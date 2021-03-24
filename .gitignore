@@ -5,3 +5,7 @@
 /test/
 /out/
 /run/
+/config/
+/data/
+/bots/
+/DynamicPlugin/
