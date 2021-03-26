@@ -21,9 +21,9 @@ suspend fun check(bot: Bot){
             val time = SimpleDateFormat("HHmm").format(timestamp)
 
             val interval = PluginConfig.dynamic["interval"]!!.toLong()
-            val shortDelay = 2000L..5000L
-            val middleDelay = (interval-5)*100..(interval+5)*100
-            val longDelay = (interval+5)*100..(interval+15)*100
+            val shortDelay = 1000L..4000L
+            val middleDelay = interval*1000..(interval+5)*1000
+            val longDelay = (interval+10)*1000..(interval+15)*1000
             var delay = middleDelay
 
             val s = PluginConfig.dynamic["lowSpeed"]!!.split("-")

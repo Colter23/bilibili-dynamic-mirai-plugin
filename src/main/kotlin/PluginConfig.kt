@@ -37,9 +37,9 @@ object PluginConfig : AutoSavePluginConfig("config") {
     var dynamic : MutableMap<String,String> by value(mutableMapOf(
         //动态检测总开关
         "enable" to "true",
-        //访问间隔 单位:秒  范围:[6,∞]
+        //访问间隔 单位:秒  范围:[1,∞]
         //这个间隔是每次访问b站api时就会触发
-        "interval" to "15",
+        "interval" to "10",
         //慢速模式开启时间段 不开启则填000-000
         //例：200..800就是凌晨2点到8点
         "lowSpeed" to "200-800",

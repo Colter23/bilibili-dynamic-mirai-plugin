@@ -2,6 +2,7 @@ package top.colter.mirai.plugin.utils
 
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONObject
+import net.mamoe.mirai.utils.ExternalResource.Companion.sendAsImageTo
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
 import top.colter.mirai.plugin.PluginConfig
 import top.colter.mirai.plugin.PluginConfig.BPI
@@ -30,8 +31,8 @@ suspend fun simpleBuildMessageImage(msg: String, uid: String): String?{
     val dynamic = Dynamic()
     dynamic.content = msg
     dynamic.timestamp = System.currentTimeMillis()/1000
-    dynamic.did = "测试ID:000000000000000000"
-    dynamic.info = "000000000000000000"
+    dynamic.did = "000000000000000000"
+    dynamic.info = "测试ID:000000000000000000"
     dynamic.isDynamic = true
     return buildMessageImage(dynamic,uid);
 }
@@ -363,7 +364,7 @@ fun getImageAvgRGB(image: Image): Color {
     return Color(R / cn, G / cn, B / cn)
 }
 
-suspend fun getImageIdByBi(bi : BufferedImage):String?{
+suspend fun  getImageIdByBi(bi : BufferedImage):String?{
     val input = biToIs(bi)
     val er = input?.toExternalResource()
     return try {

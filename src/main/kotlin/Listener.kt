@@ -2,11 +2,13 @@ package top.colter.mirai.plugin
 
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
+import net.mamoe.mirai.contact.Contact
 import net.mamoe.mirai.contact.Group
 import net.mamoe.mirai.event.EventHandler
 import net.mamoe.mirai.event.ListenerHost
 import net.mamoe.mirai.event.events.*
 import net.mamoe.mirai.message.data.*
+import top.colter.mirai.plugin.bean.Command
 import top.colter.mirai.plugin.bean.User
 
 val emoji = listOf<String>("( •̀ ω •́ )✧","(oﾟvﾟ)ノ","(o゜▽゜)o☆","(￣▽￣)\"","(。・ω・)ノ",
@@ -56,7 +58,7 @@ object MessageListener : ListenerHost {
                         "#管理 : 查看管理功能\n" +
                             "#开启动态推送 [群/Q号] / #关闭动态推送 [群/Q号]\n" +
                             "#r [指定数字] / #骰子 [指定数字]\n" +
-                            "#订阅 <UID> [群/Q号] [16进制主题色]\n"+
+                            "#添加 <UID> [群/Q号] [16进制主题色]\n"+
                             "#删除 <UID> [群/Q号]\n"+
                             "#订阅列表 [群/Q号]\n\n"+
                             "说明: <>内为必填, []为选填. 中间用空格隔开! 不要带括号!"
@@ -146,358 +148,322 @@ object MessageListener : ListenerHost {
             return
         }
 
-        when (content) {
-            "#?", "#？", "#help", "#帮助", "#功能", "#菜单" -> {
-                if (PluginConfig.adminGroup==subject.id){
+        if (content.substring(0,1)=="#"){
+            val commandArr = content.trim().split(" ")
+            val commandName = commandArr[0].substring(1)
+            when(commandName){
+                "?", "？", "help", "帮助", "功能", "菜单" -> {
+                    if (PluginConfig.adminGroup==subject.id){
+                        return
+                    }
+                    subject.sendMessage(
+                        "#? 或 #help 或 #帮助 : 功能列表\n" +
+                            "#开启动态推送 / #关闭动态推送\n" +
+                            "#r [指定数字] / #骰子 [指定数字]\n" +
+                            "#添加 <UID> [16进制主题色]\n"+
+                            "#删除 <UID>\n"+
+                            "#订阅列表\n\n"+
+                            "说明: <>内为必填, []为选填. 中间用空格隔开! 不要带括号!"
+                    )
                     return
                 }
-                subject.sendMessage(
-                    "#? 或 #help 或 #帮助 : 功能列表\n" +
-                        "#开启动态推送 / #关闭动态推送\n" +
-                        "#r [指定数字] / #骰子 [指定数字]\n" +
-                        "#订阅 <UID> [16进制主题色]\n"+
-                        "#删除 <UID>\n"+
-                        "#订阅列表\n\n"+
-                        "说明: <>内为必填, []为选填. 中间用空格隔开! 不要带括号!"
-                )
-                return
-            }
-            "#保存数据","#save" -> {
-            }
-        }
-
-        if (content.contains("#r")||content.contains("#骰子")){
-            try {
-                val split = content.trim().split(" ")
-                if(split.size==2){
-                    if(split[1].toInt() in 1..6){
-                        subject.sendMessage(Dice(split[1].toInt()))
-                    }else{
-                        throw Exception()
-                    }
-                }else{
-                    throw Exception()
-                }
-            }catch (e:Exception){
-                subject.sendMessage(Dice((1..6).random()))
-                return
-            }
-        }else if (content.contains("#开启动态推送")){
-
-            var qid = 0L
-            var isGroup = true
-
-            try {
-                val split = content.trim().split(" ")
-                if (split.size==1){
-                    qid = subject.id
-                    if (subject !is Group){
-                        isGroup = false
-                    }
-                }else if(split.size==2){
-                    if (PluginMain.bot.getGroup(split[1].toLong())!=null){
-                    }else if(PluginMain.bot.getFriend(split[1].toLong())!=null){
-                        isGroup = false
-                    }else{
-                        subject.sendMessage("QQ号错误")
+                "r", "骰子" -> {
+                    try {
+                        if(commandArr.size==2 && commandArr[1].toInt() in 1..6){
+                            subject.sendMessage(Dice(commandArr[1].toInt()))
+                            return
+                        }
+                        subject.sendMessage(Dice((1..6).random()))
+                        return
+                    }catch (e:Exception){
+                        subject.sendMessage("ERROR! "+e.message)
                         return
                     }
-                    qid = split[1].toLong()
-                }else{
-                    throw Exception()
                 }
-            }catch (e:Exception){
-                subject.sendMessage("指令格式错误")
-                return
-            }
-
-            if (!PluginData.friendList.contains(qid)&&!PluginData.groupList.contains(qid)) {
-                if (isGroup){
-                    PluginData.groupList[qid] = mutableListOf()
-                }else{
-                    PluginData.friendList[qid] = mutableListOf()
-                }
-            }
-            subject.sendMessage("已开启(oﾟvﾟ)ノ")
-            return
-        }else if(content.contains("#关闭动态推送")){
-
-            var qid = 0L
-            var isGroup = true
-
-            try {
-                val split = content.trim().split(" ")
-                if (split.size==1){
-                    qid = subject.id
-                    if (subject !is Group){
-                        isGroup = false
-                    }
-                }else if(split.size==2){
-                    if (PluginMain.bot.getGroup(split[1].toLong())!=null){
-                    }else if(PluginMain.bot.getFriend(split[1].toLong())!=null){
-                        isGroup = false
-                    }else{
-                        subject.sendMessage("QQ号错误")
+                "开启动态推送" -> {
+                    val command = resolveCommand(content, "#开启动态推送 [qid]", subject)
+                    if (command==null){
+                        subject.sendMessage("命令错误")
                         return
                     }
-                    qid = split[1].toLong()
-                }else{
-                    throw Exception()
-                }
-            }catch (e:Exception){
-                subject.sendMessage("指令格式错误")
-                return
-            }
-
-            try {
-                if (PluginData.friendList.contains(qid)||PluginData.groupList.contains(qid)) {
-                    if (isGroup){
-                        PluginData.groupList.remove(qid)
-                    }else{
-                        PluginData.friendList.remove(qid)
+                    if (!PluginData.friendList.contains(command.qid)&&!PluginData.groupList.contains(command.qid)) {
+                        if (command.isGroup){
+                            PluginData.groupList[command.qid] = mutableListOf()
+                        }else{
+                            PluginData.friendList[command.qid] = mutableListOf()
+                        }
                     }
-                    val uids = mutableListOf<String>()
-                    PluginData.followMemberGroup.forEach { (uid, u) ->
-                        for(id in u){
-                            if (id == qid){
-                                u.remove(id)
-                                break
+                    subject.sendMessage("已开启(oﾟvﾟ)ノ")
+                    return
+                }
+                "关闭动态推送" -> {
+                    val command = resolveCommand(content, "#关闭动态推送 [qid]", subject)
+                    if (command==null){
+                        subject.sendMessage("命令错误")
+                        return
+                    }
+                    try {
+                        if (PluginData.friendList.contains(command.qid)||PluginData.groupList.contains(command.qid)) {
+                            if (command.isGroup){
+                                PluginData.groupList.remove(command.qid)
+                            }else{
+                                PluginData.friendList.remove(command.qid)
+                            }
+                            val uids = mutableListOf<String>()
+                            PluginData.followMemberGroup.forEach { (uid, u) ->
+                                for(id in u){
+                                    if (id == command.qid){
+                                        u.remove(id)
+                                        break
+                                    }
+                                }
+                                if (PluginData.followMemberGroup[uid]?.size==0){
+                                    PluginData.followList.remove(uid)
+                                    uids.add(uid)
+                                    for (u in PluginData.userData){
+                                        if (u.uid==uid) {
+                                            PluginData.userData.remove(u)
+                                            break
+                                        }
+                                    }
+                                }
+                            }
+                            for (uid in uids){
+                                PluginData.followMemberGroup.remove(uid)
                             }
                         }
-                        if (PluginData.followMemberGroup[uid]?.size==0){
-                            PluginData.followList.remove(uid)
-                            uids.add(uid)
+                        subject.sendMessage("已关闭(°ー°〃)")
+                    }catch (e:Exception){
+                        subject.sendMessage("关闭失败(°ー°〃)")
+                    }
+                    return
+                }
+                "订阅", "添加", "add" -> {
+
+                    val command = resolveCommand(content, "#订阅 <uid> [qid] [hex]", subject)
+                    if (command==null){
+                        subject.sendMessage("命令错误")
+                        return
+                    }
+
+                    if (!PluginData.friendList.contains(command.qid)&&!PluginData.groupList.contains(command.qid)) {
+                        subject.sendMessage("要使用动态推送请先回复 #开启动态推送")
+                        this.intercept()
+                        return
+                    }
+                    var name = ""
+                    try {
+                        PluginData.userData.forEach { item ->
+                            if (item.uid == command.uid){
+                                name = item.name
+                                return@forEach
+                            }
+                        }
+                        if (!PluginData.followMemberGroup[command.uid]!!.contains(command.qid)){
+                            PluginData.followMemberGroup[command.uid]!!.add(command.qid)
+                            if (command.isGroup){
+                                PluginData.groupList[command.qid]?.add("${command.uid}@$name")
+                            }else{
+                                PluginData.friendList[command.qid]?.add("${command.uid}@$name")
+                            }
+                        }
+                        if(command.hex==""){
+                            subject.sendMessage("添加 $name 成功\n( •̀ ω •́ )y")
+                        }else{
+                            try{
+                                subject.sendMessage(Image(""+initFollowInfo(command.uid,User(),command.hex)))
+                            }catch (e:Exception){
+                                subject.sendMessage("添加 ${command.uid} 失败! 内部错误 或 uid错误\n")
+                            }
+                        }
+                        return
+                    }catch (e:Exception){
+                        subject.sendMessage("添加并初始化信息中，请耐心等待...")
+                        try {
+                            val user = User()
+                            val image = initFollowInfo(command.uid,user,command.hex)
+                            PluginData.userData.add(user)
+                            name = user.name
+                            if (!PluginData.followList.contains(command.uid)){
+                                PluginData.followList.add(command.uid)
+                            }
+                            PluginData.followMemberGroup[command.uid] = mutableListOf(command.qid)
+                            if (command.isGroup){
+                                PluginData.groupList[command.qid]?.add("${command.uid}@$name")
+                            }else{
+                                PluginData.friendList[command.qid]?.add("${command.uid}@$name")
+                            }
+
+                            subject.sendMessage(Image(""+image)+"添加成功")
+                        }catch (e:Exception){
+                            subject.sendMessage("添加 ${command.uid} 失败! 内部错误 或 uid错误\n")
+                        }
+                    }
+                    return
+                }
+                "删除", "del" -> {
+                    val command = resolveCommand(content, "#删除 <uid> [qid]", subject)
+                    if (command==null){
+                        subject.sendMessage("命令错误")
+                        return
+                    }
+                    if (!PluginData.friendList.contains(command.qid)&&!PluginData.groupList.contains(command.qid)) {
+                        subject.sendMessage("要使用动态推送请先回复 #开启动态推送")
+                        this.intercept()
+                        return
+                    }
+                    try {
+                        if (command.isGroup){
+                            for (u in PluginData.groupList[command.qid]!!){
+                                if (u.split("@")[0]==command.uid){
+                                    PluginData.groupList[command.qid]?.remove(u)
+                                    break
+                                }
+                            }
+                        }else{
+                            for (u in PluginData.friendList[command.qid]!!){
+                                if (u.split("@")[0]==command.uid){
+                                    PluginData.friendList[command.qid]?.remove(u)
+                                    break
+                                }
+                            }
+                        }
+                        PluginData.followMemberGroup[command.uid]?.remove(command.qid)
+                        if (PluginData.followMemberGroup[command.uid]?.size==0){
+                            PluginData.followList.remove(command.uid)
+                            PluginData.followMemberGroup.remove(command.uid)
                             for (u in PluginData.userData){
-                                if (u.uid==uid) {
+                                if (u.uid==command.uid) {
                                     PluginData.userData.remove(u)
                                     break
                                 }
                             }
                         }
+                        subject.sendMessage("删除 ${command.uid} 成功")
+                    }catch (e:Exception){
+                        subject.sendMessage("删除 ${command.uid} 失败! 内部错误 或 检查uid是否正确\n")
                     }
-                    for (uid in uids){
-                        PluginData.followMemberGroup.remove(uid)
-                    }
+                    return
                 }
-                subject.sendMessage("已关闭(°ー°〃)")
-            }catch (e:Exception){
-                subject.sendMessage("关闭失败(°ー°〃)")
-            }
-            return
-        }else if (content.contains("#订阅")||content.contains("#添加")||content.contains("#add")){
-            var name = ""
-            var uid = ""
-            var hex = ""
-            var qid = 0L
-            var isGroup = true
-            try{
-                val split = content.trim().split(" ")
-                uid = split[1]
-
-                if (split.size==2){
-                    qid = subject.id
-                    if (subject !is Group){
-                        isGroup = false
+                "订阅列表", "list" -> {
+                    val command = resolveCommand(content, "#订阅列表 [qid]", subject)
+                    if (command==null){
+                        subject.sendMessage("命令语法错误")
+                        return
                     }
-                }else if (split.size==3||split.size==4){
-                    if (split[2].substring(0,1)=="#"){
-                        hex = split[2]
-                        qid = subject.id
-                        if (subject !is Group){
-                            isGroup = false
-                        }
-                    }else{
-                        if (PluginMain.bot.getGroup(split[2].toLong())!=null){
-                        }else if(PluginMain.bot.getFriend(split[2].toLong())!=null){
-                            isGroup = false
+                    if (!PluginData.friendList.contains(command.qid)&&!PluginData.groupList.contains(command.qid)) {
+                        subject.sendMessage("要使用动态推送请先回复 #开启动态推送")
+                        this.intercept()
+                        return
+                    }
+                    try {
+                        var list = ""
+                        if (command.isGroup){
+                            for (m in PluginData.groupList[command.qid]!!){
+                                list += m.replace('@',' ')+"\n"
+                            }
                         }else{
-                            subject.sendMessage("QQ号错误")
-                            return
+                            for (m in PluginData.friendList[command.qid]!!){
+                                list += m.replace('@',' ')+"\n"
+                            }
                         }
-                        qid = split[2].toLong()
-                        if (split.size==4){
-                            hex = split[3]
-                        }
-                    }
-                }else{
-                    throw Exception()
-                }
-            }catch (e:Exception){
-                subject.sendMessage("指令格式错误")
-                return
-            }
 
-            if (!PluginData.friendList.contains(qid)&&!PluginData.groupList.contains(qid)) {
-                subject.sendMessage("要使用动态推送请先回复 #开启动态推送")
-                this.intercept()
-                return
-            }
-
-            try {
-                if (!PluginData.followMemberGroup[uid]!!.contains(qid)){
-                    PluginData.followMemberGroup[uid]!!.add(qid)
-                }
-                if(hex==""){
-                    PluginData.userData.forEach { item ->
-                        if (item.uid == uid){
-                            name = item.name
-                            return@forEach
-                        }
+                        subject.sendMessage(list)
+                    }catch (e:Exception){
+                        subject.sendMessage("无订阅")
                     }
-                    subject.sendMessage("添加 $name 成功\n( •̀ ω •́ )y")
-                }else{
-                    subject.sendMessage(Image(""+initFollowInfo(uid,User(),hex)))
-                }
-                return
-            }catch (e:Exception){
-                subject.sendMessage("添加并初始化信息中，请耐心等待...")
-                try {
-                    val user = User()
-                    val image = initFollowInfo(uid,user,hex)
-                    PluginData.userData.add(user)
-                    name = user.name
-                    if (!PluginData.followList.contains(uid)){
-                        PluginData.followList.add(uid)
-                    }
-                    PluginData.followMemberGroup[uid] = mutableListOf(qid)
-                    if (isGroup){
-                        PluginData.groupList[qid]?.add("$uid@$name")
-                    }else{
-                        PluginData.friendList[qid]?.add("$uid@$name")
-                    }
-
-                    subject.sendMessage(Image(""+image)+"添加成功")
-                }catch (e:Exception){
-                    subject.sendMessage("添加 $uid 失败! 内部错误 或 uid错误\n")
+                    return
                 }
             }
-            return
-        }else if (content.contains("#删除")||content.contains("#del")){
-
-            var uid = ""
-            var name = ""
-            var qid = 0L
-            var isGroup = true
-
-            try {
-                val split = content.trim().split(" ")
-                uid = split[1]
-                if (split.size==2){
-                    qid = subject.id
-                    if (subject !is Group){
-                        isGroup = false
-                    }
-                }else if(split.size==3){
-                    if (PluginMain.bot.getGroup(split[2].toLong())!=null){
-                    }else if(PluginMain.bot.getFriend(split[2].toLong())!=null){
-                        isGroup = false
-                    }else{
-                        subject.sendMessage("QQ号错误")
-                        return
-                    }
-                    qid = split[2].toLong()
-                }else{
-                    throw Exception()
-                }
-            }catch (e:Exception){
-                subject.sendMessage("指令格式错误")
-                return
-            }
-
-            if (!PluginData.friendList.contains(qid)&&!PluginData.groupList.contains(qid)) {
-                subject.sendMessage("要使用动态推送请先回复 #开启动态推送")
-                this.intercept()
-                return
-            }
-
-            try {
-                if (isGroup){
-                    for (u in PluginData.groupList[qid]!!){
-                        if (u.contains(uid)){
-                            PluginData.groupList[qid]?.remove(u)
-                            break
-                        }
-                    }
-                }else{
-                    for (u in PluginData.friendList[qid]!!){
-                        if (u.contains(uid)){
-                            PluginData.friendList[qid]?.remove(u)
-                            break
-                        }
-                    }
-                }
-                PluginData.followMemberGroup[uid]?.remove(qid)
-                if (PluginData.followMemberGroup[uid]?.size==0){
-                    PluginData.followList.remove(uid)
-                    PluginData.followMemberGroup.remove(uid)
-                    for (u in PluginData.userData){
-                        if (u.uid==uid) {
-                            PluginData.userData.remove(u)
-                            break
-                        }
-                    }
-                }
-                subject.sendMessage("删除 $uid 成功")
-            }catch (e:Exception){
-                subject.sendMessage("删除 $uid 失败! 内部错误 或 检查uid是否正确\n")
-            }
-            return
-        }else if(content.contains("#订阅列表")||content.contains("#list")){
-
-            var qid = 0L
-            var isGroup = true
-
-            try {
-                val split = content.trim().split(" ")
-                if (split.size==1){
-                    qid = subject.id
-                    if (subject !is Group){
-                        isGroup = false
-                    }
-                }else if(split.size==2){
-                    if (PluginMain.bot.getGroup(split[1].toLong())!=null){
-                    }else if(PluginMain.bot.getFriend(split[1].toLong())!=null){
-                        isGroup = false
-                    }else{
-                        subject.sendMessage("QQ号错误")
-                        return
-                    }
-                    qid = split[1].toLong()
-                }else{
-                    throw Exception()
-                }
-            }catch (e:Exception){
-                subject.sendMessage("指令格式错误")
-                return
-            }
-
-            if (!PluginData.friendList.contains(qid)&&!PluginData.groupList.contains(qid)) {
-                subject.sendMessage("要使用动态推送请先回复 #开启动态推送")
-                this.intercept()
-                return
-            }
-
-            try {
-                var list = ""
-                if (isGroup){
-                    for (m in PluginData.groupList[qid]!!){
-                        list += m.replace('@',' ')+"\n"
-                    }
-                }else{
-                    for (m in PluginData.friendList[qid]!!){
-                        list += m.replace('@',' ')+"\n"
-                    }
-                }
-
-                subject.sendMessage(list)
-            }catch (e:Exception){
-                subject.sendMessage("无订阅")
-            }
-            return
         }
     }
 }
 
+fun resolveCommand(rawCommand:String,commandTemplate:String,subject: Contact): Command? {
+    val command = Command()
+
+    val commandArr = rawCommand.trim().split(" ")
+    val templateArr = commandTemplate.trim().split(" ")
+//    val requireParm = mutableListOf<String>()
+//    val optionalParm = mutableListOf<String>()
+//
+//    for (parm in templateArr){
+//        if (parm.substring(0,1)=="<"){
+//            requireParm.add(parm.substring(1,parm.length-2))
+//        }else if (parm.substring(0,1)=="["){
+//            optionalParm.add(parm.substring(1,parm.length-2))
+//        }
+//    }
+
+    command.commandName = commandArr[0].substring(1)
+    command.qid = subject.id
+    command.isGroup = subject is Group
+
+    if (commandArr.size==1){
+        return command
+    }
+    if (templateArr.size==2){
+        if (PluginMain.bot.getGroup(commandArr[1].toLong())!=null){
+            command.isGroup = true
+        }else if(PluginMain.bot.getFriend(commandArr[1].toLong())!=null){
+            command.isGroup = false
+        }else{
+            return null
+        }
+        command.qid = commandArr[1].toLong()
+        return command
+    }else if(templateArr.size==3){
+        command.uid = commandArr[1]
+        if (commandArr.size==2){
+            return command
+        }else if (commandArr.size==3){
+            if (PluginMain.bot.getGroup(commandArr[2].toLong())!=null){
+                command.isGroup = true
+            }else if(PluginMain.bot.getFriend(commandArr[2].toLong())!=null){
+                command.isGroup = false
+            }else{
+                return null
+            }
+            command.qid = commandArr[2].toLong()
+            return command
+        }else {
+            return null
+        }
+    }else if(templateArr.size==4){
+        command.uid = commandArr[1]
+        if (commandArr.size==2){
+            return command
+        }else if (commandArr.size==3){
+            if (commandArr[2].substring(0,1)=="#"){
+                command.hex = commandArr[2]
+                return command
+            }
+            if (PluginMain.bot.getGroup(commandArr[2].toLong())!=null){
+                command.isGroup = true
+            }else if(PluginMain.bot.getFriend(commandArr[2].toLong())!=null){
+                command.isGroup = false
+            }else{
+                return null
+            }
+            command.qid = commandArr[2].toLong()
+            return command
+        }else if (commandArr.size==4){
+            if (PluginMain.bot.getGroup(commandArr[2].toLong())!=null){
+                command.isGroup = true
+            }else if(PluginMain.bot.getFriend(commandArr[2].toLong())!=null){
+                command.isGroup = false
+            }else{
+                return null
+            }
+            command.qid = commandArr[2].toLong()
+            command.hex = commandArr[3]
+            return command
+        }else {
+            return null
+        }
+    }
+    return null
+}
 
 //    bot.eventChannel.exceptionHandler { e ->
 //        PluginMain.logger.error("检测失败")
