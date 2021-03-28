@@ -144,8 +144,16 @@ object MessageListener : ListenerHost {
             }
         }
 
-        if (!(PluginConfig.botState&&(PluginConfig.group["enable"]=="true"||PluginConfig.friend["enable"]=="true"))){
+        if (!PluginConfig.botState){
             return
+        }
+        if (!(subject is Group && subject.id == PluginConfig.adminGroup)){
+            if (subject is Group&&PluginConfig.group["enable"]=="false"){
+                return
+            }
+            if (subject !is Group&&PluginConfig.friend["enable"]=="false"){
+                return
+            }
         }
 
         if (content.substring(0,1)=="#"){
@@ -379,6 +387,9 @@ object MessageListener : ListenerHost {
     }
 }
 
+/**
+ * 解析命令
+ */
 fun resolveCommand(rawCommand:String,commandTemplate:String,subject: Contact): Command? {
     val command = Command()
 

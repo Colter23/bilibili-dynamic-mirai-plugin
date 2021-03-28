@@ -27,9 +27,12 @@ suspend fun check(bot: Bot){
             var delay = middleDelay
 
             val s = PluginConfig.dynamic["lowSpeed"]!!.split("-")
-            if (time.toInt() in s[0].toLong()..s[1].toLong()){
-                delay = longDelay
+            if (s[0]!=s[1]){
+                if (time.toInt() in s[0].toLong()..s[1].toLong()){
+                    delay = longDelay
+                }
             }
+
 
             PluginData.userData.forEach { user ->
                 //获取动态

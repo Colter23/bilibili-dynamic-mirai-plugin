@@ -10,7 +10,7 @@ import top.colter.mirai.plugin.utils.generateImg
 suspend fun init(){
     PluginMain.logger.info("初始化数据中...")
     PluginData.userData.forEach { user ->
-        delay(2000)
+        delay((1000L..2000L).random())
         val rawDynamic = httpGet(BPI["dynamic"]+user.uid ,BPI["COOKIE"]!!).getJSONObject("data").getJSONArray("cards")
 
         val raw0 = rawDynamic.getJSONObject(0)

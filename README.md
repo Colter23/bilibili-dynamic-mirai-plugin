@@ -1,5 +1,151 @@
-# mirai-console-plugin-template
+# BilibiliDynamic MiraiPlugin
 
-[Mirai Console](https://github.com/mamoe/mirai-console) 插件模板, 使用 Kotlin + Gradle.
+> 一个把B站动态转发到Q群的 [mirai](https://github.com/mamoe/mirai) 插件
 
-[如何使用](https://github.com/project-mirai/how-to-use-plugin-template)
+本人菜鸡一个，代码写的不好（   
+可能不是很稳定
+### 样式↓   
+<img src="docs/img/demo1.jpg" width="300">     
+
+### 下载
+  可从 [releases](https://github.com/Colter23/bilibili-dynamic-mirai-plugin/releases) 里下载
+
+### 配置
+  下面是一个配置文件模板   
+  配置文件位于 根目录/config/BilibiliDynamic/config.yml  
+  第一次运行插件会自动生成，也可自己创建  
+  注：**第一行的`adminGroup`和最后一行的`COOKIE`为必填**
+```yml
+# 管理群 一个控制台 必填!!!!!!!!!!
+# 建议新建一个群 当作控制台
+adminGroup: 11111111111
+# 是否开启报错推送
+exception: true
+# bot状态
+botState: true
+# 插件的数据路径 基于启动器根目录 用于存放图片数据
+basePath: '/DynamicPlugin'
+
+## 好友相关
+friend: 
+  # 好友功能总开关 包括交互等
+  # 关闭后好友将不能与bot交互,但如果好友有订阅，bot仍会推送
+  enable: false
+  # 自动同意好友申请
+  agreeNewFriendRequest: false
+  # 欢迎语 不需要欢迎语的话请删除引号中间的内容,仅留引号
+  welcomeMessage: "( •̀ ω •́ )✧"
+
+## 群相关
+group: 
+  # 群功能总开关 包括交互等 (管理群不受影响)
+  # 关闭后群成员将不能与bot交互,但如果群有订阅，bot仍会推送
+  enable: false
+  # 欢迎新成员
+  welcomeMemberJoin: false
+  # 欢迎语 会@新成员 欢迎语后会跟一个随机表情
+  welcomeMessage: 欢迎
+
+## 动态相关
+dynamic: 
+  # 动态检测总开关
+  enable: true
+  # 访问间隔 单位:秒  范围:[1,∞]
+  # 这个间隔是每次访问b站api时就会触发
+  # 不建议太低 有可能会被b站封ip 推荐5-10s
+  interval: 10
+  # 慢速模式开启时间段 不开启则填000-000
+  # 慢速模式访问api的间隔会再上面的间隔加上10s
+  # 例：200..800就是凌晨2点到8点
+  lowSpeed: '200-800'
+  # 是否保存动态图片 保存路径为上面的 basePath
+  saveDynamicImage: true
+
+## 直播相关
+live: 
+  # 播检测总开关
+  enable: true
+  
+### 以上的 friend group dynamic live 的开关均可通过管理群回复 #管理 进行设置
+
+## 百度翻译 一些VTB的动态可能为日语或英语
+baiduTranslate:
+  # 是否开启百度翻译
+  enable: false
+  # 百度翻译api密钥 如需使用请自行申请
+  # https://api.fanyi.baidu.com/
+  APP_ID: ''
+  SECURITY_KEY: ''
+
+## B站API BiliBiliApi(BPI)
+BPI: 
+  # 动态
+  dynamic: 'https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/space_history?visitor_uid=1111111111&offset_dynamic_id=0&need_top=0&host_uid='
+  # 直播状态
+  liveStatus: 'https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom?room_id='
+  # 获取直播房间号
+  liveRoom: 'https://api.live.bilibili.com/room/v1/Room/getRoomInfoOld?mid='
+  # 粉丝数(暂时没用)
+  followNum: 'https://api.bilibili.com/x/relation/stat?vmid='
+  # 大航海数(暂时没用) 
+  # 参数: 用户id:ruid 直播间id:roomid eg: ruid=487550002&roomid=21811136
+  guard: 'https://api.live.bilibili.com/xlive/app-room/v2/guardTab/topList?page=1&page_size=1&'
+  # cookie 必填!!!!!!!!!!!!!!!!
+  COOKIE: ""
+```
+以上的 好友、群 的开关不建议开启，避免群友过多添加订阅  
+可以通过管理群统一设置
+
+<details>
+<summary>获取 Cookie</summary>
+
+浏览器打开B站 [BiliBili](https://www.bilibili.com/) 并登陆  
+注：登陆后最好不要退出登陆
+
+按`F12`，打开`开发者工具`，找到`Network 网络`并点击  
+按`F5`刷新页面，按下图复制Cookie   
+<img src="docs/img/cookie.png" width="500">
+
+</details>
+
+### 使用
+在管理群内发送 `#?` `#help` `#帮助` `#功能` `#菜单` 中的任意一个即可查看命令
+```
+> #?
+
+#管理 : 查看管理功能
+#开启动态推送 [群/Q号] / #关闭动态推送 [群/Q号]
+#r [指定数字] / #骰子 [指定数字]
+#订阅 <UID> [群/Q号] [16进制主题色]
+#删除 <UID> [群/Q号]
+#订阅列表 [群/Q号]
+
+说明: <>内为必填, []为选填. 中间用空格隔开! 不要带括号!
+[群/Q号] 不填的话默认对话所在群
+[16进制主题色] 必须带#号 例: #fde8ed
+例: 
+#订阅 487550002    :为本群/好友添加uid为487550002的订阅
+#订阅 487550002 111111  :为111111群/好友添加订阅
+#订阅 487550002 #fde8ed  :为本群/好友添加订阅 并指定图片主题色
+```
+以上命令一部分有别名  
+`#订阅` 别名 `#添加` 或 `#add`  
+`#删除` 别名 `#del`  
+`#订阅列表` 别名 `#list `
+```
+> #管理
+
+#关闭bot : 临时关闭bot
+#关闭 -a : 关闭全部功能
+#关闭 -d : 关闭动态功能
+#关闭 -l : 关闭直播功能
+#关闭 -r : 关闭命令回复(除管理群)
+#关闭 -gr : 关闭群命令回复
+#关闭 -fr : 关闭好友命令回复
+
+以上 '关闭' 可换为 'close'
+如要开启把 '关闭' 换成 '开启'或'open' 即可
+```
+
+
+

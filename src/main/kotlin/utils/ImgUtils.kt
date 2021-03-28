@@ -221,8 +221,7 @@ suspend fun buildMessageImage(dynamic: Dynamic, uid: String): String? {
 
     //把图片写入文件
     if (PluginConfig.dynamic["saveDynamicImage"]=="true") {
-        var path = ""
-        path = if (dynamic.isDynamic){
+        val path = if (dynamic.isDynamic){
             "$runPath$basePath/img/dynamic/${uid}/${dynamic.did}.png"
         }else{
             "$runPath$basePath/img/live/${uid}/${SimpleDateFormat("yyMMdd-HHmm").format(timestamp)}.png"
@@ -335,10 +334,11 @@ suspend fun generateImg(uid: String, name: String, face: String, pendant: String
  */
 fun getImageAvgRGB(image: Image): Color {
 
-//    val scaledImage = image.getScaledInstance(image.getWidth(null)*0.3.toInt(),image.getHeight(null)*0.3.toInt(), Image.SCALE_SMOOTH)
-    val scaledImage = image.getScaledInstance(100,100, Image.SCALE_SMOOTH)
+    val width = (image.getWidth(null)*0.5).toInt()
+    val height = (image.getHeight(null)*0.5).toInt()
+    val scaledImage = image.getScaledInstance(width,height, Image.SCALE_SMOOTH)
 
-    val bi = BufferedImage(100, 100, BufferedImage.TYPE_4BYTE_ABGR)
+    val bi = BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR)
     val g2 : Graphics2D = bi.graphics as Graphics2D
     g2.drawImage(scaledImage,0,0,null)
 
