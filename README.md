@@ -5,7 +5,7 @@
 本人菜鸡一个，代码写的不好（   
 可能不是很稳定
 ### 样式↓   
-<img src="docs/img/demo1.jpg" width="300">     
+<img src="docs/img/demo1.jpg" width="400">     
 
 ### 下载
   可从 [releases](https://github.com/Colter23/bilibili-dynamic-mirai-plugin/releases) 里下载
@@ -147,5 +147,9 @@ BPI:
 如要开启把 '关闭' 换成 '开启'或'open' 即可
 ```
 
+### 相关链接
+[mirai](https://github.com/mamoe/mirai)  
+[ViViD按钮](https://vividbtn.top/)  
+[B站: Colter_null](https://space.bilibili.com/32868931)
 
 
