@@ -5,6 +5,7 @@ import kotlinx.coroutines.launch
 import net.mamoe.mirai.Bot
 import net.mamoe.mirai.console.command.CommandManager.INSTANCE.register
 import net.mamoe.mirai.console.command.CommandManager.INSTANCE.unregister
+import net.mamoe.mirai.console.permission.PermissionService
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescription
 import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
 import net.mamoe.mirai.utils.info
@@ -13,7 +14,7 @@ object PluginMain : KotlinPlugin(
     JvmPluginDescription(
         id = "top.colter.bilibili-dynamic-mirai-plugin",
         name = "BilibiliDynamic",
-        version = "1.0.0"
+        version = "1.0.1"
     ) {
         author("Colter")
 
@@ -22,6 +23,10 @@ object PluginMain : KotlinPlugin(
         """.trimIndent())
     }
 ) {
+    val PERMISSION_EXECUTE_1 by lazy {
+        PermissionService.INSTANCE.register(permissionId("foo"), "注册权限的示例")
+    }
+
     // 动态历史记录
     val historyDynamic : MutableList<String> = mutableListOf()
 

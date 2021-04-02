@@ -42,19 +42,19 @@ suspend fun check(bot: Bot){
 
                 //动态检测
                 if (PluginConfig.dynamic["enable"]=="true") {
-                    var r = false
+//                    var r = false
                     // 判断是否为最新动态
                     for (i in rawDynamicList.size downTo 1){
                         val rawDynamic = rawDynamicList[i-1] as JSONObject
                         val dynamicId = rawDynamic.getJSONObject("desc").getBigInteger("dynamic_id").toString()
-                        if (!PluginMain.historyDynamic.contains(dynamicId)&&r){
+                        if (!PluginMain.historyDynamic.contains(dynamicId)){
                             user.dynamicId = dynamicId
                             PluginMain.historyDynamic.add(dynamicId)
                             sendDynamic(bot, rawDynamic, user)
                         }
-                        if (dynamicId==user.dynamicId){
-                            r = true
-                        }
+//                        if (dynamicId==user.dynamicId){
+//                            r = true
+//                        }
                     }
                 }
 

@@ -24,8 +24,7 @@ suspend fun init(){
             }
 
         rawDynamic.forEach { item ->
-            val dy = JSON.parseObject(item.toString())
-            val desc = dy.getJSONObject("desc")
+            val desc = JSON.parseObject(item.toString()).getJSONObject("desc")
             PluginMain.historyDynamic.add(desc.getBigInteger("dynamic_id").toString())
         }
     }
@@ -34,7 +33,12 @@ suspend fun init(){
 
 suspend fun initFollowInfo(uid:String, user: User, hex: String): String? {
     delay(1000)
-    val res = httpGet(BPI["dynamic"]+uid,BPI["COOKIE"]!!).getJSONObject("data").getJSONArray("cards").getJSONObject(0)
+    val rawDynamic = httpGet(BPI["dynamic"]+uid,BPI["COOKIE"]!!).getJSONObject("data").getJSONArray("cards")
+    rawDynamic.forEach { item ->
+        val desc = JSON.parseObject(item.toString()).getJSONObject("desc")
+        PluginMain.historyDynamic.add(desc.getBigInteger("dynamic_id").toString())
+    }
+    val res = rawDynamic.getJSONObject(0)
     val userProfile = res.getJSONObject("desc").getJSONObject("user_profile")
     val name = userProfile.getJSONObject("info").getString("uname")
 //    val user : User = User()
