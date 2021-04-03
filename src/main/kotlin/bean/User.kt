@@ -14,4 +14,6 @@ class User {
     var liveRoom = ""
     // 直播间状态
     var liveStatus = 0
+	// 开播时间
+	var liveStartTime = ""
 }
