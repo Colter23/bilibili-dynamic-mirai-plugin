@@ -58,15 +58,16 @@ suspend fun check(bot: Bot){
                     }
                 }
 
-                //直播检测
+                //获取直播间状态
+				val rawLiveList = httpGet(BPI["liveStatus"] + user.liveRoom ,BPI["COOKIE"]!!).getJSONObject("data").getJSONObject("room_info")
+				
+				//直播检测
                 if (PluginConfig.live["enable"]=="true") {
-                    val liveStatus =
-                        try {
-                            rawDynamicOne.getJSONObject("display").getJSONObject("live_info").getInteger("live_status")
-                        }catch (e:Exception){
-                            0
-                        }
-                    if (liveStatus == 1 && (user.liveStatus==0||user.liveStatus==2)){
+				
+                    val liveStatus = rawLiveList.getInteger("live_status")
+                    val liveStartTime = rawLiveList.getBigInteger("live_start_time").toString()
+				
+                    if (liveStatus == 1){
                         delay(shortDelay.random())
                         val roomInfo = httpGet(BPI["liveStatus"] + user.liveRoom).getJSONObject("data").getJSONObject("room_info")
 
@@ -86,7 +87,13 @@ suspend fun check(bot: Bot){
                         }else if(keyframe!=""){
                             dynamic.pictures?.add(keyframe)
                         }
-                        sendMessage(bot,user.uid,buildResMessage(dynamic, user))
+						
+						//当开播时间戳与上次检测时相同时不推送
+						if (!PluginMain.lastLiveStartTime.contains(liveStartTime)){
+							user.liveStartTime = liveStartTime
+							PluginMain.lastLiveStartTime.add(liveStartTime)		
+							sendMessage(bot,user.uid,buildResMessage(dynamic, user))
+						}
                     }
                     user.liveStatus = liveStatus
                 }
