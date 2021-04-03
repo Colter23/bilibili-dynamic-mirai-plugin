@@ -29,6 +29,9 @@ object PluginMain : KotlinPlugin(
 
     // 动态历史记录
     val historyDynamic : MutableList<String> = mutableListOf()
+	
+	// 上次开播时间
+    val lastLiveStartTime : MutableList<String> = mutableListOf()
 
     // b站表情
     val emojiMap = mutableMapOf<String,java.awt.Image>()
