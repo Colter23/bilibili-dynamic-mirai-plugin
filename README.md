@@ -5,7 +5,7 @@
 本人菜鸡一个，代码写的不好（   
 可能不是很稳定
 ### 样式↓   
-<img src="docs/img/demo1.jpg" width="400">     
+<img src="docs/img/demo1.jpg" width="400" alt="样式">     
 
 ### 下载
   可从 [releases](https://github.com/Colter23/bilibili-dynamic-mirai-plugin/releases) 里下载
@@ -16,15 +16,20 @@
   第一次运行插件会自动生成，也可自己创建  
   注：**第一行的`adminGroup`和最后一行的`COOKIE`为必填**
 ```yml
-# 管理群 一个控制台 必填!!!!!!!!!!
-# 建议新建一个群 当作控制台
-adminGroup: 11111111111
+# 管理  一个控制台 必填!!!!!!!!!!
+# 可以是群 也可以是好友，好友的话只能通过私聊控制
+admin: 11111111111
 # 是否开启报错推送
 exception: true
 # bot状态
 botState: true
-# 插件的数据路径 基于启动器根目录 用于存放图片数据
+# 插件的数据路径 基于启动器根目录 用于存放图片 字体等数据
 basePath: '/DynamicPlugin'
+# 字体  如使用字体文件仅支持ttf格式
+# 如不带后缀名则使用系统的字体，如系统中没有这个字体 则会使用系统默认字体
+# 带后缀名则使用上面的 basePath 数据路径下 font 文件夹下的字体文件
+# 需自行创建font文件夹，并把字体文件放进去
+font: 微软雅黑
 
 ## 好友相关
 friend: 
@@ -91,6 +96,7 @@ BPI:
   # 参数: 用户id:ruid 直播间id:roomid eg: ruid=487550002&roomid=21811136
   guard: 'https://api.live.bilibili.com/xlive/app-room/v2/guardTab/topList?page=1&page_size=1&'
   # cookie 必填!!!!!!!!!!!!!!!!
+  # 放在双引号里，cookie里可能带有单引号
   COOKIE: ""
 ```
 以上的 好友、群 的开关不建议开启，避免群友过多添加订阅  
@@ -146,6 +152,22 @@ BPI:
 以上 '关闭' 可换为 'close'
 如要开启把 '关闭' 换成 '开启'或'open' 即可
 ```
+
+### 已知问题
+- 当新增或删除订阅时，会导致数据不一致，而检测失败。  
+  过两分钟下一次检测就好了。
+  
+- 头像如果是动态头像(webp格式)的会报错
+
+### 其他
+- 在 [DynamicPlugin](https://github.com/Colter23/bilibili-dynamic-mirai-plugin/tree/master/DynamicPlugin) 目录下有一个`动态BG.psd`可以手动通过ps调节背景图片  
+  不要改动里面的任何元素的位置
+- 在 [DynamicPlugin](https://github.com/Colter23/bilibili-dynamic-mirai-plugin/tree/master/DynamicPlugin) 目录下有一个`font`文件夹里面有一个`思源黑体.ttf`  
+  如没有字体使用可用这个
+
+### 更新日志
+[releases](https://github.com/Colter23/bilibili-dynamic-mirai-plugin/releases)
+  
 
 ### 相关链接
 [mirai](https://github.com/mamoe/mirai)  

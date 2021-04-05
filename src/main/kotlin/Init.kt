@@ -6,9 +6,14 @@ import top.colter.mirai.plugin.utils.httpGet
 import top.colter.mirai.plugin.PluginConfig.BPI
 import top.colter.mirai.plugin.bean.User
 import top.colter.mirai.plugin.utils.generateImg
+import java.awt.Font
+import java.io.BufferedInputStream
+import java.io.File
+import java.io.FileInputStream
 
 suspend fun init(){
     PluginMain.logger.info("初始化数据中...")
+
     PluginData.userData.forEach { user ->
         delay((1000L..2000L).random())
         val rawDynamic = httpGet(BPI["dynamic"]+user.uid ,BPI["COOKIE"]!!).getJSONObject("data").getJSONArray("cards")
@@ -28,6 +33,20 @@ suspend fun init(){
             PluginMain.historyDynamic.add(desc.getBigInteger("dynamic_id").toString())
         }
     }
+
+    // 初始化字体
+    if (PluginConfig.font.indexOf('.')!=-1){
+        var bis : BufferedInputStream? = null
+        try {
+            bis = BufferedInputStream(FileInputStream(File("${PluginData.runPath}${PluginConfig.basePath}/font/${PluginConfig.font}")))
+            PluginMain.font = Font.createFont(Font.TRUETYPE_FONT, bis)
+        }catch (e:Exception){
+
+        }finally {
+            bis?.close()
+        }
+    }
+
     PluginMain.logger.info("初始化结束")
 }
 
@@ -41,7 +60,7 @@ suspend fun initFollowInfo(uid:String, user: User, hex: String): String? {
     val res = rawDynamic.getJSONObject(0)
     val userProfile = res.getJSONObject("desc").getJSONObject("user_profile")
     val name = userProfile.getJSONObject("info").getString("uname")
-//    val user : User = User()
+
     user.uid = uid
     user.name = name
     user.dynamicId = res.getJSONObject("desc").getBigInteger("dynamic_id").toString()

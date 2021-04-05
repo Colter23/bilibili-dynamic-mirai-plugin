@@ -51,7 +51,7 @@ object MessageListener : ListenerHost {
     suspend fun MessageEvent.onMessage() {
         val content = message.content
 
-        if(subject is Group && subject.id == PluginConfig.adminGroup){
+        if(subject.id == PluginConfig.admin){
             when(content){
                 "#?", "#？", "#help", "#帮助", "#功能", "#菜单" -> {
                     subject.sendMessage(
@@ -147,7 +147,7 @@ object MessageListener : ListenerHost {
         if (!PluginConfig.botState){
             return
         }
-        if (!(subject is Group && subject.id == PluginConfig.adminGroup)){
+        if (subject.id != PluginConfig.admin){
             if (subject is Group&&PluginConfig.group["enable"]=="false"){
                 return
             }
@@ -161,7 +161,7 @@ object MessageListener : ListenerHost {
             val commandName = commandArr[0].substring(1)
             when(commandName){
                 "?", "？", "help", "帮助", "功能", "菜单" -> {
-                    if (PluginConfig.adminGroup==subject.id){
+                    if (PluginConfig.admin==subject.id){
                         return
                     }
                     subject.sendMessage(
