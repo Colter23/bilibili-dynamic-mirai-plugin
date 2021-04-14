@@ -2,16 +2,15 @@ package top.colter.mirai.plugin.utils
 
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONObject
-import net.mamoe.mirai.utils.ExternalResource.Companion.sendAsImageTo
+import net.mamoe.mirai.console.util.ConsoleExperimentalApi
+import net.mamoe.mirai.console.util.ContactUtils.getFriendOrGroup
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
 import top.colter.mirai.plugin.PluginConfig
-import top.colter.mirai.plugin.PluginConfig.BPI
 import top.colter.mirai.plugin.PluginConfig.basePath
-import top.colter.mirai.plugin.PluginData
 import top.colter.mirai.plugin.PluginData.runPath
 import top.colter.mirai.plugin.PluginMain
+import top.colter.mirai.plugin.PluginMain.font
 import top.colter.mirai.plugin.bean.Dynamic
-import top.colter.mirai.plugin.bean.User
 import top.colter.myplugin.translate.TransApi
 import java.awt.*
 import java.awt.geom.Ellipse2D
@@ -21,11 +20,7 @@ import java.net.URL
 import java.text.SimpleDateFormat
 import javax.imageio.ImageIO
 import kotlin.math.ceil
-import java.io.IOException
 
-import java.io.ByteArrayInputStream
-
-import java.io.ByteArrayOutputStream
 
 suspend fun simpleBuildMessageImage(msg: String, uid: String): String?{
     val dynamic = Dynamic()
@@ -79,16 +74,30 @@ suspend fun buildMessageImage(dynamic: Dynamic, uid: String): String? {
     val biList = mutableListOf<BufferedImage>()
 
     //裁剪图片头 并写入时间信息
-    val topBi = bi.getSubimage(0, 0, 1920, 370);
+    val topBi = bi.getSubimage(0, 0, 1920, 370)
     height += 370
     biList.add(topBi)
     val topG2 : Graphics2D = topBi.graphics as Graphics2D
     topG2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_GASP)
 
-    topG2.font = Font("微软雅黑", Font.BOLD, 70)
+    //--------------------------------------//
+
+
+//    val localGraphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment()
+//    localGraphicsEnvironment.registerFont(font)
+//
+//    val graphics = localGraphicsEnvironment.createGraphics(bg)
+//    graphics.font = multiFont
+
+    //--------------------------------------//
+    if (font!=null){
+        topG2.font = font!!.deriveFont(Font.BOLD, 70f)
+    }else{
+        topG2.font = Font(PluginConfig.font, Font.BOLD, 70)
+    }
     topG2.color = Color(148, 147, 147)
     val timestamp :Long = dynamic.timestamp*1000
-    topG2.drawString(SimpleDateFormat("yyyy.MM.dd  HH:mm:ss").format(timestamp), 500, 300)
+    topG2.drawString(SimpleDateFormat("yyyy.MM.dd  HH:mm:ss").format(timestamp), 485, 300)
 
     //加一条空白区域
     height += 70
@@ -101,7 +110,11 @@ suspend fun buildMessageImage(dynamic: Dynamic, uid: String): String? {
     val textBi =  BufferedImage(1920, 70, BufferedImage.TYPE_INT_RGB)
     val textG2 : Graphics2D = textBi.graphics as Graphics2D
     textG2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_GASP)
-    textG2.font = Font("微软雅黑", Font.PLAIN, 60)
+    if (font!=null){
+        textG2.font = font!!.deriveFont(Font.PLAIN, 60f)
+    }else{
+        textG2.font = Font(PluginConfig.font, Font.PLAIN, 60)
+    }
 
     // 文字换行处理
     var l = 0
@@ -139,7 +152,11 @@ suspend fun buildMessageImage(dynamic: Dynamic, uid: String): String? {
         centerG2.drawImage(bi.getSubimage(0, 470, 1920, 70), 0, 0, null)
         centerG2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_GASP)
 
-        centerG2.font = Font("微软雅黑", Font.PLAIN, 60)
+        if (font!=null){
+            centerG2.font = font!!.deriveFont(Font.PLAIN, 60f)
+        }else{
+            centerG2.font = Font(PluginConfig.font, Font.PLAIN, 60)
+        }
         centerG2.color = Color(87, 87, 87)
 
         height += 70
@@ -206,7 +223,11 @@ suspend fun buildMessageImage(dynamic: Dynamic, uid: String): String? {
     bottomG2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_GASP)
     height += 85
     biList.add(bottomBi)
-    bottomG2.font = Font("微软雅黑", Font.BOLD, 45)
+    if (font!=null){
+        bottomG2.font = font!!.deriveFont(Font.BOLD, 45f)
+    }else{
+        bottomG2.font = Font(PluginConfig.font, Font.BOLD, 45)
+    }
     bottomG2.color = Color(217, 217, 217)
     bottomG2.drawString(dynamic.info, 80, 39)
 
@@ -276,11 +297,21 @@ suspend fun generateImg(uid: String, name: String, face: String, pendant: String
     g2.color = Color(254, 247, 249)
     g2.fillRoundRect(margin,margin,1920-margin*2,1080-margin*2,20,20)
 
-    g2.font = Font("汉仪汉黑W", Font.PLAIN, 130)
+    // 写入名字
+    if (font!=null){
+        g2.font = font!!.deriveFont(Font.PLAIN, 130f)
+    }else{
+        g2.font = Font(PluginConfig.font, Font.PLAIN, 130)
+    }
     g2.color = Color(61, 61, 61)
     g2.drawString(name, 480, 200)
 
-    g2.font = Font("微软雅黑", Font.BOLD, 45)
+    // 写入角标
+    if (font!=null){
+        g2.font = font!!.deriveFont(Font.BOLD, 45f)
+    }else{
+        g2.font = Font(PluginConfig.font, Font.BOLD, 45)
+    }
     g2.color = Color(220, 220, 220)
     g2.drawString("@Colter", 1685, 1035)
 
@@ -368,7 +399,7 @@ suspend fun  getImageIdByBi(bi : BufferedImage):String?{
     val input = biToIs(bi)
     val er = input?.toExternalResource()
     return try {
-        er?.let { PluginMain.bot.getGroup(PluginConfig.adminGroup)?.uploadImage(it)?.imageId }
+        er?.let { PluginMain.bot.getFriendOrGroup(PluginConfig.admin).uploadImage(it).imageId }
     } catch (e: Exception) {
         PluginMain.logger.error("上传图片失败")
         null

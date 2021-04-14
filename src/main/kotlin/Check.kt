@@ -3,6 +3,8 @@ package top.colter.mirai.plugin
 import com.alibaba.fastjson.JSONObject
 import kotlinx.coroutines.delay
 import net.mamoe.mirai.Bot
+import net.mamoe.mirai.console.plugin.info
+import net.mamoe.mirai.console.util.ContactUtils.getFriendOrGroup
 import net.mamoe.mirai.utils.info
 import top.colter.mirai.plugin.PluginConfig.BPI
 import top.colter.mirai.plugin.bean.Dynamic
@@ -105,7 +107,11 @@ suspend fun check(bot: Bot){
 
         }catch (e:Exception){
             if (PluginConfig.exception){
-                bot.getGroup(PluginConfig.adminGroup)?.sendMessage("检测动态失败，2分钟后重试\n"+e.message)
+                try{
+                    bot.getFriendOrGroup(PluginConfig.admin).sendMessage("检测动态失败，2分钟后重试\n"+e.message)
+                }catch (e:Exception){
+                    PluginMain.logger.error("发送失败")
+                }
             }
             delay(120000L)
         }

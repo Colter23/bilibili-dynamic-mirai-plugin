@@ -5,14 +5,18 @@ import net.mamoe.mirai.console.data.value
 
 object PluginConfig : AutoSavePluginConfig("config") {
 
-    // 管理群,报错都会发送此群 必填!!!!!!!!!!
-    var adminGroup : Long by value()
+    // 管理,报错都会发送此 必填!!!!!!!!!!
+    var admin : Long by value()
     // 是否开启报错推送
     var exception by value(true)
-    //bot状态
+    // bot状态
     var botState by value(true)
     // 插件的数据路径 基于启动器根目录
     var basePath : String by value("/DynamicPlugin")
+    // 如不带后缀名则使用系统的字体，如系统中没有这个字体 则会使用系统默认字体
+    // 带后缀名则使用上面的数据路径下/font 文件夹下的字体文件
+    // 需自行创建font文件夹，并把字体文件放进去
+    val font : String by value("微软雅黑")
 
     //---------------好友相关----------------//
     var friend : MutableMap<String,String> by value(mutableMapOf(
