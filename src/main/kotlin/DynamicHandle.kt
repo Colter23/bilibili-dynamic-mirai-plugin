@@ -1,4 +1,4 @@
-package top.colter.mirai.plugin
+package top.colter.mirai. plugin
 
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONArray
@@ -10,8 +10,10 @@ import net.mamoe.mirai.message.data.MessageChain
 import net.mamoe.mirai.message.data.buildMessageChain
 import top.colter.mirai.plugin.bean.Dynamic
 import top.colter.mirai.plugin.bean.User
-import top.colter.mirai.plugin.utils.buildMessageImage
+import top.colter.mirai.plugin.utils.buildImageMessage
+import top.colter.mirai.plugin.utils.getImageIdByBi
 import java.lang.Exception
+import java.lang.StringBuilder
 import java.net.URL
 import javax.imageio.ImageIO
 
@@ -29,10 +31,12 @@ suspend fun sendDynamic(bot: Bot, rawDynamic: JSONObject, user: User){
         dynamic.timestamp = desc.getBigInteger("timestamp").toLong()
         dynamic.type = desc.getInteger("type")
         dynamic.contentJson = JSON.parseObject(rawDynamic.getString("card"))
-        try{
-            dynamic.display = rawDynamic.getJSONObject("display")
-        }catch (e:Exception){ }
 
+        if (PluginConfig.pushMode==0){
+            try{
+                dynamic.display = rawDynamic.getJSONObject("display")
+            }catch (e:Exception){ }
+        }
 
         // 格式化动态信息
         dynamicFormat(dynamic)
@@ -85,14 +89,16 @@ fun dynamicFormat(dynamic: Dynamic){
                     dynamic.pictures?.add(origin.getString("pic"))
                 }
             }
-            try {
-                val emojiJson = dynamic.display.getJSONObject("emoji_info").getJSONArray("emoji_details")
-                putEmoji(emojiJson)
-            } catch (e: Exception) { }
-            try {
-                val emojiJson = dynamic.display.getJSONObject("origin").getJSONObject("emoji_info").getJSONArray("emoji_details")
-                putEmoji(emojiJson)
-            } catch (e: Exception) { }
+            if (PluginConfig.pushMode==0){
+                try {
+                    val emojiJson = dynamic.display.getJSONObject("emoji_info").getJSONArray("emoji_details")
+                    putEmoji(emojiJson)
+                } catch (e: Exception) { }
+                try {
+                    val emojiJson = dynamic.display.getJSONObject("origin").getJSONObject("emoji_info").getJSONArray("emoji_details")
+                    putEmoji(emojiJson)
+                } catch (e: Exception) { }
+            }
         }
         //带图片的动态
         2 -> {
@@ -102,19 +108,23 @@ fun dynamicFormat(dynamic: Dynamic){
             for (pic in card.getJSONObject("item").getJSONArray("pictures")) {
                 dynamic.pictures?.add((pic as JSONObject).getString("img_src"))
             }
-            try {
-                val emojiJson = dynamic.display.getJSONObject("emoji_info").getJSONArray("emoji_details")
-                putEmoji(emojiJson)
-            } catch (e: Exception) { }
+            if (PluginConfig.pushMode==0){
+                try {
+                    val emojiJson = dynamic.display.getJSONObject("emoji_info").getJSONArray("emoji_details")
+                    putEmoji(emojiJson)
+                } catch (e: Exception) { }
+            }
         }
         //带表情的文字动态
         4 -> {
             val card = dynamic.contentJson
             content = card.getJSONObject("item").getString("content")
-            try {
-                val emojiJson = dynamic.display.getJSONObject("emoji_info").getJSONArray("emoji_details")
-                putEmoji(emojiJson)
-            } catch (e: Exception) { }
+            if (PluginConfig.pushMode==0){
+                try {
+                    val emojiJson = dynamic.display.getJSONObject("emoji_info").getJSONArray("emoji_details")
+                    putEmoji(emojiJson)
+                } catch (e: Exception) { }
+            }
         }
 
         //视频更新动态
@@ -176,10 +186,65 @@ fun putEmoji(emojiJson: JSONArray){
  * 构建发送消息链
  */
 suspend fun buildResMessage(dynamic: Dynamic, user: User): MessageChain {
-    // 消息链
+    return if (PluginConfig.pushMode==0){
+        buildImageMassageChain(dynamic,user)
+    }else{
+        buildTextMassageChain(dynamic,user)
+    }
+}
+
+/**
+ * 构建图片消息
+ */
+suspend fun buildImageMassageChain(dynamic: Dynamic, user: User):MessageChain{
     return buildMessageChain {
-        +Image("" + buildMessageImage(dynamic, user.uid))
+        +Image("" + buildImageMessage(dynamic, user.uid))
         +dynamic.link
+    }
+}
+
+/**
+ * 构建文字消息
+ */
+suspend fun buildTextMassageChain(dynamic: Dynamic, user: User):MessageChain{
+    var content = dynamic.content
+    val sb = StringBuilder()
+
+    if (dynamic.isDynamic){
+        // 删除b站表情
+        content = content.replace("["," [")
+        while (content.indexOf('[')!=-1){
+            content = content.removeRange(content.indexOf('['),content.indexOf(']')+1)
+        }
+
+        sb.append("=====${user.name} 动态=====")
+        sb.append("\n")
+        sb.append(content)
+        sb.append("\n")
+        sb.append(dynamic.link)
+        if (dynamic.pictures!=null&&dynamic.pictures?.size!=0){
+            sb.append("\n")
+            sb.append("=======附件=======")
+            sb.append("\n")
+            return buildMessageChain{
+                +sb.toString()
+                for (img in dynamic.pictures!!){
+                    +Image(getImageIdByBi(ImageIO.read(URL(img))).toString())
+                }
+            }
+        }
+        return buildMessageChain{
+            +sb.toString()
+        }
+    }else{
+        sb.append("${user.name} 开播啦~")
+        sb.append("\n")
+        sb.append(content)
+        sb.append("\n")
+        sb.append(dynamic.link)
+        return buildMessageChain {
+            +sb.toString()
+        }
     }
 }
 

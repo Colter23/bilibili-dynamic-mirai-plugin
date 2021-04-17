@@ -276,12 +276,16 @@ object MessageListener : ListenerHost {
                             }
                         }
                         if(command.hex==""){
-                            subject.sendMessage("添加 $name 成功\n( •̀ ω •́ )y")
+                            subject.sendMessage("$name 添加成功 ( •̀ ω •́ )y")
                         }else{
-                            try{
-                                subject.sendMessage(Image(""+initFollowInfo(command.uid,User(),command.hex)))
-                            }catch (e:Exception){
-                                subject.sendMessage("添加 ${command.uid} 失败! 内部错误 或 uid错误\n")
+                            if (PluginConfig.pushMode==0){
+                                try{
+                                    subject.sendMessage(Image(""+initFollowInfo(command.uid,User(),command.hex)))
+                                }catch (e:Exception){
+                                    subject.sendMessage("${command.uid} 添加失败! 内部错误 或 uid错误")
+                                }
+                            }else{
+                                subject.sendMessage("$name 添加成功 ( •̀ ω •́ )y\n主题色仅支持图片推送模式")
                             }
                         }
                         return
@@ -289,6 +293,7 @@ object MessageListener : ListenerHost {
                         subject.sendMessage("添加并初始化信息中，请耐心等待...")
                         try {
                             val user = User()
+
                             val image = initFollowInfo(command.uid,user,command.hex)
                             PluginData.userData.add(user)
                             name = user.name
@@ -302,9 +307,14 @@ object MessageListener : ListenerHost {
                                 PluginData.friendList[command.qid]?.add("${command.uid}@$name")
                             }
 
-                            subject.sendMessage(Image(""+image)+"添加成功")
+                            if (PluginConfig.pushMode==0){
+                                subject.sendMessage(Image(""+image)+"添加成功 ( •̀ ω •́ )y")
+                            }else{
+                                subject.sendMessage("${user.name} 添加成功 ( •̀ ω •́ )y")
+                            }
+
                         }catch (e:Exception){
-                            subject.sendMessage("添加 ${command.uid} 失败! 内部错误 或 uid错误\n")
+                            subject.sendMessage("${command.uid} 添加失败! 内部错误 或 uid错误")
                         }
                     }
                     return
@@ -347,9 +357,9 @@ object MessageListener : ListenerHost {
                                 }
                             }
                         }
-                        subject.sendMessage("删除 ${command.uid} 成功")
+                        subject.sendMessage("${command.uid} 删除成功")
                     }catch (e:Exception){
-                        subject.sendMessage("删除 ${command.uid} 失败! 内部错误 或 检查uid是否正确\n")
+                        subject.sendMessage("${command.uid} 删除失败! 内部错误 或 检查uid是否正确")
                     }
                     return
                 }

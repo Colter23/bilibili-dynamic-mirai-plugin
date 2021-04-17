@@ -2,7 +2,6 @@ package top.colter.mirai.plugin.utils
 
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONObject
-import net.mamoe.mirai.console.util.ConsoleExperimentalApi
 import net.mamoe.mirai.console.util.ContactUtils.getFriendOrGroup
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
 import top.colter.mirai.plugin.PluginConfig
@@ -22,20 +21,20 @@ import javax.imageio.ImageIO
 import kotlin.math.ceil
 
 
-suspend fun simpleBuildMessageImage(msg: String, uid: String): String?{
+suspend fun simpleBuildImageMessage(msg: String, uid: String): String?{
     val dynamic = Dynamic()
     dynamic.content = msg
     dynamic.timestamp = System.currentTimeMillis()/1000
     dynamic.did = "000000000000000000"
     dynamic.info = "测试ID:000000000000000000"
     dynamic.isDynamic = true
-    return buildMessageImage(dynamic,uid);
+    return buildImageMessage(dynamic,uid)
 }
 
 /**
  * 构建动态信息图片
  */
-suspend fun buildMessageImage(dynamic: Dynamic, uid: String): String? {
+suspend fun buildImageMessage(dynamic: Dynamic, uid: String): String? {
     var msg = dynamic.content
     //文本翻译
     if (PluginConfig.baiduTranslate["enable"]=="true"){
@@ -80,16 +79,6 @@ suspend fun buildMessageImage(dynamic: Dynamic, uid: String): String? {
     val topG2 : Graphics2D = topBi.graphics as Graphics2D
     topG2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_GASP)
 
-    //--------------------------------------//
-
-
-//    val localGraphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment()
-//    localGraphicsEnvironment.registerFont(font)
-//
-//    val graphics = localGraphicsEnvironment.createGraphics(bg)
-//    graphics.font = multiFont
-
-    //--------------------------------------//
     if (font!=null){
         topG2.font = font!!.deriveFont(Font.BOLD, 70f)
     }else{
@@ -181,7 +170,7 @@ suspend fun buildMessageImage(dynamic: Dynamic, uid: String): String? {
             }
             try{
                 val emoji = PluginMain.emojiMap[tempSimp]
-                val reEmoji = emoji?.getScaledInstance(65, 65, java.awt.Image.SCALE_DEFAULT)
+                val reEmoji = emoji?.getScaledInstance(65, 65, Image.SCALE_DEFAULT)
                 centerG2.drawImage(reEmoji, x, 0, null)
             }catch (e: Exception){
 
@@ -197,7 +186,7 @@ suspend fun buildMessageImage(dynamic: Dynamic, uid: String): String? {
             for (imgSrc in dynamic.pictures!!){
                 val img = ImageIO.read(URL(imgSrc))
                 val reHeight = (img.height*1720.0)/img.width
-                val reImg = img.getScaledInstance(1720, reHeight.toInt(), java.awt.Image.SCALE_DEFAULT)
+                val reImg = img.getScaledInstance(1720, reHeight.toInt(), Image.SCALE_DEFAULT)
                 val row : Int = ceil(reHeight / 70.0).toInt()
                 val imgBi = BufferedImage(1920, row * 70, BufferedImage.TYPE_INT_RGB)
                 val imgG2 = imgBi.graphics as Graphics2D
@@ -267,13 +256,13 @@ suspend fun generateImg(uid: String, name: String, face: String, pendant: String
     if (hex == ""){
         try {
             ImageIO.read(File("$runPath$basePath/img/template/$uid.png"))
-            return simpleBuildMessageImage("订阅成功",uid)
+            return simpleBuildImageMessage("订阅成功",uid)
         }catch (e:Exception){}
     }
 
     val bi = BufferedImage(1920, 1080, BufferedImage.TYPE_4BYTE_ABGR)
     val g2 : Graphics2D = bi.graphics as Graphics2D
-    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
 //        g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_GASP)
 
     val faceImg = ImageIO.read(URL(face))
@@ -299,9 +288,9 @@ suspend fun generateImg(uid: String, name: String, face: String, pendant: String
 
     // 写入名字
     if (font!=null){
-        g2.font = font!!.deriveFont(Font.PLAIN, 130f)
+        g2.font = font!!.deriveFont(Font.BOLD, 130f)
     }else{
-        g2.font = Font(PluginConfig.font, Font.PLAIN, 130)
+        g2.font = Font(PluginConfig.font, Font.BOLD, 130)
     }
     g2.color = Color(61, 61, 61)
     g2.drawString(name, 480, 200)
@@ -324,11 +313,11 @@ suspend fun generateImg(uid: String, name: String, face: String, pendant: String
 
     val faceBi = BufferedImage(width, width, BufferedImage.TYPE_4BYTE_ABGR)
     val faceG2 : Graphics2D = faceBi.graphics as Graphics2D
-    faceG2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+    faceG2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
     val shape = Ellipse2D.Double(0.0, 0.0, width.toDouble(), width.toDouble())
     faceG2.clip = shape
     faceG2.drawImage(reImg, 0, 0, null)
-    faceG2.dispose();
+    faceG2.dispose()
 
     if (pendant==""){
         g2.drawImage(faceBi, 200, 80, null)

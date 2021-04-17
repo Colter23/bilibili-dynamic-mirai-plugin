@@ -3,9 +3,6 @@ package top.colter.mirai.plugin
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.mamoe.mirai.Bot
-import net.mamoe.mirai.console.command.CommandManager.INSTANCE.register
-import net.mamoe.mirai.console.command.CommandManager.INSTANCE.unregister
-import net.mamoe.mirai.console.permission.PermissionService
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescription
 import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
 import net.mamoe.mirai.utils.info
@@ -15,7 +12,7 @@ object PluginMain : KotlinPlugin(
     JvmPluginDescription(
         id = "top.colter.bilibili-dynamic-mirai-plugin",
         name = "BilibiliDynamic",
-        version = "1.0.2"
+        version = "1.0.3"
     ) {
         author("Colter")
 

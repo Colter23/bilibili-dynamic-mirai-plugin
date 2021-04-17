@@ -9,6 +9,10 @@ object PluginConfig : AutoSavePluginConfig("config") {
     var admin : Long by value()
     // 是否开启报错推送
     var exception by value(true)
+    // 推送模式
+    // 0 :图片推送(默认)     1 : 文字推送
+    var pushMode by value(0)
+
     // bot状态
     var botState by value(true)
     // 插件的数据路径 基于启动器根目录

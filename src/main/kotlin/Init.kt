@@ -77,5 +77,10 @@ suspend fun initFollowInfo(uid:String, user: User, hex: String): String? {
     val liveRoom = httpGet(BPI["liveRoom"]+uid,BPI["COOKIE"]!!).getJSONObject("data").getBigInteger("roomid").toString()
     user.liveRoom = liveRoom
 
-    return generateImg(uid,name,face,pendant,hex)
+    var r :String? = null
+    if (PluginConfig.pushMode==0){
+        r = generateImg(uid,name,face,pendant,hex)
+    }
+
+    return r
 }
