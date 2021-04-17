@@ -26,7 +26,7 @@ object NewFriendRequestListener : ListenerHost {
             this.accept()
             if (PluginConfig.friend["agreeNewFriendRequest"]!=""){
                 delay(2000)
-                bot.getFriend(fromId)?.sendMessage(PluginConfig.friend["agreeNewFriendRequest"].toString())
+                bot.getFriend(fromId)?.sendMessage(PluginConfig.friend["welcomeMessage"].toString())
             }
 
         }
