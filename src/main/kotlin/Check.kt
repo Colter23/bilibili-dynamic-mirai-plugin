@@ -35,7 +35,6 @@ suspend fun check(bot: Bot){
                 }
             }
 
-
             PluginData.userData.forEach { user ->
                 //获取动态
                 delay(delay.random())

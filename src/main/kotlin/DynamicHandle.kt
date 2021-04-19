@@ -5,13 +5,16 @@ import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
 import kotlinx.coroutines.delay
 import net.mamoe.mirai.Bot
+import net.mamoe.mirai.console.util.ContactUtils.getFriendOrGroup
 import net.mamoe.mirai.message.data.Image
 import net.mamoe.mirai.message.data.MessageChain
 import net.mamoe.mirai.message.data.buildMessageChain
+import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
 import top.colter.mirai.plugin.bean.Dynamic
 import top.colter.mirai.plugin.bean.User
 import top.colter.mirai.plugin.utils.buildImageMessage
 import top.colter.mirai.plugin.utils.getImageIdByBi
+import java.io.File
 import java.lang.Exception
 import java.lang.StringBuilder
 import java.net.URL
@@ -229,7 +232,7 @@ suspend fun buildTextMassageChain(dynamic: Dynamic, user: User):MessageChain{
             return buildMessageChain{
                 +sb.toString()
                 for (img in dynamic.pictures!!){
-                    +Image(getImageIdByBi(ImageIO.read(URL(img))).toString())
+                    +Image(PluginMain.bot.getFriendOrGroup(PluginConfig.admin).uploadImage(URL(img).openConnection().getInputStream().toExternalResource()).imageId)
                 }
             }
         }
