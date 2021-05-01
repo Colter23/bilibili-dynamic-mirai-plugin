@@ -6,10 +6,12 @@ import com.alibaba.fastjson.JSONObject
 import kotlinx.coroutines.delay
 import net.mamoe.mirai.Bot
 import net.mamoe.mirai.console.util.ContactUtils.getFriendOrGroup
+import net.mamoe.mirai.message.data.FileMessage
 import net.mamoe.mirai.message.data.Image
 import net.mamoe.mirai.message.data.MessageChain
 import net.mamoe.mirai.message.data.buildMessageChain
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
+import net.mamoe.mirai.utils.ExternalResource.Companion.uploadAsImage
 import top.colter.mirai.plugin.bean.Dynamic
 import top.colter.mirai.plugin.bean.User
 import top.colter.mirai.plugin.utils.buildImageMessage
@@ -26,13 +28,16 @@ import javax.imageio.ImageIO
 suspend fun sendDynamic(bot: Bot, rawDynamic: JSONObject, user: User){
     try {
         val desc = rawDynamic.getJSONObject("desc")
-        val dynamicId = desc.getBigInteger("dynamic_id").toString()
+        val type = desc.getInteger("type")
+        if (PluginConfig.dynamic["videoMode"]=="true" && type != 8){
+            return
+        }
 
         // 封装动态
         val dynamic = Dynamic()
-        dynamic.did = dynamicId
+        dynamic.did = desc.getBigInteger("dynamic_id").toString()
         dynamic.timestamp = desc.getBigInteger("timestamp").toLong()
-        dynamic.type = desc.getInteger("type")
+        dynamic.type = type
         dynamic.contentJson = JSON.parseObject(rawDynamic.getString("card"))
 
         if (PluginConfig.pushMode==0){
@@ -133,17 +138,33 @@ fun dynamicFormat(dynamic: Dynamic){
         //视频更新动态
         8 -> {
             val card = dynamic.contentJson
+            content += "视频: ${card.getString("title")}"
             val dt = card.getString("dynamic")
             val av = card.getString("aid")
             if (dt!=""){
-                content += dt+"\n"
+                content += "\n\n"+dt+"\n"
             }
-            content += "视频: ${card.getString("title")}"
             dynamic.pictures = mutableListOf()
             dynamic.pictures?.add(card.getString("pic"))
             dynamic.info = "视频ID:av${av}"
             dynamic.link = "https://www.bilibili.com/video/av${av}"
         }
+
+        //专栏
+        64 -> {
+            val card = dynamic.contentJson
+            content += "专栏: ${card.getString("title")}\n"
+            content += card.getString("summary")
+            val cv = card.getString("id")
+            val banner = card.getString("banner_url")
+            if (banner != ""){
+                dynamic.pictures = mutableListOf()
+                dynamic.pictures?.add(banner)
+            }
+            dynamic.info = "专栏ID:${cv}"
+            dynamic.link = "https://www.bilibili.com/read/cv${cv}"
+        }
+
         //音频
         256 -> {
             val card = dynamic.contentJson
@@ -232,10 +253,12 @@ suspend fun buildTextMassageChain(dynamic: Dynamic, user: User):MessageChain{
             return buildMessageChain{
                 +sb.toString()
                 for (img in dynamic.pictures!!){
-                    +Image(PluginMain.bot.getFriendOrGroup(PluginConfig.admin).uploadImage(URL(img).openConnection().getInputStream().toExternalResource()).imageId)
+//                    +Image(PluginMain.bot.getFriendOrGroup(PluginConfig.admin).uploadImage(URL(img).openConnection().getInputStream().toExternalResource()).imageId)
+                    +Image(URL(img).openConnection().getInputStream().uploadAsImage(PluginMain.bot.getFriendOrGroup(PluginConfig.admin)).imageId)
                 }
             }
         }
+
         return buildMessageChain{
             +sb.toString()
         }

@@ -47,11 +47,18 @@ object PluginMain : KotlinPlugin(
             logger.info("forward......")
 
             init()
-            delay(2000)
-
-            Bot.instances.forEach { b: Bot ->
-                bot = b
+            while (true){
+                try {
+                    bot = Bot.instances[0]
+                    bot
+                    break
+                }catch (e:Exception){
+                    delay(1000)
+                }
             }
+            delay(1000)
+            logger.info("工作Bot："+bot.id)
+
             bot.eventChannel.registerListenerHost(NewFriendRequestListener)
             bot.eventChannel.registerListenerHost(MemberJoinListener)
             bot.eventChannel.registerListenerHost(MessageListener)

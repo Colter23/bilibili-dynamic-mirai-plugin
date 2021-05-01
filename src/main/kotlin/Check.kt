@@ -3,7 +3,6 @@ package top.colter.mirai.plugin
 import com.alibaba.fastjson.JSONObject
 import kotlinx.coroutines.delay
 import net.mamoe.mirai.Bot
-import net.mamoe.mirai.console.plugin.info
 import net.mamoe.mirai.console.util.ContactUtils.getFriendOrGroup
 import net.mamoe.mirai.utils.info
 import top.colter.mirai.plugin.PluginConfig.BPI
@@ -23,7 +22,7 @@ suspend fun check(bot: Bot){
             val time = SimpleDateFormat("HHmm").format(timestamp)
 
             val interval = PluginConfig.dynamic["interval"]!!.toLong()
-            val shortDelay = 1000L..4000L
+            val shortDelay = 1000L..3000L
             val middleDelay = interval*1000..(interval+5)*1000
             val longDelay = (interval+10)*1000..(interval+15)*1000
             var delay = middleDelay
@@ -61,15 +60,25 @@ suspend fun check(bot: Bot){
 
                 //直播检测
                 if (PluginConfig.live["enable"]=="true") {
-                    val liveStatus =
-                        try {
+                    var liveStatus = 0
+                    var roomInfo = JSONObject()
+                    if (PluginConfig.live["indeApi"]=="true"){
+                        delay(shortDelay.random())
+                        roomInfo = httpGet(BPI["liveStatus"] + user.liveRoom).getJSONObject("data").getJSONObject("room_info")
+                        liveStatus = roomInfo.getInteger("live_status")
+                    }else{
+                        liveStatus = try {
                             rawDynamicOne.getJSONObject("display").getJSONObject("live_info").getInteger("live_status")
                         }catch (e:Exception){
                             0
                         }
+                    }
+
                     if (liveStatus == 1 && (user.liveStatus==0||user.liveStatus==2)){
-                        delay(shortDelay.random())
-                        val roomInfo = httpGet(BPI["liveStatus"] + user.liveRoom).getJSONObject("data").getJSONObject("room_info")
+                        if (PluginConfig.live["indeApi"]!="true"){
+                            delay(shortDelay.random())
+                            roomInfo = httpGet(BPI["liveStatus"] + user.liveRoom).getJSONObject("data").getJSONObject("room_info")
+                        }
 
                         val dynamic = Dynamic()
                         dynamic.did = user.liveRoom

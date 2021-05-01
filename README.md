@@ -4,7 +4,7 @@
 
 本人菜鸡一个，代码写的不好（   
 可能不是很稳定
-### 样式↓   
+### 图片模式样式↓   
 <img src="docs/img/demo1.jpg" width="400" alt="样式">     
 
 ### 下载
@@ -14,18 +14,19 @@
   下面是一个配置文件模板   
   配置文件位于 根目录/config/BilibiliDynamic/config.yml  
   第一次运行插件会自动生成，也可自己创建  
-  注：**第一行的`adminGroup`和最后一行的`COOKIE`为必填**
+  注：**第一行的`admin`和最后一行的`COOKIE`为必填**
 ```yml
 # 管理  一个控制台 必填!!!!!!!!!!
-# 可以是群 也可以是好友，好友的话只能通过私聊控制
+# 可以是群号或QQ号
 admin: 11111111111
 
 # 是否开启报错推送
 exception: true
 
 # 推送模式
-# 0 :图片推送(默认)     1 :文字推送
-pushMode: 0
+# 0 :图片推送 (不稳定)
+# 1 :文字推送 (默认)
+pushMode: 1
 
 # bot状态
 botState: true
@@ -71,17 +72,26 @@ dynamic:
   # 慢速模式访问api的间隔会再上面的间隔加上10s
   # 例：200..800就是凌晨2点到8点
   lowSpeed: '200-800'
+  # 视频模式  此模式仅会推送视频 要开启改为 true
+  videoMode: false
   # 是否保存动态图片 保存路径为上面的 basePath
+  # 仅图片推送模式
   saveDynamicImage: true
 
 ## 直播相关
 live: 
   # 播检测总开关
   enable: true
+  # 直播检测独立api
+  # 如果你要直播检测效果比较好的话 改为 true
+  # 不开的话可能有些up的直播检测不到
+  # 不过打开这个 每次的访问周期会变高
+  # 可以先不开试一试 如果效果不好再打开
+  indeApi: false
   
 ### 以上的 friend group dynamic live 的开关均可通过管理群回复 #管理 进行设置
 
-## 百度翻译 (一些VTB的动态可能为日语或英语)
+## 百度翻译
 baiduTranslate:
   # 是否开启百度翻译
   enable: false

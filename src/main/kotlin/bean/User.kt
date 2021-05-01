@@ -3,15 +3,15 @@ package top.colter.mirai.plugin.bean
 import kotlinx.serialization.Serializable
 
 @Serializable
-class User {
+data class User (
     // 名用户名
-    var name = ""
+    var name: String="",
     // 用户ID
-    var uid = ""
+    var uid: String="",
     // 动态ID
-    var dynamicId = ""
+    var dynamicId: String="",
     // 直播间号
-    var liveRoom = ""
+    var liveRoom: String="",
     // 直播间状态
-    var liveStatus = 0
-}
+    var liveStatus: Int=0
+)

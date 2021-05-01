@@ -5,13 +5,13 @@ import net.mamoe.mirai.console.data.value
 
 object PluginConfig : AutoSavePluginConfig("config") {
 
-    // 管理,报错都会发送此 必填!!!!!!!!!!
+    // 管理 必填!!!!!!!!!!
     var admin : Long by value()
     // 是否开启报错推送
     var exception by value(true)
     // 推送模式
-    // 0 :图片推送(默认)     1 : 文字推送
-    var pushMode by value(0)
+    // 0 :图片推送    1 : 文字推送 (默认)
+    var pushMode by value(1)
 
     // bot状态
     var botState by value(true)
@@ -51,6 +51,8 @@ object PluginConfig : AutoSavePluginConfig("config") {
         //慢速模式开启时间段 不开启则填000-000
         //例：200..800就是凌晨2点到8点
         "lowSpeed" to "200-800",
+        //视频模式  此模式仅会推送视频
+        "videoMode" to "false",
         //是否保存动态图片
         "saveDynamicImage" to "true"
     ))
@@ -58,7 +60,13 @@ object PluginConfig : AutoSavePluginConfig("config") {
     //---------------直播检测----------------//
     var live : MutableMap<String,String> by value(mutableMapOf(
         //直播检测总开关
-        "enable" to "true"
+        "enable" to "true",
+        //直播检测独立的api
+        //如果你要直播检测效果比较好的话 改为 true
+        //不开的话可能有些up的直播检测不到
+        //不过打开这个 每次的访问周期会变高
+        //可以先不开试一试 如果效果不好再打开
+        "indeApi" to "false"
     ))
 
     //---------------百度翻译----------------//
