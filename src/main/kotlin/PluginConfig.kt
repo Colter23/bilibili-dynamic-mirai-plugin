@@ -24,7 +24,7 @@ object PluginConfig : AutoSavePluginConfig("config") {
 
     //---------------好友相关----------------//
     var friend : MutableMap<String,String> by value(mutableMapOf(
-        //好友功能总开关 包括回复
+        //好友交互开关 关闭后bot不会响应命令
         "enable" to "false",
         //同意好友申请
         "agreeNewFriendRequest" to "false",
@@ -33,7 +33,7 @@ object PluginConfig : AutoSavePluginConfig("config") {
     ))
     //---------------群相关----------------//
     var group : MutableMap<String,String> by value(mutableMapOf(
-        //群功能总开关 包括回复
+        //群交互开关 关闭后bot不会响应群命令
         "enable" to "false",
         //欢迎新成员
         "welcomeMemberJoin" to "false",

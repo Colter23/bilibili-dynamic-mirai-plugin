@@ -26,7 +26,7 @@ val emoji = listOf<String>("( •̀ ω •́ )✧","(oﾟvﾟ)ノ","(o゜▽゜)
 object NewFriendRequestListener : ListenerHost {
     @EventHandler
     suspend fun NewFriendRequestEvent.onMessage(){
-        if (PluginConfig.friend["enable"]=="true"&&PluginConfig.friend["agreeNewFriendRequest"]=="true") {
+        if (PluginConfig.friend["agreeNewFriendRequest"]=="true") {
             this.accept()
             if (PluginConfig.friend["agreeNewFriendRequest"]!=""){
                 delay(2000)
@@ -41,7 +41,7 @@ object MemberJoinListener : ListenerHost {
     val coroutineContext = SupervisorJob()
     @EventHandler
     suspend fun MemberJoinEvent.onMessage() {
-        if (PluginConfig.group["enable"]=="true"&&PluginConfig.group["welcomeMemberJoin"]=="true") {
+        if (PluginConfig.group["welcomeMemberJoin"]=="true") {
             group.sendMessage(At(user)+" "+PluginConfig.group["welcomeMessage"].toString()+emoji[(emoji.indices).random()])
         }
     }

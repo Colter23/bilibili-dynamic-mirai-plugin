@@ -59,7 +59,7 @@ suspend fun check(bot: Bot){
                 }
 
                 //直播检测
-                if (PluginConfig.live["enable"]=="true") {
+                if (user.liveRoom!="0" && PluginConfig.live["enable"]=="true") {
                     var liveStatus = 0
                     var roomInfo = JSONObject()
                     if (PluginConfig.live["indeApi"]=="true"){
@@ -100,7 +100,6 @@ suspend fun check(bot: Bot){
                     }
                     user.liveStatus = liveStatus
                 }
-
             }
 
             PluginMain.logger.info {"检测结束"}

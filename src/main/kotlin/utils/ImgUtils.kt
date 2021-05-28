@@ -185,6 +185,23 @@ suspend fun buildImageMessage(dynamic: Dynamic, uid: String): String? {
         if (dynamic.pictures != null && dynamic.pictures?.size!=0){
             for (imgSrc in dynamic.pictures!!){
                 val img = ImageIO.read(URL(imgSrc))
+                if  (img.height > 4096){
+                    val textBi = BufferedImage(1920, 70, BufferedImage.TYPE_INT_RGB)
+                    val textG2 = textBi.graphics as Graphics2D
+                    textG2.drawImage(bi.getSubimage(0, 470, 1920, 70), 0, 0, null)
+                    textG2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_GASP)
+
+                    if (font!=null){
+                        textG2.font = font!!.deriveFont(Font.PLAIN, 60f)
+                    }else{
+                        textG2.font = Font(PluginConfig.font, Font.PLAIN, 60)
+                    }
+                    textG2.color = Color(87, 87, 87)
+                    textG2.drawString("图片过大", 100, 50)
+                    height += 70
+                    biList.add(textBi)
+                    continue
+                }
                 val reHeight = (img.height*1720.0)/img.width
                 val reImg = img.getScaledInstance(1720, reHeight.toInt(), Image.SCALE_DEFAULT)
                 val row : Int = ceil(reHeight / 70.0).toInt()

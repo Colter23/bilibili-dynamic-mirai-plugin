@@ -28,7 +28,18 @@ suspend fun init(){
                 0
             }
 
+        var lastId = "0"
         rawDynamic.forEach { item ->
+            val desc = JSON.parseObject(item.toString()).getJSONObject("desc")
+            lastId = desc.getBigInteger("dynamic_id").toString()
+            PluginMain.historyDynamic.add(lastId)
+        }
+
+        // 查找记录上一页动态
+        delay((500L..1500L).random())
+        val rawDynamic2 = httpGet(BPI["dynamic"]+user.uid+"&offset_dynamic_id="+lastId ,BPI["COOKIE"]!!).getJSONObject("data").getJSONArray("cards")
+
+        rawDynamic2.forEach { item ->
             val desc = JSON.parseObject(item.toString()).getJSONObject("desc")
             PluginMain.historyDynamic.add(desc.getBigInteger("dynamic_id").toString())
         }
