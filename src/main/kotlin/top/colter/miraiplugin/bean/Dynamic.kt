@@ -1,4 +1,4 @@
-package top.colter.mirai.plugin.bean
+package top.colter.miraiplugin.bean
 
 import com.alibaba.fastjson.JSONObject
 
@@ -17,6 +17,8 @@ class Dynamic {
     var isDynamic = true
     //图片集合
     var pictures : MutableList<String>? = null
+    //b站表情
+    var emoji : MutableMap<String, java.awt.Image>? = null
     //b站表情等
     var display : JSONObject = JSONObject()
     //动态信息 图片左下角的信息

@@ -1,11 +1,11 @@
-package top.colter.mirai.plugin
+package top.colter.miraiplugin
 
 import com.alibaba.fastjson.JSON
 import kotlinx.coroutines.delay
-import top.colter.mirai.plugin.utils.httpGet
-import top.colter.mirai.plugin.PluginConfig.BPI
-import top.colter.mirai.plugin.bean.User
-import top.colter.mirai.plugin.utils.generateImg
+import top.colter.miraiplugin.bean.User
+import top.colter.miraiplugin.utils.httpGet
+import top.colter.miraiplugin.PluginConfig.BPI
+import top.colter.miraiplugin.utils.generateImg
 import java.awt.Font
 import java.io.BufferedInputStream
 import java.io.File
@@ -15,18 +15,21 @@ suspend fun init(){
     PluginMain.logger.info("初始化数据中...")
 
     PluginData.userData.forEach { user ->
-        delay((1000L..2000L).random())
-        val rawDynamic = httpGet(BPI["dynamic"]+user.uid ,BPI["COOKIE"]!!).getJSONObject("data").getJSONArray("cards")
+        delay((500..2000L).random())
+        val rawDynamic = httpGet(BPI["dynamic"]+user.uid).getJSONObject("data").getJSONArray("cards")
 
         val raw0 = rawDynamic.getJSONObject(0)
         val desc = raw0.getJSONObject("desc")
         user.dynamicId = desc.getBigInteger("dynamic_id").toString()
-        user.liveStatus =
-            try {
-                raw0.getJSONObject("display").getJSONObject("live_info").getInteger("live_status")
-            }catch (e:Exception){
-                0
+
+        try {
+            if (user.liveRoom!="0"){
+                delay(500)
+                user.liveStatus = httpGet(BPI["liveStatus"] + user.liveRoom).getJSONObject("data").getJSONObject("room_info").getInteger("live_status")
             }
+        }catch (e:Exception){
+            user.liveStatus = 0
+        }
 
         var lastId = "0"
         rawDynamic.forEach { item ->
@@ -36,8 +39,8 @@ suspend fun init(){
         }
 
         // 查找记录上一页动态
-        delay((500L..1500L).random())
-        val rawDynamic2 = httpGet(BPI["dynamic"]+user.uid+"&offset_dynamic_id="+lastId ,BPI["COOKIE"]!!).getJSONObject("data").getJSONArray("cards")
+        delay((500L..700L).random())
+        val rawDynamic2 = httpGet(BPI["dynamic"]+user.uid+"&offset_dynamic_id="+lastId ).getJSONObject("data").getJSONArray("cards")
 
         rawDynamic2.forEach { item ->
             val desc = JSON.parseObject(item.toString()).getJSONObject("desc")
@@ -62,8 +65,7 @@ suspend fun init(){
 }
 
 suspend fun initFollowInfo(uid:String, user: User, hex: String): String? {
-    delay(1000)
-    val rawDynamic = httpGet(BPI["dynamic"]+uid,BPI["COOKIE"]!!).getJSONObject("data").getJSONArray("cards")
+    val rawDynamic = httpGet(BPI["dynamic"]+uid).getJSONObject("data").getJSONArray("cards")
     rawDynamic.forEach { item ->
         val desc = JSON.parseObject(item.toString()).getJSONObject("desc")
         PluginMain.historyDynamic.add(desc.getBigInteger("dynamic_id").toString())
@@ -75,21 +77,25 @@ suspend fun initFollowInfo(uid:String, user: User, hex: String): String? {
     user.uid = uid
     user.name = name
     user.dynamicId = res.getJSONObject("desc").getBigInteger("dynamic_id").toString()
-    try {
-        user.liveStatus = res.getJSONObject("display").getJSONObject("live_info").getInteger("live_status")
-    }catch (e:Exception){
-        user.liveStatus = 0
-    }
 
     val face = userProfile.getJSONObject("info").getString("face")
     val pendant = userProfile.getJSONObject("pendant").getString("image")
 
-    delay(1000)
-    val liveRoom = httpGet(BPI["liveRoom"]+uid,BPI["COOKIE"]!!).getJSONObject("data").getBigInteger("roomid").toString()
+    delay(500)
+    val liveRoom = httpGet(BPI["liveRoom"]+uid,"aaa").getJSONObject("data").getBigInteger("roomid").toString()
     user.liveRoom = liveRoom
 
+    try {
+        if (user.liveRoom!="0"){
+            delay(500)
+            user.liveStatus = httpGet(BPI["liveStatus"] + user.liveRoom).getJSONObject("data").getJSONObject("room_info").getInteger("live_status")
+        }
+    }catch (e:Exception){
+        user.liveStatus = 0
+    }
+
     var r :String? = null
-    if (PluginConfig.pushMode==0){
+    if (PluginConfig.pushMode ==0){
         r = generateImg(uid,name,face,pendant,hex)
     }
 

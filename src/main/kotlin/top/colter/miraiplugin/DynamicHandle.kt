@@ -1,4 +1,4 @@
-package top.colter.mirai. plugin
+package top.colter.miraiplugin
 
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONArray
@@ -6,17 +6,13 @@ import com.alibaba.fastjson.JSONObject
 import kotlinx.coroutines.delay
 import net.mamoe.mirai.Bot
 import net.mamoe.mirai.console.util.ContactUtils.getFriendOrGroup
-import net.mamoe.mirai.message.data.FileMessage
 import net.mamoe.mirai.message.data.Image
 import net.mamoe.mirai.message.data.MessageChain
 import net.mamoe.mirai.message.data.buildMessageChain
-import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
 import net.mamoe.mirai.utils.ExternalResource.Companion.uploadAsImage
-import top.colter.mirai.plugin.bean.Dynamic
-import top.colter.mirai.plugin.bean.User
-import top.colter.mirai.plugin.utils.buildImageMessage
-import top.colter.mirai.plugin.utils.getImageIdByBi
-import java.io.File
+import top.colter.miraiplugin.bean.Dynamic
+import top.colter.miraiplugin.bean.User
+import top.colter.miraiplugin.utils.buildImageMessage
 import java.lang.Exception
 import java.lang.StringBuilder
 import java.net.URL
@@ -40,7 +36,7 @@ suspend fun sendDynamic(bot: Bot, rawDynamic: JSONObject, user: User){
         dynamic.type = type
         dynamic.contentJson = JSON.parseObject(rawDynamic.getString("card"))
 
-        if (PluginConfig.pushMode==0){
+        if (PluginConfig.pushMode ==0){
             try{
                 dynamic.display = rawDynamic.getJSONObject("display")
             }catch (e:Exception){ }
@@ -54,7 +50,8 @@ suspend fun sendDynamic(bot: Bot, rawDynamic: JSONObject, user: User){
         sendMessage(bot, user.uid, resMag)
 
     }catch (e : Exception){
-        PluginMain.logger.error("发送 " + user.name + "的动态失败!")
+        PluginMain.logger.error("发送 " + user.name + " 的动态失败!\n"+e.message)
+        throw Exception("发送 " + user.name + " 的动态失败!\n"+e.message)
     }
 }
 
@@ -97,14 +94,14 @@ fun dynamicFormat(dynamic: Dynamic){
                     dynamic.pictures?.add(origin.getString("pic"))
                 }
             }
-            if (PluginConfig.pushMode==0){
+            if (PluginConfig.pushMode ==0){
                 try {
                     val emojiJson = dynamic.display.getJSONObject("emoji_info").getJSONArray("emoji_details")
-                    putEmoji(emojiJson)
+                    putEmoji(dynamic,emojiJson)
                 } catch (e: Exception) { }
                 try {
                     val emojiJson = dynamic.display.getJSONObject("origin").getJSONObject("emoji_info").getJSONArray("emoji_details")
-                    putEmoji(emojiJson)
+                    putEmoji(dynamic,emojiJson)
                 } catch (e: Exception) { }
             }
         }
@@ -116,10 +113,10 @@ fun dynamicFormat(dynamic: Dynamic){
             for (pic in card.getJSONObject("item").getJSONArray("pictures")) {
                 dynamic.pictures?.add((pic as JSONObject).getString("img_src"))
             }
-            if (PluginConfig.pushMode==0){
+            if (PluginConfig.pushMode ==0){
                 try {
                     val emojiJson = dynamic.display.getJSONObject("emoji_info").getJSONArray("emoji_details")
-                    putEmoji(emojiJson)
+                    putEmoji(dynamic,emojiJson)
                 } catch (e: Exception) { }
             }
         }
@@ -127,10 +124,10 @@ fun dynamicFormat(dynamic: Dynamic){
         4 -> {
             val card = dynamic.contentJson
             content = card.getJSONObject("item").getString("content")
-            if (PluginConfig.pushMode==0){
+            if (PluginConfig.pushMode ==0){
                 try {
                     val emojiJson = dynamic.display.getJSONObject("emoji_info").getJSONArray("emoji_details")
-                    putEmoji(emojiJson)
+                    putEmoji(dynamic,emojiJson)
                 } catch (e: Exception) { }
             }
         }
@@ -197,12 +194,14 @@ fun dynamicFormat(dynamic: Dynamic){
 /**
  * 解析emojiJson 获取图片封装进map
  */
-fun putEmoji(emojiJson: JSONArray){
+fun putEmoji(dynamic:Dynamic, emojiJson: JSONArray){
     for (emojiItem in emojiJson){
         val em = emojiItem as JSONObject
         val emojiName = em.getString("emoji_name")
-        if (PluginMain.emojiMap[emojiName] == null)
-            PluginMain.emojiMap[emojiName] = ImageIO.read(URL(em.getString("url")))
+        if (dynamic.emoji == null){
+            dynamic.emoji = mutableMapOf()
+        }
+        dynamic.emoji?.set(emojiName, ImageIO.read(URL(em.getString("url"))))
     }
 }
 
@@ -210,7 +209,7 @@ fun putEmoji(emojiJson: JSONArray){
  * 构建发送消息链
  */
 suspend fun buildResMessage(dynamic: Dynamic, user: User): MessageChain {
-    return if (PluginConfig.pushMode==0){
+    return if (PluginConfig.pushMode ==0){
         buildImageMassageChain(dynamic,user)
     }else{
         buildTextMassageChain(dynamic,user)
@@ -254,7 +253,10 @@ suspend fun buildTextMassageChain(dynamic: Dynamic, user: User):MessageChain{
                 +sb.toString()
                 for (img in dynamic.pictures!!){
 //                    +Image(PluginMain.bot.getFriendOrGroup(PluginConfig.admin).uploadImage(URL(img).openConnection().getInputStream().toExternalResource()).imageId)
-                    +Image(URL(img).openConnection().getInputStream().uploadAsImage(PluginMain.bot.getFriendOrGroup(PluginConfig.admin)).imageId)
+                    +Image(URL(img).openConnection().getInputStream().uploadAsImage(
+                        PluginMain.bot.getFriendOrGroup(
+                            PluginConfig.admin
+                        )).imageId)
                 }
             }
         }

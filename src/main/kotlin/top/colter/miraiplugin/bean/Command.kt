@@ -1,4 +1,4 @@
-package top.colter.mirai.plugin.bean
+package top.colter.miraiplugin.bean
 
 class Command {
     var commandName = ""

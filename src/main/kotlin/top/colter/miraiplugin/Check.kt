@@ -1,22 +1,23 @@
-package top.colter.mirai.plugin
+package top.colter.miraiplugin
 
 import com.alibaba.fastjson.JSONObject
 import kotlinx.coroutines.delay
 import net.mamoe.mirai.Bot
 import net.mamoe.mirai.console.util.ContactUtils.getFriendOrGroup
 import net.mamoe.mirai.utils.info
-import top.colter.mirai.plugin.PluginConfig.BPI
-import top.colter.mirai.plugin.bean.Dynamic
-import top.colter.mirai.plugin.utils.httpGet
+import top.colter.miraiplugin.bean.Dynamic
+import top.colter.miraiplugin.PluginConfig.BPI
+import top.colter.miraiplugin.utils.httpGet
 import java.text.SimpleDateFormat
 
 suspend fun check(bot: Bot){
     while (true){
-        if (!(PluginConfig.botState&&(PluginConfig.dynamic["enable"]=="true"||PluginConfig.live["enable"]=="true"))){
+        if (!(PluginConfig.botState &&(PluginConfig.dynamic["enable"]=="true"|| PluginConfig.live["enable"]=="true"))){
+            delay(600000)
             continue
         }
         try {
-            PluginMain.logger.info {"Start testing...开始检测..."}
+            PluginMain.logger.info {"开始检测..."}
 
             val timestamp = System.currentTimeMillis()
             val time = SimpleDateFormat("HHmm").format(timestamp)
@@ -37,7 +38,7 @@ suspend fun check(bot: Bot){
             PluginData.userData.forEach { user ->
                 //获取动态
                 delay(delay.random())
-                val rawDynamicList = httpGet(BPI["dynamic"]+user.uid ,BPI["COOKIE"]!!).getJSONObject("data").getJSONArray("cards")
+                val rawDynamicList = httpGet(BPI["dynamic"]+user.uid).getJSONObject("data").getJSONArray("cards")
                 val rawDynamicOne = rawDynamicList.getJSONObject(0)
 
                 //动态检测
@@ -60,26 +61,21 @@ suspend fun check(bot: Bot){
 
                 //直播检测
                 if (user.liveRoom!="0" && PluginConfig.live["enable"]=="true") {
-                    var liveStatus = 0
+
                     var roomInfo = JSONObject()
-                    if (PluginConfig.live["indeApi"]=="true"){
-                        delay(shortDelay.random())
-                        roomInfo = httpGet(BPI["liveStatus"] + user.liveRoom).getJSONObject("data").getJSONObject("room_info")
-                        liveStatus = roomInfo.getInteger("live_status")
-                    }else{
-                        liveStatus = try {
-                            rawDynamicOne.getJSONObject("display").getJSONObject("live_info").getInteger("live_status")
-                        }catch (e:Exception){
-                            0
+                    var liveStatus = 0
+
+                    delay(shortDelay.random())
+                    try {
+                        if (user.liveRoom!="0"){
+                            roomInfo = httpGet(BPI["liveStatus"] + user.liveRoom).getJSONObject("data").getJSONObject("room_info")
+                            liveStatus = roomInfo.getInteger("live_status")
                         }
+                    }catch (e:Exception){
+                        PluginMain.logger.error("检测动态失败")
                     }
 
                     if (liveStatus == 1 && (user.liveStatus==0||user.liveStatus==2)){
-                        if (PluginConfig.live["indeApi"]!="true"){
-                            delay(shortDelay.random())
-                            roomInfo = httpGet(BPI["liveStatus"] + user.liveRoom).getJSONObject("data").getJSONObject("room_info")
-                        }
-
                         val dynamic = Dynamic()
                         dynamic.did = user.liveRoom
                         dynamic.timestamp = roomInfo.getBigInteger("live_start_time").toLong()
@@ -96,7 +92,7 @@ suspend fun check(bot: Bot){
                         }else if(keyframe!=""){
                             dynamic.pictures?.add(keyframe)
                         }
-                        sendMessage(bot,user.uid,buildResMessage(dynamic, user))
+                        sendMessage(bot,user.uid, buildResMessage(dynamic, user))
                     }
                     user.liveStatus = liveStatus
                 }

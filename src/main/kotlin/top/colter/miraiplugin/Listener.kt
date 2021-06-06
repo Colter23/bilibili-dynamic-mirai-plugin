@@ -1,4 +1,4 @@
-package top.colter.mirai.plugin
+package top.colter.miraiplugin
 
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
@@ -8,12 +8,8 @@ import net.mamoe.mirai.event.EventHandler
 import net.mamoe.mirai.event.ListenerHost
 import net.mamoe.mirai.event.events.*
 import net.mamoe.mirai.message.data.*
-import net.mamoe.mirai.utils.ExternalResource.Companion.sendAsImageTo
-import net.mamoe.mirai.utils.ExternalResource.Companion.sendTo
-import net.mamoe.mirai.utils.ExternalResource.Companion.uploadAsImage
-import top.colter.mirai.plugin.bean.Command
-import top.colter.mirai.plugin.bean.User
-import java.io.File
+import top.colter.miraiplugin.bean.Command
+import top.colter.miraiplugin.bean.User
 
 val emoji = listOf<String>("( •̀ ω •́ )✧","(oﾟvﾟ)ノ","(o゜▽゜)o☆","(￣▽￣)\"","(。・ω・)ノ",
     "(੭ˊ꒳ˋ)੭✧","⸜(* ॑꒳ ॑*  )⸝✩°｡⋆","( •̀ ω •́ )y","(￣3￣)","(ง •_•)ง","o(〃＾▽＾〃)o",
@@ -42,7 +38,7 @@ object MemberJoinListener : ListenerHost {
     @EventHandler
     suspend fun MemberJoinEvent.onMessage() {
         if (PluginConfig.group["welcomeMemberJoin"]=="true") {
-            group.sendMessage(At(user)+" "+PluginConfig.group["welcomeMessage"].toString()+emoji[(emoji.indices).random()])
+            group.sendMessage(At(user)+" "+ PluginConfig.group["welcomeMessage"].toString()+ emoji[(emoji.indices).random()])
         }
     }
 }
@@ -152,10 +148,10 @@ object MessageListener : ListenerHost {
             return
         }
         if (subject.id != PluginConfig.admin){
-            if (subject is Group&&PluginConfig.group["enable"]=="false"){
+            if (subject is Group&& PluginConfig.group["enable"]=="false"){
                 return
             }
-            if (subject !is Group&&PluginConfig.friend["enable"]=="false"){
+            if (subject !is Group&& PluginConfig.friend["enable"]=="false"){
                 return
             }
         }
@@ -165,7 +161,7 @@ object MessageListener : ListenerHost {
             val commandName = commandArr[0].substring(1)
             when(commandName){
                 "?", "？", "help", "帮助", "功能", "菜单" -> {
-                    if (PluginConfig.admin==subject.id){
+                    if (PluginConfig.admin ==subject.id){
                         return
                     }
                     subject.sendMessage(
@@ -215,7 +211,7 @@ object MessageListener : ListenerHost {
                         return
                     }
                     try {
-                        if (PluginData.friendList.contains(command.qid)||PluginData.groupList.contains(command.qid)) {
+                        if (PluginData.friendList.contains(command.qid)|| PluginData.groupList.contains(command.qid)) {
                             if (command.isGroup){
                                 PluginData.groupList.remove(command.qid)
                             }else{
@@ -282,9 +278,9 @@ object MessageListener : ListenerHost {
                         if(command.hex==""){
                             subject.sendMessage("$name 添加成功 ( •̀ ω •́ )y")
                         }else{
-                            if (PluginConfig.pushMode==0){
+                            if (PluginConfig.pushMode ==0){
                                 try{
-                                    subject.sendMessage(Image(""+initFollowInfo(command.uid,User(),command.hex)))
+                                    subject.sendMessage(Image(""+ initFollowInfo(command.uid, User(), command.hex)))
                                 }catch (e:Exception){
                                     subject.sendMessage("${command.uid} 添加失败! 内部错误 或 uid错误")
                                 }
@@ -298,7 +294,7 @@ object MessageListener : ListenerHost {
                         try {
                             val user = User()
 
-                            val image = initFollowInfo(command.uid,user,command.hex)
+                            val image = initFollowInfo(command.uid, user, command.hex)
                             PluginData.userData.add(user)
                             name = user.name
                             if (!PluginData.followList.contains(command.uid)){
@@ -311,7 +307,7 @@ object MessageListener : ListenerHost {
                                 PluginData.friendList[command.qid]?.add("${command.uid}@$name")
                             }
 
-                            if (PluginConfig.pushMode==0){
+                            if (PluginConfig.pushMode ==0){
                                 subject.sendMessage(Image(""+image)+"添加成功 ( •̀ ω •́ )y")
                             }else{
                                 subject.sendMessage("${user.name} 添加成功 ( •̀ ω •́ )y")

@@ -1,5 +1,6 @@
-package top.colter.myplugin.translate
+package top.colter.miraiplugin.utils.translate
 
+import top.colter.myplugin.translate.MD5
 import java.util.HashMap
 
 class TransApi(private val appid: String, private val securityKey: String) {

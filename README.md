@@ -14,7 +14,7 @@
   下面是一个配置文件模板   
   配置文件位于 根目录/config/BilibiliDynamic/config.yml  
   第一次运行插件会自动生成，也可自己创建  
-  注：**第一行的`admin`和最后一行的`COOKIE`为必填**
+  注：**第一行的`admin`为必填**
 ```yml
 # 管理  一个控制台 必填!!!!!!!!!!
 # 可以是群号或QQ号
@@ -82,12 +82,6 @@ dynamic:
 live: 
   # 播检测总开关
   enable: true
-  # 直播检测独立api
-  # 如果你要直播检测效果比较好的话 改为 true
-  # 不开的话可能有些up的直播检测不到
-  # 不过打开这个 每次的访问周期会变高
-  # 可以先不开试一试 如果效果不好再打开
-  indeApi: false
   
 ### 以上的 friend group dynamic live 的开关均可通过管理群回复 #管理 进行设置
 
@@ -113,24 +107,9 @@ BPI:
   # 大航海数(暂时没用) 
   # 参数: 用户id:ruid 直播间id:roomid eg: ruid=487550002&roomid=21811136
   guard: 'https://api.live.bilibili.com/xlive/app-room/v2/guardTab/topList?page=1&page_size=1&'
-  # cookie 必填!!!!!!!!!!!!!!!!
-  # 放在双引号里，cookie里可能带有单引号
-  COOKIE: ""
 ```
 以上的 好友、群 的开关不建议开启，避免群友过多添加订阅  
 可以通过管理群统一设置
-
-<details>
-<summary>获取 Cookie</summary>
-
-浏览器打开B站 [BiliBili](https://www.bilibili.com/) 并登陆  
-注：登陆后最好不要退出登陆
-
-按`F12`，打开`开发者工具`，找到`Network 网络`并点击  
-按`F5`刷新页面，按下图复制Cookie   
-<img src="docs/img/cookie.png" width="500">
-
-</details>
 
 ### 使用
 在管理群内发送 `#?` `#help` `#帮助` `#功能` `#菜单` 中的任意一个即可查看命令

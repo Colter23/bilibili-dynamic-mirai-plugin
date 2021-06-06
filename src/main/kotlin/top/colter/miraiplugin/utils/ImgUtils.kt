@@ -1,16 +1,16 @@
-package top.colter.mirai.plugin.utils
+package top.colter.miraiplugin.utils
 
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONObject
 import net.mamoe.mirai.console.util.ContactUtils.getFriendOrGroup
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
-import top.colter.mirai.plugin.PluginConfig
-import top.colter.mirai.plugin.PluginConfig.basePath
-import top.colter.mirai.plugin.PluginData.runPath
-import top.colter.mirai.plugin.PluginMain
-import top.colter.mirai.plugin.PluginMain.font
-import top.colter.mirai.plugin.bean.Dynamic
-import top.colter.myplugin.translate.TransApi
+import top.colter.miraiplugin.PluginConfig
+import top.colter.miraiplugin.PluginConfig.basePath
+import top.colter.miraiplugin.PluginData.runPath
+import top.colter.miraiplugin.PluginMain
+import top.colter.miraiplugin.PluginMain.font
+import top.colter.miraiplugin.bean.Dynamic
+import top.colter.miraiplugin.utils.translate.TransApi
 import java.awt.*
 import java.awt.geom.Ellipse2D
 import java.awt.image.BufferedImage
@@ -169,7 +169,7 @@ suspend fun buildImageMessage(dynamic: Dynamic, uid: String): String? {
                 x += centerG2.font.getStringBounds(tempText, centerG2.fontRenderContext).width.toInt()
             }
             try{
-                val emoji = PluginMain.emojiMap[tempSimp]
+                val emoji = dynamic.emoji?.get(tempSimp)
                 val reEmoji = emoji?.getScaledInstance(65, 65, Image.SCALE_DEFAULT)
                 centerG2.drawImage(reEmoji, x, 0, null)
             }catch (e: Exception){
@@ -357,6 +357,7 @@ suspend fun generateImg(uid: String, name: String, face: String, pendant: String
         ImageIO.write(bi, "PNG", file)
     }catch (e: Exception){
         PluginMain.logger.error("储存图片失败")
+//        throw Exception("储存图片失败")
     }
 
 //    g2.font = Font("汉仪汉黑W", Font.PLAIN, 200)
@@ -404,11 +405,11 @@ fun getImageAvgRGB(image: Image): Color {
 suspend fun  getImageIdByBi(bi : BufferedImage):String?{
     val input = biToIs(bi)
     val er = input?.toExternalResource()
-    return try {
-        er?.let { PluginMain.bot.getFriendOrGroup(PluginConfig.admin).uploadImage(it).imageId }
+    try {
+        return er?.let { PluginMain.bot.getFriendOrGroup(PluginConfig.admin).uploadImage(it).imageId }
     } catch (e: Exception) {
         PluginMain.logger.error("上传图片失败")
-        null
+        throw Exception("上传图片失败")
     } finally {
         input?.close()
         er?.close()
@@ -427,8 +428,8 @@ fun biToIs(image: BufferedImage?): InputStream? {
         return ByteArrayInputStream(os.toByteArray())
     } catch (e: IOException) {
         PluginMain.logger.error("BufferedImage转换失败")
+        throw Exception("BufferedImage转换失败")
     }
-    return null
 }
 
 /**
@@ -451,7 +452,6 @@ fun scaleByPercentage(inputImage: BufferedImage, newWidth: Int, newHeight: Int):
         graphics2d.dispose()
         return img
     } catch (e: java.lang.Exception) {
-        e.printStackTrace()
+        throw Exception("图片处理失败")
     }
-    return null
 }

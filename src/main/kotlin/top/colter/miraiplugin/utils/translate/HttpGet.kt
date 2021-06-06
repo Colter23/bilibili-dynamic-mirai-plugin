@@ -1,4 +1,4 @@
-package top.colter.myplugin.translate
+package top.colter.miraiplugin.utils.translate
 
 import java.io.*
 import java.net.HttpURLConnection

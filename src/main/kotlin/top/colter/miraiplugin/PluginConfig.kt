@@ -1,4 +1,4 @@
-package top.colter.mirai.plugin
+package top.colter.miraiplugin
 
 import net.mamoe.mirai.console.data.AutoSavePluginConfig
 import net.mamoe.mirai.console.data.value
@@ -89,8 +89,6 @@ object PluginConfig : AutoSavePluginConfig("config") {
         // 直播id API
         "liveRoom" to "https://api.live.bilibili.com/room/v1/Room/getRoomInfoOld?mid=",
         // 大航海数 需要参数 用户id:ruid 直播间id:roomid  eg: ruid=487550002&roomid=21811136
-        "guard" to "https://api.live.bilibili.com/xlive/app-room/v2/guardTab/topList?page=1&page_size=1&",
-        // cookie 必填!!!!!!!!!!!!!!!!
-        "COOKIE" to ""
+        "guard" to "https://api.live.bilibili.com/xlive/app-room/v2/guardTab/topList?page=1&page_size=1&"
     ))
 }

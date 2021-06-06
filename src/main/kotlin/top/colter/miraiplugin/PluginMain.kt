@@ -1,4 +1,4 @@
-package top.colter.mirai.plugin
+package top.colter.miraiplugin
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -12,7 +12,7 @@ object PluginMain : KotlinPlugin(
     JvmPluginDescription(
         id = "top.colter.bilibili-dynamic-mirai-plugin",
         name = "BilibiliDynamic",
-        version = "1.0.4"
+        version = "1.0.6"
     ) {
         author("Colter")
 
@@ -24,9 +24,6 @@ object PluginMain : KotlinPlugin(
 
     // 动态历史记录
     val historyDynamic : MutableList<String> = mutableListOf()
-
-    // b站表情
-    val emojiMap = mutableMapOf<String,java.awt.Image>()
 
     var font : Font? = null
 
@@ -57,7 +54,7 @@ object PluginMain : KotlinPlugin(
                 }
             }
             delay(1000)
-            logger.info("工作Bot："+bot.id)
+            logger.info("工作Bot："+ bot.id)
 
             bot.eventChannel.registerListenerHost(NewFriendRequestListener)
             bot.eventChannel.registerListenerHost(MemberJoinListener)

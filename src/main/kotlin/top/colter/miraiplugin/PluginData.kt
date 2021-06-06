@@ -1,8 +1,8 @@
-package top.colter.mirai.plugin
+package top.colter.miraiplugin
 
 import net.mamoe.mirai.console.data.AutoSavePluginData
 import net.mamoe.mirai.console.data.value
-import top.colter.mirai.plugin.bean.User
+import top.colter.miraiplugin.bean.User
 
 object PluginData : AutoSavePluginData("pluginData"){
     // 运行路径 在初始化时赋值

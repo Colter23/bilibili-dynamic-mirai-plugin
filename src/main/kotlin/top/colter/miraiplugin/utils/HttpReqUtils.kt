@@ -1,4 +1,4 @@
-package top.colter.mirai.plugin.utils
+package top.colter.miraiplugin.utils
 
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONObject
