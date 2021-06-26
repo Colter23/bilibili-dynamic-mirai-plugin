@@ -2,8 +2,10 @@
 
 > 一个把B站动态转发到Q群的 [mirai](https://github.com/mamoe/mirai) 插件
 
-本人菜鸡一个，代码写的不好（   
-可能不是很稳定
+暂停维护（这个写的太辣鸡了）    
+暑假应该会再重构一遍
+
+
 ### 图片模式样式↓   
 <img src="docs/img/demo1.jpg" width="400" alt="样式">     
 

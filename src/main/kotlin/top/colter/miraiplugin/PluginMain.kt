@@ -7,6 +7,7 @@ import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescription
 import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
 import net.mamoe.mirai.utils.info
 import java.awt.Font
+import kotlin.streams.asSequence
 
 object PluginMain : KotlinPlugin(
     JvmPluginDescription(

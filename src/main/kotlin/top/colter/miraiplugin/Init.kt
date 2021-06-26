@@ -32,20 +32,30 @@ suspend fun init(){
         }
 
         var lastId = "0"
-        rawDynamic.forEach { item ->
-            val desc = JSON.parseObject(item.toString()).getJSONObject("desc")
-            lastId = desc.getBigInteger("dynamic_id").toString()
-            PluginMain.historyDynamic.add(lastId)
+        try {
+            rawDynamic.forEach { item ->
+                val desc = JSON.parseObject(item.toString()).getJSONObject("desc")
+                lastId = desc.getBigInteger("dynamic_id").toString()
+                PluginMain.historyDynamic.add(lastId)
+            }
+        }catch (e:Exception){
+
         }
+
 
         // 查找记录上一页动态
         delay((500L..700L).random())
         val rawDynamic2 = httpGet(BPI["dynamic"]+user.uid+"&offset_dynamic_id="+lastId ).getJSONObject("data").getJSONArray("cards")
 
-        rawDynamic2.forEach { item ->
-            val desc = JSON.parseObject(item.toString()).getJSONObject("desc")
-            PluginMain.historyDynamic.add(desc.getBigInteger("dynamic_id").toString())
+        try{
+            rawDynamic2.forEach { item ->
+                val desc = JSON.parseObject(item.toString()).getJSONObject("desc")
+                PluginMain.historyDynamic.add(desc.getBigInteger("dynamic_id").toString())
+            }
+        }catch (e:Exception){
+
         }
+
     }
 
     // 初始化字体
