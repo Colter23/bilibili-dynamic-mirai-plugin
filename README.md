@@ -2,8 +2,10 @@
 
 > 一个把B站动态转发到Q群的 [mirai](https://github.com/mamoe/mirai) 插件
 
-暂停维护（这个写的太辣鸡了）    
-暑假应该会再重构一遍
+## 暂停维护
+如果有需要可以试试cssxsh大佬的[bilibili-helper](https://github.com/cssxsh/bilibili-helper)    
+最近有点忙，新版写了一半了，虽然能用了，不过还有很多问题     
+之后有时间应该会完善    
 
 
 ### 图片模式样式↓   
