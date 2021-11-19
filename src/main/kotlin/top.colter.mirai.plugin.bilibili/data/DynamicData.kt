@@ -15,7 +15,7 @@ data class NewDynamicCount(
 @Serializable
 data class DynamicList(
     @SerialName("cards")
-    val dynamics: List<DynamicInfo>,
+    val dynamics: List<DynamicInfo>? = null,
     @SerialName("new_num")
     val newNum: Int = 0
 )

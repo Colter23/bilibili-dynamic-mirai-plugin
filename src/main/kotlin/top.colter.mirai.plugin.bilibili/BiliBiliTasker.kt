@@ -175,8 +175,8 @@ object DynamicTasker : CoroutineScope by PluginMain.childScope("DynamicTasker") 
         var count = 0
         val nd  = httpUtils.getAndDecode<DynamicList>(NEW_DYNAMIC)
         val ul = dynamic.map { it.key }
-        val ndList = nd.dynamics.stream().filter{ v -> ul.contains(v.uid) }.map{ v -> v.did }.collect(Collectors.toList())
-        history.addAll(ndList)
+        val ndList = nd.dynamics?.stream()?.filter{ v -> ul.contains(v.uid) }?.map{ v -> v.did }?.collect(Collectors.toList())
+        ndList?.let { history.addAll(it) }
 
         delay(10000L)
         while (isActive) {
@@ -193,7 +193,7 @@ object DynamicTasker : CoroutineScope by PluginMain.childScope("DynamicTasker") 
                 }
 //                logger.info("info")
                 val newDynamic  = httpUtils.getAndDecode<DynamicList>(NEW_DYNAMIC)
-                val dynamics = newDynamic.dynamics
+                val dynamics = newDynamic.dynamics ?: return@runCatching
                 val uidList = dynamic.map { it.key }
                 val newDynamicList = dynamics.stream().filter{ it.timestamp > lastDynamic }
                     .filter{ uidList.contains(it.uid) }//////////////////////////////////////////////////
@@ -267,7 +267,7 @@ object DynamicTasker : CoroutineScope by PluginMain.childScope("DynamicTasker") 
                 subData.forEach { (uid, sub) ->
                     logger.info("missJob: $uid")
                     if (uid != 0L) {
-                        val dynamics = httpUtils.getAndDecode<DynamicList>(DYNAMIC_LIST(uid)).dynamics
+                        val dynamics = httpUtils.getAndDecode<DynamicList>(DYNAMIC_LIST(uid)).dynamics?: return@forEach
                         for (i in 0..dynamics.size){
                             val describe = dynamics[i].describe
                             if (describe.timestamp <= lastDynamic) break
