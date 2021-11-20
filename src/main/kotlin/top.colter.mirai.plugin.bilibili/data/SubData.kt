@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 import java.time.Instant
 
 @Serializable
-data class SubData (
+data class SubData(
     @SerialName("name")
     val name: String,
     @SerialName("color")

@@ -349,31 +349,44 @@ data class DynamicLive(
 
 object DynamicType {
     const val NONE = 0
+
     //转发
     const val REPLY = 1
+
     //带图片
     const val PICTURE = 2
+
     //文本
     const val TEXT = 4
+
     //视频
     const val VIDEO = 8
+
     //专栏
     const val ARTICLE = 64
+
     //音频
     const val MUSIC = 256
+
     //番剧
     const val EPISODE = 512
+
     //动态被删除
     const val DELETE = 1024
+
     //带卡片的动态 （番剧评分，装扮，活动）
     const val SKETCH = 2048
+
     //电视剧
     const val DSJ = 4099
     const val BANGUMI = 4101
+
     //转发正在直播
     const val LIVE_ING = 4200
+
     //转发直播结束直播
     const val LIVE_END = 4201
+
     //直播动态
     const val LIVE = 4308
 }

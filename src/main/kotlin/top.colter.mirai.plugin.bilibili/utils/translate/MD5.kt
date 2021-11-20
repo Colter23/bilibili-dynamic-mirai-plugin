@@ -12,8 +12,10 @@ import kotlin.experimental.and
  */
 object MD5 {
     // 首先初始化一个字符数组，用来存放每个16进制字符
-    private val hexDigits = charArrayOf('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd',
-            'e', 'f')
+    private val hexDigits = charArrayOf(
+        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd',
+        'e', 'f'
+    )
 
     /**
      * 获得一个字符串的MD5值

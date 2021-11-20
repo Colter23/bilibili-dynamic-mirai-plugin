@@ -5,7 +5,6 @@ import top.colter.mirai.plugin.bilibili.data.BiliPluginConfig
 import top.colter.mirai.plugin.bilibili.utils.json
 import top.colter.mirai.plugin.bilibili.utils.translate.TransResult
 import top.colter.myplugin.translate.MD5
-import java.util.HashMap
 
 class TransApi(private val appid: String, private val securityKey: String) {
     fun getTransResult(query: String, from: String, to: String): String? {
@@ -35,38 +34,42 @@ class TransApi(private val appid: String, private val securityKey: String) {
     }
 }
 
-var jp = "[ぁあぃいぅうぇえぉおかがきぎくぐけげこごさざしじすずせぜそぞただちぢっつづてでとどなにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれろゎわゐゑをんゔゕゖ゚゛゜ゝゞゟ゠ァアィイゥウェエォオカガキギクグケゲコゴサザシジスズセゼソゾタダチヂッツヅテデトドナニヌネノハバパヒビピフブプヘベペホボポマミムメモャヤュユョヨラリルレロヮワヰヱヲンヴヵヶヷヸヹヺ・ーヽヾヿ㍿]"
+var jp =
+    "[ぁあぃいぅうぇえぉおかがきぎくぐけげこごさざしじすずせぜそぞただちぢっつづてでとどなにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれろゎわゐゑをんゔゕゖ゚゛゜ゝゞゟ゠ァアィイゥウェエォオカガキギクグケゲコゴサザシジスズセゼソゾタダチヂッツヅテデトドナニヌネノハバパヒビピフブプヘベペホボポマミムメモャヤュユョヨラリルレロヮワヰヱヲンヴヵヶヷヸヹヺ・ーヽヾヿ㍿]"
 
 //文本翻译
 fun trans(text: String): String? {
-    if (BiliPluginConfig.baiduTranslate["enable"]=="true"){
-        if (BiliPluginConfig.baiduTranslate["SECURITY_KEY"]!=""){
+    if (BiliPluginConfig.baiduTranslate["enable"] == "true") {
+        if (BiliPluginConfig.baiduTranslate["SECURITY_KEY"] != "") {
             var msg = text
-            while (msg.indexOf('[') != -1){
-                msg = msg.replaceRange(msg.indexOf('['),msg.indexOf(']')+1,"  ")
+            while (msg.indexOf('[') != -1) {
+                msg = msg.replaceRange(msg.indexOf('['), msg.indexOf(']') + 1, "  ")
             }
 
-            if (msg.contains(jp.toRegex())||!msg.contains("[\u4e00-\u9fa5]".toRegex())){
+            if (msg.contains(jp.toRegex()) || !msg.contains("[\u4e00-\u9fa5]".toRegex())) {
                 try {
-                    val api = TransApi(BiliPluginConfig.baiduTranslate["APP_ID"]!!, BiliPluginConfig.baiduTranslate["SECURITY_KEY"]!!)
+                    val api = TransApi(
+                        BiliPluginConfig.baiduTranslate["APP_ID"]!!,
+                        BiliPluginConfig.baiduTranslate["SECURITY_KEY"]!!
+                    )
                     val resMsg = api.getTransResult(msg, "auto", "zh")
                     val transResult = resMsg?.let { json.parseToJsonElement(it) }
                         ?.let { json.decodeFromJsonElement(TransResult.serializer(), it) }
-                    if (transResult?.from != "zh"){
+                    if (transResult?.from != "zh") {
                         return buildString {
-                            for (item in transResult?.transResult!!){
+                            for (item in transResult?.transResult!!) {
                                 append(item.dst)
                                 append("\n")
                             }
                         }
                     }
-                }catch (e: Exception){
+                } catch (e: Exception) {
                     PluginMain.logger.error("Baidu translation failure! 百度翻译失败!")
                 }
-            }else{
+            } else {
                 return null
             }
-        }else{
+        } else {
             PluginMain.logger.error("Baidu translation API not configured! 未配置百度翻译API")
         }
     }

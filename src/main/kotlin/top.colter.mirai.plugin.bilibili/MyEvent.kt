@@ -1,6 +1,5 @@
 package top.colter.mirai.plugin.bilibili
 
-import net.mamoe.mirai.contact.Contact
 import net.mamoe.mirai.event.AbstractEvent
 import net.mamoe.mirai.event.events.MessageEvent
 

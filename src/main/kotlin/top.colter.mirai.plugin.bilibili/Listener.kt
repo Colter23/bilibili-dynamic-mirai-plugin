@@ -2,34 +2,25 @@ package top.colter.mirai.plugin.bilibili
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancelChildren
-import kotlinx.coroutines.selects.select
 import kotlinx.coroutines.sync.withLock
-import net.mamoe.mirai.Bot
-import net.mamoe.mirai.console.command.CommandSender.Companion.toCommandSender
-import net.mamoe.mirai.console.command.executeCommand
-import net.mamoe.mirai.console.util.ConsoleExperimentalApi
 import net.mamoe.mirai.console.util.CoroutineScopeUtils.childScope
-import net.mamoe.mirai.contact.NormalMember
-import net.mamoe.mirai.event.*
-import net.mamoe.mirai.event.events.*
-import net.mamoe.mirai.message.data.*
+import net.mamoe.mirai.event.globalEventChannel
+import net.mamoe.mirai.event.selectMessagesUnit
 import net.mamoe.mirai.utils.MiraiExperimentalApi
-import top.colter.mirai.plugin.bilibili.command.DynamicCommand.add
-import top.colter.mirai.plugin.bilibili.command.DynamicCommand.del
 
-internal object Listener: CoroutineScope by PluginMain.childScope("Listener") {
+internal object Listener : CoroutineScope by PluginMain.childScope("Listener") {
 
     @OptIn(MiraiExperimentalApi::class)
     fun subscribe() {
-        globalEventChannel().subscribeAlways<MyEvent>{
+        globalEventChannel().subscribeAlways<MyEvent> {
             val c = DynamicTasker.dynamic[uid]?.contacts?.get(subject)
-            if (c == null){
+            if (c == null) {
                 message.sender.sendMessage("还没有订阅这个人哦")
                 return@subscribeAlways
             }
             var cfgStr = "11"
             message.sender.sendMessage("检测动态内容  0:不检测动态  1:动态(包含视频)  2:仅视频  \n请回复 0 或 1 或 2")
-            message.selectMessagesUnit{
+            message.selectMessagesUnit {
                 "0"{
                     cfgStr = "0${cfgStr[1]}"
                 }
@@ -46,7 +37,7 @@ internal object Listener: CoroutineScope by PluginMain.childScope("Listener") {
             }
 
             message.sender.sendMessage("是否检测直播  0:不检测  1:检测\n请回复 0 或 1")
-            message.selectMessagesUnit{
+            message.selectMessagesUnit {
                 "0"{
                     cfgStr = "${cfgStr[0]}0"
                 }
@@ -64,7 +55,7 @@ internal object Listener: CoroutineScope by PluginMain.childScope("Listener") {
         }
     }
 
-    fun stop()  {
+    fun stop() {
         coroutineContext.cancelChildren()
     }
 }

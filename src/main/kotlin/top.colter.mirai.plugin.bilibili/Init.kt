@@ -9,34 +9,34 @@ import top.colter.mirai.plugin.bilibili.data.BiliPluginConfig.followGroup
 import top.colter.mirai.plugin.bilibili.utils.HttpUtils
 import top.colter.mirai.plugin.bilibili.utils.decode
 
-fun initCookie(){
+fun initCookie() {
     val cookieList = BiliPluginConfig.cookie.split("; ")
     cookieList.forEach {
         val cookieItem = it.split("=")
-        if (cookieItem[0] == "SESSDATA"){
+        if (cookieItem[0] == "SESSDATA") {
             sessData = "SESSDATA=${cookieItem[1]}"
-        }else if (cookieItem[0] == "bili_jct"){
+        } else if (cookieItem[0] == "bili_jct") {
             biliJct = cookieItem[1]
         }
     }
-    if (sessData==""||biliJct==""){
+    if (sessData == "" || biliJct == "") {
         PluginMain.logger.error("Cookie错误!请检查是否有 SESSDATA 与 bili_jct 字段")
     }
 }
 
-fun initTagid(){
-    if (autoFollow && followGroup.isNotEmpty()){
+fun initTagid() {
+    if (autoFollow && followGroup.isNotEmpty()) {
         val httpUtils = HttpUtils()
         val groups = httpUtils.getAndDecode<List<FollowGroup>>(FOLLOW_GROUP)
         groups.forEach {
-            if (it.name == followGroup){
+            if (it.name == followGroup) {
                 PluginMain.tagid = it.tagId
                 return
             }
         }
         val pb = "tag=$followGroup&csrf=${biliJct}"
-        val res = httpUtils.post(CREATE_GROUP,pb).decode<ResultData>()
-        if (res.code!=0){
+        val res = httpUtils.post(CREATE_GROUP, pb).decode<ResultData>()
+        if (res.code != 0) {
             PluginMain.logger.error { "创建分组失败: ${res.message}" }
             return
         }

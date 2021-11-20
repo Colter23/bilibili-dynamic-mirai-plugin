@@ -3,7 +3,6 @@ package top.colter.mirai.plugin.bilibili.data
 import net.mamoe.mirai.console.data.ReadOnlyPluginConfig
 import net.mamoe.mirai.console.data.ValueDescription
 import net.mamoe.mirai.console.data.value
-import top.colter.mirai.plugin.bilibili.data.BiliSubscribeData.provideDelegate
 
 object BiliPluginConfig : ReadOnlyPluginConfig("BiliPluginConfig") {
 
@@ -29,12 +28,14 @@ object BiliPluginConfig : ReadOnlyPluginConfig("BiliPluginConfig") {
     val cookie: String by value("")
 
     @ValueDescription("百度翻译")
-    val baiduTranslate : Map<String,String> by value(mapOf(
-        //是否开启百度翻译
-        "enable" to "false",
-        //百度翻译api密钥
-        "APP_ID" to "",
-        "SECURITY_KEY" to ""
-    ))
+    val baiduTranslate: Map<String, String> by value(
+        mapOf(
+            //是否开启百度翻译
+            "enable" to "false",
+            //百度翻译api密钥
+            "APP_ID" to "",
+            "SECURITY_KEY" to ""
+        )
+    )
 
 }

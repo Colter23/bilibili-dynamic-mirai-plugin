@@ -75,8 +75,8 @@ internal object HttpGet {
         var i = 0
         for (key in params.keys) {
             val value = params[key]
-                    ?: // 过滤空的key
-                    continue
+                ?: // 过滤空的key
+                continue
             if (i != 0) {
                 builder.append('&')
             }
