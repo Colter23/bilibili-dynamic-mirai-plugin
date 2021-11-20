@@ -7,11 +7,9 @@ import net.mamoe.mirai.Bot
 import net.mamoe.mirai.console.util.CoroutineScopeUtils.childScope
 import net.mamoe.mirai.contact.Contact
 import net.mamoe.mirai.contact.Group
-import net.mamoe.mirai.contact.getMember
 import net.mamoe.mirai.message.data.Message
 import net.mamoe.mirai.utils.error
 import top.colter.mirai.plugin.bilibili.PluginMain.contactMap
-import top.colter.mirai.plugin.bilibili.PluginMain.contactMutex
 import top.colter.mirai.plugin.bilibili.data.*
 import top.colter.mirai.plugin.bilibili.utils.HttpUtils
 import top.colter.mirai.plugin.bilibili.utils.decode
@@ -52,24 +50,20 @@ object DynamicTasker : CoroutineScope by PluginMain.childScope("DynamicTasker") 
         }
     }
 
-
-    suspend fun listenAll(subject: String) = mutex.withLock {
-//        removeAllSubscribe(subject)
-        dynamic.forEach { (uid, sub) ->
-            if (subject in sub.contacts) {
-                sub.contacts.remove(subject)
-            }
-        }
-
-        val user = dynamic[0]
-        user?.contacts?.set(subject, "11")
-    }
-
-    suspend fun cancelListen(subject: String) = mutex.withLock {
-        if (dynamic[0]?.contacts?.contains(subject) == true) {
-            dynamic[0]?.contacts?.remove(subject)
-        }
-    }
+//    suspend fun listenAll(subject: String) = mutex.withLock {
+//        dynamic.forEach { (uid, sub) ->
+//            if (subject in sub.contacts) {
+//                sub.contacts.remove(subject)
+//            }
+//        }
+//
+//        val user = dynamic[0]
+//        user?.contacts?.set(subject, "11")
+//    }
+//
+//    suspend fun cancelListen(subject: String) = mutex.withLock {
+//        dynamic[0]?.contacts?.remove(subject)
+//    }
 
     private fun followUser(uid: Long): String {
 
@@ -134,14 +128,12 @@ object DynamicTasker : CoroutineScope by PluginMain.childScope("DynamicTasker") 
     }
 
     suspend fun removeAllSubscribe(subject: String) = mutex.withLock {
-        var count = 0
-        dynamic.forEach { (uid, sub) ->
-            if (subject in sub.contacts) {
+        dynamic.count { (uid, sub) ->
+            if (sub.contacts.contains(subject)) {
                 sub.contacts.remove(subject)
-                count++
-            }
+                true
+            } else false
         }
-        count
     }
 
     suspend fun list(subject: String) = mutex.withLock {
@@ -172,7 +164,7 @@ object DynamicTasker : CoroutineScope by PluginMain.childScope("DynamicTasker") 
     }
 
     private fun normalJob() = launch {
-        var count = 0
+//        var count = 0
         val nd = httpUtils.getAndDecode<DynamicList>(NEW_DYNAMIC)
         val ul = dynamic.map { it.key }
         val ndList =
@@ -183,21 +175,19 @@ object DynamicTasker : CoroutineScope by PluginMain.childScope("DynamicTasker") 
         while (isActive) {
             runCatching {
                 logger.debug("DynamicCheck")
-//                val pre = Instant.now().epochSecond
-                count++
-                if (count < 0) {
-                    val updateNum = httpUtils.getAndDecode<NewDynamicCount>(NEW_DYNAMIC_COUNT).updateNum
-                    logger.info("新动态数: $updateNum")
-                    if (updateNum == 0) return@runCatching
-                } else {
-                    count = 0
-                }
-//                logger.info("info")
+//                count++
+//                if (count < 0) {
+//                    val updateNum = httpUtils.getAndDecode<NewDynamicCount>(NEW_DYNAMIC_COUNT).updateNum
+//                    logger.info("新动态数: $updateNum")
+//                    if (updateNum == 0) return@runCatching
+//                } else {
+//                    count = 0
+//                }
                 val newDynamic = httpUtils.getAndDecode<DynamicList>(NEW_DYNAMIC)
                 val dynamics = newDynamic.dynamics ?: return@runCatching
                 val uidList = dynamic.map { it.key }
                 val newDynamicList = dynamics.stream().filter { it.timestamp > lastDynamic }
-                    .filter { uidList.contains(it.uid) }//////////////////////////////////////////////////
+                    .filter { uidList.contains(it.uid) }
                     .filter { !history.contains(it.did) }
                     .collect(Collectors.toList())
 
@@ -214,8 +204,6 @@ object DynamicTasker : CoroutineScope by PluginMain.childScope("DynamicTasker") 
                         }
                     }
                 }
-//                val next = Instant.now().epochSecond
-//                logger.info("time: ${next-pre}")
             }.onSuccess {
                 delay((interval..interval + 5000L).random())
             }.onFailure {
@@ -233,7 +221,7 @@ object DynamicTasker : CoroutineScope by PluginMain.childScope("DynamicTasker") 
                 logger.debug("LiveCheck")
                 val liveList = httpUtils.getAndDecode<Live>(LIVE_LIST).liveList
                 val newLiveList = liveList.stream().filter { it.liveTime > lastLive }
-                    .filter { v -> dynamic.map { it.key }.contains(v.uid) }///////////////////////////////
+                    .filter { v -> dynamic.map { it.key }.contains(v.uid) }
                     .collect(Collectors.toList())
                 newLiveList.forEach { ll ->
                     val list = getLiveContactList(ll.uid)
@@ -302,86 +290,86 @@ object DynamicTasker : CoroutineScope by PluginMain.childScope("DynamicTasker") 
 
 
     private suspend fun getDynamicContactList(uid: Long, isVideo: Boolean): MutableSet<String>? = mutex.withLock {
-        runCatching {
-            val all = dynamic[0] ?: return@getDynamicContactList null
+        return try {
+            val all = dynamic[0] ?: return null
             val list: MutableSet<String> = mutableSetOf()
-            all.let { list.addAll(it.contacts.keys) }
-            val subData = dynamic[uid] ?: return@getDynamicContactList list
+            list.addAll(all.contacts.keys)
+            val subData = dynamic[uid] ?: return list
             if (isVideo) list.addAll(subData.contacts.filter { it.value[0] == '1' || it.value[0] == '2' }.keys)
             else list.addAll(subData.contacts.filter { it.value[0] == '1' }.keys)
             list.removeAll(subData.banList.keys)
-            return@getDynamicContactList list
-        }.onFailure {
-            return@getDynamicContactList null
+            list
+        } catch (e: Throwable) {
+            null
         }
-        return null
     }
 
     private suspend fun getLiveContactList(uid: Long): MutableSet<String>? = mutex.withLock {
-        runCatching {
-            val all = dynamic[0] ?: return@getLiveContactList null
+        return try {
+            val all = dynamic[0] ?: return null
             val list: MutableSet<String> = mutableSetOf()
-            all.let { list.addAll(it.contacts.keys) }
-            val subData = dynamic[uid] ?: return@getLiveContactList list
+            list.addAll(all.contacts.keys)
+            val subData = dynamic[uid] ?: return list
             list.addAll(subData.contacts.filter { it.value[1] == '1' }.keys)
             list.removeAll(subData.banList.keys)
-            return@getLiveContactList list
-        }.onFailure {
-            return@getLiveContactList null
+            list
+        } catch (e: Throwable) {
+            null
         }
-        return null
     }
 
-}
-
-
-suspend inline fun MutableSet<String>.sendMessage(info: String? = null, message: (contact: Contact) -> Message) {
-    val me = findContact(this.first())?.let { message(it) }
-    if (me != null) {
-        this.map { delegate ->
-            runCatching {
-                requireNotNull(findContact(delegate)) { "找不到联系人" }.let {
-                    if (info == null) it.sendMessage(me)
-                    else it.sendMessage(me + "\n" + info)
+    private suspend inline fun MutableSet<String>.sendMessage(
+        info: String? = null,
+        message: (contact: Contact) -> Message
+    ) {
+        val me = findContact(this.first())?.let { message(it) }
+        if (me != null) {
+            this.map { delegate ->
+                runCatching {
+                    requireNotNull(findContact(delegate)) { "找不到联系人" }.let {
+                        if (info == null) it.sendMessage(me)
+                        else it.sendMessage(me + "\n" + info)
+                    }
+                }.onFailure {
+                    logger.error({ "对${this}构建消息失败" }, it)
                 }
-            }.onFailure {
-                PluginMain.logger.error({ "对${this}构建消息失败" }, it)
             }
         }
     }
+
 }
 
 /**
  * 查找Contact
  */
-suspend fun findContact(del: String): Contact? = contactMutex.withLock {
-    if (del == "") return null
+fun findContact(del: String): Contact? = synchronized(contactMap) {
+    if (del.isBlank()) return@synchronized null
     val delegate = del.toLong()
-    contactMap[delegate]?.let { return@findContact it }
-    Bot.instances.forEach { bot ->
-        if (delegate < 0) {
-            bot.getGroup(delegate * -1)?.let {
-                contactMap[delegate] = it
-                return@withLock it
-            }
-        } else {
-            bot.getFriend(delegate)?.let {
-                contactMap[delegate] = it
-                return@withLock it
-            }
-            bot.getStranger(delegate)?.let {
-                contactMap[delegate] = it
-                return@withLock it
-            }
-            bot.groups.forEach { group ->
-                group.getMember(delegate)?.let {
-                    contactMap[delegate] = it
-                    return@withLock it
+    contactMap.compute(delegate) { _, _ ->
+        for (bot in Bot.instances) {
+            if (delegate < 0) {
+                for (group in bot.groups) {
+                    if (group.id == delegate * -1) return@compute group
+                }
+            } else {
+                for (friend in bot.friends) {
+                    if (friend.id == delegate) return@compute friend
+                }
+                for (stranger in bot.strangers) {
+                    if (stranger.id == delegate) return@compute stranger
+                }
+                for (friend in bot.friends) {
+                    if (friend.id == delegate) return@compute friend
+                }
+                for (group in bot.groups) {
+                    for (member in group.members) {
+                        if (member.id == delegate) return@compute member
+                    }
                 }
             }
         }
+        null
     }
-    return null
 }
 
 /**
