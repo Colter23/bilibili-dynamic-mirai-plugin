@@ -200,7 +200,7 @@ object DynamicTasker : CoroutineScope by PluginMain.childScope("DynamicTasker") 
                         seleniumMutex.withLock {
                             list.sendMessage { di.build(it, color) }
                             history.add(describe.dynamicId)
-                            lastDynamic = di.timestamp
+//                            lastDynamic = di.timestamp
                         }
                     }
                 }

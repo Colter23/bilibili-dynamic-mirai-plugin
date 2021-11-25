@@ -1,6 +1,6 @@
 package top.colter.mirai.plugin.bilibili
 
-//import top.colter.mirai.plugin.bilibili.utils.getScreenshot
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromString
 import net.mamoe.mirai.contact.Contact
 import net.mamoe.mirai.message.data.Message
@@ -19,6 +19,7 @@ import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 
+@OptIn(ExperimentalSerializationApi::class)
 inline fun <reified T> String.decode(): T = json.decodeFromString(this)
 
 val DynamicInfo.did get() = describe.dynamicId
@@ -165,6 +166,8 @@ fun String.buildContent(type: Int, dynamicInfo: DynamicInfo): List<BufferedImage
         DynamicType.EPISODE -> decode<DynamicEpisode>().bufferedImages(dynamicInfo)
         DynamicType.DELETE -> listOf(ImgUtils.infoContent("源动态已被作者删除"))
         DynamicType.SKETCH -> decode<DynamicSketch>().bufferedImages(dynamicInfo)
+        DynamicType.LIVE, DynamicType.LIVE_ING -> listOf(ImgUtils.infoContent("直播"))
+        DynamicType.LIVE_END -> listOf(ImgUtils.infoContent("直播结束了"))
         else -> {
             if (dynamicInfo.link == "") {
                 dynamicInfo.link = "https://t.bilibili.com/${dynamicInfo.did}"

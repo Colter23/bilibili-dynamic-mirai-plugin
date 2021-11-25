@@ -177,7 +177,7 @@ object ImgUtils {
         val margin = 10
         val rw = imgWidth - margin * 2
         val rh = height - margin * 2
-        bgG2.color = Color.WHITE
+        bgG2.color = Color(255,255,255, 200)
         bgG2.fillRoundRect(margin, margin, rw, rh, 20, 20)
         bgG2.color = Color(238, 238, 238)
         bgG2.drawRoundRect(margin - 1, margin - 1, rw + 1, rh + 1, 20, 20)
@@ -465,7 +465,7 @@ object ImgUtils {
     }
 
     fun infoContent(text: String): BufferedImage {
-        val infoBi = BufferedImage(imgWidth, 30, BufferedImage.TYPE_INT_ARGB)
+        val infoBi = BufferedImage(imgWidth, 50, BufferedImage.TYPE_INT_ARGB)
         val infoG2 = infoBi.createGraphics()
         infoG2.setRenderingHints(renderingHints)
         infoG2.font = font.deriveFont(25f)

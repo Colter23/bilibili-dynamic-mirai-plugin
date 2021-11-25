@@ -1,19 +1,19 @@
 package top.colter.mirai.plugin.bilibili.utils
 
 import kotlinx.serialization.json.JsonElement
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import top.colter.mirai.plugin.bilibili.PluginMain
 import top.colter.mirai.plugin.bilibili.data.ResultData
-import java.net.URI
-import java.net.http.HttpClient
-import java.net.http.HttpRequest
-import java.net.http.HttpResponse
 import java.time.Duration
 
 class HttpUtils {
 
     private val cookie: String = PluginMain.sessData
 
-    private var client: HttpClient = HttpClient.newBuilder().connectTimeout(Duration.ofMillis(10000)).build()
+    private var client: OkHttpClient = OkHttpClient().newBuilder().connectTimeout(Duration.ofMillis(20000)).build()
 
     private val ua = listOf(
         "Mozilla/5.0 (Windows; U; MSIE 9.0; Windows NT 9.0; en-US);",
@@ -25,32 +25,27 @@ class HttpUtils {
         "Mozilla/5.0 (iPad; CPU OS 6_0 like Mac OS X) AppleWebKit/536.26 (KHTML, like Gecko) Version/6.0 Mobile/10A5355d Safari/8536.25"
     )
 
-    private fun sendRequest(request: HttpRequest): JsonElement {
-        val bodyHandler: HttpResponse.BodyHandler<String> = HttpResponse.BodyHandlers.ofString()
-        val response: HttpResponse<String> = client.send(request, bodyHandler)
-        val body: String = response.body()
+    private fun sendRequest(request: Request): JsonElement {
+        val body: String = client.newCall(request).execute().body!!.string()
         return json.parseToJsonElement(body)
     }
 
     fun get(url: String): JsonElement {
-        val request: HttpRequest =
-            HttpRequest.newBuilder(URI.create(url))
-                .header("cookie", cookie)
-                .header("Content-Type", "application/json; charset=utf-8")
-                .header("user-agent", ua.random())
-                .GET().build()
-
+        val request = Request.Builder().url(url)
+            .header("cookie", cookie)
+            .header("Content-Type", "application/json; charset=utf-8")
+            .header("user-agent", ua.random())
+            .get().build()
         return sendRequest(request)
     }
 
     fun post(url: String, postBody: String): JsonElement {
-        val request: HttpRequest =
-            HttpRequest.newBuilder(URI.create(url))
+        val media = "application/x-www-form-urlencoded; charset=utf-8"
+        val request = Request.Builder().url(url)
                 .header("cookie", cookie)
-                .header("Content-Type", "application/x-www-form-urlencoded; charset=utf-8")
+                .header("Content-Type", media)
                 .header("user-agent", ua.random())
-                .POST(HttpRequest.BodyPublishers.ofString(postBody)).build()
-
+                .post(postBody.toRequestBody(media.toMediaTypeOrNull())).build()
         return sendRequest(request)
     }
 
