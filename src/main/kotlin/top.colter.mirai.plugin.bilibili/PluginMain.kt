@@ -1,7 +1,5 @@
 package top.colter.mirai.plugin.bilibili
 
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.sync.Mutex
 import net.mamoe.mirai.console.command.CommandManager.INSTANCE.register
 import net.mamoe.mirai.console.command.CommandManager.INSTANCE.unregister
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescription
@@ -15,7 +13,7 @@ object PluginMain : KotlinPlugin(
     JvmPluginDescription(
         id = "top.colter.bilibili-dynamic-mirai-plugin",
         name = "BilibiliDynamic",
-        version = "2.0.3"
+        version = "2.0.5"
     ) {
         author("Colter")
         info(
@@ -26,7 +24,6 @@ object PluginMain : KotlinPlugin(
     }
 ) {
 
-    val contactMutex = Mutex()
     val contactMap: MutableMap<Long, Contact> = mutableMapOf()
 
     var sessData: String = ""

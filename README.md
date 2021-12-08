@@ -68,6 +68,9 @@ interval: 15
 # 需自行创建font文件夹，并把字体文件放进去
 font: Microsoft Yahei
 
+# 直播@全体(目前只能全体控制，如果需要对单独的群设置请去开issue)
+liveAtAll: false
+
 # cookie !!必填!!
 # cookie请包在双引号内
 # 如何获取见下文 获取Cookie

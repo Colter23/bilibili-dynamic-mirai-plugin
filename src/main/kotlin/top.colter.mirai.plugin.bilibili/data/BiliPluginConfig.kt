@@ -24,7 +24,10 @@ object BiliPluginConfig : ReadOnlyPluginConfig("BiliPluginConfig") {
     @ValueDescription("图片推送模式用的字体, 详细请看readme")
     val font: String by value("Microsoft Yahei")
 
-    @ValueDescription("cookie")
+    @ValueDescription("直播@全体")
+    val liveAtAll: Boolean by value(false)
+
+    @ValueDescription("cookie, 请使用双引号")
     val cookie: String by value("")
 
     @ValueDescription("百度翻译")

@@ -7,10 +7,12 @@ import net.mamoe.mirai.Bot
 import net.mamoe.mirai.console.util.CoroutineScopeUtils.childScope
 import net.mamoe.mirai.contact.Contact
 import net.mamoe.mirai.contact.Group
+import net.mamoe.mirai.message.data.AtAll
 import net.mamoe.mirai.message.data.Message
 import net.mamoe.mirai.utils.error
 import top.colter.mirai.plugin.bilibili.PluginMain.contactMap
 import top.colter.mirai.plugin.bilibili.data.*
+import top.colter.mirai.plugin.bilibili.data.BiliPluginConfig.liveAtAll
 import top.colter.mirai.plugin.bilibili.utils.HttpUtils
 import top.colter.mirai.plugin.bilibili.utils.decode
 import java.time.Instant
@@ -227,7 +229,7 @@ object DynamicTasker : CoroutineScope by PluginMain.childScope("DynamicTasker") 
                     val list = getLiveContactList(ll.uid)
                     if (list != null && list.size != 0) {
                         seleniumMutex.withLock {
-                            list.sendMessage { ll.build(it) }
+                            list.sendMessage(liveAtAll) { ll.build(it) }
                         }
                         lastLive = ll.liveTime
                     }
@@ -319,7 +321,8 @@ object DynamicTasker : CoroutineScope by PluginMain.childScope("DynamicTasker") 
     }
 
     private suspend inline fun MutableSet<String>.sendMessage(
-        info: String? = null,
+//        info: String? = null,
+        liveAtAll: Boolean = false,
         message: (contact: Contact) -> Message
     ) {
         val me = findContact(this.first())?.let { message(it) }
@@ -327,8 +330,11 @@ object DynamicTasker : CoroutineScope by PluginMain.childScope("DynamicTasker") 
             this.map { delegate ->
                 runCatching {
                     requireNotNull(findContact(delegate)) { "找不到联系人" }.let {
-                        if (info == null) it.sendMessage(me)
-                        else it.sendMessage(me + "\n" + info)
+//                        if (info == null) it.sendMessage(me)
+//                        else it.sendMessage(me + "\n" + info)
+                        if (liveAtAll && it is Group) {
+                            it.sendMessage(me + "\n" + AtAll)
+                        } else it.sendMessage(me)
                     }
                 }.onFailure {
                     logger.error({ "对${this}构建消息失败" }, it)
