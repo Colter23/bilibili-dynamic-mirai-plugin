@@ -4,7 +4,7 @@
 
 ## 简介    
 低延迟检测B站动态(最低10s检测所有动态 无论多少订阅)    
-使用Java原生Api绘图(~~selenium属实是不会用，老是崩~~)    
+使用Java原生Api绘图  
 可以设定检测内容： 动态(包括视频)   仅视频   直播
 
 与1.x版本数据不互通
@@ -37,7 +37,7 @@
   下面是一个配置文件模板   
   配置文件位于 根目录/config/BilibiliDynamic/BiliPluginConfig.yml  
   第一次运行插件会自动生成，也可自己创建  
-  注：**后面的`cookie`为必填**
+  注：**后面的`cookie`为必填 请用自行把单引号改为双引号**
 ```yml
 # 可以是群号或QQ号
 admin: 11111111111
@@ -70,6 +70,17 @@ font: Microsoft Yahei
 
 # 直播@全体(目前只能全体控制，如果需要对单独的群设置请去开issue)
 liveAtAll: false
+
+# 图片推送模式文字模板
+# 配置项:
+# {name} : 名字
+# {uid}  : UID
+# {type} : 类型 如 动态、直播等
+# {time} : 时间
+# {link} : 链接
+# \n     : 换行
+# 2.0.4版本之前的模板为 {name}@{uid}@{type}\n{time}\n{link}
+pushTemplate: '{name}@{type}\n{link}'
 
 # cookie !!必填!!
 # cookie请包在双引号内

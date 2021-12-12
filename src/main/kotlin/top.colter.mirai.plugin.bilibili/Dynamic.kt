@@ -296,7 +296,9 @@ suspend fun DynamicInfo.buildTextDynamic(contact: Contact): Message {
 suspend fun DynamicInfo.buildImageDynamic(contact: Contact, color: String): Message {
     val biList = card.buildContent(describe.type, this)
     val file = ImgUtils.buildImageMessage(biList, profile, time, color, "dynamic/${uid}/${did}.png")
-    return (file.uploadAsImage(contact) + "$uname@$uid@$content\n$time\n$link")
+    val msg = BiliPluginConfig.pushTemplate.replace("{name}",uname!!).replace("{uid}",uid.toString())
+        .replace("{type}",content).replace("{time}",time).replace("{link}",link)
+    return (file.uploadAsImage(contact) + msg)
 }
 
 //suspend fun DynamicInfo.buildScreenshotDynamic(contact: Contact, color: String):Message {

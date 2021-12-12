@@ -27,6 +27,9 @@ object BiliPluginConfig : ReadOnlyPluginConfig("BiliPluginConfig") {
     @ValueDescription("直播@全体")
     val liveAtAll: Boolean by value(false)
 
+    @ValueDescription("推送文字模板, 参数请看readme")
+    val pushTemplate: String by value("{name}@{type}\n{link}")
+
     @ValueDescription("cookie, 请使用双引号")
     val cookie: String by value("")
 

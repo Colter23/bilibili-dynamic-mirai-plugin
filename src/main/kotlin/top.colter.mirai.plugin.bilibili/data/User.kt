@@ -15,11 +15,11 @@ data class UserProfile(
 @Serializable
 data class UserInfo(
     @SerialName("uid")
-    val uid: Long,
+    val uid: Long?,
     @SerialName("uname")
-    val uname: String,
+    val uname: String?,
     @SerialName("face")
-    val face: String
+    val face: String?
 )
 
 @Serializable

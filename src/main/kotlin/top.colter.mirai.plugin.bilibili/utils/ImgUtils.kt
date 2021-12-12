@@ -77,7 +77,7 @@ object ImgUtils {
         background(g2, height, hex2Color(color))
         val user = profile?.user!!
         val pendant = profile.pendant?.image ?: ""
-        header(g2, user.uname, time, user.face, pendant)
+        header(g2, user.uname!!, time, user.face!!, pendant)
 
         var g2Y = 110
         biList.forEach {
@@ -94,6 +94,7 @@ object ImgUtils {
     }
 
     fun buildReplyImageMessage(biList: List<BufferedImage>, user: UserInfo?): BufferedImage {
+
         var height = if (user == null) 20 else 80
         biList.forEach { height += it.height }
 
@@ -105,14 +106,15 @@ object ImgUtils {
         g2.fillRoundRect(0, 0, imgWidth, height, 10, 10)
 
         var g2Y = if (user == null) 20 else 55
-        if (user != null) {
-            g2.clip = Ellipse2D.Double(25.0, 10.0, 40.0, 40.0)
-            g2.drawImage(ImageIO.read(URL(imgApi(user.face, 40, 40))), 25, 10, null)
-            g2.clip = null
-            g2.stroke = BasicStroke(2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
-            g2.color = Color.WHITE
-            g2.drawOval(25, 10, 40, 40)
-
+        if (user?.uname != null) {
+            if (user.face != null){
+                g2.clip = Ellipse2D.Double(25.0, 10.0, 40.0, 40.0)
+                g2.drawImage(ImageIO.read(URL(imgApi(user.face, 40, 40))), 25, 10, null)
+                g2.clip = null
+                g2.stroke = BasicStroke(2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
+                g2.color = Color.WHITE
+                g2.drawOval(25, 10, 40, 40)
+            }
             g2.color = Color(0, 161, 214)
             g2.font = font.deriveFont(25f)
             g2.drawString(user.uname, 80, 40)
