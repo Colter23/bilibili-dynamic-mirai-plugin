@@ -79,8 +79,9 @@ liveAtAll: false
 # {time} : 时间
 # {link} : 链接
 # \n     : 换行
+# 如有换行请使用双引号
 # 2.0.4版本之前的模板为 {name}@{uid}@{type}\n{time}\n{link}
-pushTemplate: '{name}@{type}\n{link}'
+pushTemplate: "{name}@{type}\n{link}"
 
 # cookie !!必填!!
 # cookie请包在双引号内
