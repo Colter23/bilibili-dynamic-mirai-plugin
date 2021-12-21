@@ -60,6 +60,16 @@ object ImgUtils {
         }
     }
 
+    fun testBuildImageMessage(msg: String){
+        buildImageMessage(
+            listOf(textContent(msg)!!),
+            UserProfile(UserInfo(1,
+                "Test",
+                "https://i0.hdslb.com/bfs/face/904bef1b4067335068faba12062f735dda07c1fe.jpg@240w_240h_1c_1s.png")),
+            "2021年12月21日","#9fc7f3","D:/Code/test.png"
+        )
+    }
+
     fun buildImageMessage(
         biList: List<BufferedImage>,
         profile: UserProfile?,
@@ -86,7 +96,7 @@ object ImgUtils {
         }
 
         g2.dispose()
-
+//        val file = File(fileStr)
         val file = PluginMain.resolveDataFile(fileStr)
         if (!file.parentFile.exists()) file.parentFile.mkdirs()
         ImageIO.write(bi, "png", file)
@@ -271,6 +281,12 @@ object ImgUtils {
                     textX++
                 } else textG2.drawString(cs, textX, textY)
                 textX += textG2.getStrWidth(cs)
+            }
+            if (textY > 1900){
+                textG2.color = Color.red
+                textX += 200
+                textG2.drawString("!!文字过长, 后续已省略!!", textX, textY)
+                break
             }
         }
 

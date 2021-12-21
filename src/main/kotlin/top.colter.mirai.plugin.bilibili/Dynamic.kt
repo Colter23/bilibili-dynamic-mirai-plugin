@@ -27,6 +27,8 @@ val DynamicInfo.uid get() = describe.uid
 val DynamicInfo.profile get() = describe.profile?.decode<UserProfile>()
 val DynamicInfo.uname get() = profile?.user?.uname
 val DynamicInfo.timestamp get() = describe.timestamp
+val DynamicInfo.type get() = describe.type
+val DynamicInfo.originType get() = describe.originType
 val DynamicInfo.time: String
     get() = DateTimeFormatter.ofPattern("yyyy年MM月dd日  HH:mm:ss")
         .format(LocalDateTime.ofEpochSecond(describe.timestamp, 0, OffsetDateTime.now().offset))
@@ -153,6 +155,7 @@ fun DynamicLive.getContent(dynamicInfo: DynamicInfo): String {
         append("直播: $title")
     }
 }
+
 
 
 fun String.buildContent(type: Int, dynamicInfo: DynamicInfo): List<BufferedImage> {

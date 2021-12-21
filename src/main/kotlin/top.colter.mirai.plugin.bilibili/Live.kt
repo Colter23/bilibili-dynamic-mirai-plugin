@@ -41,5 +41,7 @@ suspend fun LiveInfo.buildTextLive(contact: Contact): Message {
 suspend fun LiveInfo.buildImageLive(contact: Contact): Message {
     val link = "https://live.bilibili.com/${roomId}"
     val file = buildLiveImageMessage(title, cover, uname, face, "#d3edfa", "live/${uid}/${liveTime}.png")
-    return (file.uploadAsImage(contact) + "$uname@$uid@直播\n$time\n$link")
+    val msg = BiliPluginConfig.pushTemplate.replace("{name}", uname).replace("{uid}",uid.toString())
+        .replace("{type}","直播").replace("{time}",time).replace("{link}",link)
+    return (file.uploadAsImage(contact) + msg)
 }

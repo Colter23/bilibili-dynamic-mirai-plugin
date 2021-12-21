@@ -7,6 +7,8 @@ const val NEW_DYNAMIC = "https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/
 const val DYNAMIC_LIST =
     "https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/space_history?visitor_uid=0&offset_dynamic_id=0&need_top=0&platform=web&host_uid="
 
+const val DYNAMIC_DETAIL = "https://api.vc.bilibili.com/dynamic_svr/v1/dynamic_svr/get_dynamic_detail?dynamic_id="
+
 const val LIVE_LIST = "https://api.live.bilibili.com/xlive/web-ucenter/v1/xfetter/GetWebList?page=1&page_size=20"
 
 // 参数 uid

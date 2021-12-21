@@ -21,6 +21,12 @@ data class DynamicList(
 )
 
 @Serializable
+data class DynamicDetail(
+    @SerialName("card")
+    val dynamic: DynamicInfo? = null,
+)
+
+@Serializable
 data class DynamicInfo(
     @SerialName("card")
     val card: String,

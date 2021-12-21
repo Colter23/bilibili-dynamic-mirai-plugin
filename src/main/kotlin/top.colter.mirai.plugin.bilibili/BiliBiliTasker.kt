@@ -27,7 +27,7 @@ object DynamicTasker : CoroutineScope by PluginMain.childScope("DynamicTasker") 
     private val seleniumMutex = Mutex()
 
     //    private val httpMutex = Mutex()
-    private var httpUtils = HttpUtils()
+    val httpUtils = HttpUtils()
 
     val mutex = Mutex()
     val dynamic: MutableMap<Long, SubData> by BiliSubscribeData::dynamic
@@ -207,7 +207,7 @@ object DynamicTasker : CoroutineScope by PluginMain.childScope("DynamicTasker") 
                     }
                 }
             }.onSuccess {
-                delay((interval..interval + 5000L).random())
+                delay((interval..(interval + 5000L)).random())
             }.onFailure {
                 logger.error("ERROR $it")
                 findContact(BiliPluginConfig.admin)?.sendMessage("动态检测失败\n" + it.message)
@@ -363,9 +363,6 @@ fun findContact(del: String): Contact? = synchronized(contactMap) {
                 }
                 for (stranger in bot.strangers) {
                     if (stranger.id == delegate) return@compute stranger
-                }
-                for (friend in bot.friends) {
-                    if (friend.id == delegate) return@compute friend
                 }
                 for (group in bot.groups) {
                     for (member in group.members) {

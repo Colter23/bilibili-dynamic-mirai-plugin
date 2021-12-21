@@ -3,15 +3,39 @@ package top.colter.mirai.plugin.bilibili
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.sync.withLock
+import net.mamoe.mirai.console.util.ConsoleExperimentalApi
 import net.mamoe.mirai.console.util.CoroutineScopeUtils.childScope
 import net.mamoe.mirai.event.globalEventChannel
 import net.mamoe.mirai.event.selectMessagesUnit
 import net.mamoe.mirai.utils.MiraiExperimentalApi
 
+@OptIn(ConsoleExperimentalApi::class)
 internal object Listener : CoroutineScope by PluginMain.childScope("Listener") {
 
     @OptIn(MiraiExperimentalApi::class)
     fun subscribe() {
+//        globalEventChannel().subscribeAlways<MessageEvent> {
+//            message.filterIsInstance<At>().map { it.target }.first { it == bot.id }.let { _ ->
+//                println("At")
+//                if (message.content.contains("下载图片")){
+//                    println("下载图片")
+//
+//                    message[QuoteReply.Key]?.source?.originalMessage?.content.let { quote ->
+//                        val dynamicRegex = """(?<=t\.bilibili\.com/)(\d+)""".toRegex()
+//                        val videoRegex = """((av|AV)\d+|BV[0-9A-z]{8,12})""".toRegex()
+//                        dynamicRegex.find(quote!!)?.value.let {
+//                            println("动态：$it")
+//                            val dynamic = DynamicTasker.httpUtils.getAndDecode<DynamicDetail>(DYNAMIC_DETAIL).dynamic
+//                             if (dynamic?.type == DynamicType.DELETE)
+//                        }
+//                        videoRegex.find(quote)?.value.let{
+//                            println("视频：$it")
+//                        }
+//                    }
+//                }
+//            }
+//        }
+
         globalEventChannel().subscribeAlways<MyEvent> {
             val c = DynamicTasker.dynamic[uid]?.contacts?.get(subject)
             if (c == null) {

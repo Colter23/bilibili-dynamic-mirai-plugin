@@ -1,5 +1,6 @@
 package top.colter.mirai.plugin.bilibili.data
 
+import kotlinx.serialization.Serializer
 import net.mamoe.mirai.console.data.ReadOnlyPluginConfig
 import net.mamoe.mirai.console.data.ValueDescription
 import net.mamoe.mirai.console.data.value
@@ -30,6 +31,7 @@ object BiliPluginConfig : ReadOnlyPluginConfig("BiliPluginConfig") {
     @ValueDescription("推送文字模板, 参数请看readme")
     val pushTemplate: String by value("{name}@{type}\n{link}")
 
+    //@Suppress(stringSerialization = DOUBLE_QUOTATION)
     @ValueDescription("cookie, 请使用双引号")
     val cookie: String by value("")
 
