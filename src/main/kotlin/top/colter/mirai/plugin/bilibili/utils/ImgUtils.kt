@@ -1,6 +1,12 @@
 package top.colter.mirai.plugin.bilibili.utils
 
+import com.vdurmont.emoji.EmojiParser
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.serialization.decodeFromString
+import net.mamoe.mirai.console.util.ConsoleExperimentalApi
+import net.mamoe.mirai.console.util.CoroutineScopeUtils.childScope
 import net.mamoe.mirai.utils.error
 import top.colter.mirai.plugin.bilibili.PluginMain
 import top.colter.mirai.plugin.bilibili.data.*
@@ -15,8 +21,9 @@ import java.net.URL
 import java.util.*
 import javax.imageio.ImageIO
 
-//object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
-object ImgUtils {
+@OptIn(ConsoleExperimentalApi::class)
+object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
+//object ImgUtils {
     private val renderingHints = RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
     private var font: Font
 
@@ -96,8 +103,8 @@ object ImgUtils {
         }
 
         g2.dispose()
-//        val file = File(fileStr)
-        val file = PluginMain.resolveDataFile(fileStr)
+        val file = File(fileStr)
+//        val file = PluginMain.resolveDataFile(fileStr)
         if (!file.parentFile.exists()) file.parentFile.mkdirs()
         ImageIO.write(bi, "png", file)
         return file
@@ -229,6 +236,7 @@ object ImgUtils {
 
     fun textContent(text: String, emojiList: List<EmojiDetails>? = null): BufferedImage? {
         if (text == "") return null
+        var msgText = text
 
         val textBi = BufferedImage(800, 2000, BufferedImage.TYPE_INT_ARGB)
         val textG2 = textBi.createGraphics()
@@ -242,8 +250,25 @@ object ImgUtils {
             }
         }
 
-        val tran = trans(text)
-        var msgText = text
+        msgText = EmojiParser.parseFromUnicode(msgText) { e ->
+            val emojis = mutableListOf<String>()
+            e.emoji.htmlHexadecimal.split(";").filter{it.isNotEmpty()}.forEach {
+                emojis.add(it.substring(3))
+            }
+            val emoji = emojis.joinToString("-")
+            if (!emojiMap.containsKey(emoji)) {
+                val emojiBi = BufferedImage(30, 30, BufferedImage.TYPE_INT_ARGB)
+                val emojiG2 = emojiBi.createGraphics()
+                emojiG2.setRenderingHints(renderingHints)
+
+                emojiG2.drawImage(ImageIO.read(URL("https://twemoji.maxcdn.com/36x36/$emoji.png")),0,0,30,30,null)
+                emojiMap["[$emoji]"] = emojiBi
+                emojiG2.dispose()
+            }
+            "[$emoji]"
+        }
+
+        val tran = trans(msgText)
         if (tran != null) {
             msgText += "\n\n〓〓 翻译 〓〓\n$tran"
         }
@@ -252,6 +277,7 @@ object ImgUtils {
         var textY = 35
         var emojiStart = 0
         var emojiFlag = false
+
         for ((i, c) in msgText.withIndex()) {
             val cs = c.toString()
             if (c == '[') {

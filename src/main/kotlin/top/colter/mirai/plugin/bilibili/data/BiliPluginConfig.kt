@@ -1,6 +1,5 @@
 package top.colter.mirai.plugin.bilibili.data
 
-import kotlinx.serialization.Serializer
 import net.mamoe.mirai.console.data.ReadOnlyPluginConfig
 import net.mamoe.mirai.console.data.ValueDescription
 import net.mamoe.mirai.console.data.value
