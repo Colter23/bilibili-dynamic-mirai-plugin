@@ -256,7 +256,11 @@ object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
                 val emojiG2 = emojiBi.createGraphics()
                 emojiG2.setRenderingHints(renderingHints)
 
-                emojiG2.drawImage(ImageIO.read(URL("https://twemoji.maxcdn.com/36x36/$emoji.png")),0,0,30,30,null)
+                try {
+                    emojiG2.drawImage(ImageIO.read(URL("https://twemoji.maxcdn.com/36x36/$emoji.png")),0,0,30,30,null)
+                }catch (ex: Exception){
+                    return@parseFromUnicode e.emoji.unicode
+                }
                 emojiMap["[$emoji]"] = emojiBi
                 emojiG2.dispose()
             }
