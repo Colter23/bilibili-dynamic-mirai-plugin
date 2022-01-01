@@ -13,7 +13,7 @@ object PluginMain : KotlinPlugin(
     JvmPluginDescription(
         id = "top.colter.bilibili-dynamic-mirai-plugin",
         name = "BilibiliDynamic",
-        version = "2.0.7"
+        version = "2.0.8"
     ) {
         author("Colter")
         info(

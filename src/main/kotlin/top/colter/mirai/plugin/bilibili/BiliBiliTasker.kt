@@ -187,7 +187,7 @@ object DynamicTasker : CoroutineScope by PluginMain.childScope("DynamicTasker") 
 //                }
                 val newDynamic = httpUtils.getAndDecode<DynamicList>(NEW_DYNAMIC)
                 val dynamics = newDynamic.dynamics ?: return@runCatching
-                val uidList = dynamic.map { it.key }
+                val uidList = dynamic.filter { it.value.contacts.isNotEmpty() }.map { it.key }
                 val newDynamicList = dynamics.stream().filter { it.timestamp > lastDynamic }
                     .filter { uidList.contains(it.uid) }
                     .filter { !history.contains(it.did) }
@@ -200,13 +200,15 @@ object DynamicTasker : CoroutineScope by PluginMain.childScope("DynamicTasker") 
                     if (list != null && list.size > 0) {
                         val color = dynamic[describe.uid]?.color ?: "#d3edfa"
                         seleniumMutex.withLock {
-                            list.sendMessage { di.build(it, color) }
                             history.add(describe.dynamicId)
-//                            lastDynamic = di.timestamp
+                            list.sendMessage { di.build(it, color) }
+                            //lastDynamic = di.timestamp
                         }
+                        delay(1000L)
                     }
                 }
             }.onSuccess {
+                //LocalTime.now().hour
                 delay((interval..(interval + 5000L)).random())
             }.onFailure {
                 logger.error("ERROR $it")

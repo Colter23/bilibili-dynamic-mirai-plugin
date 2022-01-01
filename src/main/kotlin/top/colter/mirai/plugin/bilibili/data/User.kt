@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class UserProfile(
     @SerialName("info")
-    val user: UserInfo,
+    val user: UserInfo? = null,
     @SerialName("pendant")
     val pendant: Pendant? = null
 )

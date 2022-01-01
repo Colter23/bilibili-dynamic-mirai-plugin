@@ -2,8 +2,6 @@ package top.colter.mirai.plugin.bilibili.utils
 
 import com.vdurmont.emoji.EmojiParser
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.serialization.decodeFromString
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
 import net.mamoe.mirai.console.util.CoroutineScopeUtils.childScope
@@ -48,7 +46,7 @@ object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
                 font = Font("Microsoft Yahei", Font.PLAIN, 20)
             }
         } else {
-//            val os = System.getProperty("os.name").lowercase(Locale.getDefault())
+            //val os = System.getProperty("os.name").lowercase(Locale.getDefault())
             font = Font(BiliPluginConfig.font, Font.PLAIN, 20)
         }
     }
@@ -69,12 +67,12 @@ object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
 
     fun testBuildImageMessage(msg: String){
         buildImageMessage(
-            listOf(textContent(msg)!!),
+            listOf(textContent(msg)!!, videoContent("https://i0.hdslb.com/bfs/archive/5c20fc634ca754acc6b48a445a2980b9a4942107.jpg","PV","", "视频")),
             UserProfile(UserInfo(1,
                 "Test",
                 "https://i0.hdslb.com/bfs/face/904bef1b4067335068faba12062f735dda07c1fe.jpg@240w_240h_1c_1s.png")),
             "2021年12月21日","#9fc7f3","D:/Code/test.png"
-        )
+        )//D:/Code/test.png
     }
 
     fun buildImageMessage(
@@ -103,8 +101,8 @@ object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
         }
 
         g2.dispose()
-        val file = File(fileStr)
-//        val file = PluginMain.resolveDataFile(fileStr)
+        //val file = File(fileStr)
+        val file = PluginMain.resolveDataFile(fileStr)
         if (!file.parentFile.exists()) file.parentFile.mkdirs()
         ImageIO.write(bi, "png", file)
         return file
@@ -180,7 +178,7 @@ object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
         val rh = 570 - margin * 2
         g2.clip = RoundRectangle2D.Double(margin - 1.0, margin - 1.0, rw + 1.0, rh + 1.0, 20.0, 20.0)
         g2.drawImage(ImageIO.read(URL(imgApi(coverUrl, 780, 440))), 10, 120, 780, 440, null)
-//        g2.drawImg(coverUrl, 10,120,780,440)
+        //g2.drawImg(coverUrl, 10,120,780,440)
         g2.dispose()
 
         val file = PluginMain.resolveDataFile(fileStr)
@@ -227,7 +225,7 @@ object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
         headerG2.color = if (c) Color(251, 114, 153) else Color.BLACK
         headerG2.font = font.deriveFont(30f)
         headerG2.writeText(rowOne, 130 + offset, 60, 600, 1)
-//        headerG2.drawString(name, 130, 60)
+        //headerG2.drawString(name, 130, 60)
         headerG2.font = font.deriveFont(20f)
         headerG2.color = Color(148, 147, 147)
         headerG2.drawString(rowTwo, 130 + offset, 90)
@@ -251,10 +249,7 @@ object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
         }
 
         msgText = EmojiParser.parseFromUnicode(msgText) { e ->
-            val emojis = mutableListOf<String>()
-            e.emoji.htmlHexadecimal.split(";").filter{it.isNotEmpty()}.forEach {
-                emojis.add(it.substring(3))
-            }
+            val emojis = e.emoji.htmlHexadecimal.split(";").filter{it.isNotEmpty()}.toList()
             val emoji = emojis.joinToString("-")
             if (!emojiMap.containsKey(emoji)) {
                 val emojiBi = BufferedImage(30, 30, BufferedImage.TYPE_INT_ARGB)
@@ -372,7 +367,7 @@ object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
         val picArc = 10
         val cardWidth = imgWidth - contentMargin * 2
         val cardHeight = 150
-        val imgW = 240
+        val imgW = 240  // 视频封面比例 16/10
 
         videoG2.color = Color.WHITE
         videoG2.fillRoundRect(contentMargin, 10, cardWidth, cardHeight, picArc, picArc)
@@ -433,14 +428,8 @@ object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
                 imgX += cardWidth / 3 + 2
             }
         } else {
-            articleG2.drawImage(
-                ImageIO.read(URL(imgApi(imageUrls[0], cardWidth, imgHeight))),
-                contentMargin,
-                10,
-                cardWidth,
-                imgHeight,
-                null
-            )
+            articleG2.drawImg(imageUrls[0], contentMargin, 10, cardWidth, imgHeight)
+            //articleG2.drawImage(ImageIO.read(URL(imgApi(imageUrls[0], cardWidth, imgHeight))), contentMargin, 10, cardWidth, imgHeight,null)
         }
         articleG2.clip = null
         articleG2.stroke = BasicStroke(2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
@@ -548,11 +537,11 @@ object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
         return textY
     }
 
-    fun Graphics2D.getStrWidth(str: String, plus: Int = 0): Int {
+    private fun Graphics2D.getStrWidth(str: String, plus: Int = 0): Int {
         return font.getStringBounds(str, fontRenderContext).width.toInt() + plus
     }
 
-    fun Graphics2D.drawImg(url: String, x: Int, y: Int, w: Int, h: Int) {
+    private fun Graphics2D.drawImg(url: String, x: Int, y: Int, w: Int, h: Int) {
         runCatching {
             drawImage(ImageIO.read(URL(imgApi(url, w, h))), x, y, null)
         }.onFailure {
@@ -560,7 +549,7 @@ object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
         }
     }
 
-    fun imgApi(imgUrl: String, width: Int, height: Int): String {
+    private fun imgApi(imgUrl: String, width: Int, height: Int): String {
         return "${imgUrl}@${width}w_${height}h_1e_1c.png"
     }
 }
