@@ -71,7 +71,7 @@ font: Microsoft Yahei
 # 直播@全体(目前只能全体控制，如果需要对单独的群设置请去开issue)
 liveAtAll: false
 
-# 图片推送模式文字模板
+# 图片模式下动态/视频推送文字模板
 # 配置项:
 # {name} : 名字
 # {uid}  : UID
@@ -82,6 +82,9 @@ liveAtAll: false
 # 如有换行请使用双引号
 # 2.0.4版本之前的模板为 {name}@{uid}@{type}\n{time}\n{link}
 pushTemplate: "{name}@{type}\n{link}"
+
+# 图片模式下直播推送文字模板, 如果为空则与上方动态推送模板保持一致
+livePushTemplate: ""
 
 # cookie !!必填!!
 # cookie请包在双引号内

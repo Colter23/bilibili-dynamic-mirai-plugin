@@ -204,7 +204,7 @@ object DynamicTasker : CoroutineScope by PluginMain.childScope("DynamicTasker") 
                             list.sendMessage { di.build(it, color) }
                             //lastDynamic = di.timestamp
                         }
-                        delay(1000L)
+                        //delay(1000L)
                     }
                 }
             }.onSuccess {

@@ -252,15 +252,16 @@ object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
             val emojis = e.emoji.htmlHexadecimal.split(";").filter{it.isNotEmpty()}.toList()
             val emoji = emojis.joinToString("-")
             if (!emojiMap.containsKey(emoji)) {
-                val emojiBi = BufferedImage(30, 30, BufferedImage.TYPE_INT_ARGB)
-                val emojiG2 = emojiBi.createGraphics()
-                emojiG2.setRenderingHints(renderingHints)
-
-                try {
-                    emojiG2.drawImage(ImageIO.read(URL("https://twemoji.maxcdn.com/36x36/$emoji.png")),0,0,30,30,null)
+                val emojiImg = try {
+                    ImageIO.read(URL("https://twemoji.maxcdn.com/36x36/$emoji.png"))
                 }catch (ex: Exception){
                     return@parseFromUnicode e.emoji.unicode
                 }
+                val emojiBi = BufferedImage(30, 30, BufferedImage.TYPE_INT_ARGB)
+                val emojiG2 = emojiBi.createGraphics()
+                emojiG2.setRenderingHints(renderingHints)
+                emojiG2.drawImage(emojiImg,0,0,30,30,null)
+
                 emojiMap["[$emoji]"] = emojiBi
                 emojiG2.dispose()
             }
