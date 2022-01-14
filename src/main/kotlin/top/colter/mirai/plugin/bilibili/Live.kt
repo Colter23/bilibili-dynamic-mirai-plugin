@@ -1,6 +1,5 @@
 package top.colter.mirai.plugin.bilibili
 
-//import top.colter.mirai.plugin.bilibili.utils.getScreenshot
 import net.mamoe.mirai.contact.Contact
 import net.mamoe.mirai.message.data.Message
 import net.mamoe.mirai.message.data.toPlainText
@@ -40,7 +39,7 @@ suspend fun LiveInfo.buildTextLive(contact: Contact): Message {
 
 suspend fun LiveInfo.buildImageLive(contact: Contact): Message {
     val link = "https://live.bilibili.com/${roomId}"
-    val file = buildLiveImageMessage(title, cover, uname, face, "#d3edfa", "live/${uid}/${liveTime}.png")
+    val file = buildLiveImageMessage(title, cover, time,uname, face, "#d3edfa", "live/${uid}/${liveTime}.png")
     val template = BiliPluginConfig.livePushTemplate.ifEmpty {
         BiliPluginConfig.pushTemplate
     }

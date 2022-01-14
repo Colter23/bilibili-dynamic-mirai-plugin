@@ -67,7 +67,7 @@ object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
 
     fun testBuildImageMessage(msg: String){
         buildImageMessage(
-            listOf(textContent(msg)!!, videoContent("https://i0.hdslb.com/bfs/archive/5c20fc634ca754acc6b48a445a2980b9a4942107.jpg","PV","", "视频")),
+            listOf(videoContent("https://i0.hdslb.com/bfs/archive/5c20fc634ca754acc6b48a445a2980b9a4942107.jpg","趣味视频征集活动今日","视频内容不限，包括但不限于打法攻略、创意玩法等内容视频内容不限，包括但不限于打法攻略、创意玩法等内容", "视频")),
             UserProfile(UserInfo(1,
                 "Test",
                 "https://i0.hdslb.com/bfs/face/904bef1b4067335068faba12062f735dda07c1fe.jpg@240w_240h_1c_1s.png")),
@@ -155,6 +155,7 @@ object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
     fun buildLiveImageMessage(
         title: String,
         coverUrl: String,
+        time: String,
         uname: String,
         faceUrl: String,
         color: String,
@@ -165,7 +166,7 @@ object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
         g2.setRenderingHints(renderingHints)
 
         background(g2, 570, hex2Color(color))
-        header(g2, title, uname, faceUrl, "", -20, false)
+        header(g2, title, "$uname    $time", faceUrl, "", -20, false)
 
         g2.color = Color(251, 114, 153)
         g2.fillRoundRect(722, 50, 52, 27, 5, 5)
@@ -364,7 +365,7 @@ object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
         return imgBi.getSubimage(0, 0, imgBi.width, picH + 20)
     }
 
-    fun videoContent(coverUrl: String, title: String, desc: String, tag: String = ""): BufferedImage {
+    fun videoContentOld(coverUrl: String, title: String, desc: String, tag: String = ""): BufferedImage {
         val videoBi = BufferedImage(imgWidth, 170, BufferedImage.TYPE_INT_ARGB)
         val videoG2 = videoBi.createGraphics()
         videoG2.setRenderingHints(renderingHints)
@@ -409,6 +410,57 @@ object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
         return videoBi
     }
 
+    fun videoContent(coverUrl: String, title: String, desc: String, tag: String = ""): BufferedImage {
+        val videoBi = BufferedImage(imgWidth, 480, BufferedImage.TYPE_INT_ARGB)
+        val videoG2 = videoBi.createGraphics()
+        videoG2.setRenderingHints(renderingHints)
+
+        val picArc = 10
+        val margin = 50
+        val cardWidth = imgWidth - margin * 2
+        val cardHeight = 460
+        val imgHeight = 360
+
+        videoG2.color = Color.WHITE
+        videoG2.clip = RoundRectangle2D.Double(
+            margin.toDouble(), 10.0,
+            cardWidth.toDouble(), cardHeight.toDouble(), picArc.toDouble(), picArc.toDouble()
+        )
+        videoG2.fillRect(margin, 10, cardWidth, cardHeight)
+        videoG2.clip = RoundRectangle2D.Double(
+            margin.toDouble(), 10.0,
+            cardWidth.toDouble(), imgHeight.toDouble(), picArc.toDouble(), picArc.toDouble()
+        )
+        videoG2.drawImg(coverUrl, margin, 10, cardWidth, imgHeight)
+        //videoG2.drawImage(ImageIO.read(URL(imgApi(coverUrl, 640, 147))), contentMargin, 10, cardWidth, imgHeight,null)
+        videoG2.clip = null
+
+        if (tag != "") {
+            videoG2.color = Color(251, 114, 153)
+            videoG2.fillRoundRect(684, 30, 45, 22, 5, 5)
+            videoG2.color = Color.WHITE
+            videoG2.font = font.deriveFont(16f)
+            videoG2.drawString(tag, 690, 46)
+        }
+
+        videoG2.color = Color.BLACK
+        videoG2.font = font.deriveFont(20f)
+        val textY = videoG2.writeText(title, 65, imgHeight+40, cardWidth - 30, 1)
+
+        videoG2.font = font.deriveFont(16f)
+        videoG2.color = Color(148, 147, 147)
+        videoG2.writeText(desc, 65, textY + 25, cardWidth - 30, 3)
+
+        videoG2.color = Color(229, 233, 239)
+        videoG2.stroke = BasicStroke(2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
+        videoG2.drawRoundRect(margin, 10, cardWidth, imgHeight, picArc, picArc)
+        videoG2.stroke = BasicStroke(1f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
+        videoG2.drawRoundRect(margin, 10, cardWidth, cardHeight, picArc, picArc)
+
+        videoG2.dispose()
+        return videoBi
+    }
+
     fun articleContent(imageUrls: List<String>, title: String, desc: String): BufferedImage {
         val articleBi = BufferedImage(imgWidth, 300, BufferedImage.TYPE_INT_ARGB)
         val articleG2 = articleBi.createGraphics()
@@ -433,13 +485,13 @@ object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
                 imgX += cardWidth / 3 + 2
             }
         } else {
-            articleG2.drawImg(imageUrls[0], contentMargin, 10, cardWidth, imgHeight)
-            //articleG2.drawImage(ImageIO.read(URL(imgApi(imageUrls[0], cardWidth, imgHeight))), contentMargin, 10, cardWidth, imgHeight,null)
+            //articleG2.drawImg(imageUrls[0], contentMargin, 10, cardWidth, imgHeight)
+            articleG2.drawImage(ImageIO.read(URL(imgApi(imageUrls[0], 640, 147))), contentMargin, 10, cardWidth, imgHeight,null)
         }
         articleG2.clip = null
-        articleG2.stroke = BasicStroke(2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
-        articleG2.color = Color.WHITE
-        articleG2.drawRoundRect(contentMargin, 10, cardWidth, cardHeight, picArc, picArc)
+        //articleG2.stroke = BasicStroke(2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
+        //articleG2.color = Color.WHITE
+        //articleG2.drawRoundRect(contentMargin, 10, cardWidth, cardHeight, picArc, picArc)
 
         articleG2.color = Color.BLACK
         articleG2.font = font.deriveFont(20f)

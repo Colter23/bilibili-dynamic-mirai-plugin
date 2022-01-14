@@ -222,7 +222,11 @@ fun DynamicText.bufferedImages(dynamicInfo: DynamicInfo): List<BufferedImage> {
 fun DynamicVideo.bufferedImages(dynamicInfo: DynamicInfo): List<BufferedImage> {
     val biList = mutableListOf<BufferedImage>()
     ImgUtils.textContent(dynamic, dynamicInfo.display.emojiInfo?.emojiDetails)?.let { biList.add(it) }
-    biList.add(ImgUtils.videoContent(cover, title, description, "视频"))
+    if (dynamicInfo.type == DynamicType.REPLY){
+        biList.add(ImgUtils.videoContentOld(cover, title, description, "视频"))
+    }else{
+        biList.add(ImgUtils.videoContent(cover, title, description, "视频"))
+    }
     if (dynamicInfo.link == "") {
         dynamicInfo.content = "视频"
         dynamicInfo.link = "https://www.bilibili.com/video/av$aid"
