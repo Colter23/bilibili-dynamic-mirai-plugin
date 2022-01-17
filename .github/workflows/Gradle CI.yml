@@ -43,3 +43,11 @@ jobs:
         run: chmod +x ./gradlew
       - name: Build with Gradle
         run: ./gradlew build
+        
+      # Upload File
+      
+      - name: Upload All Build File
+        uses: actions/upload-artifact@v2
+        with: 
+          name: All File
+          path: build
