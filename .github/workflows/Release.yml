@@ -29,13 +29,13 @@ jobs:
         run: chmod +x ./gradlew
         
       - name: Build with Gradle
-        run: ./gradlew build
+        run: ./gradlew buildPlugin
       
       - name: Upload Jar File
         uses: actions/upload-artifact@v2
         with: 
           name: Jar File
-          path: build/libs
+          path: build/mirai
       
       - name: Upload All Build File
         uses: actions/upload-artifact@v2
@@ -51,4 +51,4 @@ jobs:
            prerelease: false
            title: ${{steps.branch_name.outputs.SOURCE_TAG}}
            files: |
-                 build/libs/*.jar
+                 build/mirai/*.jar
