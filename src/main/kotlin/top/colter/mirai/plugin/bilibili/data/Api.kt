@@ -14,6 +14,8 @@ const val LIVE_LIST = "https://api.live.bilibili.com/xlive/web-ucenter/v1/xfette
 // 参数 uid
 const val USER_INFO = "https://api.bilibili.com/x/space/acc/info?mid="
 
+const val USER_ID = "https://api.bilibili.com/x/web-interface/nav"
+
 // 参数 uid
 const val IS_FOLLOW = "https://api.bilibili.com/x/relation?fid="
 

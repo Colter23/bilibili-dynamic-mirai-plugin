@@ -155,7 +155,7 @@ data class DynamicText(
     @SerialName("item")
     val detail: DynamicTextDetail,
     @SerialName("user")
-    val user: UserSimple
+    val user: UserInfo
 )
 
 @Serializable

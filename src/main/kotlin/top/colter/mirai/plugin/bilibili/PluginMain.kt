@@ -13,7 +13,7 @@ object PluginMain : KotlinPlugin(
     JvmPluginDescription(
         id = "top.colter.bilibili-dynamic-mirai-plugin",
         name = "BilibiliDynamic",
-        version = "2.1.0"
+        version = "2.1.1"
     ) {
         author("Colter")
         info(
@@ -28,6 +28,7 @@ object PluginMain : KotlinPlugin(
 
     var sessData: String = ""
     var biliJct: String = ""
+    var mid: Long = 0L
 
     var tagid: Int = 0
 

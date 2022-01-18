@@ -2,6 +2,7 @@ package top.colter.mirai.plugin.bilibili.utils
 
 import com.vdurmont.emoji.EmojiParser
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromString
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
 import net.mamoe.mirai.console.util.CoroutineScopeUtils.childScope
@@ -23,7 +24,7 @@ import javax.imageio.ImageIO
 object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
 //object ImgUtils {
     private val renderingHints = RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
-    private var font: Font
+    private val fonts = mutableListOf<Font>()
 
     private const val imgWidth = 800
     private const val contentMargin = 30
@@ -34,23 +35,35 @@ object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
         renderingHints[RenderingHints.KEY_RENDERING] = RenderingHints.VALUE_RENDER_QUALITY
 
         // 初始化字体
-        if (BiliPluginConfig.font.indexOf('.') != -1) {
-
-            val fontList = BiliPluginConfig.font.split(".")
-
-            val file = PluginMain.resolveDataFile("font/${BiliPluginConfig.font}")
-            if (fontList.last() == "ttf") {
-                font = Font.createFont(Font.TRUETYPE_FONT, file)
-            } else {
-                PluginMain.logger.error { "不支持的字体类型" }
-                font = Font("Microsoft Yahei", Font.PLAIN, 20)
+        try {
+            BiliPluginConfig.font.split(',', '，').forEach {
+                if (it.indexOf('.') != -1) {
+                    val fontList = it.split(".")
+                    val file = PluginMain.resolveDataFile("font/${it}")
+                    if (file.exists()){
+                        if (fontList.last() == "ttf") {
+                            fonts.add(Font.createFont(Font.TRUETYPE_FONT, file))
+                            PluginMain.logger.info("成功加载字体: $it")
+                        } else {
+                            PluginMain.logger.error { "不支持的字体类型: $it" }
+                        }
+                    }else{
+                        PluginMain.logger.error { "没有此字体文件: $it" }
+                    }
+                } else {
+                    //val os = System.getProperty("os.name").lowercase(Locale.getDefault())
+                    fonts.add(Font(it, Font.PLAIN, 20))
+                }
             }
-        } else {
-            //val os = System.getProperty("os.name").lowercase(Locale.getDefault())
-            font = Font(BiliPluginConfig.font, Font.PLAIN, 20)
+        }catch (e: Exception){
+            PluginMain.logger.error { "初始化字体时出错: ${e.message}" }
+        }
+        if (fonts.size == 0){
+            fonts.add(Font("Microsoft Yahei", Font.PLAIN, 20))
         }
     }
 
+    @OptIn(ExperimentalSerializationApi::class)
     inline fun <reified T> String.decode(): T = json.decodeFromString(this)
 
     fun hex2Color(hex: String): Color {
@@ -67,7 +80,7 @@ object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
 
     fun testBuildImageMessage(msg: String){
         buildImageMessage(
-            listOf(videoContent("https://i0.hdslb.com/bfs/archive/5c20fc634ca754acc6b48a445a2980b9a4942107.jpg","趣味视频征集活动今日","视频内容不限，包括但不限于打法攻略、创意玩法等内容视频内容不限，包括但不限于打法攻略、创意玩法等内容", "视频")),
+            listOf(textContent(msg, null)!!,videoContent("https://i0.hdslb.com/bfs/archive/5c20fc634ca754acc6b48a445a2980b9a4942107.jpg","趣味视频征集活动今日","视频内容不限，包括但不限于打法攻略、创意玩法等内容视频内容不限，包括但不限于打法攻略、创意玩法等内容", "视频")),
             UserProfile(UserInfo(1,
                 "Test",
                 "https://i0.hdslb.com/bfs/face/904bef1b4067335068faba12062f735dda07c1fe.jpg@240w_240h_1c_1s.png")),
@@ -131,7 +144,7 @@ object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
                 g2.drawOval(25, 10, 40, 40)
             }
             g2.color = Color(0, 161, 214)
-            g2.font = font.deriveFont(25f)
+            g2.font = fonts[0].deriveFont(25f)
             g2.drawString(user.uname, 80, 40)
         } else {
             g2Y = 0
@@ -171,7 +184,7 @@ object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
         g2.color = Color(251, 114, 153)
         g2.fillRoundRect(722, 50, 52, 27, 5, 5)
         g2.color = Color.WHITE
-        g2.font = font.deriveFont(20f)
+        g2.font = fonts[0].deriveFont(20f)
         g2.drawString("直播", 728, 70)
 
         val margin = 10
@@ -224,10 +237,10 @@ object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
             headerG2.drawImg(pendentUrl, 30 + offset, 10, 100, 100)
 
         headerG2.color = if (c) Color(251, 114, 153) else Color.BLACK
-        headerG2.font = font.deriveFont(30f)
+        headerG2.font = fonts[0].deriveFont(30f)
         headerG2.writeText(rowOne, 130 + offset, 60, 600, 1)
         //headerG2.drawString(name, 130, 60)
-        headerG2.font = font.deriveFont(20f)
+        headerG2.font = fonts[0].deriveFont(20f)
         headerG2.color = Color(148, 147, 147)
         headerG2.drawString(rowTwo, 130 + offset, 90)
     }
@@ -241,7 +254,7 @@ object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
         val textG2 = textBi.createGraphics()
         textG2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_GASP)
         textG2.color = Color.BLACK
-        textG2.font = font.deriveFont(25f)
+        textG2.font = fonts[0].deriveFont(25f)
 
         emojiList?.forEach {
             if (!emojiMap.containsKey(it.emojiName)) {
@@ -280,7 +293,6 @@ object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
         var emojiFlag = false
 
         for ((i, c) in msgText.withIndex()) {
-            val cs = c.toString()
             if (c == '[') {
                 emojiStart = i
                 emojiFlag = true
@@ -303,11 +315,11 @@ object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
                     textX = 35
                     textY += 35
                 }
-                if (cs.matches("[\u4e00-\u9fa5]".toRegex())) {
-                    textG2.drawString(cs, ++textX, textY)
+                if (c.toString().matches("[\u4e00-\u9fa5]".toRegex())) {
+                    textG2.drawStr(c, ++textX, textY)
                     textX++
-                } else textG2.drawString(cs, textX, textY)
-                textX += textG2.getStrWidth(cs)
+                } else textG2.drawStr(c, textX, textY)
+                textX += textG2.getStrWidth(c.toString())
             }
             if (textY > 1900){
                 textG2.color = Color.red
@@ -390,16 +402,16 @@ object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
             videoG2.color = Color(251, 114, 153)
             videoG2.fillRoundRect(214, 20, 45, 22, 5, 5)
             videoG2.color = Color.WHITE
-            videoG2.font = font.deriveFont(16f)
+            videoG2.font = fonts[0].deriveFont(16f)
             videoG2.drawString(tag, 220, 36)
         }
 
         videoG2.color = Color.BLACK
-        videoG2.font = font.deriveFont(20f)
+        videoG2.font = fonts[0].deriveFont(20f)
         val textY = videoG2.writeText(title, 285, 45, 465, 2)
 
         videoG2.color = Color(148, 147, 147)
-        videoG2.font = font.deriveFont(16f)
+        videoG2.font = fonts[0].deriveFont(16f)
         videoG2.writeText(desc, 285, textY + 25, 465, 3)
 
         videoG2.stroke = BasicStroke(1f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
@@ -439,15 +451,15 @@ object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
             videoG2.color = Color(251, 114, 153)
             videoG2.fillRoundRect(684, 30, 45, 22, 5, 5)
             videoG2.color = Color.WHITE
-            videoG2.font = font.deriveFont(16f)
+            videoG2.font = fonts[0].deriveFont(16f)
             videoG2.drawString(tag, 690, 46)
         }
 
         videoG2.color = Color.BLACK
-        videoG2.font = font.deriveFont(20f)
+        videoG2.font = fonts[0].deriveFont(20f)
         val textY = videoG2.writeText(title, 65, imgHeight+40, cardWidth - 30, 1)
 
-        videoG2.font = font.deriveFont(16f)
+        videoG2.font = fonts[0].deriveFont(16f)
         videoG2.color = Color(148, 147, 147)
         videoG2.writeText(desc, 65, textY + 25, cardWidth - 30, 3)
 
@@ -494,10 +506,10 @@ object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
         //articleG2.drawRoundRect(contentMargin, 10, cardWidth, cardHeight, picArc, picArc)
 
         articleG2.color = Color.BLACK
-        articleG2.font = font.deriveFont(20f)
+        articleG2.font = fonts[0].deriveFont(20f)
         val textY = articleG2.writeText(title, 45, 210, cardWidth - 30, 1)
 
-        articleG2.font = font.deriveFont(16f)
+        articleG2.font = fonts[0].deriveFont(16f)
         articleG2.color = Color(148, 147, 147)
         articleG2.writeText(desc, 45, textY + 25, cardWidth - 30, 3)
 
@@ -539,10 +551,10 @@ object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
         musicG2.drawRoundRect(contentMargin, 10, cardWidth, cardHeight, picArc, picArc)
 
         musicG2.color = Color.BLACK
-        musicG2.font = font.deriveFont(20f)
+        musicG2.font = fonts[0].deriveFont(20f)
         val textY = musicG2.writeText(title, 155, 50, 470, 1)
 
-        musicG2.font = font.deriveFont(16f)
+        musicG2.font = fonts[0].deriveFont(16f)
         musicG2.color = Color(148, 147, 147)
         musicG2.writeText(desc, 155, textY + 30, 470, 1)
 
@@ -558,14 +570,14 @@ object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
         val infoBi = BufferedImage(imgWidth, 50, BufferedImage.TYPE_INT_ARGB)
         val infoG2 = infoBi.createGraphics()
         infoG2.setRenderingHints(renderingHints)
-        infoG2.font = font.deriveFont(25f)
+        infoG2.font = fonts[0].deriveFont(25f)
         infoG2.color = Color.BLACK
         infoG2.drawString(text, contentMargin, 10)
         infoG2.dispose()
         return infoBi
     }
 
-    fun Graphics2D.writeText(t: String, x: Int, y: Int, rowL: Int, rowCount: Int): Int {
+    private fun Graphics2D.writeText(t: String, x: Int, y: Int, rowL: Int, rowCount: Int): Int {
         var rowLength = 0
         var textX = x
         var textY = y
@@ -580,18 +592,34 @@ object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
                     drawString("...", textX, textY)
                     break
                 } else {
-                    drawString(c.toString(), textX, textY)
+                    drawStr(c, textX, textY)
                 }
                 rowLength = 0
                 textX = x
                 textY += font.size + 3
                 textRow++
             } else {
-                drawString(c.toString(), textX, textY)
+                drawStr(c, textX, textY)
                 textX += l
             }
         }
         return textY
+    }
+
+    private fun Graphics2D.drawStr(c: Char, textX: Int, textY: Int){
+        var cur = 0
+        while (!font.canDisplay(c)){
+            if (cur == fonts.size-1){
+                cur = 0
+                font = fonts[0].deriveFont(font.size2D)
+                break
+            }
+            font = fonts[++cur].deriveFont(font.size2D)
+        }
+        drawString(c.toString(), textX, textY)
+        if (cur != 0){
+            font = fonts[0].deriveFont(font.size2D)
+        }
     }
 
     private fun Graphics2D.getStrWidth(str: String, plus: Int = 0): Int {

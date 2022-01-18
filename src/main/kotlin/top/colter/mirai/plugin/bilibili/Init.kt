@@ -25,8 +25,9 @@ fun initCookie() {
 }
 
 fun initTagid() {
+    val httpUtils = HttpUtils()
+    PluginMain.mid = httpUtils.getAndDecode<UserID>(USER_ID).mid
     if (autoFollow && followGroup.isNotEmpty()) {
-        val httpUtils = HttpUtils()
         val groups = httpUtils.getAndDecode<List<FollowGroup>>(FOLLOW_GROUP)
         groups.forEach {
             if (it.name == followGroup) {
@@ -41,6 +42,5 @@ fun initTagid() {
             return
         }
         PluginMain.tagid = res.data?.decode<FollowGroup>()?.tagId ?: 0
-
     }
 }

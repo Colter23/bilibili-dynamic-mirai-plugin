@@ -68,7 +68,11 @@ object DynamicTasker : CoroutineScope by PluginMain.childScope("DynamicTasker") 
 //    }
 
     private fun followUser(uid: Long): String {
-
+        println("mid: ${PluginMain.mid}")
+        println("uid: ${uid}")
+        if (uid == PluginMain.mid){
+            return "不能关注自己哦"
+        }
         val attr = httpUtils.getAndDecode<IsFollow>(IS_FOLLOW(uid)).attribute
         if (attr == 0) {
             if (!BiliPluginConfig.autoFollow) {
@@ -118,8 +122,13 @@ object DynamicTasker : CoroutineScope by PluginMain.childScope("DynamicTasker") 
             dynamic[uid] = subData
             "订阅 ${dynamic[uid]?.name} 成功! \n默认检测 动态+视频+直播 如果需要调整请发送/bili set $uid\n如要设置主题色请发送/bili color <16进制颜色>"
         } else {
-            user.contacts[subject] = "11"
-            "订阅 ${dynamic[uid]?.name} 成功! \n默认检测 动态+视频+直播 如果需要调整请发送/bili set $uid"
+            if (user.contacts.contains(subject)){
+                "之前订阅过这个人哦"
+            }else{
+                user.contacts[subject] = "11"
+                "订阅 ${dynamic[uid]?.name} 成功! \n默认检测 动态+视频+直播 如果需要调整请发送/bili set $uid"
+            }
+
         }
     }
 
@@ -147,7 +156,7 @@ object DynamicTasker : CoroutineScope by PluginMain.childScope("DynamicTasker") 
                     count++
                 }
             }
-            appendLine("共 $count 个订阅")
+            append("共 $count 个订阅")
         }
     }
 

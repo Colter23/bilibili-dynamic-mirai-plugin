@@ -15,11 +15,11 @@ data class UserProfile(
 @Serializable
 data class UserInfo(
     @SerialName("uid")
-    val uid: Long?,
+    val uid: Long? = null,
     @SerialName("uname")
-    val uname: String?,
+    val uname: String? = null,
     @SerialName("face")
-    val face: String?
+    val face: String? = null
 )
 
 @Serializable
@@ -50,5 +50,11 @@ data class User(
     val level: Int,
     @SerialName("face")
     val face: String
+)
+
+@Serializable
+data class UserID(
+    @SerialName("mid")
+    val mid: Long
 )
 
