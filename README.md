@@ -1,10 +1,10 @@
 # BilibiliDynamic MiraiPlugin
 
-一个可低延迟检测B站动态并转发到 Q 群的 [Mirai](https://github.com/mamoe/mirai) 插件
+一个可低延迟检测 B 站动态并转发到 Q 群的 [Mirai](https://github.com/mamoe/mirai) 插件
 
 ## 特性    
 **无论多少订阅均可在最低 10s 内检测所有动态**  
-Java 原生 Api 绘图  
+Java 原生 API 绘图  
 可以设定检测内容： 动态(包括视频)   仅视频   直播
 
 #### 基本原理
@@ -34,7 +34,7 @@ Java 原生 Api 绘图
 
 ### 下载
 下载插件本体: [releases](https://github.com/Colter23/bilibili-dynamic-mirai-plugin/releases)    
-插件命令依赖 [在聊天环境执行指令](https://github.com/project-mirai/chat-command) 请确保有此插件
+插件命令依赖 [chat-command](https://github.com/project-mirai/chat-command) 请确保有此插件
 
 ### 配置
   下面是一个配置文件模板   
@@ -111,7 +111,7 @@ baiduTranslate:
 <details>
 <summary>点击展开</summary>
 
-浏览器打开 B 站 [BiliBili](https://www.bilibili.com/) 并登陆  
+浏览器打开 [BiliBili](https://www.bilibili.com/) 并登陆  
 注：登陆后最好不要退出登陆
 
 按`F12`，打开`开发者工具`，找到`Network 网络`并点击  
@@ -126,9 +126,9 @@ baiduTranslate:
 <details>
 <summary>点击展开</summary>
 
-在控制台输入 `/perm add <许可人ID> top.colter.bilibili-dynamic-mirai-plugin:*`
+在控制台输入 `/perm add <许可人 ID> top.colter.bilibili-dynamic-mirai-plugin:*`
 
-其中的 `许可人ID` 如果你要让所有群所有人都可以用此插件就是 `*` 即 `/perm add * top.colter.bilibili-dynamic-mirai-plugin:*`    
+其中的 `许可人 ID` 如果你要让所有群所有人都可以用此插件就是 `*` 即 `/perm add * top.colter.bilibili-dynamic-mirai-plugin:*`    
 具体的用户: `u123456789` 全部用户: `u*`    
 具体的群: `g123456789` 全部群: `g*`    
 更多的配置见 [被许可人 ID 字符串表示](https://github.com/mamoe/mirai-console/blob/master/docs/Permissions.md#%E5%AD%97%E7%AC%A6%E4%B8%B2%E8%A1%A8%E7%A4%BA)    
@@ -148,8 +148,8 @@ baiduTranslate:
 <16进制颜色> 必须带#号 例: #fde8ed
 
 下面是一些栗子:
-/bili add 487550002    :为本群/好友添加uid为487550002的订阅
-/bili add 487550002 111111  :为111111群/好友添加订阅
+/bili add 487550002    :为本群/好友添加 uid 为 487550002 的订阅
+/bili add 487550002 111111  :为 111111 群/好友添加订阅
 /bili color 487550002 #fde8ed  :设置主题色
 ```
 
@@ -163,7 +163,7 @@ baiduTranslate:
 - 部分颜文字会以方块显示
 - 小概率图片模式有些文字或图片会错位
 - 小概率图片获取失败，图片位置为全白
-- 链接,话题以及@不会变色(感觉用处不大?如果你强烈需要可以去开个issues <_<)
+- 链接,话题以及@不会变色(感觉用处不大?如果你强烈需要可以去开个 issues <_<)
 
 ## 其他
 - 在 [DynamicPlugin](https://github.com/Colter23/bilibili-dynamic-mirai-plugin/tree/master/DynamicPlugin) 目录下有一个`font`文件夹里面有一个`思源黑体.ttf`  
@@ -176,7 +176,7 @@ baiduTranslate:
 [Mirai](https://github.com/mamoe/mirai)   
 [ViViD按钮](https://vividbtn.top/)   
 [B站: 猫芒ベル_Official](https://space.bilibili.com/487550002/) 这么可爱不关注一下吗(❁´◡`❁)    
-[B站: Colter_null](https://space.bilibili.com/32868931) 如果 github 或论坛太长时间没回复可以去 B 站私信  
+[B站: Colter_null](https://space.bilibili.com/32868931) 如果 GitHub 或论坛太长时间没回复可以去 B 站私信  
 
 ## 感谢
 cssxsh: [bilibili-helper](https://github.com/cssxsh/bilibili-helper)
