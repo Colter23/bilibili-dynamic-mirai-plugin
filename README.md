@@ -1,25 +1,30 @@
 # BilibiliDynamic MiraiPlugin
 
-一个可低延迟检测 B 站动态并转发到 Q 群的 [Mirai](https://github.com/mamoe/mirai) 插件
+一个可低延迟检测 B 站动态/直播并转发到 Q 群的 [Mirai](https://github.com/mamoe/mirai) 插件    
+
+[![MiraiForum](https://img.shields.io/badge/post-on%20MiraiForum-yellow)](https://mirai.mamoe.net/topic/792)
+![Stars](https://img.shields.io/github/stars/Colter23/bilibili-dynamic-mirai-plugin)
+![Downloads](https://img.shields.io/github/downloads/Colter23/bilibili-dynamic-mirai-plugin/total)
+[![Release](https://img.shields.io/github/v/release/Colter23/bilibili-dynamic-mirai-plugin)](https://github.com/Colter23/bilibili-dynamic-mirai-plugin/releases)
 
 ## 特性    
 **无论多少订阅均可在最低 10s 内检测所有动态**  
 Java 原生 API 绘图  
 可以设定检测内容： 动态(包括视频)   仅视频   直播
 
-#### 基本原理
+### 基本原理
 通过检测 [动态](https://t.bilibili.com/) 界面，检测账号关注的所有最新动态，再挑选出 QQ 订阅的动态，这样一个检测周期就可以检测所有最新动态    
 因此，本插件需要一个 B 站账号来订阅用户。    
 (插件有自动关注自动添加分组功能，推荐使用小号，详细见下文)
 
-#### 关于自动关注
+### 关于自动关注
 
 如果账号没有关注过此人，bot 会自动关注并把他分到一个新分组中，方便管理    
 是否开启自动关注以及新分组的名称都可以在 config 中配置    
 如果关闭自动关注，那么在 QQ 中订阅一个未关注的人时会提示 未关注    
 如果你不想让 bot 自动关注又想检测动态，那么你可能不适合这个插件，请移步 cssxsh 大佬的[bilibili-helper](https://github.com/cssxsh/bilibili-helper)    
 
-#### 关于分组(如果你不知道b站关注可以分组的话请忽略)
+### 关于分组(如果你不知道b站关注可以分组的话请忽略)
 开启自动关注后，bot 会生成一个新分组(分组名可以在配置中设置)，由 bot 新关注的人会被分到这个分组内，之前就关注过的不会移动    
 如果你想让 bot 关注就保存在默认分组中，请在配置中替换 `followGroup` 后面的值为两个双引号 `""`
 
@@ -38,10 +43,11 @@ Java 原生 API 绘图
 
 ### 配置
   下面是一个配置文件模板   
-  配置文件位于 `mirai 根目录/config/BilibiliDynamic/BiliPluginConfig.yml`  
+  配置文件位于 `mirai 根目录/config/top.colter.bilibili-dynamic-mirai-plugin/BiliPluginConfig.yml`  
   第一次运行插件会自动生成，也可自己创建  
   注：**后面的`cookie`为必填 请用自行把单引号改为双引号**
 ```yml
+# 管理员
 # 可以是群号或 QQ 号
 admin: 11111111111
 
@@ -107,7 +113,7 @@ baiduTranslate:
   APP_ID: ''
   SECURITY_KEY: ''
 ```
-#### 获取 Cookie
+### 获取 Cookie
 <details>
 <summary>点击展开</summary>
 
@@ -121,7 +127,13 @@ baiduTranslate:
 </details>
 
 ## 使用帮助
+### 权限    
 插件命令依赖 [chat-command](https://github.com/project-mirai/chat-command) 来正确处理聊天环境下的命令，请确保有此插件，否则插件可能无法正常工作    
+|  权限名   |  ID  |
+|  ----  | ----  |
+| 基础权限ID  | top.colter.bilibili-dynamic-mirai-plugin:* |
+| 动态指令ID  | top.colter.bilibili-dynamic-mirai-plugin:command.bili |
+
 如果你不会给权限可以点击下面展开查看简略教程
 <details>
 <summary>点击展开</summary>
@@ -135,7 +147,8 @@ baiduTranslate:
 [授予一个用户执行所有指令的权限](https://github.com/mamoe/mirai-console/blob/master/docs/BuiltInCommands.md#%E6%8E%88%E4%BA%88%E4%B8%80%E4%B8%AA%E7%94%A8%E6%88%B7%E6%89%A7%E8%A1%8C%E6%89%80%E6%9C%89%E6%8C%87%E4%BB%A4%E7%9A%84%E6%9D%83%E9%99%90)
 
 </details>
-
+  
+### 指令    
 ```
 /bili <add 添加> <uid> [群/Q号]       #为目标 [群/Q号] 添加一个订阅
 /bili <list 列表> [群/Q号]            #查询目标 [群/Q号] 的订阅列表
@@ -144,17 +157,18 @@ baiduTranslate:
 /bili <set 设置> <uid> [群/Q号]       #为目标 [群/Q号] 设置订阅内容
 /bili <color 颜色> <uid> <16进制颜色>  #为目标 UID 设置图片推送主题色
 
+<..> 尖括号为必填参数   [..] 中括号为可选参数    
 [群/Q号] 不填的话默认对话所在地
 <16进制颜色> 必须带#号 例: #fde8ed
 
 下面是一些栗子:
-/bili add 487550002    :为本群/好友添加 uid 为 487550002 的订阅
+/bili add 487550002    :为当前群/好友添加 uid 为 487550002 的订阅
 /bili add 487550002 111111  :为 111111 群/好友添加订阅
 /bili color 487550002 #fde8ed  :设置主题色
 ```
 
 ## 图片缓存
-所有生成的图片都会缓存在 `data/BiliBiliDynamic/` 下    
+所有生成的图片都会缓存在 `data/top.colter.bilibili-dynamic-mirai-plugin/` 下    
 `dynamic` 文件夹用于存放所有动态图片    
 `live` 文件夹用于存放所有直播图片    
 目前没有自动清除缓存功能，如果需要请自行删除
