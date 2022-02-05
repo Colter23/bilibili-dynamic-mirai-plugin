@@ -62,6 +62,25 @@ object DynamicCommand : CompositeCommand(
         DynamicTasker.list(contact.delegate)
     )
 
+    @SubCommand("filter", "f", "过滤")
+    suspend fun CommandSender.filter(regex: String, uid: Long, contact: Contact = Contact()) = sendMessage(
+        DynamicTasker.addFilter(regex, uid, contact.delegate)
+    )
+
+    @SubCommand("contain", "c", "包含")
+    suspend fun CommandSender.contain(regex: String, uid: Long, contact: Contact = Contact()) = sendMessage(
+        DynamicTasker.addFilter(regex, uid, contact.delegate, false)
+    )
+
+    @SubCommand("filterList", "fl", "过滤列表")
+    suspend fun CommandSender.filterList(uid: Long, contact: Contact = Contact()) = sendMessage(
+        DynamicTasker.listFilter(uid, contact.delegate)
+    )
+
+    @SubCommand("filterDel", "fd", "过滤删除")
+    suspend fun CommandSender.filterDel(index: String, uid: Long, contact: Contact = Contact()) = sendMessage(
+        DynamicTasker.delFilter(uid, contact.delegate, index)
+    )
 
 }
 

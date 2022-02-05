@@ -35,6 +35,7 @@ data class DynamicInfo(
     @SerialName("display")
     val display: DynamicDisplay,
 
+    var dynamicContent: DynamicContent? = null,
     var link: String = "",
     var images: MutableList<String> = mutableListOf(),
     var content: String = ""
@@ -87,6 +88,15 @@ data class EmojiDetails(
     val url: String
 )
 
+
+@Serializable
+sealed class DynamicContent(
+    val describe: String = "动态"
+)
+
+@Serializable
+data class DynamicNull(val value: String = "null"): DynamicContent()
+
 // DynamicType.REPLY  1
 @Serializable
 data class DynamicReply(
@@ -98,7 +108,7 @@ data class DynamicReply(
     val origin: String,
     @SerialName("origin_user")
     val originUser: UserProfile? = null
-)
+): DynamicContent("转发动态")
 
 @Serializable
 data class DynamicReplyDetail(
@@ -121,7 +131,7 @@ data class DynamicPicture(
     val detail: DynamicPictureDetail,
     @SerialName("user")
     val user: UserSimple
-)
+): DynamicContent()
 
 @Serializable
 data class DynamicPictureDetail(
@@ -156,7 +166,7 @@ data class DynamicText(
     val detail: DynamicTextDetail,
     @SerialName("user")
     val user: UserInfo
-)
+): DynamicContent()
 
 @Serializable
 data class DynamicTextDetail(
@@ -185,7 +195,7 @@ data class DynamicVideo(
     val cover: String,
     @SerialName("title")
     val title: String
-)
+): DynamicContent("视频")
 
 // DynamicType.ARTICLE  64
 @Serializable
@@ -203,7 +213,7 @@ data class DynamicArticle(
     val title: String,
     @SerialName("words")
     val words: Int
-)
+): DynamicContent("专栏")
 
 // DynamicType.MUSIC  256
 @Serializable
@@ -226,7 +236,7 @@ data class DynamicMusic(
     val upper: String,
     @SerialName("upperAvatar")
     val upperAvatar: String
-)
+): DynamicContent("音乐")
 
 // DynamicType.EPISODE  512
 @Serializable
@@ -247,7 +257,7 @@ data class DynamicEpisode(
     val description: String,
     @SerialName("url")
     val share: String
-)
+): DynamicContent()
 
 @Serializable
 data class SeasonInfo(
@@ -274,7 +284,7 @@ data class DynamicSketch(
     val user: UserInfo,
     @SerialName("vest")
     val vest: DynamicSketchVest
-)
+): DynamicContent()
 
 @Serializable
 data class DynamicSketchDetail(
@@ -291,7 +301,7 @@ data class DynamicSketchDetail(
     val target: String,
     @SerialName("title")
     val title: String
-)
+): DynamicContent()
 
 @Serializable
 data class DynamicSketchVest(
@@ -350,7 +360,7 @@ data class DynamicLive(
     val userCover: String,
     @SerialName("verify")
     val verify: String,
-)
+): DynamicContent("直播")
 
 
 object DynamicType {

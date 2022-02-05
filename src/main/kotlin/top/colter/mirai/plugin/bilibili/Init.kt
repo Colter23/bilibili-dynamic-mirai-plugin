@@ -1,6 +1,7 @@
 package top.colter.mirai.plugin.bilibili
 
 import net.mamoe.mirai.utils.error
+import net.mamoe.mirai.utils.info
 import top.colter.mirai.plugin.bilibili.PluginMain.biliJct
 import top.colter.mirai.plugin.bilibili.PluginMain.sessData
 import top.colter.mirai.plugin.bilibili.data.*
@@ -27,6 +28,7 @@ fun initCookie() {
 fun initTagid() {
     val httpUtils = HttpUtils()
     PluginMain.mid = httpUtils.getAndDecode<UserID>(USER_ID).mid
+    PluginMain.logger.info { "账号UID为: ${PluginMain.mid}" }
     if (autoFollow && followGroup.isNotEmpty()) {
         val groups = httpUtils.getAndDecode<List<FollowGroup>>(FOLLOW_GROUP)
         groups.forEach {

@@ -21,11 +21,14 @@ object BiliPluginConfig : ReadOnlyPluginConfig("BiliPluginConfig") {
     @ValueDescription("检测间隔(推荐 15-30) 单位秒")
     val interval: Int by value(15)
 
+    @ValueDescription("直播检测间隔(与动态检测独立) 单位秒")
+    val liveInterval: Int by value(20)
+
+    @ValueDescription("低频检测时间段与倍率(例: 3-8x2 三点到八点检测间隔为正常间隔的2倍) 24小时制")
+    val lowSpeed: String by value("0-0x2")
+
     @ValueDescription("图片推送模式用的字体, 详细请看 readme")
     val font: String by value("")
-
-    @ValueDescription("直播@全体")
-    val liveAtAll: Boolean by value(false)
 
     @ValueDescription("动态/视频推送文字模板, 参数请看 readme")
     val pushTemplate: String by value("{name}@{type}\n{link}")

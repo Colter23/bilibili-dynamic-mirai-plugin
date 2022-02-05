@@ -33,21 +33,53 @@ val DynamicInfo.time: String
     get() = DateTimeFormatter.ofPattern("yyyy年MM月dd日  HH:mm:ss")
         .format(LocalDateTime.ofEpochSecond(describe.timestamp, 0, OffsetDateTime.now().offset))
 
-fun String.content(type: Int, dynamicInfo: DynamicInfo): String {
+fun String.dynamicContent(type: Int): DynamicContent {
     return when (type) {
-        DynamicType.REPLY -> decode<DynamicReply>().getContent(dynamicInfo)
-        DynamicType.PICTURE -> decode<DynamicPicture>().getContent(dynamicInfo)
-        DynamicType.TEXT -> decode<DynamicText>().getContent(dynamicInfo)
-        DynamicType.VIDEO -> decode<DynamicVideo>().getContent(dynamicInfo)
-        DynamicType.ARTICLE -> decode<DynamicArticle>().getContent(dynamicInfo)
-        DynamicType.MUSIC -> decode<DynamicMusic>().getContent(dynamicInfo)
-        DynamicType.EPISODE -> decode<DynamicEpisode>().getContent(dynamicInfo)
+        DynamicType.REPLY -> decode<DynamicReply>()
+        DynamicType.PICTURE -> decode<DynamicPicture>()
+        DynamicType.TEXT -> decode<DynamicText>()
+        DynamicType.VIDEO -> decode<DynamicVideo>()
+        DynamicType.ARTICLE -> decode<DynamicArticle>()
+        DynamicType.MUSIC -> decode<DynamicMusic>()
+        DynamicType.EPISODE -> decode<DynamicEpisode>()
+        DynamicType.SKETCH -> decode<DynamicSketch>()
+        DynamicType.LIVE, DynamicType.LIVE_ING -> decode<DynamicLive>()
+        else -> DynamicNull()
+    }
+}
+
+fun DynamicContent.textContent(type: Int): String {
+    val that = this
+    return when (type) {
+        DynamicType.REPLY -> buildString{
+            val reply = that as DynamicReply
+            val oType = reply.detail.originType
+            append(reply.detail.content)
+            append(reply.origin.dynamicContent(oType).textContent(oType))
+        }
+        DynamicType.TEXT -> (this as DynamicText).detail.content
+        DynamicType.SKETCH -> (this as DynamicSketch).vest.content
+        else -> ""
+    }
+}
+
+fun DynamicContent.content(type: Int, dynamicInfo: DynamicInfo): String {
+    return when (type) {
+        DynamicType.REPLY -> (this as DynamicReply).getContent(dynamicInfo)
+        DynamicType.PICTURE -> (this as DynamicPicture).getContent(dynamicInfo)
+        DynamicType.TEXT -> (this as DynamicText).getContent(dynamicInfo)
+        DynamicType.VIDEO -> (this as DynamicVideo).getContent(dynamicInfo)
+        DynamicType.ARTICLE -> (this as DynamicArticle).getContent(dynamicInfo)
+        DynamicType.MUSIC -> (this as DynamicMusic).getContent(dynamicInfo)
+        DynamicType.EPISODE -> (this as DynamicEpisode).getContent(dynamicInfo)
         DynamicType.DELETE -> "源动态已被作者删除"
-        DynamicType.SKETCH -> decode<DynamicSketch>().getContent(dynamicInfo)
-        DynamicType.LIVE, DynamicType.LIVE_ING -> decode<DynamicLive>().getContent(dynamicInfo)
+        DynamicType.SKETCH -> (this as DynamicSketch).getContent(dynamicInfo)
+        DynamicType.LIVE, DynamicType.LIVE_ING -> (this as DynamicLive).getContent(dynamicInfo)
         DynamicType.LIVE_END -> "直播结束了"
         else -> {
-            dynamicInfo.link = "https://t.bilibili.com/${dynamicInfo.did}"
+            if (dynamicInfo.link == "") {
+                dynamicInfo.link = "https://t.bilibili.com/${dynamicInfo.did}"
+            }
             "不支持此类型${type}"
         }
     }
@@ -60,7 +92,7 @@ fun DynamicReply.getContent(dynamicInfo: DynamicInfo): String {
     return buildString {
         appendLine(detail.content)
         appendLine("〓 转发 〓 ${originUser?.user?.uname} 〓")
-        append(origin.content(detail.originType, dynamicInfo))
+        append(origin.dynamicContent(detail.originType).content(detail.originType, dynamicInfo))
     }
 }
 
@@ -157,18 +189,17 @@ fun DynamicLive.getContent(dynamicInfo: DynamicInfo): String {
 }
 
 
-
-fun String.buildContent(type: Int, dynamicInfo: DynamicInfo): List<BufferedImage> {
+fun DynamicContent.buildContent(type: Int, dynamicInfo: DynamicInfo): List<BufferedImage> {
     return when (type) {
-        DynamicType.REPLY -> decode<DynamicReply>().bufferedImages(dynamicInfo)
-        DynamicType.PICTURE -> decode<DynamicPicture>().bufferedImages(dynamicInfo)
-        DynamicType.TEXT -> decode<DynamicText>().bufferedImages(dynamicInfo)
-        DynamicType.VIDEO -> decode<DynamicVideo>().bufferedImages(dynamicInfo)
-        DynamicType.ARTICLE -> decode<DynamicArticle>().bufferedImages(dynamicInfo)
-        DynamicType.MUSIC -> decode<DynamicMusic>().bufferedImages(dynamicInfo)
-        DynamicType.EPISODE -> decode<DynamicEpisode>().bufferedImages(dynamicInfo)
+        DynamicType.REPLY -> (this as DynamicReply).bufferedImages(dynamicInfo)
+        DynamicType.PICTURE -> (this as DynamicPicture).bufferedImages(dynamicInfo)
+        DynamicType.TEXT -> (this as DynamicText).bufferedImages(dynamicInfo)
+        DynamicType.VIDEO -> (this as DynamicVideo).bufferedImages(dynamicInfo)
+        DynamicType.ARTICLE -> (this as DynamicArticle).bufferedImages(dynamicInfo)
+        DynamicType.MUSIC -> (this as DynamicMusic).bufferedImages(dynamicInfo)
+        DynamicType.EPISODE -> (this as DynamicEpisode).bufferedImages(dynamicInfo)
         DynamicType.DELETE -> listOf(ImgUtils.infoContent("源动态已被作者删除"))
-        DynamicType.SKETCH -> decode<DynamicSketch>().bufferedImages(dynamicInfo)
+        DynamicType.SKETCH -> (this as DynamicSketch).bufferedImages(dynamicInfo)
         DynamicType.LIVE, DynamicType.LIVE_ING -> listOf(ImgUtils.infoContent("直播"))
         DynamicType.LIVE_END -> listOf(ImgUtils.infoContent("直播结束了"))
         else -> {
@@ -192,7 +223,7 @@ fun DynamicReply.bufferedImages(dynamicInfo: DynamicInfo): List<BufferedImage> {
         dynamicInfo.content = "转发动态"
         dynamicInfo.link = "https://t.bilibili.com/${dynamicInfo.did}"
     }
-    val biL = origin.buildContent(detail.originType, dynamicInfo)
+    val biL = origin.dynamicContent(detail.originType).buildContent(detail.originType, dynamicInfo)
     biList.add(ImgUtils.buildReplyImageMessage(biL, originUser?.user))
 
     return biList.toList()
@@ -222,9 +253,9 @@ fun DynamicText.bufferedImages(dynamicInfo: DynamicInfo): List<BufferedImage> {
 fun DynamicVideo.bufferedImages(dynamicInfo: DynamicInfo): List<BufferedImage> {
     val biList = mutableListOf<BufferedImage>()
     ImgUtils.textContent(dynamic, dynamicInfo.display.emojiInfo?.emojiDetails)?.let { biList.add(it) }
-    if (dynamicInfo.type == DynamicType.REPLY){
+    if (dynamicInfo.type == DynamicType.REPLY) {
         biList.add(ImgUtils.videoContentOld(cover, title, description, "视频"))
-    }else{
+    } else {
         biList.add(ImgUtils.videoContent(cover, title, description, "视频"))
     }
     if (dynamicInfo.link == "") {
@@ -278,7 +309,7 @@ fun DynamicEpisode.bufferedImages(dynamicInfo: DynamicInfo): List<BufferedImage>
 
 
 suspend fun DynamicInfo.buildTextDynamic(contact: Contact): Message {
-    val content = card.content(describe.type, this)
+    val content = (dynamicContent ?: card.dynamicContent(type)).content(type, this)
     var resMessage: Message = buildString {
         appendLine("〓 $uname 〓")
         appendLine(content)
@@ -301,10 +332,10 @@ suspend fun DynamicInfo.buildTextDynamic(contact: Contact): Message {
 }
 
 suspend fun DynamicInfo.buildImageDynamic(contact: Contact, color: String): Message {
-    val biList = card.buildContent(describe.type, this)
+    val biList = (dynamicContent ?: card.dynamicContent(type)).buildContent(type, this)
     val file = ImgUtils.buildImageMessage(biList, profile, time, color, "dynamic/${uid}/${did}.png")
-    val msg = BiliPluginConfig.pushTemplate.replace("{name}",uname!!).replace("{uid}",uid.toString())
-        .replace("{type}",content).replace("{time}",time).replace("{link}",link)
+    val msg = BiliPluginConfig.pushTemplate.replace("{name}", uname!!).replace("{uid}", uid.toString())
+        .replace("{type}", content).replace("{time}", time).replace("{link}", link)
     return (file.uploadAsImage(contact) + msg)
 }
 

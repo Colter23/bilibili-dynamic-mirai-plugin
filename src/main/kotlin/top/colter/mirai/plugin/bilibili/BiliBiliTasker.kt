@@ -4,7 +4,8 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import net.mamoe.mirai.Bot
-import net.mamoe.mirai.console.util.CoroutineScopeUtils.childScope
+import net.mamoe.mirai.console.permission.PermissionService.Companion.getPermittedPermissions
+import net.mamoe.mirai.console.permission.PermitteeId.Companion.permitteeId
 import net.mamoe.mirai.contact.Contact
 import net.mamoe.mirai.contact.Group
 import net.mamoe.mirai.message.data.AtAll
@@ -12,22 +13,25 @@ import net.mamoe.mirai.message.data.Message
 import net.mamoe.mirai.utils.error
 import top.colter.mirai.plugin.bilibili.PluginMain.contactMap
 import top.colter.mirai.plugin.bilibili.data.*
-import top.colter.mirai.plugin.bilibili.data.BiliPluginConfig.liveAtAll
+import top.colter.mirai.plugin.bilibili.data.BiliPluginConfig.lowSpeed
 import top.colter.mirai.plugin.bilibili.utils.HttpUtils
 import top.colter.mirai.plugin.bilibili.utils.decode
 import java.time.Instant
+import java.time.LocalTime
 import java.util.stream.Collectors
+import kotlin.coroutines.CoroutineContext
 
 internal val logger by PluginMain::logger
 
-object DynamicTasker : CoroutineScope by PluginMain.childScope("DynamicTasker") {
+object DynamicTasker : CoroutineScope {
+
+    override val coroutineContext: CoroutineContext = Dispatchers.IO + CoroutineName("DynamicTasker")
 
     private var listener: MutableList<Job>? = null
 
     private val seleniumMutex = Mutex()
 
-    //    private val httpMutex = Mutex()
-    val httpUtils = HttpUtils()
+    private val httpUtils = HttpUtils()
 
     val mutex = Mutex()
     val dynamic: MutableMap<Long, SubData> by BiliSubscribeData::dynamic
@@ -40,9 +44,21 @@ object DynamicTasker : CoroutineScope by PluginMain.childScope("DynamicTasker") 
     private val history: MutableList<Long> = mutableListOf()
 
     private val interval = BiliPluginConfig.interval * 1000
+    private val liveInterval = BiliPluginConfig.liveInterval * 1000
+
+    private var lsl = listOf(0,0)
+
+    private var isLowSpeed = false
 
 
     fun start() {
+        runCatching {
+            lsl = lowSpeed.split("-","x").map { it.toInt() }
+            isLowSpeed = lsl[0] != lsl[1]
+        }.onFailure {
+            logger.error("低频检测参数错误 ${it.message}")
+        }
+
         listener = listen()
     }
 
@@ -68,9 +84,7 @@ object DynamicTasker : CoroutineScope by PluginMain.childScope("DynamicTasker") 
 //    }
 
     private fun followUser(uid: Long): String {
-        println("mid: ${PluginMain.mid}")
-        println("uid: ${uid}")
-        if (uid == PluginMain.mid){
+        if (uid == PluginMain.mid) {
             return "不能关注自己哦"
         }
         val attr = httpUtils.getAndDecode<IsFollow>(IS_FOLLOW(uid)).attribute
@@ -81,13 +95,13 @@ object DynamicTasker : CoroutineScope by PluginMain.childScope("DynamicTasker") 
                 val postBody = "fid=$uid&act=1&re_src=11&csrf=${PluginMain.biliJct}"
                 val res = httpUtils.post(FOLLOW, postBody).decode<ResultData>()
                 if (res.code != 0) {
-                    return "关注失败"
+                    return "关注失败: ${res.message}"
                 }
                 if (BiliPluginConfig.followGroup.isNotEmpty()) {
                     val pb = "fids=${uid}&tagids=${PluginMain.tagid}&csrf=${PluginMain.biliJct}"
-                    val res = httpUtils.post(ADD_USER, pb).decode<ResultData>()
-                    if (res.code != 0) {
-                        logger.error("移动分组失败: ${res.message}")
+                    val res1 = httpUtils.post(ADD_USER, pb).decode<ResultData>()
+                    if (res1.code != 0) {
+                        logger.error("移动分组失败: ${res1.message}")
                     }
                 }
             }
@@ -122,13 +136,80 @@ object DynamicTasker : CoroutineScope by PluginMain.childScope("DynamicTasker") 
             dynamic[uid] = subData
             "订阅 ${dynamic[uid]?.name} 成功! \n默认检测 动态+视频+直播 如果需要调整请发送/bili set $uid\n如要设置主题色请发送/bili color <16进制颜色>"
         } else {
-            if (user.contacts.contains(subject)){
+            if (user.contacts.contains(subject)) {
                 "之前订阅过这个人哦"
-            }else{
+            } else {
                 user.contacts[subject] = "11"
                 "订阅 ${dynamic[uid]?.name} 成功! \n默认检测 动态+视频+直播 如果需要调整请发送/bili set $uid"
             }
 
+        }
+    }
+
+    suspend fun addFilter(regex: String, uid: Long, subject: String, mode: Boolean = true) = mutex.withLock {
+        if (dynamic.containsKey(uid)){
+            val filter = if (mode) dynamic[uid]?.filter else dynamic[uid]?.containFilter
+            if (filter?.containsKey(subject) == true){
+                filter[subject]?.add(regex)
+            }else{
+                filter?.set(subject, mutableListOf(regex))
+            }
+            "设置成功"
+        }else{
+            "还未关注此人哦"
+        }
+    }
+
+    suspend fun listFilter(uid: Long, subject: String) = mutex.withLock {
+        if (dynamic.containsKey(uid)){
+            return@withLock buildString {
+                appendLine("过滤 ")
+                if (dynamic[uid]?.filter?.containsKey(subject) == true && dynamic[uid]?.filter?.get(subject)?.size!! > 0){
+                    dynamic[uid]?.filter?.get(subject)?.forEachIndexed { index, s ->
+                        appendLine("f$index: $s")
+                    }
+                }else{
+                    appendLine("还没有设置过滤哦")
+                }
+                appendLine("包含 ")
+                if (dynamic[uid]?.containFilter?.containsKey(subject) == true && dynamic[uid]?.containFilter?.get(subject)?.size!! > 0){
+                    dynamic[uid]?.containFilter?.get(subject)?.forEachIndexed { index, s ->
+                        appendLine("c$index: $s")
+                    }
+                }else{
+                    appendLine("还没有设置包含哦")
+                }
+            }
+        }else{
+            "还未关注此人哦"
+        }
+    }
+
+    suspend fun delFilter(uid: Long, subject: String, index: String) = mutex.withLock {
+        if (dynamic.containsKey(uid)){
+            var i = 0
+            runCatching {
+                i = index.substring(1).toInt()
+            }.onFailure {
+                return@withLock "索引错误"
+            }
+            val filter = if (index[0] == 'f'){
+                 dynamic[uid]?.filter
+            }else if (index[0] == 'c'){
+                dynamic[uid]?.containFilter
+            }else{
+                return@withLock "索引值错误"
+            }
+            if (filter?.containsKey(subject) == true){
+                if (filter[subject]?.size!! < i) return@withLock "索引超出范围"
+                val ft = filter[subject]?.get(i)
+                filter[subject]?.removeAt(i)
+                "已删除 $ft 过滤"
+            }else{
+                "还没有设置过滤哦"
+            }
+        }else{
+            "还未关注此人哦"
         }
     }
 
@@ -167,7 +248,6 @@ object DynamicTasker : CoroutineScope by PluginMain.childScope("DynamicTasker") 
         jobList.add(normalJob())
 //        if (BiliPluginConfig.botMode==1) jobList.add(normalJob())
 //        else jobList.add(missJob())
-
         jobList.add(liveJob())
 
         return jobList
@@ -181,11 +261,14 @@ object DynamicTasker : CoroutineScope by PluginMain.childScope("DynamicTasker") 
         val ndList =
             nd.dynamics?.stream()?.filter { v -> ul.contains(v.uid) }?.map { v -> v.did }?.collect(Collectors.toList())
         ndList?.let { history.addAll(it) }
+        var intervalTime = interval
 
         delay(10000L)
         while (isActive) {
             runCatching {
                 logger.debug("DynamicCheck")
+                intervalTime = calcTime(interval)
+
 //                count++
 //                if (count < 0) {
 //                    val updateNum = httpUtils.getAndDecode<NewDynamicCount>(NEW_DYNAMIC_COUNT).updateNum
@@ -205,20 +288,25 @@ object DynamicTasker : CoroutineScope by PluginMain.childScope("DynamicTasker") 
                 newDynamicList.forEach { di ->
                     val describe = di.describe
                     logger.info("新动态: ${di.uname}@${di.uid}=${di.did}")
-                    val list = getDynamicContactList(describe.uid, di.describe.type == 8)
+                    var list = getDynamicContactList(describe.uid, di.describe.type == 8)
                     if (list != null && list.size > 0) {
-                        val color = dynamic[describe.uid]?.color ?: "#d3edfa"
-                        seleniumMutex.withLock {
-                            history.add(describe.dynamicId)
-                            list.sendMessage { di.build(it, color) }
-                            //lastDynamic = di.timestamp
+                        di.dynamicContent = di.card.dynamicContent(di.type)
+                        list = list.filterContent(describe.uid, di.dynamicContent!!.textContent(describe.type))
+                        if (list.size > 0){
+                            val color = dynamic[describe.uid]?.color ?: "#d3edfa"
+                            seleniumMutex.withLock {
+                                history.add(describe.dynamicId)
+                                withTimeout(30000) {
+                                    list.sendMessage { di.build(it, color) }
+                                }
+                                //lastDynamic = di.timestamp
+                            }
                         }
-                        //delay(1000L)
                     }
                 }
             }.onSuccess {
                 //LocalTime.now().hour
-                delay((interval..(interval + 5000L)).random())
+                delay((intervalTime..(intervalTime + 5000L)).random())
             }.onFailure {
                 logger.error("ERROR $it")
                 findContact(BiliPluginConfig.admin)?.sendMessage("动态检测失败\n" + it.message)
@@ -228,10 +316,14 @@ object DynamicTasker : CoroutineScope by PluginMain.childScope("DynamicTasker") 
     }
 
     private fun liveJob() = launch {
+        var liveIntervalTime = interval
+
         delay(20000L)
         while (isActive) {
             runCatching {
                 logger.debug("LiveCheck")
+                liveIntervalTime = calcTime(liveInterval)
+
                 val liveList = httpUtils.getAndDecode<Live>(LIVE_LIST).liveList
                 val newLiveList = liveList.stream().filter { it.liveTime > lastLive }
                     .filter { v -> dynamic.map { it.key }.contains(v.uid) }
@@ -240,13 +332,15 @@ object DynamicTasker : CoroutineScope by PluginMain.childScope("DynamicTasker") 
                     val list = getLiveContactList(ll.uid)
                     if (list != null && list.size != 0) {
                         seleniumMutex.withLock {
-                            list.sendMessage(liveAtAll) { ll.build(it) }
+                            withTimeout(30000) {
+                                list.sendMessage{ ll.build(it) }
+                            }
                         }
                         lastLive = ll.liveTime
                     }
                 }
             }.onSuccess {
-                delay((20000..30000L).random())
+                delay((liveIntervalTime..(liveIntervalTime + 5000L)).random())
             }.onFailure {
                 logger.error("ERROR $it")
                 findContact(BiliPluginConfig.admin)?.sendMessage("直播检测失败\n" + it.message)
@@ -254,6 +348,17 @@ object DynamicTasker : CoroutineScope by PluginMain.childScope("DynamicTasker") 
             }
 
         }
+    }
+
+    private fun calcTime(time: Int): Int{
+        return if (isLowSpeed){
+            val hour = LocalTime.now().hour
+            return if (lsl[0] > lsl[1]){
+                if (lsl[0] <= hour || hour <= lsl[1]) time * lsl[2] else time
+            }else{
+                if (lsl[0] <= hour && hour <= lsl[1]) time * lsl[2] else time
+            }
+        }else time
     }
 
     private fun missJob() = launch {
@@ -331,21 +436,55 @@ object DynamicTasker : CoroutineScope by PluginMain.childScope("DynamicTasker") 
         }
     }
 
+    private suspend fun MutableSet<String>.filterContent(uid: Long, content: String): MutableSet<String> = mutex.withLock {
+        val allContainList = mutableListOf<String>()
+        dynamic[0]?.containFilter?.get("0")?.let { allContainList.addAll(it) }
+        dynamic[uid]?.containFilter?.get("0")?.let { allContainList.addAll(it) }
+
+        val allFilterList = mutableListOf<String>()
+        dynamic[0]?.filter?.get("0")?.let { allFilterList.addAll(it) }
+        dynamic[uid]?.filter?.get("0")?.let { allFilterList.addAll(it) }
+
+        return filter { contact ->
+            val containList = mutableListOf<String>()
+            containList.addAll(allContainList)
+            dynamic[0]?.containFilter?.get(contact)?.let { containList.addAll(it) }
+            dynamic[uid]?.containFilter?.get(contact)?.let { containList.addAll(it) }
+            containList.forEach {
+                val b = Regex(it).containsMatchIn(content)
+                if (b) return@filter true
+            }
+            if (containList.size > 0) return@filter false
+
+            val filterList = mutableListOf<String>()
+            filterList.addAll(allFilterList)
+            dynamic[0]?.filter?.get(contact)?.let { filterList.addAll(it) }
+            dynamic[uid]?.filter?.get(contact)?.let { filterList.addAll(it) }
+            filterList.forEach {
+                val b = Regex(it).containsMatchIn(content)
+                if (b) return@filter false
+            }
+            true
+        }.toMutableSet()
+    }
+
     private suspend inline fun MutableSet<String>.sendMessage(
 //        info: String? = null,
-        liveAtAll: Boolean = false,
         message: (contact: Contact) -> Message
     ) {
         val me = findContact(this.first())?.let { message(it) }
         if (me != null) {
             this.map { delegate ->
                 runCatching {
-                    requireNotNull(findContact(delegate)) { "找不到联系人" }.let {
+                    requireNotNull(findContact(delegate)) { "找不到联系人" }.let { contact ->
 //                        if (info == null) it.sendMessage(me)
 //                        else it.sendMessage(me + "\n" + info)
-                        if (liveAtAll && it is Group) {
-                            it.sendMessage(me + "\n" + AtAll)
-                        } else it.sendMessage(me)
+                        var msg = me
+                        if (contact is Group) {
+                            val hasPerm = contact.permitteeId.getPermittedPermissions().any { it.id == PluginMain.gwp }
+                            if (hasPerm) msg = msg + "\n" + AtAll
+                        }
+                        contact.sendMessage(msg)
                     }
                 }.onFailure {
                     logger.error({ "对${this}构建消息失败" }, it)

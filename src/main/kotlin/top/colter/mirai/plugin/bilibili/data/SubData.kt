@@ -17,5 +17,9 @@ data class SubData(
     @SerialName("contacts")
     val contacts: MutableMap<String, String> = mutableMapOf(),
     @SerialName("banList")
-    val banList: MutableMap<String, String> = mutableMapOf()
+    val banList: MutableMap<String, String> = mutableMapOf(),
+    @SerialName("filter")
+    val filter: MutableMap<String, MutableList<String>> = mutableMapOf(),
+    @SerialName("containFilter")
+    val containFilter: MutableMap<String, MutableList<String>> = mutableMapOf()
 )

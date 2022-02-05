@@ -1,14 +1,15 @@
 package top.colter.mirai.plugin.bilibili.utils
 
 import com.vdurmont.emoji.EmojiParser
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromString
-import net.mamoe.mirai.console.util.ConsoleExperimentalApi
-import net.mamoe.mirai.console.util.CoroutineScopeUtils.childScope
 import net.mamoe.mirai.utils.error
 import top.colter.mirai.plugin.bilibili.PluginMain
 import top.colter.mirai.plugin.bilibili.data.*
+import top.colter.mirai.plugin.bilibili.logger
 import top.colter.miraiplugin.utils.translate.trans
 import java.awt.*
 import java.awt.geom.Ellipse2D
@@ -19,10 +20,12 @@ import java.io.File
 import java.net.URL
 import java.util.*
 import javax.imageio.ImageIO
+import kotlin.coroutines.CoroutineContext
 
-@OptIn(ConsoleExperimentalApi::class)
-object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
-//object ImgUtils {
+object ImgUtils: CoroutineScope{
+
+    override val coroutineContext: CoroutineContext = Dispatchers.IO + CoroutineName("ImageTasker")
+
     private val renderingHints = RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
     private val fonts = mutableListOf<Font>()
 
@@ -40,14 +43,14 @@ object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
                 if (it.indexOf('.') != -1) {
                     val fontList = it.split(".")
                     val file = PluginMain.resolveDataFile("font/${it}")
-                    if (file.exists()){
+                    if (file.exists()) {
                         if (fontList.last() == "ttf") {
                             fonts.add(Font.createFont(Font.TRUETYPE_FONT, file))
                             PluginMain.logger.info("成功加载字体: $it")
                         } else {
                             PluginMain.logger.error { "不支持的字体类型: $it" }
                         }
-                    }else{
+                    } else {
                         PluginMain.logger.error { "没有此字体文件: $it" }
                     }
                 } else {
@@ -55,10 +58,10 @@ object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
                     fonts.add(Font(it, Font.PLAIN, 20))
                 }
             }
-        }catch (e: Exception){
+        } catch (e: Exception) {
             PluginMain.logger.error { "初始化字体时出错: ${e.message}" }
         }
-        if (fonts.size == 0){
+        if (fonts.size == 0) {
             fonts.add(Font("Microsoft Yahei", Font.PLAIN, 20))
         }
     }
@@ -66,7 +69,7 @@ object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
     @OptIn(ExperimentalSerializationApi::class)
     inline fun <reified T> String.decode(): T = json.decodeFromString(this)
 
-    fun hex2Color(hex: String): Color {
+    private fun hex2Color(hex: String): Color {
         return if (hex.startsWith("#")) {
             Color(
                 Integer.valueOf(hex.substring(1, 3), 16),
@@ -76,16 +79,6 @@ object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
         } else {
             Color.BLACK
         }
-    }
-
-    fun testBuildImageMessage(msg: String){
-        buildImageMessage(
-            listOf(textContent(msg, null)!!,videoContent("https://i0.hdslb.com/bfs/archive/5c20fc634ca754acc6b48a445a2980b9a4942107.jpg","趣味视频征集活动今日","视频内容不限，包括但不限于打法攻略、创意玩法等内容视频内容不限，包括但不限于打法攻略、创意玩法等内容", "视频")),
-            UserProfile(UserInfo(1,
-                "Test",
-                "https://i0.hdslb.com/bfs/face/904bef1b4067335068faba12062f735dda07c1fe.jpg@240w_240h_1c_1s.png")),
-            "2021年12月21日","#9fc7f3","D:/Code/test.png"
-        )//D:/Code/test.png
     }
 
     fun buildImageMessage(
@@ -135,7 +128,7 @@ object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
 
         var g2Y = if (user == null) 20 else 55
         if (user?.uname != null) {
-            if (user.face != null){
+            if (user.face != null) {
                 g2.clip = Ellipse2D.Double(25.0, 10.0, 40.0, 40.0)
                 g2.drawImage(ImageIO.read(URL(imgApi(user.face, 40, 40))), 25, 10, null)
                 g2.clip = null
@@ -208,7 +201,7 @@ object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
         val margin = 10
         val rw = imgWidth - margin * 2
         val rh = height - margin * 2
-        bgG2.color = Color(255,255,255, 200)
+        bgG2.color = Color(255, 255, 255, 200)
         bgG2.fillRoundRect(margin, margin, rw, rh, 20, 20)
         bgG2.color = Color(238, 238, 238)
         bgG2.drawRoundRect(margin - 1, margin - 1, rw + 1, rh + 1, 20, 20)
@@ -263,18 +256,23 @@ object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
         }
 
         msgText = EmojiParser.parseFromUnicode(msgText) { e ->
-            val emojis = e.emoji.htmlHexadecimal.split(";").filter{it.isNotEmpty()}.toList()
+            val emojis = e.emoji.htmlHexadecimal.split(";").filter{ it.isNotEmpty() }.map{ it.substring(3) }.toList()
             val emoji = emojis.joinToString("-")
             if (!emojiMap.containsKey(emoji)) {
-                val emojiImg = try {
-                    ImageIO.read(URL("https://twemoji.maxcdn.com/36x36/$emoji.png"))
-                }catch (ex: Exception){
+                var emojiImg: BufferedImage? = null
+                runCatching {
+                    val conn = URL("https://twemoji.maxcdn.com/36x36/$emoji.png").openConnection()
+                    conn.connectTimeout = 5000
+                    conn.readTimeout = 5000
+                    emojiImg = ImageIO.read(conn.getInputStream())
+                }.onFailure {
+                    logger.error("获取 $emoji emoji失败")
                     return@parseFromUnicode e.emoji.unicode
                 }
                 val emojiBi = BufferedImage(30, 30, BufferedImage.TYPE_INT_ARGB)
                 val emojiG2 = emojiBi.createGraphics()
                 emojiG2.setRenderingHints(renderingHints)
-                emojiG2.drawImage(emojiImg,0,0,30,30,null)
+                emojiG2.drawImage(emojiImg, 0, 0, 30, 30, null)
 
                 emojiMap["[$emoji]"] = emojiBi
                 emojiG2.dispose()
@@ -321,7 +319,7 @@ object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
                 } else textG2.drawStr(c, textX, textY)
                 textX += textG2.getStrWidth(c.toString())
             }
-            if (textY > 1900){
+            if (textY > 1900) {
                 textG2.color = Color.red
                 textX += 200
                 textG2.drawString("!!文字过长, 后续已省略!!", textX, textY)
@@ -430,7 +428,7 @@ object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
         val picArc = 10
         val margin = 50
         val cardWidth = imgWidth - margin * 2
-        val cardHeight = 460
+        val cardHeight = 465
         val imgHeight = 360
 
         videoG2.color = Color.WHITE
@@ -457,7 +455,7 @@ object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
 
         videoG2.color = Color.BLACK
         videoG2.font = fonts[0].deriveFont(20f)
-        val textY = videoG2.writeText(title, 65, imgHeight+40, cardWidth - 30, 1)
+        val textY = videoG2.writeText(title, 65, imgHeight + 40, cardWidth - 30, 1)
 
         videoG2.font = fonts[0].deriveFont(16f)
         videoG2.color = Color(148, 147, 147)
@@ -498,7 +496,14 @@ object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
             }
         } else {
             //articleG2.drawImg(imageUrls[0], contentMargin, 10, cardWidth, imgHeight)
-            articleG2.drawImage(ImageIO.read(URL(imgApi(imageUrls[0], 640, 147))), contentMargin, 10, cardWidth, imgHeight,null)
+            articleG2.drawImage(
+                ImageIO.read(URL(imgApi(imageUrls[0], 640, 147))),
+                contentMargin,
+                10,
+                cardWidth,
+                imgHeight,
+                null
+            )
         }
         articleG2.clip = null
         //articleG2.stroke = BasicStroke(2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
@@ -606,10 +611,10 @@ object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
         return textY
     }
 
-    private fun Graphics2D.drawStr(c: Char, textX: Int, textY: Int){
+    private fun Graphics2D.drawStr(c: Char, textX: Int, textY: Int) {
         var cur = 0
-        while (!font.canDisplay(c)){
-            if (cur == fonts.size-1){
+        while (!font.canDisplay(c)) {
+            if (cur == fonts.size - 1) {
                 cur = 0
                 font = fonts[0].deriveFont(font.size2D)
                 break
@@ -617,7 +622,7 @@ object ImgUtils : CoroutineScope by PluginMain.childScope("ImageTasker"){
             font = fonts[++cur].deriveFont(font.size2D)
         }
         drawString(c.toString(), textX, textY)
-        if (cur != 0){
+        if (cur != 0) {
             font = fonts[0].deriveFont(font.size2D)
         }
     }
