@@ -92,9 +92,6 @@ lowSpeed: 0-0x2
 # 建议最后一个字体使用字符比较全的，用于显示颜文字
 font: HarmonyOS Sans SC,Source Han Sans
 
-# 直播@全体(目前只能全体控制，如果需要对单独的群设置请去开 issue)
-liveAtAll: false
-
 # 图片模式下动态/视频推送文字模板
 # 配置项:
 # {name} : 名字
