@@ -333,7 +333,7 @@ object DynamicTasker : CoroutineScope {
                     if (list != null && list.size != 0) {
                         seleniumMutex.withLock {
                             withTimeout(30000) {
-                                list.sendMessage{ ll.build(it) }
+                                list.sendMessage(true){ ll.build(it) }
                             }
                         }
                         lastLive = ll.liveTime
@@ -470,6 +470,7 @@ object DynamicTasker : CoroutineScope {
 
     private suspend inline fun MutableSet<String>.sendMessage(
 //        info: String? = null,
+        liveAtAll: Boolean = false,
         message: (contact: Contact) -> Message
     ) {
         val me = findContact(this.first())?.let { message(it) }
@@ -480,11 +481,16 @@ object DynamicTasker : CoroutineScope {
 //                        if (info == null) it.sendMessage(me)
 //                        else it.sendMessage(me + "\n" + info)
                         var msg = me
-                        if (contact is Group) {
+                        if (liveAtAll && contact is Group) {
                             val hasPerm = contact.permitteeId.getPermittedPermissions().any { it.id == PluginMain.gwp }
                             if (hasPerm) msg = msg + "\n" + AtAll
                         }
-                        contact.sendMessage(msg)
+                        runCatching {
+                            contact.sendMessage(msg)
+                        }.onFailure {
+                            logger.error(it.message)
+                            contact.sendMessage(me)
+                        }
                     }
                 }.onFailure {
                     logger.error({ "对${this}构建消息失败" }, it)
