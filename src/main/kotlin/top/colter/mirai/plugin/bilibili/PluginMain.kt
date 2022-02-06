@@ -15,7 +15,7 @@ object PluginMain : KotlinPlugin(
     JvmPluginDescription(
         id = "top.colter.bilibili-dynamic-mirai-plugin",
         name = "BilibiliDynamic",
-        version = "2.1.3"
+        version = "2.1.4"
     ) {
         author("Colter")
         info(
@@ -37,7 +37,6 @@ object PluginMain : KotlinPlugin(
     val gwp = PermissionId(PluginMain.description.id,"live.atall")
 
     override fun onEnable() {
-        System.setProperty("java.awt.headless", "true")
         PermissionService.INSTANCE.register(gwp,"直播At全体")
 
         BiliSubscribeData.reload()
