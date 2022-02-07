@@ -135,6 +135,8 @@ baiduTranslate:
 </details>
 
 ## 使用帮助
+### 常见问题
+查阅 [Q&A](docs/qa.md)
 ### 权限    
 插件命令依赖 [chat-command](https://github.com/project-mirai/chat-command) 来正确处理聊天环境下的命令，请确保有此插件，否则插件可能无法正常工作    
 
