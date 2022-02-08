@@ -47,9 +47,10 @@ object DynamicTasker : CoroutineScope {
     private val liveInterval = BiliPluginConfig.liveInterval * 1000
 
     private var lsl = listOf(0,0)
-
     private var isLowSpeed = false
 
+    private var errorMessage = "SUCCESS"
+    private var liveErrorMessage = "SUCCESS"
 
     fun start() {
         runCatching {
@@ -306,10 +307,16 @@ object DynamicTasker : CoroutineScope {
                 }
             }.onSuccess {
                 //LocalTime.now().hour
+                errorMessage = "SUCCESS"
                 delay((intervalTime..(intervalTime + 5000L)).random())
             }.onFailure {
                 logger.error("ERROR $it")
-                findContact(BiliPluginConfig.admin)?.sendMessage("动态检测失败\n" + it.message)
+                if (it.message != errorMessage){
+                    (findContact(BiliPluginConfig.admin)?:findContact("-${BiliPluginConfig.admin}"))?.sendMessage("动态检测失败\n" + it.message)
+                }
+                if (errorMessage == "SUCCESS"){
+                    errorMessage = it.message.toString()
+                }
                 delay((60000L..120000L).random())
             }
         }
@@ -340,13 +347,18 @@ object DynamicTasker : CoroutineScope {
                     }
                 }
             }.onSuccess {
+                liveErrorMessage = "SUCCESS"
                 delay((liveIntervalTime..(liveIntervalTime + 5000L)).random())
             }.onFailure {
                 logger.error("ERROR $it")
-                findContact(BiliPluginConfig.admin)?.sendMessage("直播检测失败\n" + it.message)
+                if (it.message != liveErrorMessage){
+                    (findContact(BiliPluginConfig.admin)?:findContact("-${BiliPluginConfig.admin}"))?.sendMessage("直播检测失败\n" + it.message)
+                }
+                if (liveErrorMessage == "SUCCESS"){
+                    liveErrorMessage = it.message.toString()
+                }
                 delay((60000L..120000L).random())
             }
-
         }
     }
 

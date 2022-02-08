@@ -10,6 +10,7 @@ import top.colter.mirai.plugin.bilibili.utils.ImgUtils
 import java.net.URL
 import javax.imageio.ImageIO
 
+
 internal class PluginTest {
 
     @Test

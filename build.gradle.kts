@@ -12,6 +12,7 @@ version = "2.1.4"
 repositories {
     mavenLocal()
     maven("https://maven.aliyun.com/repository/public") // 阿里云国内代理仓库
+    maven("https://jitpack.io")
     mavenCentral()
 }
 

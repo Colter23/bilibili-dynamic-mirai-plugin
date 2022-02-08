@@ -52,11 +52,10 @@ class HttpUtils {
     inline fun <reified T> getAndDecode(url: String): T {
         val js = get(url).decode<ResultData>()
         if (js.code != 0) {
-            throw Exception()
+            if (js.code == -6) throw Exception("Cookie失效！请重新登录！")
+            throw Exception(js.message)
         }
         return js.data!!.decode()
     }
-
-
 
 }
