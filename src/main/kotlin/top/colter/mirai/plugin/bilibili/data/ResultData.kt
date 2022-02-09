@@ -7,9 +7,11 @@ import kotlinx.serialization.json.JsonElement
 @Serializable
 data class ResultData(
     @SerialName("code")
-    val code: Int,
+    val code: Int? = null,
     @SerialName("message")
-    val message: String,
+    val message: String? = null,
+    @SerialName("status")
+    val status: Boolean? = null,
     @SerialName("msg")
     val msg: String? = null,
     @SerialName("data")

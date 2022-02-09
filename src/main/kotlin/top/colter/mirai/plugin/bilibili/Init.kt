@@ -1,7 +1,6 @@
 package top.colter.mirai.plugin.bilibili
 
 import net.mamoe.mirai.utils.error
-import net.mamoe.mirai.utils.info
 import top.colter.mirai.plugin.bilibili.PluginMain.biliJct
 import top.colter.mirai.plugin.bilibili.PluginMain.sessData
 import top.colter.mirai.plugin.bilibili.data.*
@@ -11,7 +10,7 @@ import top.colter.mirai.plugin.bilibili.utils.HttpUtils
 import top.colter.mirai.plugin.bilibili.utils.decode
 
 fun initCookie() {
-    val cookieList = BiliPluginConfig.cookie.split("; ")
+    val cookieList = BiliPluginConfig.cookie.split("; ", ";")
     cookieList.forEach {
         val cookieItem = it.split("=")
         if (cookieItem[0] == "SESSDATA") {
@@ -21,14 +20,19 @@ fun initCookie() {
         }
     }
     if (sessData == "" || biliJct == "") {
-        PluginMain.logger.error("Cookie错误!请检查是否有 SESSDATA 与 bili_jct 字段")
+        PluginMain.logger.error("Cookie错误!请检查是否有 SESSDATA 与 bili_jct 字段, 或使用 /bili login 进行登录")
     }
 }
 
 fun initTagid() {
     val httpUtils = HttpUtils()
-    PluginMain.mid = httpUtils.getAndDecode<UserID>(USER_ID).mid
-    PluginMain.logger.info { "账号UID为: ${PluginMain.mid}" }
+    runCatching {
+        PluginMain.mid = httpUtils.getAndDecode<UserID>(USER_ID).mid
+        PluginMain.logger.info("账号UID为: ${PluginMain.mid}")
+    }.onFailure {
+        PluginMain.logger.error(it.message)
+        return
+    }
     if (autoFollow && followGroup.isNotEmpty()) {
         val groups = httpUtils.getAndDecode<List<FollowGroup>>(FOLLOW_GROUP)
         groups.forEach {

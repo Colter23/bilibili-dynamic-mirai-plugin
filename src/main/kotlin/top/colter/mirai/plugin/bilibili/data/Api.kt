@@ -33,6 +33,10 @@ const val DEL_FOLLOW_GROUP = "https://api.bilibili.com/x/relation/tag/del"
 // POST 参数 fids  tagids
 const val ADD_USER = "https://api.bilibili.com/x/relation/tags/addUsers"
 
+const val LOGIN_URL = "http://passport.bilibili.com/qrcode/getLoginUrl"
+
+const val LOGIN_INFO = "http://passport.bilibili.com/qrcode/getLoginInfo"
+
 
 fun USER_INFO(uid: Long): String {
     return USER_INFO + uid

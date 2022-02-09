@@ -12,13 +12,14 @@
 Java 原生 API 绘图  
 可以设定检测内容： 动态(包括视频)   仅视频   直播    
 直播@全体    
-动态过滤
+动态过滤    
+扫码登录
 
 ### 基本原理
 通过检测 [动态](https://t.bilibili.com/) 界面，检测账号关注的所有最新动态，再挑选出 QQ 订阅的动态，这样一个检测周期就可以检测所有最新动态    
 因此，本插件需要一个 B 站账号来订阅用户。     
 **强烈推荐使用小号** 如果让bot用你经常使用的账号可能会出现长期多次异地访问造成风控 [无法添加关注](https://github.com/Colter23/bilibili-dynamic-mirai-plugin/issues/40)    
-(插件有自动关注自动添加分组功能，详细见下文)
+(插件有扫码登陆和自动关注自动添加分组功能，详细见下文)
 
 ### 关于自动关注
 如果账号没有关注过此人，bot 会自动关注并把他分到一个新分组中，方便管理    
@@ -47,7 +48,8 @@ Java 原生 API 绘图
   下面是一个配置文件模板   
   配置文件位于 `mirai 根目录/config/top.colter.bilibili-dynamic-mirai-plugin/BiliPluginConfig.yml`  
   第一次运行插件会自动生成，也可自己创建  
-  注：**后面的`cookie`为必填 请用自行把单引号改为双引号**
+  注：**v2.1.5版本之后 `cookie` 项可以不用填写，bot管理员通过 `/bili login` 进行扫码登录**    
+  **v2.1.5之前的版本 `cookie` 项为必填，并自行在配置文件中把单引号改为双引号**
 ```yml
 # 管理员
 # 可以是群号或 QQ 号
@@ -107,9 +109,9 @@ pushTemplate: "{name}@{type}\n{link}"
 # 图片模式下直播推送文字模板, 如果为空则与上方动态推送模板保持一致
 livePushTemplate: ""
 
-# cookie !!必填!!
 # cookie 请包在双引号内
-# 如何获取见下文 获取 Cookie
+# 如何获取见下文 手动获取 Cookie
+# 或使用 /bili login 进行扫码登录
 cookie: ""
 
 # 百度翻译
@@ -121,7 +123,7 @@ baiduTranslate:
   APP_ID: ''
   SECURITY_KEY: ''
 ```
-### 获取 Cookie
+### 手动获取 Cookie
 <details>
 <summary>点击展开</summary>
 
@@ -169,6 +171,7 @@ baiduTranslate:
 
 | 指令                              | 描述                 |
 |---------------------------------|--------------------|
+| /bili <login 登录>                | bot管理员进行扫码登录       |
 | /bili <add 添加> <uid> [群/Q号]     | 为目标 [群/Q号] 添加一个订阅  |
 | /bili <list 列表> [群/Q号]          | 查询目标 [群/Q号] 的订阅列表  |
 | /bili <del 删除> <uid> [群/Q号]     | 为目标 [群/Q号] 删除一个订阅  |
@@ -176,8 +179,9 @@ baiduTranslate:
 | /bili <set 设置> <uid> [群/Q号]     | 为目标 [群/Q号] 设置订阅内容  |
 | /bili <color 颜色> <uid> <16进制颜色> | 为目标 UID 设置图片推送主题色  |
 | /bili <list 列表> [群/Q号]          | 查询目标 [群/Q号] 的订阅列表  |
-```shell
+```
 # 说明
+扫码登录请在配置文件中填写管理员账号    
 <..> 尖括号为必填参数   [..] 中括号为可选参数    
 [群/Q号] 不填的话默认对话所在地
 <16进制颜色> 必须带#号 例: #fde8ed
@@ -200,7 +204,7 @@ baiduTranslate:
 | /bili <filterList fl 过滤列表> <uid> [群/Q号]        | 列出 uid 的过滤包含列表          |
 | /bili <filterDel fd 过滤删除> <index> <uid> [群/Q号] | 删除 uid 中 index 的过滤包含    |
 
-```shell
+```
 # 栗子
 /bili f 互动抽奖 487550002    # 为当前群/好友订阅的 487550002 用户设置内容为“互动抽奖”的过滤
 # 当 487550002 用户动态中包含“互动抽奖”文字时不给当前群/好友推送

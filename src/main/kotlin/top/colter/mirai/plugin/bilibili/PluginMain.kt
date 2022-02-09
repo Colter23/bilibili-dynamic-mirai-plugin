@@ -15,7 +15,7 @@ object PluginMain : KotlinPlugin(
     JvmPluginDescription(
         id = "top.colter.bilibili-dynamic-mirai-plugin",
         name = "BilibiliDynamic",
-        version = "2.1.4"
+        version = "2.1.5"
     ) {
         author("Colter")
         info(
@@ -54,5 +54,7 @@ object PluginMain : KotlinPlugin(
         DynamicCommand.unregister()
         DynamicTasker.stop()
         Listener.stop()
+        BiliSubscribeData.save()
+        BiliPluginConfig.save()
     }
 }

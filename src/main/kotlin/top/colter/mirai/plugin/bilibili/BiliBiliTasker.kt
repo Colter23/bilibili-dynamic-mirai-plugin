@@ -1,5 +1,8 @@
 package top.colter.mirai.plugin.bilibili
 
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.client.j2se.MatrixToImageWriter
+import com.google.zxing.qrcode.QRCodeWriter
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -10,12 +13,15 @@ import net.mamoe.mirai.contact.Contact
 import net.mamoe.mirai.contact.Group
 import net.mamoe.mirai.message.data.AtAll
 import net.mamoe.mirai.message.data.Message
+import net.mamoe.mirai.utils.ExternalResource.Companion.uploadAsImage
 import net.mamoe.mirai.utils.error
 import top.colter.mirai.plugin.bilibili.PluginMain.contactMap
+import top.colter.mirai.plugin.bilibili.PluginMain.save
 import top.colter.mirai.plugin.bilibili.data.*
 import top.colter.mirai.plugin.bilibili.data.BiliPluginConfig.lowSpeed
 import top.colter.mirai.plugin.bilibili.utils.HttpUtils
 import top.colter.mirai.plugin.bilibili.utils.decode
+import java.net.URI
 import java.time.Instant
 import java.time.LocalTime
 import java.util.stream.Collectors
@@ -69,20 +75,19 @@ object DynamicTasker : CoroutineScope {
         }
     }
 
-//    suspend fun listenAll(subject: String) = mutex.withLock {
-//        dynamic.forEach { (uid, sub) ->
-//            if (subject in sub.contacts) {
-//                sub.contacts.remove(subject)
-//            }
-//        }
-//
-//        val user = dynamic[0]
-//        user?.contacts?.set(subject, "11")
-//    }
-//
-//    suspend fun cancelListen(subject: String) = mutex.withLock {
-//        dynamic[0]?.contacts?.remove(subject)
-//    }
+    suspend fun listenAll(subject: String) = mutex.withLock {
+        dynamic.forEach { (uid, sub) ->
+            if (subject in sub.contacts) {
+                sub.contacts.remove(subject)
+            }
+        }
+        val user = dynamic[0]
+        user?.contacts?.set(subject, "11")
+    }
+
+    suspend fun cancelListen(subject: String) = mutex.withLock {
+        dynamic[0]?.contacts?.remove(subject)
+    }
 
     private fun followUser(uid: Long): String {
         if (uid == PluginMain.mid) {
@@ -242,42 +247,76 @@ object DynamicTasker : CoroutineScope {
         }
     }
 
-    private fun listen(): MutableList<Job> {
-
-        val jobList = mutableListOf<Job>()
-
-        jobList.add(normalJob())
-//        if (BiliPluginConfig.botMode==1) jobList.add(normalJob())
-//        else jobList.add(missJob())
-        jobList.add(liveJob())
-
-        return jobList
-
+    suspend fun login(contact: Contact){
+        val loginData = httpUtils.getAndDecode<LoginData>(LOGIN_URL)
+        val qrCodeWriter = QRCodeWriter()
+        val bitMatrix = qrCodeWriter.encode(loginData.url, BarcodeFormat.QR_CODE, 250, 250)
+        val file = PluginMain.resolveDataFile("qrcode.png")
+        MatrixToImageWriter.writeToPath(bitMatrix, "PNG", file.toPath())
+        contact.sendMessage(file.uploadAsImage(contact) + "请使用BiliBili手机APP扫码登录 3分钟有效")
+        runCatching {
+            withTimeout(180000){
+                while (true){
+                    val loginInfo = httpUtils.post(LOGIN_INFO,"oauthKey=${loginData.oauthKey}").decode<ResultData>()
+                    if (loginInfo.status == true){
+                        val url = loginInfo.data?.decode<LoginData>()?.url
+                        val querys = URI(url).query.split("&")
+                        val cookie = buildString {
+                            querys.forEach {
+                                if (it.contains("SESSDATA") || it.contains("bili_jct")) append("$it; ")
+                            }
+                        }
+                        BiliPluginConfig.cookie = cookie
+                        BiliPluginConfig.save()
+                        logger.info("Cookie: ${BiliPluginConfig.cookie}")
+                        initCookie()
+                        initTagid()
+                        getHistoryDynamic()
+                        contact.sendMessage("登录成功!")
+                        break
+                    }
+                    delay(5000)
+                }
+            }
+        }.onFailure {
+            contact.sendMessage("登录失败 ${it.message}")
+        }
+        file.delete()
     }
 
-    private fun normalJob() = launch {
-//        var count = 0
+
+    private fun listen(): MutableList<Job> {
+        val jobList = mutableListOf<Job>()
+        jobList.add(normalJob())
+        jobList.add(liveJob())
+        return jobList
+    }
+
+    private fun getHistoryDynamic() = runCatching {
         val nd = httpUtils.getAndDecode<DynamicList>(NEW_DYNAMIC)
         val ul = dynamic.map { it.key }
         val ndList =
             nd.dynamics?.stream()?.filter { v -> ul.contains(v.uid) }?.map { v -> v.did }?.collect(Collectors.toList())
         ndList?.let { history.addAll(it) }
+    }.onFailure {
+        logger.error(it.message)
+    }
+
+    private fun normalJob() = launch {
+        getHistoryDynamic()
         var intervalTime = interval
 
         delay(10000L)
         while (isActive) {
+            if (PluginMain.sessData == ""){
+                logger.debug("未登录")
+                delay(100000)
+                continue
+            }
             runCatching {
                 logger.debug("DynamicCheck")
                 intervalTime = calcTime(interval)
 
-//                count++
-//                if (count < 0) {
-//                    val updateNum = httpUtils.getAndDecode<NewDynamicCount>(NEW_DYNAMIC_COUNT).updateNum
-//                    logger.info("新动态数: $updateNum")
-//                    if (updateNum == 0) return@runCatching
-//                } else {
-//                    count = 0
-//                }
                 val newDynamic = httpUtils.getAndDecode<DynamicList>(NEW_DYNAMIC)
                 val dynamics = newDynamic.dynamics ?: return@runCatching
                 val uidList = dynamic.filter { it.value.contacts.isNotEmpty() }.map { it.key }
@@ -300,13 +339,11 @@ object DynamicTasker : CoroutineScope {
                                 withTimeout(30000) {
                                     list.sendMessage { di.build(it, color) }
                                 }
-                                //lastDynamic = di.timestamp
                             }
                         }
                     }
                 }
             }.onSuccess {
-                //LocalTime.now().hour
                 errorMessage = "SUCCESS"
                 delay((intervalTime..(intervalTime + 5000L)).random())
             }.onFailure {
@@ -327,6 +364,10 @@ object DynamicTasker : CoroutineScope {
 
         delay(20000L)
         while (isActive) {
+            if (PluginMain.sessData == ""){
+                delay(100000)
+                continue
+            }
             runCatching {
                 logger.debug("LiveCheck")
                 liveIntervalTime = calcTime(liveInterval)
@@ -481,7 +522,6 @@ object DynamicTasker : CoroutineScope {
     }
 
     private suspend inline fun MutableSet<String>.sendMessage(
-//        info: String? = null,
         liveAtAll: Boolean = false,
         message: (contact: Contact) -> Message
     ) {
@@ -490,8 +530,6 @@ object DynamicTasker : CoroutineScope {
             this.map { delegate ->
                 runCatching {
                     requireNotNull(findContact(delegate)) { "找不到联系人" }.let { contact ->
-//                        if (info == null) it.sendMessage(me)
-//                        else it.sendMessage(me + "\n" + info)
                         var msg = me
                         if (liveAtAll && contact is Group) {
                             val hasPerm = contact.permitteeId.getPermittedPermissions().any { it.id == PluginMain.gwp }
@@ -516,7 +554,7 @@ object DynamicTasker : CoroutineScope {
 /**
  * 查找Contact
  */
-fun findContact(del: String): Contact? = synchronized(contactMap) {
+fun findContact(del: String, ): Contact? = synchronized(contactMap) {
     if (del.isBlank()) return@synchronized null
     val delegate = del.toLong()
     contactMap.compute(delegate) { _, _ ->

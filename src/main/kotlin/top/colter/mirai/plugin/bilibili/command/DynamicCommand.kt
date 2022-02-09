@@ -9,6 +9,7 @@ import net.mamoe.mirai.event.broadcast
 import top.colter.mirai.plugin.bilibili.DynamicTasker
 import top.colter.mirai.plugin.bilibili.MyEvent
 import top.colter.mirai.plugin.bilibili.PluginMain
+import top.colter.mirai.plugin.bilibili.data.BiliPluginConfig
 import top.colter.mirai.plugin.bilibili.delegate
 
 object DynamicCommand : CompositeCommand(
@@ -81,6 +82,15 @@ object DynamicCommand : CompositeCommand(
     suspend fun CommandSender.filterDel(index: String, uid: Long, contact: Contact = Contact()) = sendMessage(
         DynamicTasker.delFilter(uid, contact.delegate, index)
     )
+
+    @SubCommand("login", "登录")
+    suspend fun CommandSender.login() {
+        if (BiliPluginConfig.admin == subject?.id.toString()){
+            DynamicTasker.login(Contact())
+        }else{
+            sendMessage("仅Bot管理员可进行登录")
+        }
+    }
 
 }
 

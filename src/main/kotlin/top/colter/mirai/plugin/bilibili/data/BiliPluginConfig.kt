@@ -1,10 +1,10 @@
 package top.colter.mirai.plugin.bilibili.data
 
-import net.mamoe.mirai.console.data.ReadOnlyPluginConfig
+import net.mamoe.mirai.console.data.AutoSavePluginConfig
 import net.mamoe.mirai.console.data.ValueDescription
 import net.mamoe.mirai.console.data.value
 
-object BiliPluginConfig : ReadOnlyPluginConfig("BiliPluginConfig") {
+object BiliPluginConfig : AutoSavePluginConfig("BiliPluginConfig") {
 
     @ValueDescription("管理员")
     val admin: String by value("")
@@ -38,7 +38,7 @@ object BiliPluginConfig : ReadOnlyPluginConfig("BiliPluginConfig") {
 
     //@Suppress(stringSerialization = DOUBLE_QUOTATION)
     @ValueDescription("cookie, 请使用双引号")
-    val cookie: String by value("")
+    var cookie: String by value("")
 
     @ValueDescription("百度翻译")
     val baiduTranslate: Map<String, String> by value(

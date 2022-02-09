@@ -1,5 +1,8 @@
 package top.colter.mirai.plugin
 
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.client.j2se.MatrixToImageWriter
+import com.google.zxing.qrcode.QRCodeWriter
 import com.vdurmont.emoji.EmojiParser
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
@@ -8,6 +11,7 @@ import top.colter.mirai.plugin.bilibili.data.UserInfo
 import top.colter.mirai.plugin.bilibili.data.UserProfile
 import top.colter.mirai.plugin.bilibili.utils.ImgUtils
 import java.net.URL
+import java.nio.file.FileSystems
 import javax.imageio.ImageIO
 
 
@@ -120,6 +124,19 @@ internal class PluginTest {
             "[$emoji]"
         }
         println(emojiHex)
+    }
+
+    @Test
+    fun QRTest(): Unit = runBlocking{
+        //QRCode.from("https://passport.bilibili.com/qrcode/h5/login?oauthKey=c3bd5286a2b40a822f5f60e9bf3f602e").withSize(250, 250).file("QRCode").renameTo(
+        //    File("D:/Code/QRCode.png")
+        //)
+        val text = "https://passport.bilibili.com/qrcode/h5/login?oauthKey=c3bd5286a2b40a822f5f60e9bf3f602e"
+        val qrCodeWriter = QRCodeWriter()
+        val bitMatrix = qrCodeWriter.encode(text, BarcodeFormat.QR_CODE, 250, 250)
+        val path = FileSystems.getDefault().getPath("D:/Code/QRCode.png")
+
+        MatrixToImageWriter.writeToPath(bitMatrix, "PNG", path)
     }
 
 }

@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "top.colter"
-version = "2.1.4"
+version = "2.1.5"
 
 repositories {
     mavenLocal()
@@ -18,5 +18,6 @@ repositories {
 
 dependencies{
     implementation("com.vdurmont:emoji-java:5.1.1")
+    implementation("com.google.zxing:javase:3.4.1")
     testImplementation(kotlin("test", "1.6.0"))
 }

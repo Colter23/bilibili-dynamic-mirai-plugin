@@ -11,8 +11,6 @@ import java.time.Duration
 
 class HttpUtils {
 
-    private val cookie: String = PluginMain.sessData
-
     private var client: OkHttpClient = OkHttpClient().newBuilder().connectTimeout(Duration.ofMillis(20000)).build()
 
     private val ua = listOf(
@@ -32,7 +30,7 @@ class HttpUtils {
 
     fun get(url: String): JsonElement {
         val request = Request.Builder().url(url)
-            .header("cookie", cookie)
+            .header("cookie", PluginMain.sessData)
             .header("Content-Type", "application/json; charset=utf-8")
             .header("user-agent", ua.random())
             .get().build()
@@ -42,7 +40,7 @@ class HttpUtils {
     fun post(url: String, postBody: String): JsonElement {
         val media = "application/x-www-form-urlencoded; charset=utf-8"
         val request = Request.Builder().url(url)
-            .header("cookie", cookie)
+            .header("cookie", PluginMain.sessData)
             .header("Content-Type", media)
             .header("user-agent", ua.random())
             .post(postBody.toRequestBody(media.toMediaTypeOrNull())).build()
@@ -52,7 +50,7 @@ class HttpUtils {
     inline fun <reified T> getAndDecode(url: String): T {
         val js = get(url).decode<ResultData>()
         if (js.code != 0) {
-            if (js.code == -6) throw Exception("Cookie失效！请重新登录！")
+            if (js.code == -6) throw Exception("Cookie失效！可使用 /bili login 重新登录！")
             throw Exception(js.message)
         }
         return js.data!!.decode()
