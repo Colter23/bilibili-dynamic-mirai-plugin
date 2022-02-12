@@ -337,7 +337,7 @@ object DynamicTasker : CoroutineScope {
                             seleniumMutex.withLock {
                                 history.add(describe.dynamicId)
                                 withTimeout(30000) {
-                                    list.sendMessage { di.build(it, color) }
+                                    list.sendMessage(di.type) { di.build(it, color) }
                                 }
                             }
                         }
@@ -381,7 +381,7 @@ object DynamicTasker : CoroutineScope {
                     if (list != null && list.size != 0) {
                         seleniumMutex.withLock {
                             withTimeout(30000) {
-                                list.sendMessage(true){ ll.build(it) }
+                                list.sendMessage(DynamicType.LIVE){ ll.build(it) }
                             }
                         }
                         lastLive = ll.liveTime
@@ -522,7 +522,7 @@ object DynamicTasker : CoroutineScope {
     }
 
     private suspend inline fun MutableSet<String>.sendMessage(
-        liveAtAll: Boolean = false,
+        dynamicType: Int = DynamicType.DELETE,
         message: (contact: Contact) -> Message
     ) {
         val me = findContact(this.first())?.let { message(it) }
@@ -531,8 +531,13 @@ object DynamicTasker : CoroutineScope {
                 runCatching {
                     requireNotNull(findContact(delegate)) { "找不到联系人" }.let { contact ->
                         var msg = me
-                        if (liveAtAll && contact is Group) {
-                            val hasPerm = contact.permitteeId.getPermittedPermissions().any { it.id == PluginMain.gwp }
+                        if (contact is Group) {
+                             val gwp = when (dynamicType){
+                                DynamicType.LIVE -> PluginMain.gwp
+                                DynamicType.VIDEO -> PluginMain.videoGwp
+                                else -> null
+                            }
+                            val hasPerm = contact.permitteeId.getPermittedPermissions().any { it.id == gwp }
                             if (hasPerm) msg = msg + "\n" + AtAll
                         }
                         runCatching {

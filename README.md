@@ -159,10 +159,11 @@ baiduTranslate:
 
 </details>
 
-#### 直播@全体
-| 权限名    | ID                                                    |
-|--------|-------------------------------------------------------|
-| 直播@全体  | top.colter.bilibili-dynamic-mirai-plugin:live.atall   |
+#### At全体权限
+| 权限名   | ID                                                    |
+|-------|-------------------------------------------------------|
+| 直播@全体 | top.colter.bilibili-dynamic-mirai-plugin:live.atall   |
+| 视频@全体 | top.colter.bilibili-dynamic-mirai-plugin:video.atall  |
 
 通过对群设置权限来控制是否开启直播@全体    
 `/perm add g123456789 top.colter.bilibili-dynamic-mirai-plugin:live.atall`

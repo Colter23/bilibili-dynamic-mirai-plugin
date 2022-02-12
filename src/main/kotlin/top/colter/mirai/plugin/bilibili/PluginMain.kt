@@ -15,7 +15,7 @@ object PluginMain : KotlinPlugin(
     JvmPluginDescription(
         id = "top.colter.bilibili-dynamic-mirai-plugin",
         name = "BilibiliDynamic",
-        version = "2.1.5"
+        version = "2.2.0"
     ) {
         author("Colter")
         info(
@@ -35,9 +35,11 @@ object PluginMain : KotlinPlugin(
     var tagid: Int = 0
 
     val gwp = PermissionId(PluginMain.description.id,"live.atall")
+    val videoGwp = PermissionId(PluginMain.description.id,"video.atall")
 
     override fun onEnable() {
         PermissionService.INSTANCE.register(gwp,"直播At全体")
+        PermissionService.INSTANCE.register(videoGwp,"视频At全体")
 
         BiliSubscribeData.reload()
         BiliPluginConfig.reload()
