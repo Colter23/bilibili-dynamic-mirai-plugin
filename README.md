@@ -163,23 +163,22 @@ baiduTranslate:
 | 权限名   | ID                                                    |
 |-------|-------------------------------------------------------|
 | 直播@全体 | top.colter.bilibili-dynamic-mirai-plugin:live.atall   |
-| 视频@全体 | top.colter.bilibili-dynamic-mirai-plugin:video.atall  |
 
 通过对群设置权限来控制是否开启直播@全体    
 `/perm add g123456789 top.colter.bilibili-dynamic-mirai-plugin:live.atall`
   
 ### 指令    
 
-| 指令                              | 描述                 |
-|---------------------------------|--------------------|
-| /bili <login 登录>                | bot管理员进行扫码登录       |
-| /bili <add 添加> <uid> [群/Q号]     | 为目标 [群/Q号] 添加一个订阅  |
-| /bili <list 列表> [群/Q号]          | 查询目标 [群/Q号] 的订阅列表  |
-| /bili <del 删除> <uid> [群/Q号]     | 为目标 [群/Q号] 删除一个订阅  |
-| /bili <delAll 删除全部订阅> [群/Q号]    | 将目标 [群/Q号] 的全部订阅删除 |
-| /bili <set 设置> <uid> [群/Q号]     | 为目标 [群/Q号] 设置订阅内容  |
-| /bili <color 颜色> <uid> <16进制颜色> | 为目标 UID 设置图片推送主题色  |
-| /bili <list 列表> [群/Q号]          | 查询目标 [群/Q号] 的订阅列表  |
+| 指令                                    | 描述                 |
+|---------------------------------------|--------------------|
+| /bili <login 登录>                      | bot管理员进行扫码登录       |
+| /bili <add 添加> &lt;uid&gt; [群/Q号]     | 为目标 [群/Q号] 添加一个订阅  |
+| /bili <list 列表> [群/Q号]                | 查询目标 [群/Q号] 的订阅列表  |
+| /bili <del 删除> &lt;uid&gt; [群/Q号]     | 为目标 [群/Q号] 删除一个订阅  |
+| /bili <delAll 删除全部订阅> [群/Q号]          | 将目标 [群/Q号] 的全部订阅删除 |
+| /bili <set 设置> &lt;uid&gt; [群/Q号]     | 为目标 [群/Q号] 设置订阅内容  |
+| /bili <color 颜色> &lt;uid&gt; <16进制颜色> | 为目标 UID 设置图片推送主题色  |
+| /bili <list 列表> [群/Q号]                | 查询目标 [群/Q号] 的订阅列表  |
 ```
 # 说明
 扫码登录请在配置文件中填写管理员账号    
@@ -198,12 +197,12 @@ baiduTranslate:
 包含：仅当动态文字内容匹配过滤表达式时**推送**动态    
 过滤表达式：支持正则表达式，普通用户用文字即可，^匹配开头  $匹配结尾
 
-| 指令                                             | 描述                      |
-|------------------------------------------------|-------------------------|
-| /bili <filter f 过滤> <过滤表达式> <uid> [群/Q号]       | 为目标 [群/Q号] 添加 uid 的动态过滤 |
-| /bili <contain c 包含> <过滤表达式> <uid> [群/Q号]      | 为目标 [群/Q号] 添加 uid 的动态包含 |
-| /bili <filterList fl 过滤列表> <uid> [群/Q号]        | 列出 uid 的过滤包含列表          |
-| /bili <filterDel fd 过滤删除> <index> <uid> [群/Q号] | 删除 uid 中 index 的过滤包含    |
+| 指令                                                         | 描述                      |
+|------------------------------------------------------------|-------------------------|
+| /bili <filter f 过滤> <过滤表达式> &lt;uid&gt; [群/Q号]             | 为目标 [群/Q号] 添加 uid 的动态过滤 |
+| /bili <contain c 包含> <过滤表达式> &lt;uid&gt; [群/Q号]            | 为目标 [群/Q号] 添加 uid 的动态包含 |
+| /bili <filterList fl 过滤列表> &lt;uid&gt; [群/Q号]              | 列出 uid 的过滤包含列表          |
+| /bili <filterDel fd 过滤删除> &lt;index&gt; &lt;uid&gt; [群/Q号] | 删除 uid 中 index 的过滤包含    |
 
 ```
 # 栗子
