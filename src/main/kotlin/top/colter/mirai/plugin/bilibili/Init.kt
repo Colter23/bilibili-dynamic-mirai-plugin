@@ -28,7 +28,7 @@ fun initTagid() {
     val httpUtils = HttpUtils()
     runCatching {
         PluginMain.mid = httpUtils.getAndDecode<UserID>(USER_ID).mid
-        PluginMain.logger.info("账号UID为: ${PluginMain.mid}")
+        PluginMain.logger.info("BiliBili UID: ${PluginMain.mid}")
     }.onFailure {
         PluginMain.logger.error(it.message)
         return

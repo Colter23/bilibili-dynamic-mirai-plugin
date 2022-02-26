@@ -90,17 +90,39 @@ internal class PluginTest {
                     "趣味视频征集活动今日",
                     "视频内容不限，包括但不限于打法攻略、创意玩法等内容视频内容不限，包括但不限于打法攻略、创意玩法等内容",
                     "视频"
-                )
+                ),
+                //ImgUtils.imageContent(
+                //    listOf(
+                //        DynamicPictureInfo(1080,null,"https://i0.hdslb.com/bfs/album/648fb2527f49fd42c6ecbf991151e1593e7225ad.jpg",1920),
+                //        DynamicPictureInfo(816,null,"https://i0.hdslb.com/bfs/album/0ae6fee9eaeafe614377cf5451e78c2430d5a6e4.gif",499),
+                //        DynamicPictureInfo(816,null,"https://i0.hdslb.com/bfs/album/56c135d05c0d4a77964db04a07f039d7fe945f14.gif",499),
+                //        DynamicPictureInfo(816,null,"https://i0.hdslb.com/bfs/album/1971358d4d71ded8c1b287c7377a32c397190490.gif",499),
+                //        DynamicPictureInfo(816,null,"https://i0.hdslb.com/bfs/album/554027b1f38ad88040e315cdf55ee98ed5a20335.gif",499),
+                //        DynamicPictureInfo(816,null,"https://i0.hdslb.com/bfs/album/2180d689ad3de225f70e37f6ae3e953f583b012a.gif",499),
+                //        DynamicPictureInfo(816,null,"https://i0.hdslb.com/bfs/album/d009f31357f049f7f8134e4e74e208db4284c2eb.gif",499),
+                //    )),
+                ImgUtils.footer("动态ID：12313246432132")
             ),
             UserProfile(
                 UserInfo(
                     1,
                     "Test",
-                    "https://i0.hdslb.com/bfs/face/904bef1b4067335068faba12062f735dda07c1fe.jpg@240w_240h_1c_1s.png"
+                    "https://i0.hdslb.com/bfs/face/904bef1b4067335068faba12062f735dda07c1fe.jpg"
                 )
             ),
             "2021年12月21日", "#9fc7f3", "D:/Code/test.png"
         )//D:/Code/test.png
+    }
+
+    @Test
+    fun imgTest(): Unit = runBlocking {
+        testBuildImageMessage("#明日方舟#\n" +
+            "【新增服饰】\n" +
+            "//无拘无束 - 刻俄柏\n" +
+            "0011子品牌，飙系列新款/无拘无束。为了奖励近期十分听话的刻俄柏，火神托人从哥伦比亚弄来了一套最新潮流......童装？\n" +
+            "\n" +
+            "_____________\n" +
+            "火神从包裹里拿出一件，刻俄柏就穿上一件，然而，当火神想再找条长裤给刻俄柏穿上的时候......她早就跑得没影啦！ ")
     }
 
     @Test

@@ -11,7 +11,7 @@ import java.time.Duration
 
 class HttpUtils {
 
-    private var client: OkHttpClient = OkHttpClient().newBuilder().connectTimeout(Duration.ofMillis(20000)).build()
+    private var client: OkHttpClient = OkHttpClient().newBuilder().connectTimeout(Duration.ofMillis(10000)).readTimeout(Duration.ofMillis(10000)).build()
 
     private val ua = listOf(
         "Mozilla/5.0 (Windows; U; MSIE 9.0; Windows NT 9.0; en-US);",

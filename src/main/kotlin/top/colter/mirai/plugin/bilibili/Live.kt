@@ -16,10 +16,10 @@ val LiveInfo.time: String
     get() = DateTimeFormatter.ofPattern("yyyy年MM月dd日  HH:mm:ss")
         .format(LocalDateTime.ofEpochSecond(liveTime, 0, OffsetDateTime.now().offset))
 
-suspend fun LiveInfo.build(contact: Contact): Message {
+suspend fun LiveInfo.build(contact: Contact, color: String): Message {
     return when (BiliPluginConfig.pushMode) {
         // 图片模式
-        1 -> buildImageLive(contact)
+        1 -> buildImageLive(contact, color)
         // 文字模式
         else -> this.buildTextLive(contact)
     }
@@ -37,9 +37,9 @@ suspend fun LiveInfo.buildTextLive(contact: Contact): Message {
     return resMessage
 }
 
-suspend fun LiveInfo.buildImageLive(contact: Contact): Message {
+suspend fun LiveInfo.buildImageLive(contact: Contact, color: String): Message {
     val link = "https://live.bilibili.com/${roomId}"
-    val file = buildLiveImageMessage(title, cover, time, uname, face, "#d3edfa", "live/${uid}/${liveTime}.png")
+    val file = buildLiveImageMessage(title, cover, time, uname, face, color, "live/${uid}/${liveTime}.png")
     val template = BiliPluginConfig.livePushTemplate.ifEmpty {
         BiliPluginConfig.pushTemplate
     }

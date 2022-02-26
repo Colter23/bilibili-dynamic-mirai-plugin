@@ -10,6 +10,7 @@ import net.mamoe.mirai.Bot
 import net.mamoe.mirai.console.permission.PermissionService.Companion.getPermittedPermissions
 import net.mamoe.mirai.console.permission.PermitteeId.Companion.permitteeId
 import net.mamoe.mirai.contact.Contact
+import net.mamoe.mirai.contact.Friend
 import net.mamoe.mirai.contact.Group
 import net.mamoe.mirai.message.data.AtAll
 import net.mamoe.mirai.message.data.Message
@@ -29,14 +30,12 @@ import kotlin.coroutines.CoroutineContext
 
 internal val logger by PluginMain::logger
 
-object DynamicTasker : CoroutineScope {
+object DynamicTasker: CoroutineScope {
 
     override val coroutineContext: CoroutineContext = Dispatchers.IO + CoroutineName("DynamicTasker")
 
-    private var listener: MutableList<Job>? = null
-
+    private var listener: MutableMap<String,Job>? = null
     private val seleniumMutex = Mutex()
-
     private val httpUtils = HttpUtils()
 
     val mutex = Mutex()
@@ -58,6 +57,8 @@ object DynamicTasker : CoroutineScope {
     private var errorMessage = "SUCCESS"
     private var liveErrorMessage = "SUCCESS"
 
+    private var adminContact: Contact? = null
+
     fun start() {
         runCatching {
             lsl = lowSpeed.split("-","x").map { it.toInt() }
@@ -65,13 +66,14 @@ object DynamicTasker : CoroutineScope {
         }.onFailure {
             logger.error("低频检测参数错误 ${it.message}")
         }
+        adminContact = findContact(BiliPluginConfig.admin)?:findContact("-${BiliPluginConfig.admin}")
 
         listener = listen()
     }
 
     fun stop() {
         listener?.forEach {
-            it.cancel()
+            it.value.cancel()
         }
     }
 
@@ -91,7 +93,7 @@ object DynamicTasker : CoroutineScope {
 
     private fun followUser(uid: Long): String {
         if (uid == PluginMain.mid) {
-            return "不能关注自己哦"
+            return ""
         }
         val attr = httpUtils.getAndDecode<IsFollow>(IS_FOLLOW(uid)).attribute
         if (attr == 0) {
@@ -140,7 +142,7 @@ object DynamicTasker : CoroutineScope {
             val subData = SubData(httpUtils.getAndDecode<User>(USER_INFO(uid)).name)
             subData.contacts[subject] = "11"
             dynamic[uid] = subData
-            "订阅 ${dynamic[uid]?.name} 成功! \n默认检测 动态+视频+直播 如果需要调整请发送/bili set $uid\n如要设置主题色请发送/bili color <16进制颜色>"
+            "订阅 ${dynamic[uid]?.name} 成功! \n默认检测 动态+视频+直播 如果需要调整请发送/bili set $uid\n如要设置主题色请发送/bili color $uid <16进制颜色>"
         } else {
             if (user.contacts.contains(subject)) {
                 "之前订阅过这个人哦"
@@ -247,6 +249,45 @@ object DynamicTasker : CoroutineScope {
         }
     }
 
+    suspend fun listAll( ) = mutex.withLock {
+        var count = 0
+        buildString {
+            appendLine("名称@UID#订阅人数")
+            appendLine()
+            dynamic.forEach { (uid, sub) ->
+                appendLine("${sub.name}@$uid#${sub.contacts.keys.size}")
+                count++
+            }
+            appendLine()
+            append("共 $count 个订阅")
+        }
+    }
+
+    suspend fun listUser() = mutex.withLock {
+        buildString {
+            val user = mutableSetOf<String>()
+            dynamic.forEach { (uid, sub) ->
+                user.addAll(sub.contacts.keys)
+            }
+            val group = StringBuilder()
+            val friend = StringBuilder()
+            user.forEach {
+                findContact(it).apply {
+                    when (this){
+                        is Group -> group.appendLine("${name}@${id}")
+                        is Friend -> friend.appendLine("${nick}@${id}")
+                    }
+                }
+            }
+            appendLine("====群====")
+            append(group.ifEmpty { "无\n" })
+            appendLine("====好友====")
+            append(friend.ifEmpty { "无\n" })
+            appendLine()
+            append("共 ${user.size} 名用户")
+        }
+    }
+
     suspend fun login(contact: Contact){
         val loginData = httpUtils.getAndDecode<LoginData>(LOGIN_URL)
         val qrCodeWriter = QRCodeWriter()
@@ -284,12 +325,29 @@ object DynamicTasker : CoroutineScope {
         file.delete()
     }
 
+    private fun listen(): MutableMap<String, Job> {
+        val jobMap = mutableMapOf<String, Job>()
+        jobMap["动态"] = normalJob()
+        jobMap["直播"] = liveJob()
+        jobMap["检测"] = checkJobActive()
+        return jobMap
+    }
 
-    private fun listen(): MutableList<Job> {
-        val jobList = mutableListOf<Job>()
-        jobList.add(normalJob())
-        jobList.add(liveJob())
-        return jobList
+    private fun checkJobActive() = launch {
+        while (isActive){
+            logger.debug("Check")
+            listener?.keys?.forEach {
+                var job = listener!![it]!!
+                if (!job.isActive){
+                    adminContact?.sendMessage("$it 任务已停止工作，正在尝试重启任务")
+                    logger.error("$it 任务已停止工作")
+                    job.cancel()
+                    if (it=="动态") listener!![it] = normalJob()
+                    else if (it=="直播") listener!![it] = liveJob()
+                }
+            }
+            delay(60000)
+        }
     }
 
     private fun getHistoryDynamic() = runCatching {
@@ -309,7 +367,7 @@ object DynamicTasker : CoroutineScope {
         delay(10000L)
         while (isActive) {
             if (PluginMain.sessData == ""){
-                logger.debug("未登录")
+                logger.error("未登录")
                 delay(100000)
                 continue
             }
@@ -333,10 +391,10 @@ object DynamicTasker : CoroutineScope {
                         di.dynamicContent = di.card.dynamicContent(di.type)
                         list = list.filterContent(describe.uid, di.dynamicContent!!.textContent(describe.type))
                         if (list.size > 0){
-                            val color = dynamic[describe.uid]?.color ?: "#d3edfa"
                             seleniumMutex.withLock {
+                                val color = dynamic[describe.uid]?.color ?: "#d3edfa"
                                 history.add(describe.dynamicId)
-                                withTimeout(30000) {
+                                withTimeout(45000) {
                                     list.sendMessage(di.type) { di.build(it, color) }
                                 }
                             }
@@ -348,12 +406,8 @@ object DynamicTasker : CoroutineScope {
                 delay((intervalTime..(intervalTime + 5000L)).random())
             }.onFailure {
                 logger.error("ERROR $it")
-                if (it.message != errorMessage){
-                    (findContact(BiliPluginConfig.admin)?:findContact("-${BiliPluginConfig.admin}"))?.sendMessage("动态检测失败\n" + it.message)
-                }
-                if (errorMessage == "SUCCESS"){
-                    errorMessage = it.message.toString()
-                }
+                if (it.message != errorMessage) adminContact?.sendMessage("动态检测失败\n" + it.message)
+                if (errorMessage == "SUCCESS") errorMessage = it.message.toString()
                 delay((60000L..120000L).random())
             }
         }
@@ -380,8 +434,9 @@ object DynamicTasker : CoroutineScope {
                     val list = getLiveContactList(ll.uid)
                     if (list != null && list.size != 0) {
                         seleniumMutex.withLock {
-                            withTimeout(30000) {
-                                list.sendMessage(DynamicType.LIVE){ ll.build(it) }
+                            val color = dynamic[ll.uid]?.color ?: "#d3edfa"
+                            withTimeout(20000) {
+                                list.sendMessage(DynamicType.LIVE){ ll.build(it, color) }
                             }
                         }
                         lastLive = ll.liveTime
@@ -392,12 +447,8 @@ object DynamicTasker : CoroutineScope {
                 delay((liveIntervalTime..(liveIntervalTime + 5000L)).random())
             }.onFailure {
                 logger.error("ERROR $it")
-                if (it.message != liveErrorMessage){
-                    (findContact(BiliPluginConfig.admin)?:findContact("-${BiliPluginConfig.admin}"))?.sendMessage("直播检测失败\n" + it.message)
-                }
-                if (liveErrorMessage == "SUCCESS"){
-                    liveErrorMessage = it.message.toString()
-                }
+                if (it.message != liveErrorMessage) adminContact?.sendMessage("直播检测失败\n" + it.message)
+                if (liveErrorMessage == "SUCCESS") liveErrorMessage = it.message.toString()
                 delay((60000L..120000L).random())
             }
         }

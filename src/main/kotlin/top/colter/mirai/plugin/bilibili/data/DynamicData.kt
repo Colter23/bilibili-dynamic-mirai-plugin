@@ -38,7 +38,8 @@ data class DynamicInfo(
     var dynamicContent: DynamicContent? = null,
     var link: String = "",
     var images: MutableList<String> = mutableListOf(),
-    var content: String = ""
+    var content: String = "",
+    var id: String = ""
 )
 
 @Serializable

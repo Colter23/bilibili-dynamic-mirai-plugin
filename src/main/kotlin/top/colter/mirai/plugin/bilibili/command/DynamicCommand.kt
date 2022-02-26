@@ -63,6 +63,24 @@ object DynamicCommand : CompositeCommand(
         DynamicTasker.list(contact.delegate)
     )
 
+    @SubCommand("listAll", "la" , "全部订阅列表")
+    suspend fun CommandSender.listAll() = sendMessage(
+        if (subject?.isAdmin() == true){
+            DynamicTasker.listAll()
+        }else{
+            "权限不足"
+        }
+    )
+
+    @SubCommand("listUser", "lu" , "用户列表")
+    suspend fun CommandSender.listUser() = sendMessage(
+        if (subject?.isAdmin() == true){
+            DynamicTasker.listUser()
+        }else{
+            "权限不足"
+        }
+    )
+
     @SubCommand("filter", "f", "过滤")
     suspend fun CommandSender.filter(regex: String, uid: Long, contact: Contact = Contact()) = sendMessage(
         DynamicTasker.addFilter(regex, uid, contact.delegate)
@@ -85,7 +103,7 @@ object DynamicCommand : CompositeCommand(
 
     @SubCommand("login", "登录")
     suspend fun CommandSender.login() {
-        if (BiliPluginConfig.admin == subject?.id.toString()){
+        if (subject?.isAdmin() == true){
             DynamicTasker.login(Contact())
         }else{
             sendMessage("仅Bot管理员可进行登录")
@@ -93,5 +111,7 @@ object DynamicCommand : CompositeCommand(
     }
 
 }
+
+fun Contact.isAdmin(): Boolean = BiliPluginConfig.admin == id.toString()
 
 fun CommandSender.Contact(): Contact = subject ?: throw CommandArgumentParserException("无法从当前环境获取联系人")

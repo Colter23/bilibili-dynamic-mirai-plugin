@@ -4,7 +4,6 @@ import com.vdurmont.emoji.EmojiParser
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromString
 import net.mamoe.mirai.utils.error
 import top.colter.mirai.plugin.bilibili.PluginMain
@@ -46,12 +45,12 @@ object ImgUtils: CoroutineScope{
                     if (file.exists()) {
                         if (fontList.last() == "ttf") {
                             fonts.add(Font.createFont(Font.TRUETYPE_FONT, file))
-                            PluginMain.logger.info("成功加载字体: $it")
+                            logger.info("成功加载字体: $it")
                         } else {
-                            PluginMain.logger.error { "不支持的字体类型: $it" }
+                            logger.error { "不支持的字体类型: $it" }
                         }
                     } else {
-                        PluginMain.logger.error { "没有此字体文件: $it" }
+                        logger.error { "没有此字体文件: $it" }
                     }
                 } else {
                     //val os = System.getProperty("os.name").lowercase(Locale.getDefault())
@@ -59,14 +58,13 @@ object ImgUtils: CoroutineScope{
                 }
             }
         } catch (e: Exception) {
-            PluginMain.logger.error { "初始化字体时出错: ${e.message}" }
+            logger.error { "初始化字体时出错: ${e.message}" }
         }
         if (fonts.size == 0) {
             fonts.add(Font("Microsoft Yahei", Font.PLAIN, 20))
         }
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
     inline fun <reified T> String.decode(): T = json.decodeFromString(this)
 
     private fun hex2Color(hex: String): Color {
@@ -88,7 +86,7 @@ object ImgUtils: CoroutineScope{
         color: String,
         fileStr: String
     ): File {
-        var height = 130
+        var height = 120
         biList.forEach { height += it.height }
 
         val bi = BufferedImage(imgWidth, height, BufferedImage.TYPE_INT_ARGB)
@@ -238,6 +236,17 @@ object ImgUtils: CoroutineScope{
         headerG2.drawString(rowTwo, 130 + offset, 90)
     }
 
+    fun footer(text: String): BufferedImage {
+        val footerBi = BufferedImage(800, 30, BufferedImage.TYPE_INT_ARGB)
+        val footerG2 = footerBi.createGraphics()
+        footerG2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_GASP)
+        footerG2.color = Color(210, 210, 210)
+        footerG2.font = fonts[0].deriveFont(18f)
+        footerG2.writeText(text, 25, 22, 710, 1)
+        footerG2.dispose()
+        return footerBi
+    }
+
 
     fun textContent(text: String, emojiList: List<EmojiDetails>? = null): BufferedImage? {
         if (text == "") return null
@@ -261,10 +270,7 @@ object ImgUtils: CoroutineScope{
             if (!emojiMap.containsKey(emoji)) {
                 var emojiImg: BufferedImage? = null
                 runCatching {
-                    val conn = URL("https://twemoji.maxcdn.com/36x36/$emoji.png").openConnection()
-                    conn.connectTimeout = 5000
-                    conn.readTimeout = 5000
-                    emojiImg = ImageIO.read(conn.getInputStream())
+                    emojiImg = downloadImg("https://twemoji.maxcdn.com/36x36/$emoji.png")?: throw Exception()
                 }.onFailure {
                     logger.error("获取 $emoji emoji失败")
                     return@parseFromUnicode e.emoji.unicode
@@ -421,14 +427,14 @@ object ImgUtils: CoroutineScope{
     }
 
     fun videoContent(coverUrl: String, title: String, desc: String, tag: String = ""): BufferedImage {
-        val videoBi = BufferedImage(imgWidth, 480, BufferedImage.TYPE_INT_ARGB)
+        val videoBi = BufferedImage(imgWidth, 490, BufferedImage.TYPE_INT_ARGB)
         val videoG2 = videoBi.createGraphics()
         videoG2.setRenderingHints(renderingHints)
 
         val picArc = 10
         val margin = 50
         val cardWidth = imgWidth - margin * 2
-        val cardHeight = 465
+        val cardHeight = 470
         val imgHeight = 360
 
         videoG2.color = Color.WHITE
@@ -447,10 +453,10 @@ object ImgUtils: CoroutineScope{
 
         if (tag != "") {
             videoG2.color = Color(251, 114, 153)
-            videoG2.fillRoundRect(684, 30, 45, 22, 5, 5)
+            videoG2.fillRoundRect(663, 30, 65, 32, 5, 5)//+20
             videoG2.color = Color.WHITE
-            videoG2.font = fonts[0].deriveFont(16f)
-            videoG2.drawString(tag, 690, 46)
+            videoG2.font = fonts[0].deriveFont(22f)//16
+            videoG2.drawString(tag, 673, 54)
         }
 
         videoG2.color = Color.BLACK
@@ -497,7 +503,7 @@ object ImgUtils: CoroutineScope{
         } else {
             //articleG2.drawImg(imageUrls[0], contentMargin, 10, cardWidth, imgHeight)
             articleG2.drawImage(
-                ImageIO.read(URL(imgApi(imageUrls[0], 640, 147))),
+                downloadImg(imgApi(imageUrls[0], 640, 147)),
                 contentMargin,
                 10,
                 cardWidth,
@@ -512,11 +518,11 @@ object ImgUtils: CoroutineScope{
 
         articleG2.color = Color.BLACK
         articleG2.font = fonts[0].deriveFont(20f)
-        val textY = articleG2.writeText(title, 45, 210, cardWidth - 30, 1)
+        val textY = articleG2.writeText(title, 45, 210, cardWidth - 40, 1)
 
         articleG2.font = fonts[0].deriveFont(16f)
         articleG2.color = Color(148, 147, 147)
-        articleG2.writeText(desc, 45, textY + 25, cardWidth - 30, 3)
+        articleG2.writeText(desc, 45, textY + 25, cardWidth - 40, 3)
 
         articleG2.stroke = BasicStroke(1f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND)
         articleG2.color = Color(229, 233, 239)
@@ -627,19 +633,26 @@ object ImgUtils: CoroutineScope{
         }
     }
 
-    private fun Graphics2D.getStrWidth(str: String, plus: Int = 0): Int {
-        return font.getStringBounds(str, fontRenderContext).width.toInt() + plus
-    }
+    private fun Graphics2D.getStrWidth(str: String, plus: Int = 0): Int =
+        font.getStringBounds(str, fontRenderContext).width.toInt() + plus
 
-    private fun Graphics2D.drawImg(url: String, x: Int, y: Int, w: Int, h: Int) {
-        runCatching {
-            drawImage(ImageIO.read(URL(imgApi(url, w, h))), x, y, null)
-        }.onFailure {
-            println(it.message)
+    private fun Graphics2D.drawImg(url: String, x: Int, y: Int, w: Int, h: Int){
+        try {
+            drawImage(downloadImg(imgApi(url, w, h)), x, y, null)
+        }catch (e: Exception){
+            logger.error(e.message)
         }
     }
 
-    private fun imgApi(imgUrl: String, width: Int, height: Int): String {
-        return "${imgUrl}@${width}w_${height}h_1e_1c.png"
+    private fun downloadImg(url: String):BufferedImage? = try {
+        val conn = URL(url).openConnection()
+        conn.connectTimeout = 5000
+        conn.readTimeout = 5000
+        ImageIO.read(conn.getInputStream())
+    }catch (e: Exception) {
+        throw Exception("下载图片失败,图片链接: ${url}\n${e.message}")
     }
+
+    private fun imgApi(imgUrl: String, width: Int, height: Int): String = "${imgUrl}@${width}w_${height}h_1e_1c.png"
+
 }

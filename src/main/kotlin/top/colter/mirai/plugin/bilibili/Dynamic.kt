@@ -1,6 +1,5 @@
 package top.colter.mirai.plugin.bilibili
 
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.decodeFromString
 import net.mamoe.mirai.contact.Contact
 import net.mamoe.mirai.message.data.Message
@@ -19,7 +18,6 @@ import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 
-@OptIn(ExperimentalSerializationApi::class)
 inline fun <reified T> String.decode(): T = json.decodeFromString(this)
 
 val DynamicInfo.did get() = describe.dynamicId
@@ -189,7 +187,7 @@ fun DynamicLive.getContent(dynamicInfo: DynamicInfo): String {
 }
 
 
-fun DynamicContent.buildContent(type: Int, dynamicInfo: DynamicInfo): List<BufferedImage> {
+fun DynamicContent.buildContent(type: Int, dynamicInfo: DynamicInfo): MutableList<BufferedImage> {
     return when (type) {
         DynamicType.REPLY -> (this as DynamicReply).bufferedImages(dynamicInfo)
         DynamicType.PICTURE -> (this as DynamicPicture).bufferedImages(dynamicInfo)
@@ -198,21 +196,21 @@ fun DynamicContent.buildContent(type: Int, dynamicInfo: DynamicInfo): List<Buffe
         DynamicType.ARTICLE -> (this as DynamicArticle).bufferedImages(dynamicInfo)
         DynamicType.MUSIC -> (this as DynamicMusic).bufferedImages(dynamicInfo)
         DynamicType.EPISODE -> (this as DynamicEpisode).bufferedImages(dynamicInfo)
-        DynamicType.DELETE -> listOf(ImgUtils.infoContent("源动态已被作者删除"))
+        DynamicType.DELETE -> mutableListOf(ImgUtils.infoContent("源动态已被作者删除"))
         DynamicType.SKETCH -> (this as DynamicSketch).bufferedImages(dynamicInfo)
-        DynamicType.LIVE, DynamicType.LIVE_ING -> listOf(ImgUtils.infoContent("直播"))
-        DynamicType.LIVE_END -> listOf(ImgUtils.infoContent("直播结束了"))
+        DynamicType.LIVE, DynamicType.LIVE_ING -> mutableListOf(ImgUtils.infoContent("直播"))
+        DynamicType.LIVE_END -> mutableListOf(ImgUtils.infoContent("直播结束了"))
         else -> {
             if (dynamicInfo.link == "") {
                 dynamicInfo.link = "https://t.bilibili.com/${dynamicInfo.did}"
             }
-            listOf(ImgUtils.infoContent("不支持此类型动态 type:${type}"))
+            mutableListOf(ImgUtils.infoContent("不支持此类型动态 type:${type}"))
         }
     }
 }
 
 
-fun DynamicReply.bufferedImages(dynamicInfo: DynamicInfo): List<BufferedImage> {
+fun DynamicReply.bufferedImages(dynamicInfo: DynamicInfo): MutableList<BufferedImage> {
     val biList = mutableListOf<BufferedImage>()
     val emojiList: MutableList<EmojiDetails> = mutableListOf()
     dynamicInfo.display.emojiInfo?.emojiDetails?.let { emojiList.addAll(it) }
@@ -222,35 +220,38 @@ fun DynamicReply.bufferedImages(dynamicInfo: DynamicInfo): List<BufferedImage> {
     if (dynamicInfo.link == "") {
         dynamicInfo.content = "转发动态"
         dynamicInfo.link = "https://t.bilibili.com/${dynamicInfo.did}"
+        dynamicInfo.id = dynamicInfo.did.toString()
     }
     val biL = origin.dynamicContent(detail.originType).buildContent(detail.originType, dynamicInfo)
     biList.add(ImgUtils.buildReplyImageMessage(biL, originUser?.user))
 
-    return biList.toList()
+    return biList
 }
 
-fun DynamicPicture.bufferedImages(dynamicInfo: DynamicInfo): List<BufferedImage> {
+fun DynamicPicture.bufferedImages(dynamicInfo: DynamicInfo): MutableList<BufferedImage> {
     val biList = mutableListOf<BufferedImage>()
     ImgUtils.textContent(detail.description, dynamicInfo.display.emojiInfo?.emojiDetails)?.let { biList.add(it) }
     biList.add(ImgUtils.imageContent(detail.pictures))
     if (dynamicInfo.link == "") {
         dynamicInfo.content = "动态"
         dynamicInfo.link = "https://t.bilibili.com/${dynamicInfo.did}"
+        dynamicInfo.id = dynamicInfo.did.toString()
     }
-    return biList.toList()
+    return biList
 }
 
-fun DynamicText.bufferedImages(dynamicInfo: DynamicInfo): List<BufferedImage> {
+fun DynamicText.bufferedImages(dynamicInfo: DynamicInfo): MutableList<BufferedImage> {
     val biList = mutableListOf<BufferedImage>()
     ImgUtils.textContent(detail.content, dynamicInfo.display.emojiInfo?.emojiDetails)?.let { biList.add(it) }
     if (dynamicInfo.link == "") {
         dynamicInfo.content = "动态"
         dynamicInfo.link = "https://t.bilibili.com/${dynamicInfo.did}"
+        dynamicInfo.id = dynamicInfo.did.toString()
     }
-    return biList.toList()
+    return biList
 }
 
-fun DynamicVideo.bufferedImages(dynamicInfo: DynamicInfo): List<BufferedImage> {
+fun DynamicVideo.bufferedImages(dynamicInfo: DynamicInfo): MutableList<BufferedImage> {
     val biList = mutableListOf<BufferedImage>()
     ImgUtils.textContent(dynamic, dynamicInfo.display.emojiInfo?.emojiDetails)?.let { biList.add(it) }
     if (dynamicInfo.type == DynamicType.REPLY) {
@@ -261,50 +262,55 @@ fun DynamicVideo.bufferedImages(dynamicInfo: DynamicInfo): List<BufferedImage> {
     if (dynamicInfo.link == "") {
         dynamicInfo.content = "视频"
         dynamicInfo.link = "https://www.bilibili.com/video/av$aid"
+        dynamicInfo.id = "av$aid"
     }
-    return biList.toList()
+    return biList
 }
 
-fun DynamicArticle.bufferedImages(dynamicInfo: DynamicInfo): List<BufferedImage> {
+fun DynamicArticle.bufferedImages(dynamicInfo: DynamicInfo): MutableList<BufferedImage> {
     val biList = mutableListOf<BufferedImage>()
     biList.add(ImgUtils.articleContent(images, title, summary))
     if (dynamicInfo.link == "") {
         dynamicInfo.content = "专栏"
         dynamicInfo.link = "https://www.bilibili.com/read/cv$id"
+        dynamicInfo.id = "cv$id"
     }
-    return biList.toList()
+    return biList
 }
 
-fun DynamicMusic.bufferedImages(dynamicInfo: DynamicInfo): List<BufferedImage> {
+fun DynamicMusic.bufferedImages(dynamicInfo: DynamicInfo): MutableList<BufferedImage> {
     val biList = mutableListOf<BufferedImage>()
     ImgUtils.textContent(intro, dynamicInfo.display.emojiInfo?.emojiDetails)?.let { biList.add(it) }
     biList.add(ImgUtils.musicContent(cover, title, type))
     if (dynamicInfo.link == "") {
         dynamicInfo.content = "音乐"
         dynamicInfo.link = "https://www.bilibili.com/audio/au$id"
+        dynamicInfo.id = "au$id"
     }
-    return biList.toList()
+    return biList
 }
 
-fun DynamicSketch.bufferedImages(dynamicInfo: DynamicInfo): List<BufferedImage> {
+fun DynamicSketch.bufferedImages(dynamicInfo: DynamicInfo): MutableList<BufferedImage> {
     val biList = mutableListOf<BufferedImage>()
     ImgUtils.textContent(vest.content, dynamicInfo.display.emojiInfo?.emojiDetails)?.let { biList.add(it) }
     biList.add(ImgUtils.musicContent(detail.cover, detail.title, detail.description, false))
     if (dynamicInfo.link == "") {
         dynamicInfo.content = "动态"
         dynamicInfo.link = "https://t.bilibili.com/${dynamicInfo.did}"
+        dynamicInfo.id = dynamicInfo.did.toString()
     }
-    return biList.toList()
+    return biList
 }
 
-fun DynamicEpisode.bufferedImages(dynamicInfo: DynamicInfo): List<BufferedImage> {
+fun DynamicEpisode.bufferedImages(dynamicInfo: DynamicInfo): MutableList<BufferedImage> {
     val biList = mutableListOf<BufferedImage>()
     biList.add(ImgUtils.videoContent(cover, season.title, description, "番剧"))
     if (dynamicInfo.link == "") {
         dynamicInfo.content = "动态"
         dynamicInfo.link = "https://t.bilibili.com/${dynamicInfo.did}"
+        dynamicInfo.id = dynamicInfo.did.toString()
     }
-    return biList.toList()
+    return biList
 }
 
 
@@ -333,10 +339,17 @@ suspend fun DynamicInfo.buildTextDynamic(contact: Contact): Message {
 
 suspend fun DynamicInfo.buildImageDynamic(contact: Contact, color: String): Message {
     val biList = (dynamicContent ?: card.dynamicContent(type)).buildContent(type, this)
+    val footer = replaceTemplate(BiliPluginConfig.footerTemplate)
+    biList.add(ImgUtils.footer(footer))
     val file = ImgUtils.buildImageMessage(biList, profile, time, color, "dynamic/${uid}/${did}.png")
-    val msg = BiliPluginConfig.pushTemplate.replace("{name}", uname!!).replace("{uid}", uid.toString())
-        .replace("{type}", content).replace("{time}", time).replace("{link}", link)
+    val msg = replaceTemplate(BiliPluginConfig.pushTemplate)
     return (file.uploadAsImage(contact) + msg)
+}
+
+fun DynamicInfo.replaceTemplate(template: String): String {
+    return template.replace("{name}", uname!!).replace("{uid}", uid.toString())
+        .replace("{type}", content).replace("{time}", time).replace("{link}", link)
+        .replace("{id}", id)
 }
 
 //suspend fun DynamicInfo.buildScreenshotDynamic(contact: Contact, color: String):Message {

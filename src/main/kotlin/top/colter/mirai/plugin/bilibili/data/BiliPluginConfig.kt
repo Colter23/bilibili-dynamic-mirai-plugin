@@ -36,6 +36,9 @@ object BiliPluginConfig : AutoSavePluginConfig("BiliPluginConfig") {
     @ValueDescription("直播推送文字模板, 如不配置则与上面的动态推送模板一致")
     val livePushTemplate: String by value("")
 
+    @ValueDescription("页脚模板")
+    val footerTemplate: String by value("{type}ID: {id}")
+
     //@Suppress(stringSerialization = DOUBLE_QUOTATION)
     @ValueDescription("cookie, 请使用双引号")
     var cookie: String by value("")
