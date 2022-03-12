@@ -48,7 +48,7 @@ Java 原生 API 绘图
   下面是一个配置文件模板   
   配置文件位于 `mirai 根目录/config/top.colter.bilibili-dynamic-mirai-plugin/BiliPluginConfig.yml`  
   第一次运行插件会自动生成，也可自己创建  
-  注：**v2.1.5版本之后 `cookie` 项可以不用填写，bot管理员通过 `/bili login` 进行扫码登录**    
+  注：**v2.1.5版本及之后 `cookie` 项可以不用填写，bot管理员通过 `/bili login` 进行扫码登录**    
   **v2.1.5之前的版本 `cookie` 项为必填，并自行在配置文件中把单引号改为双引号**
 ```yml
 # 管理员
