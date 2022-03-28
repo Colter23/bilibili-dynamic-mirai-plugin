@@ -187,7 +187,7 @@ fun DynamicLive.getContent(dynamicInfo: DynamicInfo): String {
 }
 
 
-fun DynamicContent.buildContent(type: Int, dynamicInfo: DynamicInfo): MutableList<BufferedImage> {
+suspend fun DynamicContent.buildContent(type: Int, dynamicInfo: DynamicInfo): MutableList<BufferedImage> {
     return when (type) {
         DynamicType.REPLY -> (this as DynamicReply).bufferedImages(dynamicInfo)
         DynamicType.PICTURE -> (this as DynamicPicture).bufferedImages(dynamicInfo)
@@ -210,7 +210,7 @@ fun DynamicContent.buildContent(type: Int, dynamicInfo: DynamicInfo): MutableLis
 }
 
 
-fun DynamicReply.bufferedImages(dynamicInfo: DynamicInfo): MutableList<BufferedImage> {
+suspend fun DynamicReply.bufferedImages(dynamicInfo: DynamicInfo): MutableList<BufferedImage> {
     val biList = mutableListOf<BufferedImage>()
     val emojiList: MutableList<EmojiDetails> = mutableListOf()
     dynamicInfo.display.emojiInfo?.emojiDetails?.let { emojiList.addAll(it) }
@@ -228,7 +228,7 @@ fun DynamicReply.bufferedImages(dynamicInfo: DynamicInfo): MutableList<BufferedI
     return biList
 }
 
-fun DynamicPicture.bufferedImages(dynamicInfo: DynamicInfo): MutableList<BufferedImage> {
+suspend fun DynamicPicture.bufferedImages(dynamicInfo: DynamicInfo): MutableList<BufferedImage> {
     val biList = mutableListOf<BufferedImage>()
     ImgUtils.textContent(detail.description, dynamicInfo.display.emojiInfo?.emojiDetails)?.let { biList.add(it) }
     biList.add(ImgUtils.imageContent(detail.pictures))
@@ -240,7 +240,7 @@ fun DynamicPicture.bufferedImages(dynamicInfo: DynamicInfo): MutableList<Buffere
     return biList
 }
 
-fun DynamicText.bufferedImages(dynamicInfo: DynamicInfo): MutableList<BufferedImage> {
+suspend fun DynamicText.bufferedImages(dynamicInfo: DynamicInfo): MutableList<BufferedImage> {
     val biList = mutableListOf<BufferedImage>()
     ImgUtils.textContent(detail.content, dynamicInfo.display.emojiInfo?.emojiDetails)?.let { biList.add(it) }
     if (dynamicInfo.link == "") {
@@ -251,7 +251,7 @@ fun DynamicText.bufferedImages(dynamicInfo: DynamicInfo): MutableList<BufferedIm
     return biList
 }
 
-fun DynamicVideo.bufferedImages(dynamicInfo: DynamicInfo): MutableList<BufferedImage> {
+suspend fun DynamicVideo.bufferedImages(dynamicInfo: DynamicInfo): MutableList<BufferedImage> {
     val biList = mutableListOf<BufferedImage>()
     ImgUtils.textContent(dynamic, dynamicInfo.display.emojiInfo?.emojiDetails)?.let { biList.add(it) }
     if (dynamicInfo.type == DynamicType.REPLY) {
@@ -267,7 +267,7 @@ fun DynamicVideo.bufferedImages(dynamicInfo: DynamicInfo): MutableList<BufferedI
     return biList
 }
 
-fun DynamicArticle.bufferedImages(dynamicInfo: DynamicInfo): MutableList<BufferedImage> {
+suspend fun DynamicArticle.bufferedImages(dynamicInfo: DynamicInfo): MutableList<BufferedImage> {
     val biList = mutableListOf<BufferedImage>()
     biList.add(ImgUtils.articleContent(images, title, summary))
     if (dynamicInfo.link == "") {
@@ -278,7 +278,7 @@ fun DynamicArticle.bufferedImages(dynamicInfo: DynamicInfo): MutableList<Buffere
     return biList
 }
 
-fun DynamicMusic.bufferedImages(dynamicInfo: DynamicInfo): MutableList<BufferedImage> {
+suspend fun DynamicMusic.bufferedImages(dynamicInfo: DynamicInfo): MutableList<BufferedImage> {
     val biList = mutableListOf<BufferedImage>()
     ImgUtils.textContent(intro, dynamicInfo.display.emojiInfo?.emojiDetails)?.let { biList.add(it) }
     biList.add(ImgUtils.musicContent(cover, title, type))
@@ -290,7 +290,7 @@ fun DynamicMusic.bufferedImages(dynamicInfo: DynamicInfo): MutableList<BufferedI
     return biList
 }
 
-fun DynamicSketch.bufferedImages(dynamicInfo: DynamicInfo): MutableList<BufferedImage> {
+suspend fun DynamicSketch.bufferedImages(dynamicInfo: DynamicInfo): MutableList<BufferedImage> {
     val biList = mutableListOf<BufferedImage>()
     ImgUtils.textContent(vest.content, dynamicInfo.display.emojiInfo?.emojiDetails)?.let { biList.add(it) }
     biList.add(ImgUtils.musicContent(detail.cover, detail.title, detail.description, false))
@@ -302,7 +302,7 @@ fun DynamicSketch.bufferedImages(dynamicInfo: DynamicInfo): MutableList<Buffered
     return biList
 }
 
-fun DynamicEpisode.bufferedImages(dynamicInfo: DynamicInfo): MutableList<BufferedImage> {
+suspend fun DynamicEpisode.bufferedImages(dynamicInfo: DynamicInfo): MutableList<BufferedImage> {
     val biList = mutableListOf<BufferedImage>()
     biList.add(ImgUtils.videoContent(cover, season.title, description, "番剧"))
     if (dynamicInfo.link == "") {

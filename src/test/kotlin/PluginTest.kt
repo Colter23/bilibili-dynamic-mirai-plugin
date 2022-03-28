@@ -81,7 +81,7 @@ internal class PluginTest {
         }.toMutableSet()
     }
 
-    fun testBuildImageMessage(msg: String) {
+    suspend fun testBuildImageMessage(msg: String) {
         ImgUtils.buildImageMessage(
             listOf(
                 ImgUtils.textContent(msg, null)!!,

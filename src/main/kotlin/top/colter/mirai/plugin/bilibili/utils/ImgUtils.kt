@@ -1,9 +1,10 @@
 package top.colter.mirai.plugin.bilibili.utils
 
 import com.vdurmont.emoji.EmojiParser
-import kotlinx.coroutines.CoroutineName
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import io.ktor.client.*
+import io.ktor.client.engine.okhttp.*
+import io.ktor.client.request.*
+import kotlinx.coroutines.*
 import kotlinx.serialization.decodeFromString
 import net.mamoe.mirai.utils.error
 import top.colter.mirai.plugin.bilibili.PluginMain
@@ -16,6 +17,7 @@ import java.awt.geom.RoundRectangle2D
 import java.awt.image.BufferedImage
 import java.io.ByteArrayInputStream
 import java.io.File
+import java.io.InputStream
 import java.net.URL
 import java.util.*
 import javax.imageio.ImageIO
@@ -28,10 +30,10 @@ object ImgUtils: CoroutineScope{
     private val renderingHints = RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
     private val fonts = mutableListOf<Font>()
 
+    private val client = HttpClient(OkHttp)
+
     private const val imgWidth = 800
     private const val contentMargin = 30
-
-    private val emojiMap: MutableMap<String, BufferedImage> = mutableMapOf()
 
     init {
         renderingHints[RenderingHints.KEY_RENDERING] = RenderingHints.VALUE_RENDER_QUALITY
@@ -79,7 +81,7 @@ object ImgUtils: CoroutineScope{
         }
     }
 
-    fun buildImageMessage(
+    suspend fun buildImageMessage(
         biList: List<BufferedImage>,
         profile: UserProfile?,
         time: String,
@@ -156,7 +158,7 @@ object ImgUtils: CoroutineScope{
         return newBi
     }
 
-    fun buildLiveImageMessage(
+    suspend fun buildLiveImageMessage(
         title: String,
         coverUrl: String,
         time: String,
@@ -206,7 +208,7 @@ object ImgUtils: CoroutineScope{
 
     }
 
-    private fun header(
+    private suspend fun header(
         headerG2: Graphics2D,
         rowOne: String,
         rowTwo: String,
@@ -248,7 +250,7 @@ object ImgUtils: CoroutineScope{
     }
 
 
-    fun textContent(text: String, emojiList: List<EmojiDetails>? = null): BufferedImage? {
+    suspend fun textContent(text: String, emojiList: List<EmojiDetails>? = null): BufferedImage? {
         if (text == "") return null
         var msgText = text
 
@@ -258,32 +260,31 @@ object ImgUtils: CoroutineScope{
         textG2.color = Color.BLACK
         textG2.font = fonts[0].deriveFont(25f)
 
+        val emojiMap: MutableMap<String, BufferedImage> = mutableMapOf()
+
         emojiList?.forEach {
             if (!emojiMap.containsKey(it.emojiName)) {
-                emojiMap[it.emojiName] = ImageIO.read(URL(imgApi(it.url, 30, 30)))
+                emojiMap[it.emojiName] = downloadImg(imgApi(it.url, 30, 30))!!
             }
         }
 
         msgText = EmojiParser.parseFromUnicode(msgText) { e ->
-            val emojis = e.emoji.htmlHexadecimal.split(";").filter{ it.isNotEmpty() }.map{ it.substring(3) }.toList()
-            val emoji = emojis.joinToString("-")
-            if (!emojiMap.containsKey(emoji)) {
-                var emojiImg: BufferedImage? = null
-                runCatching {
-                    emojiImg = downloadImg("https://twemoji.maxcdn.com/36x36/$emoji.png")?: throw Exception()
-                }.onFailure {
-                    logger.error("获取 $emoji emoji失败")
-                    return@parseFromUnicode e.emoji.unicode
-                }
-                val emojiBi = BufferedImage(30, 30, BufferedImage.TYPE_INT_ARGB)
-                val emojiG2 = emojiBi.createGraphics()
-                emojiG2.setRenderingHints(renderingHints)
-                emojiG2.drawImage(emojiImg, 0, 0, 30, 30, null)
+            runBlocking {
+                val emojis = e.emoji.htmlHexadecimal.split(";").filter{ it.isNotEmpty() }.map{ it.substring(3) }.toList()
+                val emoji = emojis.joinToString("-")
+                if (!emojiMap.containsKey(emoji)) {
+                    val emojiImg: BufferedImage? = downloadImg("https://twemoji.maxcdn.com/36x36/$emoji.png")
+                        ?: return@runBlocking e.emoji.unicode
+                    val emojiBi = BufferedImage(30, 30, BufferedImage.TYPE_INT_ARGB)
+                    val emojiG2 = emojiBi.createGraphics()
+                    emojiG2.setRenderingHints(renderingHints)
+                    emojiG2.drawImage(emojiImg, 0, 0, 30, 30, null)
 
-                emojiMap["[$emoji]"] = emojiBi
-                emojiG2.dispose()
+                    emojiMap["[$emoji]"] = emojiBi
+                    emojiG2.dispose()
+                }
+                "[$emoji]"
             }
-            "[$emoji]"
         }
 
         val tran = trans(msgText)
@@ -337,7 +338,7 @@ object ImgUtils: CoroutineScope{
         return textBi.getSubimage(0, 0, textBi.width, textY + 15)
     }
 
-    fun imageContent(pictures: List<DynamicPictureInfo>): BufferedImage {
+    suspend fun imageContent(pictures: List<DynamicPictureInfo>): BufferedImage {
         val imgBi = BufferedImage(imgWidth, 2000, BufferedImage.TYPE_INT_ARGB)
         val imgG2 = imgBi.createGraphics()
         imgG2.setRenderingHints(renderingHints)
@@ -381,7 +382,7 @@ object ImgUtils: CoroutineScope{
         return imgBi.getSubimage(0, 0, imgBi.width, picH + 20)
     }
 
-    fun videoContentOld(coverUrl: String, title: String, desc: String, tag: String = ""): BufferedImage {
+    suspend fun videoContentOld(coverUrl: String, title: String, desc: String, tag: String = ""): BufferedImage {
         val videoBi = BufferedImage(imgWidth, 170, BufferedImage.TYPE_INT_ARGB)
         val videoG2 = videoBi.createGraphics()
         videoG2.setRenderingHints(renderingHints)
@@ -426,7 +427,7 @@ object ImgUtils: CoroutineScope{
         return videoBi
     }
 
-    fun videoContent(coverUrl: String, title: String, desc: String, tag: String = ""): BufferedImage {
+    suspend fun videoContent(coverUrl: String, title: String, desc: String, tag: String = ""): BufferedImage {
         val videoBi = BufferedImage(imgWidth, 490, BufferedImage.TYPE_INT_ARGB)
         val videoG2 = videoBi.createGraphics()
         videoG2.setRenderingHints(renderingHints)
@@ -477,7 +478,7 @@ object ImgUtils: CoroutineScope{
         return videoBi
     }
 
-    fun articleContent(imageUrls: List<String>, title: String, desc: String): BufferedImage {
+    suspend fun articleContent(imageUrls: List<String>, title: String, desc: String): BufferedImage {
         val articleBi = BufferedImage(imgWidth, 300, BufferedImage.TYPE_INT_ARGB)
         val articleG2 = articleBi.createGraphics()
         articleG2.setRenderingHints(renderingHints)
@@ -532,7 +533,7 @@ object ImgUtils: CoroutineScope{
         return articleBi
     }
 
-    fun musicContent(coverUrl: String, title: String, desc: String, isMusic: Boolean = true): BufferedImage {
+    suspend fun musicContent(coverUrl: String, title: String, desc: String, isMusic: Boolean = true): BufferedImage {
         val musicBi = BufferedImage(imgWidth, 120, BufferedImage.TYPE_INT_ARGB)
         val musicG2 = musicBi.createGraphics()
         musicG2.setRenderingHints(renderingHints)
@@ -636,21 +637,17 @@ object ImgUtils: CoroutineScope{
     private fun Graphics2D.getStrWidth(str: String, plus: Int = 0): Int =
         font.getStringBounds(str, fontRenderContext).width.toInt() + plus
 
-    private fun Graphics2D.drawImg(url: String, x: Int, y: Int, w: Int, h: Int){
-        try {
-            drawImage(downloadImg(imgApi(url, w, h)), x, y, null)
-        }catch (e: Exception){
-            logger.error(e.message)
-        }
+    private suspend fun Graphics2D.drawImg(url: String, x: Int, y: Int, w: Int, h: Int){
+        drawImage(downloadImg(imgApi(url, w, h)), x, y, null)
     }
 
-    private fun downloadImg(url: String):BufferedImage? = try {
-        val conn = URL(url).openConnection()
-        conn.connectTimeout = 5000
-        conn.readTimeout = 5000
-        ImageIO.read(conn.getInputStream())
+    private suspend fun downloadImg(url: String):BufferedImage? = try {
+        withContext(Dispatchers.IO) {
+            ImageIO.read(client.get<InputStream>(url))
+        }
     }catch (e: Exception) {
-        throw Exception("下载图片失败,图片链接: ${url}\n${e.message}")
+        logger.error("下载图片失败,图片链接: ${url}\n${e.message}")
+        null
     }
 
     private fun imgApi(imgUrl: String, width: Int, height: Int): String = "${imgUrl}@${width}w_${height}h_1e_1c.png"
