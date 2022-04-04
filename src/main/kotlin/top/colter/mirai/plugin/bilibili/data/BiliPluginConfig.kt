@@ -39,6 +39,12 @@ object BiliPluginConfig : AutoSavePluginConfig("BiliPluginConfig") {
     @ValueDescription("页脚模板")
     val footerTemplate: String by value("{type}ID: {id}")
 
+    @ValueDescription("是否开启图片二维码")
+    val qrCode: Boolean by value(false)
+
+    @ValueDescription("卡片圆角大小")
+    val cardArc: Int by value(20)
+
     //@Suppress(stringSerialization = DOUBLE_QUOTATION)
     @ValueDescription("cookie, 请使用双引号")
     var cookie: String by value("")

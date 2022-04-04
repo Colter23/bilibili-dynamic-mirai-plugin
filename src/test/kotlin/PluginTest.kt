@@ -1,6 +1,8 @@
 package top.colter.mirai.plugin
 
 import com.google.zxing.BarcodeFormat
+import com.google.zxing.EncodeHintType
+import com.google.zxing.client.j2se.MatrixToImageConfig
 import com.google.zxing.client.j2se.MatrixToImageWriter
 import com.google.zxing.qrcode.QRCodeWriter
 import com.vdurmont.emoji.EmojiParser
@@ -10,6 +12,8 @@ import top.colter.mirai.plugin.bilibili.data.SubData
 import top.colter.mirai.plugin.bilibili.data.UserInfo
 import top.colter.mirai.plugin.bilibili.data.UserProfile
 import top.colter.mirai.plugin.bilibili.utils.ImgUtils
+import top.colter.mirai.plugin.bilibili.utils.ImgUtils.buildLiveImageMessage
+import java.awt.Color
 import java.net.URL
 import java.nio.file.FileSystems
 import javax.imageio.ImageIO
@@ -110,7 +114,7 @@ internal class PluginTest {
                     "https://i0.hdslb.com/bfs/face/904bef1b4067335068faba12062f735dda07c1fe.jpg"
                 )
             ),
-            "2021年12月21日", "#9fc7f3", "D:/Code/test.png"
+            "2021年12月21日", "#9fc7f3", "https://t.bilibili.com/6443821168139960445465","D:/Code/test.png"
         )//D:/Code/test.png
     }
 
@@ -123,6 +127,16 @@ internal class PluginTest {
             "\n" +
             "_____________\n" +
             "火神从包裹里拿出一件，刻俄柏就穿上一件，然而，当火神想再找条长裤给刻俄柏穿上的时候......她早就跑得没影啦！ ")
+    }
+
+    @Test
+    fun liveTest():Unit = runBlocking {
+        buildLiveImageMessage(
+            "无拘无束 - 刻俄柏",
+            "https://i0.hdslb.com/bfs/archive/5c20fc634ca754acc6b48a445a2980b9a4942107.jpg",
+            "2021年12月21日", "明日方舟",
+            "https://i0.hdslb.com/bfs/face/904bef1b4067335068faba12062f735dda07c1fe.jpg",
+            "#9fc7f3", "https://t.bilibili.com/6443821168139960445465","D:/Code/test.png")
     }
 
     @Test
@@ -153,12 +167,56 @@ internal class PluginTest {
         //QRCode.from("https://passport.bilibili.com/qrcode/h5/login?oauthKey=c3bd5286a2b40a822f5f60e9bf3f602e").withSize(250, 250).file("QRCode").renameTo(
         //    File("D:/Code/QRCode.png")
         //)
-        val text = "https://passport.bilibili.com/qrcode/h5/login?oauthKey=c3bd5286a2b40a822f5f60e9bf3f602e"
+        val text = "https://t.bilibili.com/6443821168139960445465"
         val qrCodeWriter = QRCodeWriter()
-        val bitMatrix = qrCodeWriter.encode(text, BarcodeFormat.QR_CODE, 250, 250)
-        val path = FileSystems.getDefault().getPath("D:/Code/QRCode.png")
+        val bitMatrix = qrCodeWriter.encode(
+            text,
+            BarcodeFormat.QR_CODE,
+            90, 90,
+            mapOf(EncodeHintType.MARGIN to 0))
 
-        MatrixToImageWriter.writeToPath(bitMatrix, "PNG", path)
+        val color = "#dda2bb"
+        val c = hex2Color(color)
+        val cc = c.red + c.green + c.blue
+        val ccc = if (cc > 382){
+            val hsb = Color.RGBtoHSB(c.red, c.green, c.blue, null)
+            hsb[1] = hsb[1] + 0.25f
+            Color.HSBtoRGB(hsb[0], hsb[1], hsb[2])
+        }else{
+            ("ff"+color.substring(1)).toUInt(16).toInt()
+        }
+
+        val path = FileSystems.getDefault().getPath("D:/Code/QRCode.png")
+        val config = MatrixToImageConfig(ccc, 0x00FFFFFF.toInt())
+        MatrixToImageWriter.writeToPath(bitMatrix, "PNG", path, config)
+
+        //println("4e6ef2".toInt()) (0xFF shl 24).toUInt()+
+        //println(("#4e6ef2".substring(1)).toInt(16))
+
+        //println("=========")
+        //bitMatrix.topLeftOnBit.forEach ( ::println )
+        //println("=========")
+        //bitMatrix.bottomRightOnBit.forEach ( ::println )
+        //println("=========")
+        //
+        //val bb = bitMatrix.getRow(37, null)
+        //for (i in 1..bb.size){
+        //    println(bb[i])
+        //}
+
+
     }
 
+}
+
+private fun hex2Color(hex: String): Color {
+    return if (hex.startsWith("#")) {
+        Color(
+            Integer.valueOf(hex.substring(1, 3), 16),
+            Integer.valueOf(hex.substring(3, 5), 16),
+            Integer.valueOf(hex.substring(5), 16)
+        )
+    } else {
+        Color.BLACK
+    }
 }

@@ -6,7 +6,7 @@ import net.mamoe.mirai.message.data.toPlainText
 import net.mamoe.mirai.utils.ExternalResource.Companion.uploadAsImage
 import top.colter.mirai.plugin.bilibili.data.BiliPluginConfig
 import top.colter.mirai.plugin.bilibili.data.LiveInfo
-import top.colter.mirai.plugin.bilibili.utils.ImgUtils.buildLiveImageMessage
+import top.colter.mirai.plugin.bilibili.utils.ImgUtils
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
@@ -39,7 +39,7 @@ suspend fun LiveInfo.buildTextLive(contact: Contact): Message {
 
 suspend fun LiveInfo.buildImageLive(contact: Contact, color: String): Message {
     val link = "https://live.bilibili.com/${roomId}"
-    val file = buildLiveImageMessage(title, cover, time, uname, face, color, "live/${uid}/${liveTime}.png")
+    val file = ImgUtils.buildLiveImageMessage(title, cover, time, uname, face, color, link,"live/${uid}/${liveTime}.png")
     val template = BiliPluginConfig.livePushTemplate.ifEmpty {
         BiliPluginConfig.pushTemplate
     }

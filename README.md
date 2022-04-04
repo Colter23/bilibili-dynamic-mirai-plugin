@@ -113,6 +113,12 @@ livePushTemplate: ""
 # 图标页脚模板 配置项与上方一致
 footerTemplate: "{type}ID: {id}"
 
+#是否开启图片二维码
+qrCode: false
+
+#卡片圆角大小
+cardArc: 20
+
 # cookie 请包在双引号内
 # 如何获取见下文 手动获取 Cookie
 # 或使用 /bili login 进行扫码登录

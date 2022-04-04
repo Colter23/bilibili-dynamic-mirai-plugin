@@ -604,7 +604,6 @@ object DynamicTasker: CoroutineScope {
             }
         }
     }
-
 }
 
 /**
@@ -642,5 +641,3 @@ fun findContact(del: String, ): Contact? = synchronized(contactMap) {
  * @author cssxsh
  */
 val Contact.delegate get() = (if (this is Group) id * -1 else id).toString()
-
-

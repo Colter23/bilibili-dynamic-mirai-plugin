@@ -1,5 +1,7 @@
 package top.colter.mirai.plugin.bilibili
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
 import net.mamoe.mirai.contact.Contact
 import net.mamoe.mirai.message.data.Message
@@ -341,9 +343,12 @@ suspend fun DynamicInfo.buildImageDynamic(contact: Contact, color: String): Mess
     val biList = (dynamicContent ?: card.dynamicContent(type)).buildContent(type, this)
     val footer = replaceTemplate(BiliPluginConfig.footerTemplate)
     biList.add(ImgUtils.footer(footer))
-    val file = ImgUtils.buildImageMessage(biList, profile, time, color, "dynamic/${uid}/${did}.png")
+    val file = withContext(Dispatchers.IO) {
+        ImgUtils.buildImageMessage(biList, profile, time, color, link,"dynamic/${uid}/${did}.png")
+    }
+    //val file = ImgUtils.buildImageMessage(biList, profile, time, color, "dynamic/${uid}/${did}.png")
     val msg = replaceTemplate(BiliPluginConfig.pushTemplate)
-    return (file.uploadAsImage(contact) + msg)
+    return file.uploadAsImage(contact) + msg
 }
 
 fun DynamicInfo.replaceTemplate(template: String): String {
