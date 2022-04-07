@@ -315,54 +315,51 @@ data class DynamicSketchVest(
 // DynamicType.LIVE
 @Serializable
 data class DynamicLive(
-    @SerialName("background")
-    val background: String,
-    @SerialName("broadcast_type")
-    val broadcastType: Int,
-    @SerialName("cover")
-    val cover: String,
-    @SerialName("face")
-    val face: String,
-    @SerialName("hidden_status")
-    val hiddenStatus: String,
-    @SerialName("link")
-    val link: String,
-    @SerialName("live_status")
-    val liveStatus: Int,
-    @SerialName("lock_status")
-    val lockStatus: String,
-    @SerialName("on_flag")
-    val onFlag: Int,
-    @SerialName("online")
-    val online: Int,
-    @SerialName("room_shield")
-    val roomShield: Int,
-    @SerialName("room_silent")
-    val roomSilent: Int,
-    @SerialName("roomid")
-    val roomId: Long,
-    @SerialName("round_status")
-    val roundStatus: Int,
-    @SerialName("short_id")
-    val shortId: Int,
-    @SerialName("slide_link")
-    val slideLink: String,
-    @SerialName("tags")
-    val tags: String,
-    @SerialName("title")
-    val title: String,
-    @SerialName("try_time")
-    val tryTime: String,
-    @SerialName("uid")
-    val uid: Long,
-    @SerialName("uname")
-    val uname: String,
-    @SerialName("user_cover")
-    val userCover: String,
-    @SerialName("verify")
-    val verify: String,
+    @SerialName("live_play_info")
+    val livePlayInfo: LivePlayInfo,
+    //@SerialName("live_record_info")
+    //val liveRecordInfo: LiveRecordInfo? = null,
+    @SerialName("style")
+    val style: Int,
+    @SerialName("type")
+    val type: Int
 ): DynamicContent("直播")
 
+@Serializable
+data class LivePlayInfo(
+    @SerialName("area_id")
+    val areaId: Int,
+    @SerialName("area_name")
+    val areaName: String,
+    @SerialName("cover")
+    val cover: String,
+    @SerialName("link")
+    val link: String,
+    @SerialName("live_id")
+    val liveId: Long,
+    @SerialName("live_start_time")
+    val liveStartTime: Long,
+    @SerialName("live_status")
+    val liveStatus: Int,
+    @SerialName("online")
+    val online: Int,
+    @SerialName("parent_area_id")
+    val parentAreaId: Int,
+    @SerialName("parent_area_name")
+    val parentAreaName: String,
+    @SerialName("room_id")
+    val roomId: Int,
+    @SerialName("title")
+    val title: String,
+    @SerialName("uid")
+    val uid: Long,
+    @SerialName("watched_show")
+    val watchedShow: String,
+)
+@Serializable
+data class LiveRecordInfo(
+    val info: String? = null
+)
 
 object DynamicType {
     const val NONE = 0

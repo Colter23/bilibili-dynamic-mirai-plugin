@@ -178,13 +178,13 @@ fun DynamicSketch.getContent(dynamicInfo: DynamicInfo): String {
 
 fun DynamicLive.getContent(dynamicInfo: DynamicInfo): String {
     if (dynamicInfo.link == "") {
-        dynamicInfo.link = "https://live.bilibili.com/$roomId"
+        dynamicInfo.link = "https://live.bilibili.com/${livePlayInfo.roomId}"
     }
-    if (cover != "") {
-        dynamicInfo.images.add(cover)
+    if (livePlayInfo.cover != "") {
+        dynamicInfo.images.add(livePlayInfo.cover)
     }
     return buildString {
-        append("直播: $title")
+        append("直播: $livePlayInfo.title")
     }
 }
 
@@ -365,14 +365,16 @@ fun DynamicInfo.replaceTemplate(template: String): String {
 //}
 
 suspend fun getImageMessage(url: String, contact: Contact): Message {
-    var inputStream: InputStream? = null
-    return try {
-        inputStream = URL(url).openConnection().getInputStream()
-        inputStream.uploadAsImage(contact)
-    } catch (e: Exception) {
-        "获取图片失败".toPlainText()
-    } finally {
-        inputStream?.close()
+    return withContext(Dispatchers.IO) {
+        var inputStream: InputStream? = null
+        return@withContext try {
+            inputStream = URL(url).openConnection().getInputStream()
+            inputStream.uploadAsImage(contact)
+        } catch (e: Exception) {
+            "获取图片失败".toPlainText()
+        } finally {
+            inputStream?.close()
+        }
     }
 }
 
