@@ -184,7 +184,7 @@ fun DynamicLive.getContent(dynamicInfo: DynamicInfo): String {
         dynamicInfo.images.add(livePlayInfo.cover)
     }
     return buildString {
-        append("直播: $livePlayInfo.title")
+        append("直播: ${livePlayInfo.title}")
     }
 }
 
