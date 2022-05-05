@@ -27,26 +27,32 @@ internal class PluginTest {
     }
 
     val dynamic: MutableMap<Long, SubData> = mutableMapOf(
-        0L to SubData("ALL", filter = mutableMapOf(
-            "0" to mutableListOf("互动抽奖", "恭喜"),
-            "3375582524" to mutableListOf("额")
-        )),
-        11111111L to SubData("AAA", filter = mutableMapOf(
-            "0" to mutableListOf("啊这", "可以"),
-            "3375582524" to mutableListOf("和", "看"),
-            "2323232323" to mutableListOf("哦", "怕"),
-            "7878787878" to mutableListOf("和", "吧"),
-        ), containFilter = mutableMapOf(
-            "5656566655" to mutableListOf("看"),
-        )),
-        22222222L to SubData("BBB", filter = mutableMapOf(
-            "0" to mutableListOf("啊这", "可以"),
-            "5656566655" to mutableListOf("和", "看")
-        ))
+        0L to SubData(
+            "ALL", filter = mutableMapOf(
+                "0" to mutableListOf("互动抽奖", "恭喜"),
+                "3375582524" to mutableListOf("额")
+            )
+        ),
+        11111111L to SubData(
+            "AAA", filter = mutableMapOf(
+                "0" to mutableListOf("啊这", "可以"),
+                "3375582524" to mutableListOf("和", "看"),
+                "2323232323" to mutableListOf("哦", "怕"),
+                "7878787878" to mutableListOf("和", "吧"),
+            ), containFilter = mutableMapOf(
+                "5656566655" to mutableListOf("看"),
+            )
+        ),
+        22222222L to SubData(
+            "BBB", filter = mutableMapOf(
+                "0" to mutableListOf("啊这", "可以"),
+                "5656566655" to mutableListOf("和", "看")
+            )
+        )
     )
 
     @Test
-    fun filterTest(): Unit = runBlocking{
+    fun filterTest(): Unit = runBlocking {
         val content = "啊水水水水水水水水水看水水水水水"
         val set = mutableSetOf("3375582524", "2323232323", "5656566655").filterContent(11111111L, content)
         println(set)
@@ -114,33 +120,36 @@ internal class PluginTest {
                     "https://i0.hdslb.com/bfs/face/904bef1b4067335068faba12062f735dda07c1fe.jpg"
                 )
             ),
-            "2021年12月21日", "#9fc7f3", "https://t.bilibili.com/6443821168139960445465","D:/Code/test.png"
+            "2021年12月21日", "#9fc7f3", "https://t.bilibili.com/6443821168139960445465", "D:/Code/test.png"
         )//D:/Code/test.png
     }
 
     @Test
     fun imgTest(): Unit = runBlocking {
-        testBuildImageMessage("#明日方舟#\n" +
-            "【新增服饰】\n" +
-            "//无拘无束 - 刻俄柏\n" +
-            "0011子品牌，飙系列新款/无拘无束。为了奖励近期十分听话的刻俄柏，火神托人从哥伦比亚弄来了一套最新潮流......童装？\n" +
-            "\n" +
-            "_____________\n" +
-            "火神从包裹里拿出一件，刻俄柏就穿上一件，然而，当火神想再找条长裤给刻俄柏穿上的时候......她早就跑得没影啦！ ")
+        testBuildImageMessage(
+            "#明日方舟#\n" +
+                "【新增服饰】\n" +
+                "//无拘无束 - 刻俄柏\n" +
+                "0011子品牌，飙系列新款/无拘无束。为了奖励近期十分听话的刻俄柏，火神托人从哥伦比亚弄来了一套最新潮流......童装？\n" +
+                "\n" +
+                "_____________\n" +
+                "火神从包裹里拿出一件，刻俄柏就穿上一件，然而，当火神想再找条长裤给刻俄柏穿上的时候......她早就跑得没影啦！ "
+        )
     }
 
     @Test
-    fun liveTest():Unit = runBlocking {
+    fun liveTest(): Unit = runBlocking {
         buildLiveImageMessage(
             "无拘无束 - 刻俄柏",
             "https://i0.hdslb.com/bfs/archive/5c20fc634ca754acc6b48a445a2980b9a4942107.jpg",
             "2021年12月21日", "明日方舟",
             "https://i0.hdslb.com/bfs/face/904bef1b4067335068faba12062f735dda07c1fe.jpg",
-            "#9fc7f3", "https://t.bilibili.com/6443821168139960445465","D:/Code/test.png")
+            "#9fc7f3", "https://t.bilibili.com/6443821168139960445465", "D:/Code/test.png"
+        )
     }
 
     @Test
-    fun emojiTest(): Unit = runBlocking{
+    fun emojiTest(): Unit = runBlocking {
         val msgText = "我的\uD83C\uDF15世界"
         val emojiHex = EmojiParser.parseFromUnicode(msgText) { e ->
             val emojis = e.emoji.htmlHexadecimal.split(";").filter { it.isNotEmpty() }.map { it.substring(3) }.toList()
@@ -148,10 +157,10 @@ internal class PluginTest {
             runCatching {
                 //async {
                 //    withTimeout(5000){
-                        println(emoji)
-                        ImageIO.read(URL("https://twemoji.maxcdn.com/36x36/$emoji.png"))
-                    //}
-                    //delay(100)
+                println(emoji)
+                ImageIO.read(URL("https://twemoji.maxcdn.com/36x36/$emoji.png"))
+                //}
+                //delay(100)
                 //}
             }.onFailure {
                 println(it.message)
@@ -162,8 +171,9 @@ internal class PluginTest {
         println(emojiHex)
     }
 
+
     @Test
-    fun QRTest(): Unit = runBlocking{
+    fun QRTest(): Unit = runBlocking {
         //QRCode.from("https://passport.bilibili.com/qrcode/h5/login?oauthKey=c3bd5286a2b40a822f5f60e9bf3f602e").withSize(250, 250).file("QRCode").renameTo(
         //    File("D:/Code/QRCode.png")
         //)
@@ -173,17 +183,18 @@ internal class PluginTest {
             text,
             BarcodeFormat.QR_CODE,
             90, 90,
-            mapOf(EncodeHintType.MARGIN to 0))
+            mapOf(EncodeHintType.MARGIN to 0)
+        )
 
         val color = "#dda2bb"
         val c = hex2Color(color)
         val cc = c.red + c.green + c.blue
-        val ccc = if (cc > 382){
+        val ccc = if (cc > 382) {
             val hsb = Color.RGBtoHSB(c.red, c.green, c.blue, null)
             hsb[1] = hsb[1] + 0.25f
             Color.HSBtoRGB(hsb[0], hsb[1], hsb[2])
-        }else{
-            ("ff"+color.substring(1)).toUInt(16).toInt()
+        } else {
+            ("ff" + color.substring(1)).toUInt(16).toInt()
         }
 
         val path = FileSystems.getDefault().getPath("D:/Code/QRCode.png")
@@ -205,6 +216,13 @@ internal class PluginTest {
         //}
 
 
+    }
+
+    @Test
+    fun timeTest(): Unit = runBlocking {
+        val DYNAMIC_START = 1498838400L
+        fun dynamictime(id: Long): Long = (id shr 32) + DYNAMIC_START
+        println(dynamictime(655153542555762741))
     }
 
 }
