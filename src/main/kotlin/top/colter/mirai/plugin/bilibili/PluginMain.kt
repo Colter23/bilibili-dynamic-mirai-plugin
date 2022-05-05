@@ -25,7 +25,6 @@ object PluginMain : KotlinPlugin(
         )
     }
 ) {
-
     val contactMap: MutableMap<Long, Contact> = mutableMapOf()
 
     var sessData: String = ""
