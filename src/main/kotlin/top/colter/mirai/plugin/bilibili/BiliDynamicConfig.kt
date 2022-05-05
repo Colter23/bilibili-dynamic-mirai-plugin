@@ -1,10 +1,13 @@
-package top.colter.mirai.plugin.bilibili.data
+package top.colter.mirai.plugin.bilibili
 
+import kotlinx.serialization.Serializable
 import net.mamoe.mirai.console.data.AutoSavePluginConfig
 import net.mamoe.mirai.console.data.ValueDescription
 import net.mamoe.mirai.console.data.value
 
-object BiliPluginConfig : AutoSavePluginConfig("BiliPluginConfig") {
+
+object BiliDynamicConfig : AutoSavePluginConfig("BiliPluginConfig") {
+
 
     @ValueDescription("管理员")
     val admin: String by value("")
@@ -50,14 +53,41 @@ object BiliPluginConfig : AutoSavePluginConfig("BiliPluginConfig") {
     var cookie: String by value("")
 
     @ValueDescription("百度翻译")
-    val baiduTranslate: Map<String, String> by value(
-        mapOf(
-            //是否开启百度翻译
-            "enable" to "false",
-            //百度翻译api密钥
-            "APP_ID" to "",
-            "SECURITY_KEY" to ""
-        )
-    )
+    val baiduTranslate: TranslateConfig by value()
+
+    @ValueDescription("图片配置")
+    val imageConfig: ImageConfig by value()
+
+    @ValueDescription("代理")
+    val proxy: List<String> by value()
+
+    @ValueDescription("代理")
+    val enableConfig: EnableConfig by value()
 
 }
+
+@Serializable
+data class EnableConfig(
+    val enable: Boolean = true,
+    val proxyEnable: Boolean = true,
+)
+
+@Serializable
+data class TranslateConfig(
+    val enable: Boolean = false,
+    val APP_ID: String = "",
+    val SECURITY_KEY: String = "",
+)
+
+@Serializable
+data class ImageConfig(
+    val quality: Int = 1,
+    val font: String = "",
+)
+
+@Serializable
+data class ProxyConfig(
+    val proxy: List<String> = listOf(),
+//    val verifyUrl: String = "http://httpbin.org",
+)
+

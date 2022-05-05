@@ -1,13 +1,13 @@
 plugins {
-    val kotlinVersion = "1.6.0"
+    val kotlinVersion = "1.6.21"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.serialization") version kotlinVersion
 
-    id("net.mamoe.mirai-console") version "2.10.1"
+    id("net.mamoe.mirai-console") version "2.11.0-RC"
 }
 
 group = "top.colter"
-version = "2.2.2-M1"
+version = "3.0.0-M1"
 
 repositories {
     mavenLocal()
@@ -17,7 +17,7 @@ repositories {
 }
 
 dependencies{
-    implementation("com.vdurmont:emoji-java:5.1.1")
     implementation("com.google.zxing:javase:3.4.1")
-    testImplementation(kotlin("test", "1.6.0"))
+    implementation("org.jetbrains.skiko:skiko-awt-runtime-windows-x64:0.7.18")
+    testImplementation(kotlin("test", "1.6.21"))
 }

@@ -1,222 +1,238 @@
-package top.colter.mirai.plugin
+package top.colter
 
-import com.google.zxing.BarcodeFormat
-import com.google.zxing.EncodeHintType
-import com.google.zxing.client.j2se.MatrixToImageConfig
-import com.google.zxing.client.j2se.MatrixToImageWriter
-import com.google.zxing.qrcode.QRCodeWriter
-import com.vdurmont.emoji.EmojiParser
+import io.ktor.client.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
+import io.ktor.utils.io.*
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.serializer
+import org.jetbrains.skia.*
 import org.junit.Test
-import top.colter.mirai.plugin.bilibili.data.SubData
-import top.colter.mirai.plugin.bilibili.data.UserInfo
-import top.colter.mirai.plugin.bilibili.data.UserProfile
-import top.colter.mirai.plugin.bilibili.utils.ImgUtils
-import top.colter.mirai.plugin.bilibili.utils.ImgUtils.buildLiveImageMessage
-import java.awt.Color
-import java.net.URL
-import java.nio.file.FileSystems
-import javax.imageio.ImageIO
+import top.colter.mirai.plugin.bilibili.BiliClient
+import top.colter.mirai.plugin.bilibili.BiliDynamicConfig.font
+import top.colter.mirai.plugin.bilibili.BiliLogin
+import top.colter.mirai.plugin.bilibili.data.*
+import top.colter.mirai.plugin.bilibili.draw.*
+import top.colter.mirai.plugin.bilibili.utils.json
 
 
 internal class PluginTest {
 
-    @Test
-    fun test(): Unit = runBlocking {
 
-    }
-
-    val dynamic: MutableMap<Long, SubData> = mutableMapOf(
-        0L to SubData("ALL", filter = mutableMapOf(
-            "0" to mutableListOf("互动抽奖", "恭喜"),
-            "3375582524" to mutableListOf("额")
-        )),
-        11111111L to SubData("AAA", filter = mutableMapOf(
-            "0" to mutableListOf("啊这", "可以"),
-            "3375582524" to mutableListOf("和", "看"),
-            "2323232323" to mutableListOf("哦", "怕"),
-            "7878787878" to mutableListOf("和", "吧"),
-        ), containFilter = mutableMapOf(
-            "5656566655" to mutableListOf("看"),
-        )),
-        22222222L to SubData("BBB", filter = mutableMapOf(
-            "0" to mutableListOf("啊这", "可以"),
-            "5656566655" to mutableListOf("和", "看")
-        ))
-    )
 
     @Test
-    fun filterTest(): Unit = runBlocking{
-        val content = "啊水水水水水水水水水看水水水水水"
-        val set = mutableSetOf("3375582524", "2323232323", "5656566655").filterContent(11111111L, content)
-        println(set)
-        set.forEach(::println)
-    }
+    fun httpTest(): Unit = runBlocking{
 
-    fun MutableSet<String>.filterContent(uid: Long, content: String): MutableSet<String> {
-        val allContainList = mutableListOf<String>()
-        dynamic[0]?.containFilter?.get("0")?.let { allContainList.addAll(it) }
-        dynamic[uid]?.containFilter?.get("0")?.let { allContainList.addAll(it) }
+//        val client = HttpClient()
+//        client.get<HttpResponse>("aa")
+        BiliLogin().getLoginQrCode()
 
-        val allFilterList = mutableListOf<String>()
-        dynamic[0]?.filter?.get("0")?.let { allFilterList.addAll(it) }
-        dynamic[uid]?.filter?.get("0")?.let { allFilterList.addAll(it) }
-
-        return filter { contact ->
-            val containList = mutableListOf<String>()
-            containList.addAll(allContainList)
-            dynamic[0]?.containFilter?.get(contact)?.let { containList.addAll(it) }
-            dynamic[uid]?.containFilter?.get(contact)?.let { containList.addAll(it) }
-            containList.forEach {
-                val b = Regex(it).containsMatchIn(content)
-                if (b) return@filter true
-            }
-            if (containList.size > 0) return@filter false
-
-            val filterList = mutableListOf<String>()
-            filterList.addAll(allFilterList)
-            dynamic[0]?.filter?.get(contact)?.let { filterList.addAll(it) }
-            dynamic[uid]?.filter?.get(contact)?.let { filterList.addAll(it) }
-            filterList.forEach {
-                val b = Regex(it).containsMatchIn(content)
-                if (b) return@filter false
-            }
-            true
-        }.toMutableSet()
-    }
-
-    suspend fun testBuildImageMessage(msg: String) {
-        ImgUtils.buildImageMessage(
-            listOf(
-                ImgUtils.textContent(msg, null)!!,
-                ImgUtils.videoContent(
-                    "https://i0.hdslb.com/bfs/archive/5c20fc634ca754acc6b48a445a2980b9a4942107.jpg",
-                    "趣味视频征集活动今日",
-                    "视频内容不限，包括但不限于打法攻略、创意玩法等内容视频内容不限，包括但不限于打法攻略、创意玩法等内容",
-                    "视频"
-                ),
-                //ImgUtils.imageContent(
-                //    listOf(
-                //        DynamicPictureInfo(1080,null,"https://i0.hdslb.com/bfs/album/648fb2527f49fd42c6ecbf991151e1593e7225ad.jpg",1920),
-                //        DynamicPictureInfo(816,null,"https://i0.hdslb.com/bfs/album/0ae6fee9eaeafe614377cf5451e78c2430d5a6e4.gif",499),
-                //        DynamicPictureInfo(816,null,"https://i0.hdslb.com/bfs/album/56c135d05c0d4a77964db04a07f039d7fe945f14.gif",499),
-                //        DynamicPictureInfo(816,null,"https://i0.hdslb.com/bfs/album/1971358d4d71ded8c1b287c7377a32c397190490.gif",499),
-                //        DynamicPictureInfo(816,null,"https://i0.hdslb.com/bfs/album/554027b1f38ad88040e315cdf55ee98ed5a20335.gif",499),
-                //        DynamicPictureInfo(816,null,"https://i0.hdslb.com/bfs/album/2180d689ad3de225f70e37f6ae3e953f583b012a.gif",499),
-                //        DynamicPictureInfo(816,null,"https://i0.hdslb.com/bfs/album/d009f31357f049f7f8134e4e74e208db4284c2eb.gif",499),
-                //    )),
-                ImgUtils.footer("动态ID：12313246432132")
-            ),
-            UserProfile(
-                UserInfo(
-                    1,
-                    "Test",
-                    "https://i0.hdslb.com/bfs/face/904bef1b4067335068faba12062f735dda07c1fe.jpg"
-                )
-            ),
-            "2021年12月21日", "#9fc7f3", "https://t.bilibili.com/6443821168139960445465","D:/Code/test.png"
-        )//D:/Code/test.png
     }
 
     @Test
-    fun imgTest(): Unit = runBlocking {
-        testBuildImageMessage("#明日方舟#\n" +
-            "【新增服饰】\n" +
-            "//无拘无束 - 刻俄柏\n" +
-            "0011子品牌，飙系列新款/无拘无束。为了奖励近期十分听话的刻俄柏，火神托人从哥伦比亚弄来了一套最新潮流......童装？\n" +
-            "\n" +
-            "_____________\n" +
-            "火神从包裹里拿出一件，刻俄柏就穿上一件，然而，当火神想再找条长裤给刻俄柏穿上的时候......她早就跑得没影啦！ ")
+    fun cookieTest(): Unit = runBlocking{
+
+        val client = BiliClient()
+
+        println(client.useHttpClient {
+            it.get<String>("http://passport.bilibili.com/qrcode/getLoginUrl")
+        })
+
+//        json.parseToJsonElement()
+
     }
 
     @Test
-    fun liveTest():Unit = runBlocking {
-        buildLiveImageMessage(
-            "无拘无束 - 刻俄柏",
-            "https://i0.hdslb.com/bfs/archive/5c20fc634ca754acc6b48a445a2980b9a4942107.jpg",
-            "2021年12月21日", "明日方舟",
-            "https://i0.hdslb.com/bfs/face/904bef1b4067335068faba12062f735dda07c1fe.jpg",
-            "#9fc7f3", "https://t.bilibili.com/6443821168139960445465","D:/Code/test.png")
+    fun drawTest(): Unit = runBlocking{
+
+        LoginQrCodeDraw.qrCode("https://passport.bilibili.com/qrcode/h5/login?oauthKey=c3bd5286a2b40a822f5f60e9bf3f602e")
     }
+
+    sealed class RichText {
+        data class Text(
+            val value: String
+        ):RichText()
+
+        data class Emoji(
+            val value: String
+        ):RichText()
+    }
+
 
     @Test
     fun emojiTest(): Unit = runBlocking{
-        val msgText = "我的\uD83C\uDF15世界"
-        val emojiHex = EmojiParser.parseFromUnicode(msgText) { e ->
-            val emojis = e.emoji.htmlHexadecimal.split(";").filter { it.isNotEmpty() }.map { it.substring(3) }.toList()
-            val emoji = emojis.joinToString("-")
-            runCatching {
-                //async {
-                //    withTimeout(5000){
-                        println(emoji)
-                        ImageIO.read(URL("https://twemoji.maxcdn.com/36x36/$emoji.png"))
-                    //}
-                    //delay(100)
-                //}
-            }.onFailure {
-                println(it.message)
-                return@parseFromUnicode e.emoji.unicode
+
+
+
+        val text = "AAAAA👩🏻‍⚕️👩🏻‍🏫👩🏻‍⚕️👩🏻‍🏫AAvv"
+
+
+        val textNode = mutableListOf<RichText>()
+        var index = 0
+
+        emojiRegex.findAll(text).forEach {
+            if (index != it.range.first){
+                textNode.add(RichText.Text(text.substring(index, it.range.first)))
             }
-            "[$emoji]"
+            textNode.add(RichText.Emoji(it.value))
+            index = it.range.last + 1
         }
-        println(emojiHex)
+
+        if (index != text.length){
+            textNode.add(RichText.Text(text.substring(index, text.length)))
+        }
+
+
+        val font = Font(Typeface.makeFromFile("E:/Desktop/资源/字体/HarmonyOS Sans/HarmonyOS_Sans_SC/HarmonyOS_Sans_SC_Medium.ttf"), 22f)
+
+        Surface.makeRasterN32Premul(500,500).apply {
+            canvas.apply {
+                var y = 20f
+
+                textNode.forEach {
+                    when (it){
+                        is RichText.Text -> {
+                            val tl = TextLine.make(it.value, font)
+                            drawTextLine(tl, 20f, y, Paint().apply {
+                                color = Color.WHITE
+                                isAntiAlias = true
+                            })
+                            y += 30f
+                        }
+                        is RichText.Emoji -> {
+                            val tl = TextLine.make(it.value, font)
+                            drawTextLine(tl, 20f, y, Paint().apply {
+                                color = Color.WHITE
+                                isAntiAlias = true
+                            })
+                            y += 30f
+                        }
+                    }
+
+                }
+            }
+
+        }.saveImage("test.png")
+
+
     }
 
     @Test
-    fun QRTest(): Unit = runBlocking{
-        //QRCode.from("https://passport.bilibili.com/qrcode/h5/login?oauthKey=c3bd5286a2b40a822f5f60e9bf3f602e").withSize(250, 250).file("QRCode").renameTo(
-        //    File("D:/Code/QRCode.png")
-        //)
-        val text = "https://t.bilibili.com/6443821168139960445465"
-        val qrCodeWriter = QRCodeWriter()
-        val bitMatrix = qrCodeWriter.encode(
-            text,
-            BarcodeFormat.QR_CODE,
-            90, 90,
-            mapOf(EncodeHintType.MARGIN to 0))
+    fun drawDynamicTest(): Unit = runBlocking{
+        val dynamic = DynamicItem(
+//            "DYNAMIC_TYPE_WORD",
+            DynamicType.DYNAMIC_TYPE_WORD,
+            "652271005324017683",
+            true,
+            null,
+            DynamicItem.Modules(
+                ModuleAuthor(
+                    "AUTHOR_TYPE_NORMAL",
+                    487550002,
+                    "猫芒ベル_Official",
+                    "https://i1.hdslb.com/bfs/face/652385c47e4742b6e26e19995a2407c83756b1f7.jpg",
+                    false,
+                    true,
+                    "",
+                    "//space.bilibili.com/487550002/dynamic",
+                    "",
+                    "2022-04-23 17:44",
+                    1650707078,
+                    ModuleAuthor.OfficialVerify(
+                        0,
+                        ""
+                    ),
+                    ModuleAuthor.Vip(
+                        2,
+                        1,
+                        "http://i0.hdslb.com/bfs/vip/icon_Certification_big_member_22_3x.png",
+                        1658160000000,
+                        ModuleAuthor.Vip.Label(
+                            "#FB7299",
+                            1,
+                            "",
+                            "annual_vip",
+                            "",
+                            "年度大会员",
+                            "#FFFFFF"
+                        ),
+                        "#FB7299",
+                        1,
+                        0
+                    ),
+                    ModuleAuthor.Pendant(
+                        258,
+                        "梦100",
+                        0,
+                        "http://i1.hdslb.com/bfs/face/d3587e6f3b534499fc08a71296bafa74a159fa33.png",
+                        "http://i1.hdslb.com/bfs/face/d3587e6f3b534499fc08a71296bafa74a159fa33.png",
+                        ""
+                    ),
+                    ModuleAuthor.Decorate(
+                        2426,
+                        1,
+                        "湊-阿库娅",
+                        "http://i0.hdslb.com/bfs/garb/item/5ebada630d1897124a9f33dd2d5c9566d02fcc72.png",
+                        "https://www.bilibili.com/h5/mall/fans/recommend/2452?navhide=1&mid=186463&from=dynamic&isdiy=0",
+                        ModuleAuthor.Decorate.Fan(
+                            "",
+                            false,
+                            "",
+                            0
+                        )
+                    )
+                ),
 
-        val color = "#dda2bb"
-        val c = hex2Color(color)
-        val cc = c.red + c.green + c.blue
-        val ccc = if (cc > 382){
-            val hsb = Color.RGBtoHSB(c.red, c.green, c.blue, null)
-            hsb[1] = hsb[1] + 0.25f
-            Color.HSBtoRGB(hsb[0], hsb[1], hsb[2])
-        }else{
-            ("ff"+color.substring(1)).toUInt(16).toInt()
-        }
+                ModuleDynamic(
+                    major = ModuleDynamic.Major(
+                        "MAJOR_TYPE_ARCHIVE",
+                        ModuleDynamic.Major.Archive(
+                            1,
+                            "341097266",
+                            "BV14R4y1P7Me",
+                            "【杂谈】她好像知道自己很可爱",
+                            "",
+                            "20220329－－封面：早乙女aku 翻译：土間うまる 时轴：予之笑颜 校对：剪辑也很可爱 剪辑：Canizza 压制：伊落",
+                            false,
+                            "04:02",
+                            "",
+                            ModuleDynamic.Major.Stat(
+                                "1236",
+                                "1.2万"
+                            ),
+                            ModuleDynamic.Major.Badge(
+                                "",
+                                "",
+                                "投稿视频"
+                            )
+                        )
+                    )
+                )
 
-        val path = FileSystems.getDefault().getPath("D:/Code/QRCode.png")
-        val config = MatrixToImageConfig(ccc, 0x00FFFFFF.toInt())
-        MatrixToImageWriter.writeToPath(bitMatrix, "PNG", path, config)
-
-        //println("4e6ef2".toInt()) (0xFF shl 24).toUInt()+
-        //println(("#4e6ef2".substring(1)).toInt(16))
-
-        //println("=========")
-        //bitMatrix.topLeftOnBit.forEach ( ::println )
-        //println("=========")
-        //bitMatrix.bottomRightOnBit.forEach ( ::println )
-        //println("=========")
-        //
-        //val bb = bitMatrix.getRow(37, null)
-        //for (i in 1..bb.size){
-        //    println(bb[i])
-        //}
-
-
-    }
-
-}
-
-private fun hex2Color(hex: String): Color {
-    return if (hex.startsWith("#")) {
-        Color(
-            Integer.valueOf(hex.substring(1, 3), 16),
-            Integer.valueOf(hex.substring(3, 5), 16),
-            Integer.valueOf(hex.substring(5), 16)
+            )
         )
-    } else {
-        Color.BLACK
+        makeCardBg(dynamic)
     }
+
+    @Test
+    fun jsonTest(): Unit = runBlocking{
+
+        val jsonStr = "{\"basic\": {\"comment_id_str\": \"193712377\",\"comment_type\": 11,\"like_icon\": {\"action_url\": \"\",\"end_url\": \"\",\"id\": 0,\"start_url\": \"\"},\"rid_str\": \"193712377\"},\"id_str\": \"656453757984309256\",\"modules\": {\"module_author\": {\"face\": \"http://i1.hdslb.com/bfs/face/5cf0b8f6acb15c6051e57e31503fb3d3ad945f96.jpg\",\"face_nft\": false,\"following\": true,\"jump_url\": \"//space.bilibili.com/697091119/dynamic\",\"label\": \"\",\"mid\": 697091119,\"name\": \"猫雷NyaRu_Official\",\"official_verify\": {\"desc\": \"\",\"type\": 0},\"pendant\": {\"expire\": 0,\"image\": \"\",\"image_enhance\": \"\",\"image_enhance_frame\": \"\",\"name\": \"\",\"pid\": 0},\"pub_action\": \"\",\"pub_time\": \"2022-05-05 00:15\",\"pub_ts\": 1651680951,\"type\": \"AUTHOR_TYPE_NORMAL\",\"vip\": {\"avatar_subscript\": 1,\"avatar_subscript_url\": \"http://i0.hdslb.com/bfs/vip/icon_Certification_big_member_22_3x.png\",\"due_date\": 1711123200000,\"label\": {\"bg_color\": \"#FB7299\",\"bg_style\": 1,\"border_color\": \"\",\"label_theme\": \"annual_vip\",\"path\": \"\",\"text\": \"年度大会员\",\"text_color\": \"#FFFFFF\"},\"nickname_color\": \"#FB7299\",\"status\": 1,\"theme_type\": 0,\"type\": 2}},\"module_dynamic\": {\"additional\": null,\"desc\": {\"rich_text_nodes\": [{\"orig_text\": \"みんなは今何してる〜？\\n今日はおでかけでつかれちゃった！\\nおやすみ\uD83D\uDC99\uD83D\uDC99mua\",\"text\": \"みんなは今何してる〜？\\n今日はおでかけでつかれちゃった！\\nおやすみ\uD83D\uDC99\uD83D\uDC99mua\",\"type\": \"RICH_TEXT_NODE_TYPE_TEXT\"}],\"text\": \"みんなは今何してる〜？\\n今日はおでかけでつかれちゃった！\\nおやすみ\uD83D\uDC99\uD83D\uDC99mua\"},\"major\": {\"draw\": {\"id\": 193712377,\"items\": [{\"height\": 1000,\"size\": 345.55078,\"src\": \"https://i0.hdslb.com/bfs/album/874ecf3eb8681d8a4b73ec70006ab2d0f8066a96.jpg\",\"tags\": [],\"width\": 1000}]},\"type\": \"MAJOR_TYPE_DRAW\"},\"topic\": null},\"module_more\": {\"three_point_items\": [{\"label\": \"举报\",\"type\": \"THREE_POINT_REPORT\"}]},\"module_stat\": {\"comment\": {\"count\": 180,\"forbidden\": false},\"forward\": {\"count\": 4,\"forbidden\": false},\"like\": {\"count\": 1150,\"forbidden\": false,\"status\": false}}},\"type\": \"DYNAMIC_TYPE_DRAW\",\"visible\": true}"
+
+        val item = json.decodeFromString<DynamicItem>(json.serializersModule.serializer(), jsonStr)
+        item.draw()
+        println()
+        println(item.type)
+
+    }
+
+
 }
+
+const val emojiCharacter = "(?:[\\uD83C\\uDF00-\\uD83D\\uDDFF]|[\\uD83E\\uDD00-\\uD83E\\uDDFF]|[\\uD83D\\uDE00-\\uD83D\\uDE4F]|[\\uD83D\\uDE80-\\uD83D\\uDEFF]|[\\u2600-\\u26FF]\\uFE0F?|[\\u2700-\\u27BF]\\uFE0F?|\\u24C2\\uFE0F?|[\\uD83C\\uDDE6-\\uD83C\\uDDFF]{1,2}|[\\uD83C\\uDD70\\uD83C\\uDD71\\uD83C\\uDD7E\\uD83C\\uDD7F\\uD83C\\uDD8E\\uD83C\\uDD91-\\uD83C\\uDD9A]\\uFE0F?|[\\u0023\\u002A\\u0030-\\u0039]\\uFE0F?\\u20E3|[\\u2194-\\u2199\\u21A9-\\u21AA]\\uFE0F?|[\\u2B05-\\u2B07\\u2B1B\\u2B1C\\u2B50\\u2B55]\\uFE0F?|[\\u2934\\u2935]\\uFE0F?|[\\u3030\\u303D]\\uFE0F?|[\\u3297\\u3299]\\uFE0F?|[\\uD83C\\uDE01\\uD83C\\uDE02\\uD83C\\uDE1A\\uD83C\\uDE2F\\uD83C\\uDE32-\\uD83C\\uDE3A\\uD83C\\uDE50\\uD83C\\uDE51]\\uFE0F?|[\\u203C\\u2049]\\uFE0F?|[\\u25AA\\u25AB\\u25B6\\u25C0\\u25FB-\\u25FE]\\uFE0F?|[\\u00A9\\u00AE]\\uFE0F?|[\\u2122\\u2139]\\uFE0F?|\\uD83C\\uDC04\\uFE0F?|\\uD83C\\uDCCF\\uFE0F?|[\\u231A\\u231B\\u2328\\u23CF\\u23E9-\\u23F3\\u23F8-\\u23FA]\\uFE0F?)(?:[\\uD83C\\uDFFB-\\uD83C\\uDFFF]|[\\uD83E\\uDDB0-\\uD83E\\uDDB3])?"
+
+val emojiRegex = "${emojiCharacter}(?:\\u200D${emojiCharacter})*".toRegex()
+
