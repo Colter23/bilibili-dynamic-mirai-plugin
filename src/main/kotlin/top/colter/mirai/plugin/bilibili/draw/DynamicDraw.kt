@@ -4,11 +4,13 @@ import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.request.*
 import org.jetbrains.skia.*
-import org.jetbrains.skia.paragraph.*
+import org.jetbrains.skia.paragraph.Alignment
+import org.jetbrains.skia.paragraph.ParagraphBuilder
+import org.jetbrains.skia.paragraph.ParagraphStyle
+import org.jetbrains.skia.paragraph.TextStyle
 import org.jetbrains.skia.svg.SVGDOM
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
 import top.colter.mirai.plugin.bilibili.data.DynamicItem
-import top.colter.mirai.plugin.bilibili.data.DynamicType
 import top.colter.mirai.plugin.bilibili.data.DynamicType.*
 import top.colter.mirai.plugin.bilibili.data.ModuleAuthor
 import top.colter.mirai.plugin.bilibili.data.ModuleDynamic
@@ -396,7 +398,7 @@ val paint = Paint().apply {
 fun makeCardBg(dynamic: DynamicItem){
 
     //val imageWidth = 800
-    val imageHeight = 1200
+    val imageHeight = 900
     val imageRect = Rect.makeXYWH(0f,0f,quality.imageWidth.toFloat(), imageHeight.toFloat())
     val cardRect = Rect.makeLTRB(
         quality.cardMargin.toFloat(),

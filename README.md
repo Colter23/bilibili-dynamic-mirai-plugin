@@ -7,6 +7,12 @@
 ![Downloads](https://img.shields.io/github/downloads/Colter23/bilibili-dynamic-mirai-plugin/total)
 [![Release](https://img.shields.io/github/v/release/Colter23/bilibili-dynamic-mirai-plugin)](https://github.com/Colter23/bilibili-dynamic-mirai-plugin/releases)
 
+## V3版本重构中...
+v3使用skiko绘图, 更加美观。同时增加稳定性与可配置性
+
+## V3样式预览
+<img src="docs/img/demo1.png" width="400" alt="样式1">    
+
 ## 特性    
 **无论多少订阅均可在最低 10s 内检测所有动态**  
 Java 原生 API 绘图  
@@ -30,13 +36,6 @@ Java 原生 API 绘图
 ### 关于分组(如果你不知道b站关注可以分组的话请忽略)
 开启自动关注后，bot 会生成一个新分组(分组名可以在配置中设置)，由 bot 新关注的人会被分到这个分组内，之前就关注过的不会移动    
 如果你想让 bot 关注就保存在默认分组中，请在配置中替换 `followGroup` 后面的值为两个双引号 `""`
-
-## 图片模式样式示例   
-<img src="docs/img/demo1.png" width="400" alt="样式1">     
-
-<img src="docs/img/demo2.png" width="400" alt="样式2">     
-
-<img src="docs/img/demo3.png" width="400" alt="样式3">     
 
 ## 开始使用
 
