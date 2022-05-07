@@ -389,11 +389,11 @@ object DynamicTasker: CoroutineScope {
                     var list = getDynamicContactList(describe.uid, di.describe.type == 8)
                     if (list != null && list.size > 0) {
                         di.dynamicContent = di.card.dynamicContent(di.type)
+                        history.add(describe.dynamicId)
                         list = list.filterContent(describe.uid, di.dynamicContent!!.textContent(describe.type))
                         if (list.size > 0){
                             seleniumMutex.withLock {
                                 val color = dynamic[describe.uid]?.color ?: "#d3edfa"
-                                history.add(describe.dynamicId)
                                 withTimeout(45000) {
                                     list.sendMessage(di.type) { di.build(it, color) }
                                 }
