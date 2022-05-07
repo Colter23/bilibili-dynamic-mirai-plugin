@@ -16,9 +16,12 @@ data class Quality(
     val badgeArc: Float = 0f,
 
     val lineHeight: Float = 0f,
+    val lineSpace: Float = 0f,
 
     val mainFontSize: Float = 0f,
-    val subFontSize: Float = 0f
+    val subFontSize: Float = 0f,
+    val emojiSize: Float = 0f,
+    val iconSize: Float = 0f
 ){
 
 //    data class VideoCard(
@@ -41,8 +44,12 @@ data class Quality(
             badgeArc = 5f,
 
             lineHeight = 30f,
+            lineSpace = 5f,
+
             mainFontSize = 22f,
-            subFontSize = 18f
+            subFontSize = 18f,
+            emojiSize = 30f,
+            iconSize = 26f,
         )
         val middle = Quality(
             imageWidth =  1000,
@@ -59,8 +66,12 @@ data class Quality(
             badgeArc = 8f,
 
             lineHeight = 35f,
+            lineSpace = 8f,
+
             mainFontSize = 26f,
-            subFontSize = 22f
+            subFontSize = 22f,
+            emojiSize = 36f,
+            iconSize = 31f,
         )
         val high = Quality(1200, 50, 20, 35f,10f,64f,112f, 20f,20)
 

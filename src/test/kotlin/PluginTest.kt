@@ -1,20 +1,16 @@
 package top.colter
 
-import io.ktor.client.*
 import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
-import io.ktor.utils.io.*
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.serializer
 import org.jetbrains.skia.*
 import org.junit.Test
 import top.colter.mirai.plugin.bilibili.BiliClient
-import top.colter.mirai.plugin.bilibili.BiliDynamicConfig.font
 import top.colter.mirai.plugin.bilibili.BiliLogin
-import top.colter.mirai.plugin.bilibili.data.*
+import top.colter.mirai.plugin.bilibili.data.DynamicItem
+import top.colter.mirai.plugin.bilibili.data.DynamicType
+import top.colter.mirai.plugin.bilibili.data.ModuleAuthor
+import top.colter.mirai.plugin.bilibili.data.ModuleDynamic
 import top.colter.mirai.plugin.bilibili.draw.*
 import top.colter.mirai.plugin.bilibili.utils.json
 
@@ -187,6 +183,77 @@ internal class PluginTest {
                 ),
 
                 ModuleDynamic(
+                    desc = ModuleDynamic.Desc(
+                        listOf(
+                            ModuleDynamic.Desc.RichTextNode(
+                                "RICH_TEXT_NODE_TYPE_TEXT",
+                                "好唯美的😶‍🌫️曲调，好温柔👩🏻‍⚕️🙃的歌声",
+                                "好唯美的\uD83D\uDE36\u200D\uD83C\uDF2B️曲调，好温柔\uD83D\uDC69\uD83C\uDFFB\u200D⚕️\uD83D\uDE43的歌声",
+                            ),
+                            ModuleDynamic.Desc.RichTextNode(
+                                "RICH_TEXT_NODE_TYPE_EMOJI",
+                                "[tv_难过]",
+                                "[tv_难过]",
+                                emoji = ModuleDynamic.Desc.RichTextNode.Emoji(
+                                    1,
+                                    "http://i0.hdslb.com/bfs/emote/87f46748d3f142ebc6586ff58860d0e2fc8263ba.png",
+                                    1,
+                                    "[tv_难过]"
+                                )
+                            ),
+                            //ModuleDynamic.Desc.RichTextNode(
+                            //    "RICH_TEXT_NODE_TYPE_EMOJI",
+                            //    "[tv_难过]",
+                            //    "[tv_难过]",
+                            //    emoji = ModuleDynamic.Desc.RichTextNode.Emoji(
+                            //        1,
+                            //        "http://i0.hdslb.com/bfs/emote/87f46748d3f142ebc6586ff58860d0e2fc8263ba.png",
+                            //        1,
+                            //        "[tv_难过]"
+                            //    )
+                            //),
+                            //ModuleDynamic.Desc.RichTextNode(
+                            //    "RICH_TEXT_NODE_TYPE_EMOJI",
+                            //    "[tv_难过]",
+                            //    "[tv_难过]",
+                            //    emoji = ModuleDynamic.Desc.RichTextNode.Emoji(
+                            //        1,
+                            //        "http://i0.hdslb.com/bfs/emote/87f46748d3f142ebc6586ff58860d0e2fc8263ba.png",
+                            //        1,
+                            //        "[tv_难过]"
+                            //    )
+                            //),
+                            ModuleDynamic.Desc.RichTextNode(
+                                "RICH_TEXT_NODE_TYPE_TEXT",
+                                "感受到雨中的茶香了吗？",
+                                "感受到雨中的茶香了吗？",
+                            ),
+                            // 𓂚𓈖𓇋𓂝𓎛𓇹 鬼
+                            //ModuleDynamic.Desc.RichTextNode(
+                            //    "RICH_TEXT_NODE_TYPE_TEXT",
+                            //    "𓂚𓈖𓇋𓂝𓎛𓇹",
+                            //    "𓂚𓈖𓇋𓂝𓎛𓇹",
+                            //),
+                            ModuleDynamic.Desc.RichTextNode(
+                                "RICH_TEXT_NODE_TYPE_TOPIC",
+                                "#原创歌曲#",
+                                "#原创歌曲#",
+                            ),
+                            ModuleDynamic.Desc.RichTextNode(
+                                "RICH_TEXT_NODE_TYPE_TOPIC",
+                                "#虚拟歌手#",
+                                "#虚拟歌手#",
+                            ),
+                            ModuleDynamic.Desc.RichTextNode(
+                                "RICH_TEXT_NODE_TYPE_WEB",
+                                "https://www.bilibili.com/medialist/play/ml1604262874",
+                                "网页链接",
+                                jumpUrl = "https://www.bilibili.com/medialist/play/ml1604262874"
+                            ),
+                        ),
+                        ""
+                    ),
+
                     major = ModuleDynamic.Major(
                         "MAJOR_TYPE_ARCHIVE",
                         ModuleDynamic.Major.Archive(

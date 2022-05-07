@@ -160,21 +160,11 @@ fun ModuleDynamic.Major.draw(): Image? {
 }
 
 
-suspend fun ModuleDynamic.Desc.makeTextContent(){
+suspend fun ModuleDynamic.Desc.makeTextContent(): Image {
 
-    //val imageWidth = 800
-    val imageHeight = 1000
+    //val textRect = cardRect.inflate(-1f * quality.cardPadding)
 
-    val cardRect = Rect.makeLTRB(
-        quality.cardMargin.toFloat(),
-        quality.cardMargin.toFloat() + quality.badgeHeight,
-        quality.imageWidth.toFloat() - quality.cardMargin.toFloat(),
-        imageHeight.toFloat() - quality.cardMargin.toFloat()
-    )
-
-    val textRect = cardRect.inflate(-1f * quality.cardPadding)
-
-    Surface.makeRasterN32Premul(cardRect.width.toInt(), imageHeight).apply {
+    return Surface.makeRasterN32Premul(cardRect.width.toInt(), 200).apply {
         canvas.apply {
             val linkPaint = Paint().apply {
                 color = Color.makeRGB(23, 139, 207)
@@ -185,34 +175,53 @@ suspend fun ModuleDynamic.Desc.makeTextContent(){
                 isAntiAlias = true
             }
 
-            var x = textRect.left
-            var y = textRect.top
+            var x = quality.cardPadding.toFloat()
+            var y = quality.mainFontSize
 
             val nodes = this@makeTextContent.richTextNodes
             nodes.forEach {
 
-                val text = TextLine.make(it.text, font)
+                //val text = TextLine.make(it.text, font)
 
                 if (it.type == "RICH_TEXT_NODE_TYPE_TEXT"){
-                    drawTextArea(it.text, x, y, font, Color.makeRGB(34, 34, 34), cardContentRect)
-//                    drawTextLine(text, x, y, generalPaint)
+                    val point = drawTextArea(it.text,cardContentRect, x, y, font, generalPaint)
+                    x = point.x
+                    y = point.y
                 }else if (it.type == "RICH_TEXT_NODE_TYPE_EMOJI"){
                     val img = Image.makeFromEncoded(HttpClient(OkHttp).get<ByteArray>(it.emoji?.iconUrl!!))
-
+                    val emojiSize = quality.mainFontSize * 1.4f
+                    if (x + emojiSize > cardContentRect.right){
+                        x = cardContentRect.left
+                        y += emojiSize + quality.lineSpace
+                    }
                     val srcRect = Rect.makeXYWH(0f, 0f, img.width.toFloat(), img.height.toFloat())
-                    val tarRect = Rect.makeXYWH(x, y, quality.lineHeight, quality.lineHeight)
+                    val tarRect = Rect.makeXYWH(x, y - quality.mainFontSize*1.1f, emojiSize, emojiSize)
                     drawImageRect(img, srcRect, tarRect, FilterMipmap(FilterMode.LINEAR, MipmapMode.NEAREST), null, true)
+                    x += emojiSize
                 }else{
-                    drawTextArea(it.text, x, y, font, Color.makeRGB(23, 139, 207), cardContentRect)
-//                    drawTextLine(text, x, y, linkPaint)
+                    if (it.type == "RICH_TEXT_NODE_TYPE_WEB"){
+                        //val svg = SVGDOM(Data.makeFromBytes(BiliBiliDynamic.getResourceAsStream("src/main/resources/icon/RICH_TEXT_NODE_TYPE_WEB.svg")!!.readBytes()))
+                        val svg = SVGDOM(Data.makeFromFileName("src/main/resources/icon/${it.type}.svg"))
+                        val iconSize = quality.mainFontSize * 1.2f
+                        drawImage(svg.makeImage(iconSize,iconSize), x, y - quality.mainFontSize)
+                        x += iconSize
+                    }
+
+                    val point = drawTextArea(it.text, cardContentRect, x, y, font, linkPaint)
+                    x = point.x
+                    y = point.y
                 }
 
-                x += text.width
+                //x += text.width
 
             }
         }
-    }
+    }.makeImageSnapshot()
+
+
 }
+
+
 
 fun ModuleDynamic.Major.Archive.makeVideoContent(): Image {
 
@@ -336,15 +345,9 @@ const val emojiCharacter = "(?:[\\uD83C\\uDF00-\\uD83D\\uDDFF]|[\\uD83E\\uDD00-\
 
 val emojiRegex = "${emojiCharacter}(?:\\u200D${emojiCharacter})*".toRegex()
 
-fun Canvas.drawTextArea(text: String, textX: Float, textY: Float, font: Font, textColor: Int, rect: Rect){
+fun Canvas.drawTextArea(text: String,rect: Rect, textX: Float, textY: Float, font: Font, paint: Paint ): Point {
     var x = textX
     var y = textY
-
-    val paint = Paint().apply {
-        color = textColor
-        isAntiAlias = true
-    }
-
 
     val textNode = mutableListOf<RichText>()
     var index = 0
@@ -368,7 +371,7 @@ fun Canvas.drawTextArea(text: String, textX: Float, textY: Float, font: Font, te
                     val charLine = TextLine.make(c.toString(), font)
                     if (x + charLine.width > rect.right){
                         x = rect.left
-                        y += charLine.height + 5
+                        y += charLine.height + quality.lineSpace
                     }
                     drawTextLine(charLine, x, y, paint)
                     x += charLine.width
@@ -378,7 +381,7 @@ fun Canvas.drawTextArea(text: String, textX: Float, textY: Float, font: Font, te
                 val tl = TextLine.make(it.value, font)
                 if (x + tl.width > rect.right){
                     x = rect.left
-                    y += tl.height + 5
+                    y += tl.height + quality.lineSpace
                 }
                 drawTextLine(tl, x, y, paint)
                 x += tl.width
@@ -386,19 +389,18 @@ fun Canvas.drawTextArea(text: String, textX: Float, textY: Float, font: Font, te
         }
 
     }
+
+    return Point(x, y)
 }
 
-
-//val typeface = Typeface.makeFromFile("E:/Desktop/资源/字体/HarmonyOS Sans/HarmonyOS_Sans_SC/HarmonyOS_Sans_SC_Medium.ttf")
-//val font = Font(typeface, 25f)
 val paint = Paint().apply {
     color = Color.BLACK
     isAntiAlias = true
 }
-fun makeCardBg(dynamic: DynamicItem){
+suspend fun makeCardBg(dynamic: DynamicItem){
 
     //val imageWidth = 800
-    val imageHeight = 900
+    val imageHeight = 930
     val imageRect = Rect.makeXYWH(0f,0f,quality.imageWidth.toFloat(), imageHeight.toFloat())
     val cardRect = Rect.makeLTRB(
         quality.cardMargin.toFloat(),
@@ -448,37 +450,13 @@ fun makeCardBg(dynamic: DynamicItem){
 
             drawImage(makeAuthorHeader(dynamic, quality), cardRect.left, cardRect.top)
 
-            drawTextArea("🔌每天晚😶‍🌫️🧑🏾‍🎤上10点开👩🏻‍🏫👩🏻‍⚕️始直播，周三除🙂😑🙃外！🥬", 600f, 200f, font, Color.makeRGB(72, 199, 240), cardContentRect)
-
-            drawImage(dynamic.modules.moduleDynamic.major?.archive!!.makeVideoContent(), quality.cardMargin.toFloat(), quality.cardMargin+quality.cardPadding+220f)
+            drawImage(dynamic.modules.moduleDynamic.desc!!.makeTextContent(), quality.cardMargin.toFloat(), quality.cardMargin+quality.cardPadding+200f)
 
 
-            //val text = "每天的记忆从按下快门的瞬间开始，今天，就选「你」啦~\n" +
-            //    "\n" +
-            //    "———————————————————\n" +
-            //    "▉转发抽奖\n" +
-            //    "关注帕姆并转发本条动态，帕姆将在5月10日抽取10位开拓者各送出三月七周边礼盒1份。\n" +
-            //    "★周边寄送\n" +
-            //    "由于疫情原因，部分地区快递存在停发情况，实物奖励寄送存在延迟。在此对开拓者致以诚挚的歉意，敬请谅解！\n" +
-            //    "———————————————————\n" +
-            //    "官网：https://sr.mihoyo.com/?utm_source=bz\n" +
-            //    "官方微信：崩坏星穹铁道\n" +
-            //    "官方B站：崩坏星穹铁道\n" +
-            //    "米游社：https://bbs.mihoyo.com/sr/"
-            //val style = ParagraphStyle().apply {
-            //    maxLinesCount = 50
-            //    alignment = Alignment.LEFT
-            //    textStyle = TextStyle().setFontSize(30f).setColor(Color.GREEN).setFontFamilies(arrayOf("Noto Sans SC"))
-            //}
-            //
-            //val fonts = FontCollection().setDefaultFontManager(FontMgr.default)
-            //val paragraph = ParagraphBuilder(style, fonts).addText(text).build()
-            //println(paragraph.height)
-            //println(paragraph.lineNumber)
-            //paragraph.lineMetrics.forEach {
-            //    println(it.descent)
-            //}
-            //paragraph.paint(this, 60f,100f)
+            //drawTextArea("🔌每天晚😶‍🌫️🧑🏾‍🎤上10点开👩🏻‍🏫👩🏻‍⚕️始直播，周三除🙂😑🙃外！🥬", cardContentRect,600f, 200f, font, paint)
+
+            drawImage(dynamic.modules.moduleDynamic.major?.archive!!.makeVideoContent(), quality.cardMargin.toFloat(), quality.cardMargin+quality.cardPadding+250f)
+
 
         }
 
