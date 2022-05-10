@@ -64,6 +64,9 @@ object BiliDynamicConfig : AutoSavePluginConfig("BiliPluginConfig") {
     @ValueDescription("代理")
     val enableConfig: EnableConfig by value()
 
+    @ValueDescription("代理")
+    val checkConfig: CheckConfig by value()
+
 }
 
 @Serializable
@@ -91,3 +94,18 @@ data class ProxyConfig(
 //    val verifyUrl: String = "http://httpbin.org",
 )
 
+@Serializable
+data class BiliAccountConfig(
+    val quality: Int = 1,
+)
+
+@Serializable
+data class CheckConfig(
+    val interval: Int = 15,
+)
+
+
+@Serializable
+data class PushConfig(
+    val quality: Int = 1,
+)

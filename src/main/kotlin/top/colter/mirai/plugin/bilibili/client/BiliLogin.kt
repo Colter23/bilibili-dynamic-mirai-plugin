@@ -1,9 +1,6 @@
-package top.colter.mirai.plugin.bilibili
+package top.colter.mirai.plugin.bilibili.client
 
-import io.ktor.client.request.*
-import top.colter.mirai.plugin.bilibili.api.LOGIN_URL
 import top.colter.mirai.plugin.bilibili.api.getLoginUrl
-import top.colter.mirai.plugin.bilibili.data.LoginResult
 
 class BiliLogin: BiliClient() {
 

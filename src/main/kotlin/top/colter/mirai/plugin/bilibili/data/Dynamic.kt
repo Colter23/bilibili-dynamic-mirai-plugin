@@ -2,7 +2,6 @@ package top.colter.mirai.plugin.bilibili.data
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.JsonObject
 
 
 
@@ -15,7 +14,7 @@ import kotlinx.serialization.json.JsonObject
  * @param items 动态列表
  */
 @Serializable
-data class DynamicListNew(
+data class DynamicList(
     @SerialName("has_more")
     val hasMore: Boolean = false,
     @SerialName("offset")
@@ -936,10 +935,10 @@ data class ModuleDynamic(
             val id: Long,
             @SerialName("title")
             val title: String,
-            @SerialName("label")
-            val label: String,
             @SerialName("desc")
             val desc: String,
+            @SerialName("label")
+            val label: String,
             @SerialName("jump_url")
             val jumpUrl: String,
             @SerialName("covers")

@@ -16,7 +16,9 @@ data class Quality(
     val badgeArc: Float = 0f,
 
     val lineHeight: Float = 0f,
-    val lineSpace: Float = 0f,
+    val lineSpace: Int = 0,
+
+    var drawSpace: Int = 0,
 
     val mainFontSize: Float = 0f,
     val subFontSize: Float = 0f,
@@ -44,7 +46,9 @@ data class Quality(
             badgeArc = 5f,
 
             lineHeight = 30f,
-            lineSpace = 5f,
+            lineSpace = 5,
+
+            drawSpace = 10,
 
             mainFontSize = 22f,
             subFontSize = 18f,
@@ -66,7 +70,9 @@ data class Quality(
             badgeArc = 8f,
 
             lineHeight = 35f,
-            lineSpace = 8f,
+            lineSpace = 8,
+
+            drawSpace = 15,
 
             mainFontSize = 26f,
             subFontSize = 22f,

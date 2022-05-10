@@ -5,8 +5,8 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.serializer
 import org.jetbrains.skia.*
 import org.junit.Test
-import top.colter.mirai.plugin.bilibili.BiliClient
-import top.colter.mirai.plugin.bilibili.BiliLogin
+import top.colter.mirai.plugin.bilibili.client.BiliClient
+import top.colter.mirai.plugin.bilibili.client.BiliLogin
 import top.colter.mirai.plugin.bilibili.data.DynamicItem
 import top.colter.mirai.plugin.bilibili.data.DynamicType
 import top.colter.mirai.plugin.bilibili.data.ModuleAuthor
@@ -40,6 +40,14 @@ internal class PluginTest {
 //        json.parseToJsonElement()
 
     }
+
+    @Test
+    fun timeTest(): Unit = runBlocking {
+        val DYNAMIC_START = 1498838400L
+        fun dynamictime(id: Long): Long = (id shr 32) + DYNAMIC_START
+        println(dynamictime(649955687456047124))
+    }
+
 
     @Test
     fun drawTest(): Unit = runBlocking{
@@ -190,28 +198,6 @@ internal class PluginTest {
                                 "好唯美的😶‍🌫️曲调，好温柔👩🏻‍⚕️🙃的歌声",
                                 "好唯美的\uD83D\uDE36\u200D\uD83C\uDF2B️曲调，好温柔\uD83D\uDC69\uD83C\uDFFB\u200D⚕️\uD83D\uDE43的歌声",
                             ),
-                            ModuleDynamic.Desc.RichTextNode(
-                                "RICH_TEXT_NODE_TYPE_EMOJI",
-                                "[tv_难过]",
-                                "[tv_难过]",
-                                emoji = ModuleDynamic.Desc.RichTextNode.Emoji(
-                                    1,
-                                    "http://i0.hdslb.com/bfs/emote/87f46748d3f142ebc6586ff58860d0e2fc8263ba.png",
-                                    1,
-                                    "[tv_难过]"
-                                )
-                            ),
-                            //ModuleDynamic.Desc.RichTextNode(
-                            //    "RICH_TEXT_NODE_TYPE_EMOJI",
-                            //    "[tv_难过]",
-                            //    "[tv_难过]",
-                            //    emoji = ModuleDynamic.Desc.RichTextNode.Emoji(
-                            //        1,
-                            //        "http://i0.hdslb.com/bfs/emote/87f46748d3f142ebc6586ff58860d0e2fc8263ba.png",
-                            //        1,
-                            //        "[tv_难过]"
-                            //    )
-                            //),
                             //ModuleDynamic.Desc.RichTextNode(
                             //    "RICH_TEXT_NODE_TYPE_EMOJI",
                             //    "[tv_难过]",
@@ -225,8 +211,8 @@ internal class PluginTest {
                             //),
                             ModuleDynamic.Desc.RichTextNode(
                                 "RICH_TEXT_NODE_TYPE_TEXT",
-                                "感受到雨中的茶香了吗？",
-                                "感受到雨中的茶香了吗？",
+                                "感受到雨中\n\n的茶香了吗？",
+                                "感受到雨中\n\n的茶香了吗？",
                             ),
                             // 𓂚𓈖𓇋𓂝𓎛𓇹 鬼
                             //ModuleDynamic.Desc.RichTextNode(
@@ -251,7 +237,7 @@ internal class PluginTest {
                                 jumpUrl = "https://www.bilibili.com/medialist/play/ml1604262874"
                             ),
                         ),
-                        ""
+                        "好唯美的\uD83D\uDE36\u200D\uD83C\uDF2B️曲调，好温柔\uD83D\uDC69\uD83C\uDFFB\u200D⚕️\uD83D\uDE43的歌声[tv_难过]感受到雨中\n\n的茶香了吗？#原创歌曲##虚拟歌手#网页链接"
                     ),
 
                     major = ModuleDynamic.Major(
@@ -275,6 +261,38 @@ internal class PluginTest {
                                 "",
                                 "投稿视频"
                             )
+                        ),
+                        //draw = ModuleDynamic.Major.Draw(
+                        //    1L,
+                        //    listOf(
+                        //        ModuleDynamic.Major.Draw.DrawItem(
+                        //            1146,
+                        //            717,
+                        //            1000f,
+                        //            "https://i0.hdslb.com/bfs/album/b04ee4292a83f06a09047a31a5f813d14dcf3bc2.jpg"
+                        //        ),
+                        //        ModuleDynamic.Major.Draw.DrawItem(
+                        //        1080,
+                        //        12300,
+                        //        1000f,
+                        //        "https://i0.hdslb.com/bfs/album/f5c91131de75b4163d2888acfafe23bc1ef5999b.png"
+                        //        ),
+                        //    )
+                        //),
+                        //article = ModuleDynamic.Major.Article(
+                        //    1L,
+                        //    "#泠鸢十周年生日会二创#活动开启！",
+                        //    "泠鸢的生日要到啦，各位小伙伴们任选创作并投稿：1. 泠鸢生日会二创作品 2. 泠鸢鸟蛋二创作品泠鸢手绘鸟蛋示范需带上活动tag #泠鸢十周年生日会二创# （通过官方话题功能）每个类别（由工作人员分类统计）投稿/动态作品 点赞+评论前30名（共60名）可以获得泠鸢yousa首款数字藏品！",
+                        //    "",
+                        //    "",
+                        //    listOf("https://i0.hdslb.com/bfs/article/8826d991eaaf6b68dba2a65206f4f13af97e0824.jpg")
+                        //),
+                        music = ModuleDynamic.Major.Music(
+                            1L,
+                            "哭声",
+                            "http://i0.hdslb.com/bfs/music/625896a6d3a355f3925b8da02f30917e986822b0.jpg",
+                            "音乐 · 人声演唱",
+                            "//www.bilibili.com/audio/au2935811"
                         )
                     )
                 )
@@ -293,6 +311,21 @@ internal class PluginTest {
         item.draw()
         println()
         println(item.type)
+
+    }
+
+    @Test
+    fun rectTest(): Unit = runBlocking{
+
+        ModuleDynamic.Major.Draw(
+            1L,
+            listOf(ModuleDynamic.Major.Draw.DrawItem(
+                50,
+                150,
+                1000f,
+                ""
+            ))
+        ).makeDrawContent()
 
     }
 

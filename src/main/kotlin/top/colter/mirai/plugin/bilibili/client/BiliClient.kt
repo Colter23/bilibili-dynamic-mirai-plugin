@@ -1,18 +1,19 @@
-package top.colter.mirai.plugin.bilibili
+package top.colter.mirai.plugin.bilibili.client
 
 import io.ktor.client.*
 import io.ktor.client.engine.*
-import io.ktor.client.engine.ProxyConfig
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.features.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.utils.io.core.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.supervisorScope
 import kotlinx.serialization.serializer
+import top.colter.mirai.plugin.bilibili.data.BiliCookie
 import top.colter.mirai.plugin.bilibili.BiliDynamicConfig.enableConfig
 import top.colter.mirai.plugin.bilibili.BiliDynamicConfig.proxy
-import top.colter.mirai.plugin.bilibili.data.BiliCookie
 import top.colter.mirai.plugin.bilibili.utils.isNotBlank
 import top.colter.mirai.plugin.bilibili.utils.json
 
