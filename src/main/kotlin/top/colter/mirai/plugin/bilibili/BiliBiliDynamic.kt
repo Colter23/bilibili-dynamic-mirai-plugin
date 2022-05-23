@@ -35,6 +35,8 @@ object BiliBiliDynamic : KotlinPlugin(
         BiliSubscribeData.reload()
         BiliDynamicConfig.reload()
 
+        this.dataFolderPath
+
         waitOnline {
             DynamicCheckTasker.start()
             MessageTasker.start()
@@ -51,7 +53,7 @@ object BiliBiliDynamic : KotlinPlugin(
     }
 
     /**
-     * author: cssxsh
+     * author cssxsh
      */
     private fun waitOnline(block: () -> Unit) {
         if (Bot.instances.isEmpty()) {

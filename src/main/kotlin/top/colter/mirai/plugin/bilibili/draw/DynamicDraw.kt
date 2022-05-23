@@ -11,12 +11,14 @@ import org.jetbrains.skia.paragraph.TextStyle
 import org.jetbrains.skia.svg.SVGDOM
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
 import top.colter.mirai.plugin.bilibili.data.DynamicItem
-import top.colter.mirai.plugin.bilibili.data.DynamicType.*
+import top.colter.mirai.plugin.bilibili.data.DynamicType.DYNAMIC_TYPE_FORWARD
 import top.colter.mirai.plugin.bilibili.data.ModuleAuthor
+import top.colter.mirai.plugin.bilibili.data.ModuleDispute
 import top.colter.mirai.plugin.bilibili.data.ModuleDynamic
 import top.colter.mirai.plugin.bilibili.draw.Position.*
 import top.colter.mirai.plugin.bilibili.utils.FontUtils.fonts
 import top.colter.mirai.plugin.bilibili.utils.FontUtils.loadTypeface
+import top.colter.mirai.plugin.bilibili.utils.formatTime
 import java.io.File
 import kotlin.math.ceil
 
@@ -80,78 +82,137 @@ enum class Position{
     BOTTOM_RIGHT
 }
 
+suspend fun DynamicItem.makeDrawDynamic(){
+
+    val dynamic = drawDynamic()
+    //val forward = orig?.drawDynamic()
+
+    val path = "dynamic.png"
+    makeCardBg(path, quality.cardMargin *2 + dynamic.height){
+        it.drawImage(dynamic, (quality.cardMargin - quality.cardPadding).toFloat(), quality.cardPadding.toFloat())
+    }
+
+}
+
+suspend fun DynamicItem.drawDynamic(isForward: Boolean = false): Image{
+
+    val forward = orig?.drawDynamic(type == DYNAMIC_TYPE_FORWARD)
+
+    val imgList = if (forward != null){
+        modules.makeGeneral(formatTime, isForward).plus(forward)
+    }else{
+        modules.makeGeneral(formatTime, isForward)
+    }
+
+
+    val height = imgList.sumOf { it.height + 10 }
+
+    return Surface.makeRasterN32Premul(
+        (quality.cardPadding * 2 + cardRect.width).toInt(),
+        height + quality.cardMargin * 2 + quality.badgeHeight + quality.cardPadding
+    ).apply {
+        canvas.apply {
+
+            val rrect = RRect.makeXYWH(
+                quality.cardPadding.toFloat(),
+                (quality.cardPadding + quality.badgeHeight).toFloat(), cardRect.width,
+                (height + quality.cardPadding).toFloat(), 0f,0f,quality.cardArc,quality.cardArc)
+
+            drawCard(rrect)
+
+            drawRectShadowAntiAlias(rrect.inflate(1f), 6f, 6f, 25f, 0f, Color.makeARGB(70, 0, 0, 0))
+
+            drawBadge("动态", font, Color.makeRGB(0, 203, 255), Color.WHITE, 120, rrect, TOP_LEFT)
+            drawBadge(this@drawDynamic.idStr, font, Color.WHITE, Color.makeRGB(72, 199, 240), 255, rrect, TOP_RIGHT)
+
+            var top = quality.cardMargin + quality.badgeHeight.toFloat()
+            for (img in imgList){
+
+                drawScaleWidthImage(img, cardRect.width, quality.cardMargin.toFloat(), top)
+
+                top += img.height + 10
+            }
+
+        }
+    }.makeImageSnapshot()
+
+
+}
 
 
 object DynamicDraw {
 
-    fun makeDynamic(){
+    suspend fun makeDynamic(dynamic: DynamicItem){
 
+        val imgList = dynamic.modules.moduleDynamic.makeGeneral()
+        val result = ArrayList<Image>(imgList.size + 1)
+        result.add(dynamic.modules.moduleAuthor.drawGeneral(dynamic.formatTime))
+        result.addAll(imgList)
 
+        val height = result.sumOf { it.height + 10 }
+
+        //val path = dynamicCachePath.resolve("${dynamic.modules.moduleAuthor.mid}/${dynamic.idStr}.png").pathString
+        val path = "dynamic.png"
+
+        dynamic.makeCardBg(
+            path,
+            height + quality.cardMargin + quality.badgeHeight + quality.cardPadding
+        ){
+            var top = quality.cardMargin + quality.badgeHeight.toFloat()
+            for (img in result){
+                it.drawImage(img, quality.cardMargin.toFloat(), top)
+                top += img.height + 10
+            }
+        }
 
     }
 
 }
 
-fun DynamicItem.draw(){
-
-    when(this.type){
-        DYNAMIC_TYPE_WORD -> {}
-        DYNAMIC_TYPE_DRAW -> {}
-        DYNAMIC_TYPE_ARTICLE -> {}
-        DYNAMIC_TYPE_FORWARD -> {}
-        DYNAMIC_TYPE_AV -> {}
-        DYNAMIC_TYPE_MUSIC -> {}
-        DYNAMIC_TYPE_LIVE -> {}
-        DYNAMIC_TYPE_LIVE_RCMD -> {}
-        DYNAMIC_TYPE_PGC -> {}
-        DYNAMIC_TYPE_COMMON_SQUARE -> {}
-        DYNAMIC_TYPE_NONE -> {}
-    }
-
-}
-
-fun ModuleAuthor.draw(){
-//    makeAvatar()
-}
-
-fun ModuleDynamic.draw(): List<Image> {
-    val imgs = mutableListOf<Image>()
-    topic?.draw()?.let { imgs.add(it) }
-    desc?.draw()?.let { imgs.add(it) }
-    major?.draw()?.let { imgs.add(it) }
-    additional?.draw()?.let { imgs.add(it) }
-    return imgs.toList()
-}
-
-fun ModuleDynamic.Topic.draw(): Image? {
-    return null
-}
-
-fun ModuleDynamic.Desc.draw(): Image?{
-    return null
-}
-
-fun ModuleDynamic.Additional.draw(): Image? {
-    return when (type){
-        "ADDITIONAL_TYPE_COMMON" -> {null}
-        "ADDITIONAL_TYPE_RESERVE" -> {null}
-        "ADDITIONAL_TYPE_VOTE" -> {null}
-        "ADDITIONAL_TYPE_UGC" -> {null}
-        "ADDITIONAL_TYPE_GOODS" -> {null}
-        else -> {null}
+suspend fun DynamicItem.Modules.makeGeneral(time: String, isForward: Boolean = false): List<Image>{
+    return mutableListOf<Image>().apply {
+        add(if (isForward) moduleAuthor.drawForward(time) else moduleAuthor.drawGeneral(time))
+        moduleDispute?.drawGeneral()?.let { add(it) }
+        addAll(moduleDynamic.makeGeneral(isForward))
     }
 }
 
-fun ModuleDynamic.Major.draw(): Image? {
+
+suspend fun ModuleDynamic.makeGeneral(isForward: Boolean = false): List<Image> {
+    return mutableListOf<Image>().apply {
+        topic?.drawGeneral()?.let { add(it) }
+        desc?.drawGeneral()?.let { add(it) }
+        major?.makeGeneral(isForward)?.let { add(it) }
+        additional?.makeGeneral()?.let { add(it) }
+    }
+}
+
+fun ModuleDynamic.Additional.makeGeneral(): Image? {
+    return drawAdditionalCard()
+    //return when (type){
+    //    "ADDITIONAL_TYPE_COMMON" -> {null}
+    //    "ADDITIONAL_TYPE_RESERVE" -> {null}
+    //    "ADDITIONAL_TYPE_VOTE" -> {null}
+    //    "ADDITIONAL_TYPE_UGC" -> {null}
+    //    "ADDITIONAL_TYPE_GOODS" -> {null}
+    //    else -> {null}
+    //}
+}
+
+suspend fun ModuleDynamic.Major.makeGeneral(isForward: Boolean = false): Image? {
     return when (type){
         "MAJOR_TYPE_ARCHIVE" -> {
-            archive!!.makeVideoContent()
+            if (isForward) archive!!.drawSmall() else archive!!.drawGeneral()
         }
         "MAJOR_TYPE_DRAW" -> {
-            null
+            draw!!.drawGeneral()
         }
-        "MAJOR_TYPE_ARTICLE" -> {null}
-        "MAJOR_TYPE_MUSIC" -> {null}
+        "MAJOR_TYPE_ARTICLE" -> {
+            article!!.drawGeneral()
+        }
+        "MAJOR_TYPE_MUSIC" -> {
+            music!!.drawGeneral()
+        }
         "MAJOR_TYPE_LIVE" -> {null}
         "MAJOR_TYPE_LIVE_RCMD" -> {null}
         "MAJOR_TYPE_PGC" -> {null}
@@ -161,15 +222,60 @@ fun ModuleDynamic.Major.draw(): Image? {
     }
 }
 
-suspend fun ModuleDynamic.Desc.makeTextContent(): Image {
+fun ModuleDispute.drawGeneral(): Image {
+    return Surface.makeRasterN32Premul(10,10).apply {
+        canvas.apply {
 
+
+
+        }
+    }.makeImageSnapshot()
+}
+
+
+fun ModuleDynamic.Topic.drawGeneral(): Image {
+
+    val lineCount = if (TextLine.make(name, font).width / cardContentRect.width > 1) 2 else 1
+    val textCardHeight = (quality.mainFontSize * 1.4f + quality.lineSpace * 2) * lineCount
+
+    val textCardRect = Rect.makeXYWH(
+        quality.cardPadding.toFloat(),
+        0f,
+        cardContentRect.width,
+        textCardHeight
+    )
+
+    return Surface.makeRasterN32Premul(cardRect.width.toInt(), textCardHeight.toInt()).apply {
+        canvas.apply {
+            var x = quality.cardPadding.toFloat()
+            var y = quality.mainFontSize + quality.lineSpace
+            try {
+                //val svg = SVGDOM(Data.makeFromBytes(BiliBiliDynamic.getResourceAsStream("src/main/resources/icon/RICH_TEXT_NODE_TYPE_WEB.svg")!!.readBytes()))
+                val svg = SVGDOM(Data.makeFromFileName("src/main/resources/icon/TOPIC.svg"))
+                val iconSize = quality.mainFontSize * 1.2f
+                drawImage(svg.makeImage(iconSize,iconSize), x, y - quality.mainFontSize)
+                x += iconSize
+            }catch (e: Exception){
+                logger.warning("未找到类型为 TOPIC 的图标")
+            }
+
+            drawTextArea(this@drawGeneral.name, textCardRect, x, y, font, linkPaint)
+        }
+    }.makeImageSnapshot()
+
+}
+
+suspend fun ModuleDynamic.Desc.drawGeneral(): Image{
     val paragraphStyle = ParagraphStyle().apply {
         alignment = Alignment.LEFT
         textStyle = titleTextStyle
     }
 
     val textParagraph = ParagraphBuilder(paragraphStyle, fonts).addText(text).build().layout(cardContentRect.width)
-    val textCardHeight = textParagraph.lineNumber * (quality.mainFontSize * 1.4f + quality.lineSpace * 2)
+
+    //val lineCount = (TextLine.make(text, font).width / cardContentRect.width).toInt() + 1
+
+    val textCardHeight = (quality.mainFontSize * 1.4f + quality.lineSpace * 2) * textParagraph.lineNumber
 
     val textCardRect = Rect.makeXYWH(
         quality.cardPadding.toFloat(),
@@ -183,7 +289,7 @@ suspend fun ModuleDynamic.Desc.makeTextContent(): Image {
 
     return Surface.makeRasterN32Premul(cardRect.width.toInt(), textCardHeight.toInt()).apply {
         canvas.apply {
-            this@makeTextContent.richTextNodes.forEach {
+            this@drawGeneral.richTextNodes.forEach {
                 when (it.type){
                     "RICH_TEXT_NODE_TYPE_TEXT" -> {
                         val point = drawTextArea(it.text, textCardRect, x, y, font, generalPaint)
@@ -206,11 +312,15 @@ suspend fun ModuleDynamic.Desc.makeTextContent(): Image {
                     "RICH_TEXT_NODE_TYPE_VOTE",
                     "RICH_TEXT_NODE_TYPE_LOTTERY",
                     "RICH_TEXT_NODE_TYPE_BV" -> {
-                        //val svg = SVGDOM(Data.makeFromBytes(BiliBiliDynamic.getResourceAsStream("src/main/resources/icon/RICH_TEXT_NODE_TYPE_WEB.svg")!!.readBytes()))
-                        val svg = SVGDOM(Data.makeFromFileName("src/main/resources/icon/${it.type}.svg"))
-                        val iconSize = quality.mainFontSize * 1.2f
-                        drawImage(svg.makeImage(iconSize,iconSize), x, y - quality.mainFontSize)
-                        x += iconSize
+                        try {
+                            //val svg = SVGDOM(Data.makeFromBytes(BiliBiliDynamic.getResourceAsStream("src/main/resources/icon/RICH_TEXT_NODE_TYPE_WEB.svg")!!.readBytes()))
+                            val svg = SVGDOM(Data.makeFromFileName("src/main/resources/icon/${it.type}.svg"))
+                            val iconSize = quality.mainFontSize * 1.2f
+                            drawImage(svg.makeImage(iconSize,iconSize), x, y - quality.mainFontSize)
+                            x += iconSize
+                        }catch (e: Exception){
+                            logger.warning("未找到类型为 ${it.type} 的图标")
+                        }
 
                         val point = drawTextArea(it.text, textCardRect, x, y, font, linkPaint)
                         x = point.x
@@ -227,8 +337,82 @@ suspend fun ModuleDynamic.Desc.makeTextContent(): Image {
     }.makeImageSnapshot(IRect.makeXYWH(0, 0, cardRect.width.toInt(), ceil(y + quality.lineSpace * 2).toInt()))!!
 }
 
+fun ModuleDynamic.Additional.drawAdditionalCard(): Image{
 
-fun ModuleDynamic.Major.Archive.makeVideoContent(): Image {
+    val additionalCardRect = RRect.makeXYWH(
+        quality.cardPadding.toFloat(),
+        quality.subFontSize + quality.cardPadding + 1f,
+        cardContentRect.width,
+        quality.additionalCardHeight.toFloat(),
+        quality.cardArc
+    )
+
+    return Surface.makeRasterN32Premul(cardRect.width.toInt(),
+        (quality.additionalCardHeight + quality.subFontSize + quality.cardPadding * 2f).toInt()
+    ).apply {
+        canvas.apply {
+            drawCard(additionalCardRect)
+            drawRectShadowAntiAlias(additionalCardRect.inflate(1f), 5f, 5f, 15f, 0f, Color.makeARGB(30, 0, 0, 0))
+
+            val img = Image.makeFromEncoded(File("D:/Desktop/bilibili动态/625896a6d3a355f3925b8da02f30917e986822b0.jpg").readBytes())
+            val imgRect = RRect.makeXYWH(
+                quality.cardPadding.toFloat(),
+                quality.subFontSize + quality.cardPadding + 1f,
+                quality.additionalCardHeight.toFloat(),
+                quality.additionalCardHeight.toFloat(),
+                quality.cardArc
+            ).inflate(-1f) as RRect
+            drawImageRRect(img, imgRect)
+
+            val labelTextLine = TextLine.make("直播预约", font.makeWithSize(quality.subFontSize))
+            drawTextLine(labelTextLine, additionalCardRect.left + 8, quality.subFontSize, Paint().apply {
+                color = Color.BLACK
+                alpha = 130
+            })
+
+            var y = quality.subFontSize + quality.cardPadding * 2.8f
+            val titleTextLine = TextLine.make("直播预约：玥玥春日新衣发布", font)
+            drawTextLine(titleTextLine, imgRect.right + quality.cardPadding, y, Paint())
+
+            y += quality.cardPadding * 1.2f
+
+            val desc1TextLine = TextLine.make("04-17 20:00 直播 2623人预约", font.makeWithSize(quality.subFontSize))
+            drawTextLine(desc1TextLine, imgRect.right + quality.cardPadding, y, Paint().apply {
+                color = Color.BLACK
+                alpha = 130
+            })
+
+            y += quality.cardPadding * 1.2f
+
+            val desc2TextLine = TextLine.make("预约有奖：新衣立牌*3份、玥玥钥匙扣*3份", font.makeWithSize(quality.subFontSize))
+            drawTextLine(desc2TextLine, imgRect.right + quality.cardPadding, y, Paint().apply {
+                color = Color.makeRGB(0, 203, 255)
+            })
+
+            val buttonRect = RRect.makeXYWH(
+                additionalCardRect.right - quality.cardPadding - 90f,
+                quality.subFontSize + quality.cardPadding + quality.cardPadding * 1.5f,
+                90f,
+                35f,
+                5f
+            )
+            drawRRect(buttonRect, Paint().apply {
+                color = Color.makeRGB(0, 203, 255)
+            })
+
+            val buttonTextLine = TextLine.make("去观看", font.makeWithSize(quality.subFontSize))
+            drawTextLine(buttonTextLine, buttonRect.left + quality.cardPadding, buttonRect.bottom - 11, Paint().apply {
+                color = Color.WHITE
+            })
+
+        }
+    }.makeImageSnapshot()
+
+
+}
+
+
+fun ModuleDynamic.Major.Archive.drawGeneral(): Image {
 
     val paragraphStyle = ParagraphStyle().apply {
         maxLinesCount = 2
@@ -242,13 +426,14 @@ fun ModuleDynamic.Major.Archive.makeVideoContent(): Image {
     val titleParagraph = ParagraphBuilder(paragraphStyle, fonts).addText(title).build().layout(paragraphWidth)
 
     paragraphStyle.apply {
+        maxLinesCount = 3
         textStyle = descTextStyle
     }
 
     val descParagraph = ParagraphBuilder(paragraphStyle, fonts).addText(desc).build().layout(paragraphWidth)
 
     val videoCoverHeight = cardContentRect.width * 0.625f  // 封面比例 16:10
-    val videoCardHeight = videoCoverHeight + titleParagraph.height + descParagraph.height + quality.cardPadding * 1.5f
+    val videoCardHeight = videoCoverHeight + titleParagraph.height + descParagraph.height + quality.cardPadding
 
     val videoCardRect = RRect.makeComplexXYWH(
         quality.cardPadding.toFloat(),
@@ -267,8 +452,8 @@ fun ModuleDynamic.Major.Archive.makeVideoContent(): Image {
             drawRectShadowAntiAlias(videoCardRect.inflate(1f), 5f, 5f, 15f, 0f, Color.makeARGB(30, 0, 0, 0))
 
             // 徽章
-            drawBadge(quality, this@makeVideoContent.badge.text, font, Color.WHITE, Color.makeRGB(251, 114, 153), 255, videoCardRect, TOP_LEFT)
-            drawBadge(quality, "av${this@makeVideoContent.aid}  |  ${this@makeVideoContent.bvid}", font, Color.WHITE, Color.makeRGB(72, 199, 240), 255, videoCardRect, TOP_RIGHT)
+            drawBadge(this@drawGeneral.badge.text, font, Color.WHITE, Color.makeRGB(251, 114, 153), 255, videoCardRect, TOP_LEFT)
+            drawBadge("av${this@drawGeneral.aid}  |  ${this@drawGeneral.bvid}", font, Color.WHITE, Color.makeRGB(72, 199, 240), 255, videoCardRect, TOP_RIGHT)
 
             // 封面
             val cover = Image.makeFromEncoded(File("D:/Desktop/bilibili动态/f1d0fb9dbee0066997546a1951f90aeccc95808c.jpg").readBytes())
@@ -287,8 +472,8 @@ fun ModuleDynamic.Major.Archive.makeVideoContent(): Image {
                 )
             })
 
-            val durationText = TextLine.make(this@makeVideoContent.durationText, font)
-            val playInfo = TextLine.make("${this@makeVideoContent.stat.play}观看 ${this@makeVideoContent.stat.danmaku}弹幕", font.makeWithSize(22f))
+            val durationText = TextLine.make(this@drawGeneral.durationText, font)
+            val playInfo = TextLine.make("${this@drawGeneral.stat.play}观看 ${this@drawGeneral.stat.danmaku}弹幕", font.makeWithSize(22f))
 
             val durationRRect = RRect.makeXYWH(coverMaskRRect.left + quality.cardPadding * 1.3f, coverRRect.bottom - quality.badgeHeight - quality.cardPadding, durationText.width + quality.badgePadding * 4, quality.badgeHeight.toFloat(), quality.badgeArc)
             drawRRect(durationRRect, Paint().apply {
@@ -306,14 +491,125 @@ fun ModuleDynamic.Major.Archive.makeVideoContent(): Image {
 
             titleParagraph.paint(this, quality.cardPadding * 1.5f, quality.badgeHeight + videoCoverHeight + quality.cardPadding / 2)
 
-            descParagraph.paint(this, quality.cardPadding * 1.5f, quality.badgeHeight + videoCoverHeight + quality.cardPadding + titleParagraph.height)
+            descParagraph.paint(this, quality.cardPadding * 1.5f, quality.badgeHeight + videoCoverHeight + quality.cardPadding / 2 + titleParagraph.height)
 
         }
     }.makeImageSnapshot()
 }
 
 
-suspend fun ModuleDynamic.Major.Draw.makeDrawContent(): Image {
+fun ModuleDynamic.Major.Archive.drawSmall(): Image {
+
+    val paragraphStyle = ParagraphStyle().apply {
+        maxLinesCount = 2
+        ellipsis = "..."
+        alignment = Alignment.LEFT
+        textStyle = titleTextStyle
+    }
+
+
+    val videoCoverWidth = quality.smallCardHeight * 1.6f  // 封面比例 16:10
+    val paragraphWidth = cardContentRect.width - quality.cardPadding - videoCoverWidth
+
+    val titleParagraph = ParagraphBuilder(paragraphStyle, fonts).addText(title).build().layout(paragraphWidth)
+
+    paragraphStyle.apply {
+        maxLinesCount = 2
+        textStyle = descTextStyle
+    }
+
+    val descParagraph = ParagraphBuilder(paragraphStyle, fonts).addText(desc).build().layout(paragraphWidth)
+
+    //val videoCoverHeight = cardContentRect.width * 0.625f  // 封面比例 16:10
+    //val videoCardHeight = videoCoverHeight + titleParagraph.height + descParagraph.height + quality.cardPadding * 1.5f
+
+    val videoCardRect = RRect.makeComplexXYWH(
+        quality.cardPadding.toFloat(),
+        quality.badgeHeight + 1f,
+        cardContentRect.width,
+        quality.smallCardHeight.toFloat(),
+        topTwoBadgeCardArc
+    )
+
+    return Surface.makeRasterN32Premul(cardRect.width.toInt(), quality.smallCardHeight + quality.badgeHeight + quality.cardPadding).apply {
+        canvas.apply {
+
+            // 绘制卡片背景
+            drawCard(videoCardRect)
+            // 卡片阴影
+            drawRectShadowAntiAlias(videoCardRect.inflate(1f), 5f, 5f, 15f, 0f, Color.makeARGB(30, 0, 0, 0))
+
+            // 徽章
+            drawBadge(this@drawSmall.badge.text, font, Color.WHITE, Color.makeRGB(251, 114, 153), 255, videoCardRect, TOP_LEFT)
+            drawBadge("av${this@drawSmall.aid}  |  ${this@drawSmall.bvid}", font, Color.WHITE, Color.makeRGB(72, 199, 240), 255, videoCardRect, TOP_RIGHT)
+
+            // 封面
+            val cover = Image.makeFromEncoded(File("D:/Desktop/bilibili动态/f1d0fb9dbee0066997546a1951f90aeccc95808c.jpg").readBytes())
+            val coverRRect = RRect.makeComplexXYWH(videoCardRect.left , videoCardRect.top, videoCoverWidth,
+                quality.smallCardHeight.toFloat(), topTwoBadgeCardArc).inflate(-1f) as RRect
+            drawImageRRect(cover, coverRRect)
+
+            titleParagraph.paint(this, quality.cardPadding * 1.5f + videoCoverWidth, quality.badgeHeight + quality.cardPadding / 2f)
+
+            descParagraph.paint(this, quality.cardPadding * 1.5f + videoCoverWidth, quality.badgeHeight + quality.cardPadding / 2f + titleParagraph.height)
+
+
+            //val typeText = TextLine.make("投稿视频", font)
+            //val durationText = TextLine.make(this@drawSmall.durationText, font)
+            //val playInfoText = TextLine.make("${this@drawSmall.stat.play}观看 ${this@drawSmall.stat.danmaku}弹幕", font.makeWithSize(
+            //    quality.subFontSize))
+
+            //val typeRRect = RRect.makeXYWH(
+            //    coverRRect.right + quality.cardPadding * 1.3f,
+            //    titleParagraph.height + descParagraph.height + quality.badgeHeight + quality.cardPadding,
+            //    typeText.width + quality.badgePadding * 4,
+            //    quality.badgeHeight.toFloat(),
+            //    quality.badgeArc
+            //)
+            var x = coverRRect.right + quality.cardPadding * 1.3f
+            var y = videoCardRect.bottom - quality.cardPadding * 1.3f
+            x += drawLabelCard("投稿视频", font.makeWithSize(quality.subFontSize), Color.WHITE, Color.makeRGB(251, 114, 153), 255, x, y) + quality.cardPadding
+
+            //drawRRect(typeRRect, Paint().apply {
+            //    color = Color.BLACK
+            //    alpha = 130
+            //})
+            //drawTextLine(typeText, typeRRect.left + quality.badgePadding * 2, typeRRect.textVertical(typeText), Paint().apply {
+            //    color = Color.WHITE
+            //})
+
+
+            //val durationRRect = typeRRect.offsetR(typeRRect.width + quality.badgePadding * 4, 0f)
+
+            x += drawLabelCard(this@drawSmall.durationText, font.makeWithSize(quality.subFontSize), Color.WHITE, Color.BLACK, 130,
+                x, y) + quality.cardPadding
+            //drawRRect(durationRRect, Paint().apply {
+            //    color = Color.BLACK
+            //    alpha = 130
+            //})
+            //drawTextLine(durationText, durationRRect.left + quality.badgePadding * 2, durationRRect.textVertical(durationText), Paint().apply {
+            //    color = Color.WHITE
+            //})
+
+
+            //val playInfoRRect = typeRRect.offsetR(durationRRect.width + quality.badgePadding * 4, 0f)
+            x += drawLabelCard("${this@drawSmall.stat.play}观看 ${this@drawSmall.stat.danmaku}弹幕", font.makeWithSize(quality.subFontSize), Color.WHITE, Color.makeRGB(26, 198, 255), 255,
+                x, y
+            ) + quality.cardPadding
+            //drawRRect(playInfoRRect, Paint().apply {
+            //    color = Color.BLACK
+            //    alpha = 130
+            //})
+            //drawTextLine(playInfoText, playInfoRRect.right + quality.badgePadding * 2, playInfoRRect.textVertical(playInfoText), Paint().apply {
+            //    color = Color.WHITE
+            //})
+
+
+        }
+    }.makeImageSnapshot()
+}
+
+suspend fun ModuleDynamic.Major.Draw.drawGeneral(): Image {
 
     var drawItemWidth = 0f
     var drawItemHeight = 0f
@@ -394,7 +690,7 @@ suspend fun ModuleDynamic.Major.Draw.makeDrawContent(): Image {
 }
 
 
-suspend fun ModuleDynamic.Major.Article.makeArticleContent(): Image {
+suspend fun ModuleDynamic.Major.Article.drawGeneral(): Image {
 
     val paragraphStyle = ParagraphStyle().apply {
         maxLinesCount = 2
@@ -408,13 +704,14 @@ suspend fun ModuleDynamic.Major.Article.makeArticleContent(): Image {
     val titleParagraph = ParagraphBuilder(paragraphStyle, fonts).addText(title).build().layout(paragraphWidth)
 
     paragraphStyle.apply {
+        maxLinesCount = 3
         textStyle = descTextStyle
     }
 
     val descParagraph = ParagraphBuilder(paragraphStyle, fonts).addText(desc).build().layout(paragraphWidth)
 
     val articleCoverHeight = cardContentRect.width * 0.29375f  // 封面比例 16:4.7
-    val articleCardHeight = articleCoverHeight + titleParagraph.height + descParagraph.height + quality.cardPadding * 1.5f
+    val articleCardHeight = articleCoverHeight + titleParagraph.height + descParagraph.height + quality.cardPadding
 
     val articleCardRect = RRect.makeComplexXYWH(
         quality.cardPadding.toFloat(),
@@ -433,8 +730,8 @@ suspend fun ModuleDynamic.Major.Article.makeArticleContent(): Image {
             drawRectShadowAntiAlias(articleCardRect.inflate(1f), 5f, 5f, 15f, 0f, Color.makeARGB(30, 0, 0, 0))
 
             // 徽章
-            drawBadge(quality, "专栏", font, Color.WHITE, Color.makeRGB(251, 114, 153), 255, articleCardRect, TOP_LEFT)
-            drawBadge(quality, "cv${this@makeArticleContent.id}", font, Color.WHITE, Color.makeRGB(72, 199, 240), 255, articleCardRect, TOP_RIGHT)
+            drawBadge("专栏", font, Color.WHITE, Color.makeRGB(251, 114, 153), 255, articleCardRect, TOP_LEFT)
+            drawBadge("cv${this@drawGeneral.id}", font, Color.WHITE, Color.makeRGB(72, 199, 240), 255, articleCardRect, TOP_RIGHT)
 
             // 封面
             val cover = Image.makeFromEncoded(HttpClient(OkHttp).get<ByteArray>(covers[0]))
@@ -443,13 +740,13 @@ suspend fun ModuleDynamic.Major.Article.makeArticleContent(): Image {
 
             titleParagraph.paint(this, quality.cardPadding * 1.5f, quality.badgeHeight + articleCoverHeight + quality.cardPadding / 2)
 
-            descParagraph.paint(this, quality.cardPadding * 1.5f, quality.badgeHeight + articleCoverHeight + quality.cardPadding + titleParagraph.height)
+            descParagraph.paint(this, quality.cardPadding * 1.5f, quality.badgeHeight + articleCoverHeight + quality.cardPadding / 2 + titleParagraph.height)
 
         }
     }.makeImageSnapshot()
 }
 
-suspend fun ModuleDynamic.Major.Music.makeMusicContent(): Image {
+suspend fun ModuleDynamic.Major.Music.drawGeneral(): Image {
 
     val paragraphStyle = ParagraphStyle().apply {
         maxLinesCount = 2
@@ -487,8 +784,8 @@ suspend fun ModuleDynamic.Major.Music.makeMusicContent(): Image {
             drawRectShadowAntiAlias(musicCardRect.inflate(1f), 5f, 5f, 15f, 0f, Color.makeARGB(30, 0, 0, 0))
 
             // 徽章
-            drawBadge(quality, "音乐", font, Color.WHITE, Color.makeRGB(251, 114, 153), 255, musicCardRect, TOP_LEFT)
-            drawBadge(quality, "au${this@makeMusicContent.id}", font, Color.WHITE, Color.makeRGB(72, 199, 240), 255, musicCardRect, TOP_RIGHT)
+            drawBadge("音乐", font, Color.WHITE, Color.makeRGB(251, 114, 153), 255, musicCardRect, TOP_LEFT)
+            drawBadge("au${this@drawGeneral.id}", font, Color.WHITE, Color.makeRGB(72, 199, 240), 255, musicCardRect, TOP_RIGHT)
 
             // 封面
             val cover = Image.makeFromEncoded(HttpClient(OkHttp).get<ByteArray>(cover))
@@ -505,43 +802,15 @@ suspend fun ModuleDynamic.Major.Music.makeMusicContent(): Image {
 }
 
 
-fun Canvas.drawImageClip(
-    image: Image,
-    dstRect: RRect,
-    paint: Paint? = null
-){
-    val ratio = image.width.toFloat() / image.height.toFloat()
-
-    val srcRect = if (dstRect.width / ratio < dstRect.height) {
-        val imgW = dstRect.width * image.height / dstRect.height
-        val offsetX = (image.width - imgW) / 2f
-        Rect.makeXYWH(offsetX, 0f, imgW, image.height.toFloat())
-    } else {
-        val imgH = dstRect.height * image.width / dstRect.width
-        val offsetY = (image.height - imgH) / 2
-        Rect.makeXYWH(0f, offsetY, image.width.toFloat(), imgH)
-    }
-
-    drawImageRRect(image, srcRect, dstRect, paint)
-}
-
-
-fun Rect.toRRect() =
-    RRect.makeLTRB(left, top, right, bottom, 0f)
-
-fun Rect.toRRect(radius: Float) =
-    RRect.makeLTRB(left, top, right, bottom, radius)
-
-
 fun Rect.textVertical(text: TextLine) =
     bottom - (height - text.capHeight) / 2
 
 
-fun Canvas.drawCard(rrect: RRect){
+fun Canvas.drawCard(rrect: RRect, bgColor: Int = Color.WHITE, bgAlpha: Int = 160){
     // alpha = 120
     drawRRect(rrect, Paint().apply {
-        color = Color.WHITE
-        alpha = 160
+        color = bgColor
+        alpha = bgAlpha
         mode = PaintMode.FILL
         isAntiAlias = true
     })
@@ -552,6 +821,7 @@ fun Canvas.drawCard(rrect: RRect){
         strokeWidth = 2f
         isAntiAlias = true
     })
+
 }
 
 sealed class RichText(
@@ -565,10 +835,6 @@ sealed class RichText(
         val value: String
     ):RichText(value)
 }
-
-const val emojiCharacter = "(?:[\\uD83C\\uDF00-\\uD83D\\uDDFF]|[\\uD83E\\uDD00-\\uD83E\\uDDFF]|[\\uD83D\\uDE00-\\uD83D\\uDE4F]|[\\uD83D\\uDE80-\\uD83D\\uDEFF]|[\\u2600-\\u26FF]\\uFE0F?|[\\u2700-\\u27BF]\\uFE0F?|\\u24C2\\uFE0F?|[\\uD83C\\uDDE6-\\uD83C\\uDDFF]{1,2}|[\\uD83C\\uDD70\\uD83C\\uDD71\\uD83C\\uDD7E\\uD83C\\uDD7F\\uD83C\\uDD8E\\uD83C\\uDD91-\\uD83C\\uDD9A]\\uFE0F?|[\\u0023\\u002A\\u0030-\\u0039]\\uFE0F?\\u20E3|[\\u2194-\\u2199\\u21A9-\\u21AA]\\uFE0F?|[\\u2B05-\\u2B07\\u2B1B\\u2B1C\\u2B50\\u2B55]\\uFE0F?|[\\u2934\\u2935]\\uFE0F?|[\\u3030\\u303D]\\uFE0F?|[\\u3297\\u3299]\\uFE0F?|[\\uD83C\\uDE01\\uD83C\\uDE02\\uD83C\\uDE1A\\uD83C\\uDE2F\\uD83C\\uDE32-\\uD83C\\uDE3A\\uD83C\\uDE50\\uD83C\\uDE51]\\uFE0F?|[\\u203C\\u2049]\\uFE0F?|[\\u25AA\\u25AB\\u25B6\\u25C0\\u25FB-\\u25FE]\\uFE0F?|[\\u00A9\\u00AE]\\uFE0F?|[\\u2122\\u2139]\\uFE0F?|\\uD83C\\uDC04\\uFE0F?|\\uD83C\\uDCCF\\uFE0F?|[\\u231A\\u231B\\u2328\\u23CF\\u23E9-\\u23F3\\u23F8-\\u23FA]\\uFE0F?)(?:[\\uD83C\\uDFFB-\\uD83C\\uDFFF]|[\\uD83E\\uDDB0-\\uD83E\\uDDB3])?"
-
-val emojiRegex = "${emojiCharacter}(?:\\u200D${emojiCharacter})*".toRegex()
 
 fun Canvas.drawTextArea(text: String,rect: Rect, textX: Float, textY: Float, font: Font, paint: Paint ): Point {
     var x = textX
@@ -592,12 +858,13 @@ fun Canvas.drawTextArea(text: String,rect: Rect, textX: Float, textY: Float, fon
     textNode.forEach {
         when (it){
             is RichText.Text -> {
-                for (c in it.value){
-                    if (c == '\n'){
+                for (point in it.value.codePoints()){
+                    val c = String(intArrayOf(point), 0, intArrayOf(point).size)
+                    if (c == "\n"){
                         x = rect.left
                         y += quality.mainFontSize * 1.4f + quality.lineSpace
                     }else{
-                        val charLine = TextLine.make(c.toString(), font)
+                        val charLine = TextLine.make(c, font)
                         if (x + charLine.width > rect.right){
                             x = rect.left
                             y += quality.mainFontSize * 1.4f + quality.lineSpace
@@ -617,35 +884,27 @@ fun Canvas.drawTextArea(text: String,rect: Rect, textX: Float, textY: Float, fon
                 x += tl.width
             }
         }
-
     }
 
     return Point(x, y)
 }
 
 
-suspend fun makeCardBg(dynamic: DynamicItem){
+suspend fun DynamicItem.makeCardBg(path: String, height: Int, block: (Canvas) -> Unit){
 
     //val imageWidth = 800
     val imageHeight = 930
     //val imageHeight = 1330
     //val imageHeight = 2000
-    val imageRect = Rect.makeXYWH(0f,0f,quality.imageWidth.toFloat(), imageHeight.toFloat())
+    val imageRect = Rect.makeXYWH(0f,0f,quality.imageWidth.toFloat(), height.toFloat())
     val cardRect = Rect.makeLTRB(
         quality.cardMargin.toFloat(),
         quality.cardMargin.toFloat() + quality.badgeHeight,
         quality.imageWidth.toFloat() - quality.cardMargin.toFloat(),
-        imageHeight.toFloat() - quality.cardMargin.toFloat()
+        height - quality.cardMargin.toFloat()
     )
 
-    //val typeface = Typeface.makeFromFile("E:/Desktop/资源/字体/HarmonyOS Sans/HarmonyOS_Sans_SC/HarmonyOS_Sans_SC_Medium.ttf")
-    //val font = Font(typeface, 25f)
-    //val paint = Paint().apply {
-    //    color = Color.BLACK
-    //    isAntiAlias = true
-    //}
-
-    Surface.makeRasterN32Premul(imageRect.width.toInt(), imageRect.height.toInt()).apply {
+    Surface.makeRasterN32Premul(imageRect.width.toInt(), height).apply {
         canvas.apply {
 
             drawRect(imageRect, Paint().apply {
@@ -659,56 +918,96 @@ suspend fun makeCardBg(dynamic: DynamicItem){
 //                    )
 
                     // H：色相   S：30   B：100
-                    intArrayOf(
-                        0xFFffb2ff.toInt(),0xFFffb2e5.toInt(), 0xFFffb2cc.toInt(), 0xFFffb2b2.toInt(), 0xFFffccb2.toInt()
-                    )
+                    //intArrayOf(
+                    //    0xFFffb2ff.toInt(),0xFFffb2e5.toInt(), 0xFFffb2cc.toInt(), 0xFFffb2b2.toInt(), 0xFFffccb2.toInt()
+                    //)
+                    generateLinearGradient(listOf(0xFFffb2cc.toInt(), 0xFFffb2b2.toInt()))
                 )
             })
             val rrect = RRect.makeLTRB(cardRect.left, cardRect.top, cardRect.right, cardRect.bottom, 0f,0f,quality.cardArc,quality.cardArc)
 
 
-            drawCard(rrect)
+            //drawCard(rrect)
+            //
+            //drawRectShadowAntiAlias(rrect.inflate(1f), 6f, 6f, 25f, 0f, Color.makeARGB(70, 0, 0, 0))
+            //
+            //drawBadge("动态", font, Color.makeRGB(0, 203, 255), Color.WHITE, 120, cardRect, TOP_LEFT)
+            //drawBadge(this@makeCardBg.idStr, font, Color.WHITE, Color.makeRGB(72, 199, 240), 255, cardRect, TOP_RIGHT)
 
+            block(this)
 
-            drawRectShadowAntiAlias(rrect.inflate(1f), 6f, 6f, 25f, 0f, Color.makeARGB(70, 0, 0, 0))
+            //drawImage(this@makeCardBg.modules.moduleAuthor.drawGeneral(this@makeCardBg.timeStr), cardRect.left, cardRect.top)
 
+            //drawTextLine(TextLine.make("\uD80C\uDC9A\uD80C\uDE16\uD80C\uDDCB\uD80C\uDC9D\uD80C\uDF9B\uD80C\uDDF9", font), quality.cardMargin.toFloat(), quality.cardMargin+quality.cardPadding+120f, Paint())
 
-            drawBadge(quality, "动态", font, Color.makeRGB(0, 203, 255), Color.WHITE, 120, cardRect, TOP_LEFT)
-            drawBadge(quality, "650036681957703732", font, Color.WHITE, Color.makeRGB(72, 199, 240), 255, cardRect, TOP_RIGHT)
+            //drawImage(this@makeCardBg.modules.moduleDynamic.desc!!.drawGeneral(), quality.cardMargin.toFloat(), quality.cardMargin+quality.cardPadding+120f)
 
+            //drawImage(dynamic.modules.moduleDynamic.major?.draw!!.drawGeneral(), quality.cardMargin.toFloat(), quality.cardMargin+quality.cardPadding+160f)
 
-            drawImage(makeAuthorHeader(dynamic, quality), cardRect.left, cardRect.top)
+            //drawImage(dynamic.modules.moduleDynamic.major.archive!!.drawSmall(), quality.cardMargin.toFloat(), quality.cardMargin+quality.cardPadding+650f)
 
-            drawImage(dynamic.modules.moduleDynamic.desc!!.makeTextContent(), quality.cardMargin.toFloat(), quality.cardMargin+quality.cardPadding+120f)
+            //drawImage(dynamic.modules.moduleDynamic.major?.article!!.drawGeneral(), quality.cardMargin.toFloat(), quality.cardMargin+quality.cardPadding+160f)
 
-            //drawImage(dynamic.modules.moduleDynamic.major?.draw!!.makeDrawContent(), quality.cardMargin.toFloat(), quality.cardMargin+quality.cardPadding+160f)
-
-            //drawImage(dynamic.modules.moduleDynamic.major.archive!!.makeVideoContent(), quality.cardMargin.toFloat(), quality.cardMargin+quality.cardPadding+650f)
-
-            //drawImage(dynamic.modules.moduleDynamic.major?.article!!.makeArticleContent(), quality.cardMargin.toFloat(), quality.cardMargin+quality.cardPadding+160f)
-
-            drawImage(dynamic.modules.moduleDynamic.major?.music!!.makeMusicContent(), quality.cardMargin.toFloat(), quality.cardMargin+quality.cardPadding+160f)
+            //drawImage(dynamic.modules.moduleDynamic.major?.music!!.drawGeneral(), quality.cardMargin.toFloat(), quality.cardMargin+quality.cardPadding+160f)
 
         }
 
-    }.saveImage("dynamic.png")
+    }.saveImage(path)
 }
 
-fun Surface.saveImage(path: String) = File(path).writeBytes(makeImageSnapshot().encodeToData()!!.bytes)
 
+fun generateLinearGradient(colors: List<Int>): IntArray{
+    return if (colors.size == 1){
+        val hsb = rgb2hsb(Color.getR(colors[0]), Color.getG(colors[0]), Color.getB(colors[0]))
+        hsb[1] = 0.3f
+        hsb[2] = 1f
+        val linearLayerCount = 3
+        val linearLayerStep = 40
+        val llc = if (linearLayerCount % 2 == 0) linearLayerCount + 1 else linearLayerCount
+        val ia = IntArray(llc)
+        hsb[0] = (hsb[0] + linearLayerCount / 2 * linearLayerStep) % 360
+        repeat(llc) {
+            val c = hsb2rgb(hsb[0], hsb[1], hsb[2])
+            ia[it] = Color.makeRGB(c[0], c[1], c[2])
+            hsb[0] = if (hsb[0] - linearLayerStep < 0) hsb[0] + 360 - linearLayerStep else hsb[0] - linearLayerStep
+        }
+        ia
+    }else{
+        val llc = colors.size
+        val ia = IntArray(llc)
+        repeat(llc) {
+            val hsb = rgb2hsb(Color.getR(colors[it]), Color.getG(colors[it]), Color.getB(colors[it]))
+            hsb[1] = 0.3f
+            hsb[2] = 1f
+            val c = hsb2rgb(hsb[0], hsb[1], hsb[2])
+            ia[it] = Color.makeRGB(c[0], c[1], c[2])
+        }
+        ia
+    }
+}
 
-fun makeAuthorHeader(dynamic: DynamicItem, quality: Quality): Image {
-    return Surface.makeRasterN32Premul(quality.imageWidth-quality.cardMargin*2,200).apply surface@{
+fun ModuleAuthor.drawForward(time: String): Image {
+    return Surface.makeRasterN32Premul(quality.imageWidth-quality.cardMargin*2,
+        (quality.pendantSize ).toInt()
+    ).apply{
         canvas.apply {
 
+        }
+    }.makeImageSnapshot()
+}
 
-            drawImage(makeAvatar(quality, "asd","asd",0), 0f,0f)
+fun ModuleAuthor.drawGeneral(time: String): Image {
+    return Surface.makeRasterN32Premul(quality.imageWidth-quality.cardMargin*2,
+        (quality.pendantSize ).toInt()
+    ).apply surface@{
+        canvas.apply {
 
+            drawAvatar(this@drawGeneral.face, this@drawGeneral.pendant?.image, this@drawGeneral.officialVerify?.type)
 
-            val textLineName = TextLine.make("猫芒ベル_Official", font.makeWithSize(30f))
+            val textLineName = TextLine.make(this@drawGeneral.name, font.makeWithSize(quality.mainFontSize * 1.5f))
             drawTextLine(textLineName, 150f, 60f,Paint().apply { color = Color.makeRGB(251, 114, 153) })
 
-            val textLineTime = TextLine.make("2022年04月20日 22:17:20", font.makeWithSize(20f))
+            val textLineTime = TextLine.make(time, font.makeWithSize(quality.mainFontSize * 1.1f))
             drawTextLine(textLineTime, 150f, 90f, Paint().apply { color = Color.makeRGB(156, 156, 156) })
 
 
@@ -734,102 +1033,62 @@ fun makeAuthorHeader(dynamic: DynamicItem, quality: Quality): Image {
     }.makeImageSnapshot()
 }
 
-fun makeAvatar(quality: Quality, face: String, pendant: String, verifyType: Int): Image {
-    val avatarSize = (quality.cardPadding*4+quality.faceSize).toInt()
-    return Surface.makeRasterN32Premul(avatarSize, avatarSize).apply {
-        canvas.apply {
-            val faceImg = Image.makeFromEncoded(File("D:/Desktop/bilibili动态/625896a6d3a355f3925b8da02f30917e986822b0.jpg").readBytes())
 
-            var tarFaceRect = RRect.makeXYWH(
-                quality.cardPadding*2f,
-                quality.cardPadding*1.5f,
-                quality.faceSize,
-                quality.faceSize,
-                quality.faceSize/2
-            )
-             if (pendant == ""){
-                 tarFaceRect = tarFaceRect.inflate(quality.noPendantFaceInflate) as RRect
-                 drawCircle(tarFaceRect.left+tarFaceRect.width/2,tarFaceRect.top+tarFaceRect.width/2,tarFaceRect.width/2+2,Paint().apply { color = Color.WHITE; alpha = 160 })
-            }
+fun Canvas.drawAvatar(face: String, pendant: String?, verifyType: Int?) {
+    //val avatarSize = (quality.cardPadding * 4 + quality.faceSize).toInt()
+    //return Surface.makeRasterN32Premul(avatarSize, avatarSize).apply {
+    //    canvas.apply {
 
-            drawImageRRect(faceImg, tarFaceRect)
+    val faceImg = Image.makeFromEncoded(File("D:/Desktop/bilibili动态/625896a6d3a355f3925b8da02f30917e986822b0.jpg").readBytes())
 
+    var tarFaceRect = RRect.makeXYWH(
+        quality.cardPadding*2f,
+        quality.cardPadding*1.5f,
+        quality.faceSize,
+        quality.faceSize,
+        quality.faceSize/2
+    )
+     if (pendant == null || pendant == ""){
+         tarFaceRect = tarFaceRect.inflate(quality.noPendantFaceInflate) as RRect
+         drawCircle(tarFaceRect.left+tarFaceRect.width/2,tarFaceRect.top+tarFaceRect.width/2,tarFaceRect.width/2+2,Paint().apply { color = Color.WHITE; alpha = 160 })
+    }
 
-            if (pendant != ""){
-                //val pand = Image.makeFromEncoded(File("D:/Desktop/d8f6dec3bd0bcdb09fcfd99fba620aa7da91dd8e.png").readBytes())
-                //val pand = Image.makeFromEncoded(File("D:/Desktop/1cdf174c75dd6493f3c8f0797e972b69e3293870.png").readBytes())
-                val pendantImg = Image.makeFromEncoded(File("D:/Desktop/d3587e6f3b534499fc08a71296bafa74a159fa33.png").readBytes())
+    drawImageRRect(faceImg, tarFaceRect)
 
-                val srcPendantRect = Rect(0f,0f,pendantImg.width.toFloat(),pendantImg.height.toFloat())
-                val tarPendantRect = Rect.makeXYWH(
-                    tarFaceRect.left + tarFaceRect.width/2 - quality.pendantSize/2,
-                    tarFaceRect.top + tarFaceRect.height/2 - quality.pendantSize/2,
-                    quality.pendantSize, quality.pendantSize)
-                drawImageRect(pendantImg, srcPendantRect, tarPendantRect, FilterMipmap(FilterMode.LINEAR, MipmapMode.NEAREST), null, true)
-            }
+    if (pendant != null && pendant != ""){
+        //val pand = Image.makeFromEncoded(File("D:/Desktop/d8f6dec3bd0bcdb09fcfd99fba620aa7da91dd8e.png").readBytes())
+        //val pand = Image.makeFromEncoded(File("D:/Desktop/1cdf174c75dd6493f3c8f0797e972b69e3293870.png").readBytes())
+        val pendantImg = Image.makeFromEncoded(File("D:/Desktop/bilibili动态/5c004d76ba9f57c00d7972de411c3989efebe120.png").readBytes())
 
+        val srcPendantRect = Rect(0f,0f,pendantImg.width.toFloat(),pendantImg.height.toFloat())
+        val tarPendantRect = Rect.makeXYWH(
+            tarFaceRect.left + tarFaceRect.width/2 - quality.pendantSize/2,
+            tarFaceRect.top + tarFaceRect.height/2 - quality.pendantSize/2,
+            quality.pendantSize, quality.pendantSize)
+        drawImageRect(pendantImg, srcPendantRect, tarPendantRect, FilterMipmap(FilterMode.LINEAR, MipmapMode.NEAREST), null, true)
+    }
 
-            val svg = SVGDOM(Data.makeFromFileName("D:/Desktop/bilibili动态/个人认证.svg"))
-            drawImage(svg.makeImage(quality.verifyIconSize,quality.verifyIconSize), tarFaceRect.right-quality.verifyIconSize, tarFaceRect.bottom-quality.verifyIconSize)
-        }
-    }.makeImageSnapshot()
+    val verifyIcon = when (verifyType){
+        0 -> "PERSONAL_OFFICIAL_VERIFY"
+        1 -> "ORGANIZATION_OFFICIAL_VERIFY"
+        else -> ""
+    }
+
+    if (verifyIcon != ""){
+        val svg = SVGDOM(Data.makeFromFileName("src/main/resources/icon/$verifyIcon.svg"))
+        drawImage(svg.makeImage(quality.verifyIconSize,quality.verifyIconSize), tarFaceRect.right-quality.verifyIconSize, tarFaceRect.bottom-quality.verifyIconSize)
+    }
+
+        //}
+    //}.makeImageSnapshot()
 }
 
 
-fun SVGDOM.makeImage(width: Float, height: Float): Image{
-    setContainerSize(width, height)
-    return Surface.makeRasterN32Premul(width.toInt(), height.toInt()).apply { render(canvas) }.makeImageSnapshot()
-}
-
-
-
-fun Canvas.drawRectShadowAntiAlias(r: Rect, dx: Float, dy: Float, blur: Float, spread: Float, color: Int): Canvas {
-    val insides = r.inflate(-1f)
-    if (!insides.isEmpty) {
-        save()
-        if (insides is RRect) clipRRect(insides, ClipMode.DIFFERENCE, true)
-        else clipRect(insides, ClipMode.DIFFERENCE, true)
-        drawRectShadowNoclip(r, dx, dy, blur, spread, color)
-        restore()
-    } else drawRectShadowNoclip(r, dx, dy, blur, spread, color)
-    return this
-}
-
-fun Canvas.drawImageRRect(image: Image, srcRect: Rect, rRect: RRect, paint: Paint? = null) {
-    save()
-    clipRRect(rRect, true)
-    drawImageRect(image, srcRect, rRect, FilterMipmap(FilterMode.LINEAR, MipmapMode.NEAREST), paint, true)
-    restore()
-}
-fun Canvas.drawImageRRect(image: Image, rRect: RRect, paint: Paint? = null) =
-    drawImageRRect(image, Rect(0f,0f,image.width.toFloat(),image.height.toFloat()), rRect, paint)
-
-
-fun Canvas.drawBadge(textLine: TextLine, font: Font, rrect: RRect){
-    //val textLine = TextLine.make(text, font)
-    //val rrect3 = RRect.makeXYWH(cardRect.right-textLine.width-30, cardRect.top-35, textLine.width+30, 35f, 5f,5f,0f,0f)
-    drawRRect(rrect, Paint().apply {
-        color = Color.makeRGB(72, 199, 240)
-        mode = PaintMode.FILL
-        isAntiAlias = true
-    })
-    drawRRect(rrect, Paint().apply {
-        color = Color.WHITE
-        mode = PaintMode.STROKE
-        strokeWidth = 2f
-        isAntiAlias = true
-    })
-    //drawTextLine(textLine,cardRect.right-textLine.width-15,cardRect.top-8, paint.apply { color = Color.WHITE })
-    drawTextLine(textLine, rrect.left + font.size/2, rrect.bottom-(rrect.height-textLine.capHeight)/2, Paint().apply { color = Color.WHITE })
-}
-
-
-fun Canvas.drawBadge(quality: Quality, text: String, font: Font, fontColor: Int, bgColor: Int, bgAlpha: Int, cardRect: Rect, position: Position){
+fun Canvas.drawBadge(text: String, font: Font, fontColor: Int, bgColor: Int, bgAlpha: Int, cardRect: Rect, position: Position){
 
     val textLine = TextLine.make(text, font)
 
-    val badgeWidth = textLine.width + quality.badgePadding*8
-    //val badgeHeight = textLine.height + quality.badgePadding*2
+    val badgeWidth = textLine.width + quality.badgePadding * 8
 
     val rrect = when (position){
         TOP_LEFT -> RRect.makeXYWH(cardRect.left, cardRect.top - quality.badgeHeight, badgeWidth,
@@ -843,19 +1102,31 @@ fun Canvas.drawBadge(quality: Quality, text: String, font: Font, fontColor: Int,
         else -> throw Exception("Bad Badge Position!")
     }
 
-    drawRRect(rrect, Paint().apply {
-        color = bgColor
-        mode = PaintMode.FILL
-        alpha = bgAlpha
-        isAntiAlias = true
-    })
-    drawRRect(rrect, Paint().apply {
-        color = Color.WHITE
-        mode = PaintMode.STROKE
-        strokeWidth = 2f
-        isAntiAlias = true
-    })
+    drawCard(rrect, bgColor, bgAlpha)
 
-    drawTextLine(textLine, rrect.left + quality.badgePadding*4, rrect.bottom - (quality.badgeHeight-textLine.capHeight)/2, Paint().apply { color = fontColor })
+    drawTextLine(textLine, rrect.left + quality.badgePadding * 4, rrect.bottom - (quality.badgeHeight-textLine.capHeight) / 2, Paint().apply { color = fontColor })
 
 }
+
+fun Canvas.drawLabelCard(text: String, font: Font, fontColor: Int, bgColor: Int, bgAlpha: Int, x: Float, y: Float): Float {
+    val textLine = TextLine.make(text, font)
+
+    val rrect = RRect.makeXYWH(
+        x, y - textLine.capHeight,
+        textLine.width + quality.badgePadding * 4,
+        quality.badgePadding * 2f + textLine.capHeight,
+        quality.badgeArc
+    )
+
+    drawRRect(rrect, Paint().apply {
+        color = bgColor
+        alpha = bgAlpha
+        mode = PaintMode.FILL
+        isAntiAlias = true
+    })
+
+    drawTextLine(textLine, rrect.left + quality.badgePadding * 2, rrect.bottom - quality.badgePadding, Paint().apply { color = fontColor })
+
+    return rrect.width
+}
+

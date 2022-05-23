@@ -1,18 +1,19 @@
 package top.colter.mirai.plugin.bilibili.data
 
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
-import org.jetbrains.skia.Image
 
 
 @Serializable
 data class DynamicMessage(
     val did: String,
+    val uid: Long,
+    val uname: String,
+    val type: String,
+    val time: String,
     val content: String,
     val images: List<String>?,
     val links: List<Link>?,
-    @Transient
-    val draw: Image? = null
+    val drawPath: String? = null
 ){
     @Serializable
     data class Link(

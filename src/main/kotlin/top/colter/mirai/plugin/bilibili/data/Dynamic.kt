@@ -220,7 +220,7 @@ data class ModuleAuthor(
 
     /**
      * 官方认证
-     * @param type 认证类型 无认证(-1) 个人认证(0) 机构认证(1)
+     * @param type 认证类型 无认证(-1) 个人认证(0) 机构认证(1) PERSONA_OFFICIAL_VERIFY ORGANIZATION_OFFICIAL_VERIFY
      * @param desc 描述
      */
     @Serializable
@@ -783,7 +783,7 @@ data class ModuleDynamic(
 
         @SerialName("archive")
         val archive: Archive? = null,
-        @SerialName("top/colter/mirai/plugin/bilibili/draw")
+        @SerialName("draw")
         val draw: Draw? = null,
         @SerialName("article")
         val article: Article? = null,

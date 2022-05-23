@@ -128,7 +128,7 @@ internal class PluginTest {
     fun drawDynamicTest(): Unit = runBlocking{
         val dynamic = DynamicItem(
 //            "DYNAMIC_TYPE_WORD",
-            DynamicType.DYNAMIC_TYPE_WORD,
+            DynamicType.DYNAMIC_TYPE_FORWARD,
             "652271005324017683",
             true,
             null,
@@ -195,111 +195,180 @@ internal class PluginTest {
                         listOf(
                             ModuleDynamic.Desc.RichTextNode(
                                 "RICH_TEXT_NODE_TYPE_TEXT",
-                                "好唯美的😶‍🌫️曲调，好温柔👩🏻‍⚕️🙃的歌声",
-                                "好唯美的\uD83D\uDE36\u200D\uD83C\uDF2B️曲调，好温柔\uD83D\uDC69\uD83C\uDFFB\u200D⚕️\uD83D\uDE43的歌声",
-                            ),
-                            //ModuleDynamic.Desc.RichTextNode(
-                            //    "RICH_TEXT_NODE_TYPE_EMOJI",
-                            //    "[tv_难过]",
-                            //    "[tv_难过]",
-                            //    emoji = ModuleDynamic.Desc.RichTextNode.Emoji(
-                            //        1,
-                            //        "http://i0.hdslb.com/bfs/emote/87f46748d3f142ebc6586ff58860d0e2fc8263ba.png",
-                            //        1,
-                            //        "[tv_难过]"
-                            //    )
-                            //),
-                            ModuleDynamic.Desc.RichTextNode(
-                                "RICH_TEXT_NODE_TYPE_TEXT",
-                                "感受到雨中\n\n的茶香了吗？",
-                                "感受到雨中\n\n的茶香了吗？",
-                            ),
-                            // 𓂚𓈖𓇋𓂝𓎛𓇹 鬼
-                            //ModuleDynamic.Desc.RichTextNode(
-                            //    "RICH_TEXT_NODE_TYPE_TEXT",
-                            //    "𓂚𓈖𓇋𓂝𓎛𓇹",
-                            //    "𓂚𓈖𓇋𓂝𓎛𓇹",
-                            //),
-                            ModuleDynamic.Desc.RichTextNode(
-                                "RICH_TEXT_NODE_TYPE_TOPIC",
-                                "#原创歌曲#",
-                                "#原创歌曲#",
-                            ),
-                            ModuleDynamic.Desc.RichTextNode(
-                                "RICH_TEXT_NODE_TYPE_TOPIC",
-                                "#虚拟歌手#",
-                                "#虚拟歌手#",
-                            ),
-                            ModuleDynamic.Desc.RichTextNode(
-                                "RICH_TEXT_NODE_TYPE_WEB",
-                                "https://www.bilibili.com/medialist/play/ml1604262874",
-                                "网页链接",
-                                jumpUrl = "https://www.bilibili.com/medialist/play/ml1604262874"
-                            ),
-                        ),
-                        "好唯美的\uD83D\uDE36\u200D\uD83C\uDF2B️曲调，好温柔\uD83D\uDC69\uD83C\uDFFB\u200D⚕️\uD83D\uDE43的歌声[tv_难过]感受到雨中\n\n的茶香了吗？#原创歌曲##虚拟歌手#网页链接"
-                    ),
-
-                    major = ModuleDynamic.Major(
-                        "MAJOR_TYPE_ARCHIVE",
-                        ModuleDynamic.Major.Archive(
-                            1,
-                            "341097266",
-                            "BV14R4y1P7Me",
-                            "【杂谈】她好像知道自己很可爱",
-                            "",
-                            "20220329－－封面：早乙女aku 翻译：土間うまる 时轴：予之笑颜 校对：剪辑也很可爱 剪辑：Canizza 压制：伊落",
-                            false,
-                            "04:02",
-                            "",
-                            ModuleDynamic.Major.Stat(
-                                "1236",
-                                "1.2万"
-                            ),
-                            ModuleDynamic.Major.Badge(
-                                "",
-                                "",
-                                "投稿视频"
+                                "AAAAAA好唯美的😶‍🌫️曲调，好温柔👩🏻‍⚕️🙃的歌声",
+                                "AAAAAA好唯美的\uD83D\uDE36\u200D\uD83C\uDF2B️曲调，好温柔\uD83D\uDC69\uD83C\uDFFB\u200D⚕️\uD83D\uDE43的歌声",
                             )
                         ),
-                        //draw = ModuleDynamic.Major.Draw(
-                        //    1L,
-                        //    listOf(
-                        //        ModuleDynamic.Major.Draw.DrawItem(
-                        //            1146,
-                        //            717,
-                        //            1000f,
-                        //            "https://i0.hdslb.com/bfs/album/b04ee4292a83f06a09047a31a5f813d14dcf3bc2.jpg"
-                        //        ),
-                        //        ModuleDynamic.Major.Draw.DrawItem(
-                        //        1080,
-                        //        12300,
-                        //        1000f,
-                        //        "https://i0.hdslb.com/bfs/album/f5c91131de75b4163d2888acfafe23bc1ef5999b.png"
-                        //        ),
-                        //    )
-                        //),
-                        //article = ModuleDynamic.Major.Article(
-                        //    1L,
-                        //    "#泠鸢十周年生日会二创#活动开启！",
-                        //    "泠鸢的生日要到啦，各位小伙伴们任选创作并投稿：1. 泠鸢生日会二创作品 2. 泠鸢鸟蛋二创作品泠鸢手绘鸟蛋示范需带上活动tag #泠鸢十周年生日会二创# （通过官方话题功能）每个类别（由工作人员分类统计）投稿/动态作品 点赞+评论前30名（共60名）可以获得泠鸢yousa首款数字藏品！",
-                        //    "",
-                        //    "",
-                        //    listOf("https://i0.hdslb.com/bfs/article/8826d991eaaf6b68dba2a65206f4f13af97e0824.jpg")
-                        //),
-                        music = ModuleDynamic.Major.Music(
-                            1L,
-                            "哭声",
-                            "http://i0.hdslb.com/bfs/music/625896a6d3a355f3925b8da02f30917e986822b0.jpg",
-                            "音乐 · 人声演唱",
-                            "//www.bilibili.com/audio/au2935811"
-                        )
-                    )
+                        "AAAAAA好唯美的\uD83D\uDE36\u200D\uD83C\uDF2B️曲调，好温柔\uD83D\uDC69\uD83C\uDFFB\u200D⚕️\uD83D\uDE43的歌声"
+                    ),
                 )
 
+            ),
+            orig = DynamicItem(
+//            "DYNAMIC_TYPE_WORD",
+                DynamicType.DYNAMIC_TYPE_WORD,
+                "652271005324017683",
+                true,
+                null,
+                DynamicItem.Modules(
+                    ModuleAuthor(
+                        "AUTHOR_TYPE_NORMAL",
+                        487550002,
+                        "猫芒ベル_Official",
+                        "https://i1.hdslb.com/bfs/face/652385c47e4742b6e26e19995a2407c83756b1f7.jpg",
+                        false,
+                        true,
+                        "",
+                        "//space.bilibili.com/487550002/dynamic",
+                        "",
+                        "2022-04-23 17:44",
+                        1650707078,
+                        ModuleAuthor.OfficialVerify(
+                            0,
+                            ""
+                        ),
+                        ModuleAuthor.Vip(
+                            2,
+                            1,
+                            "http://i0.hdslb.com/bfs/vip/icon_Certification_big_member_22_3x.png",
+                            1658160000000,
+                            ModuleAuthor.Vip.Label(
+                                "#FB7299",
+                                1,
+                                "",
+                                "annual_vip",
+                                "",
+                                "年度大会员",
+                                "#FFFFFF"
+                            ),
+                            "#FB7299",
+                            1,
+                            0
+                        ),
+                        ModuleAuthor.Pendant(
+                            258,
+                            "梦100",
+                            0,
+                            "http://i1.hdslb.com/bfs/face/d3587e6f3b534499fc08a71296bafa74a159fa33.png",
+                            "http://i1.hdslb.com/bfs/face/d3587e6f3b534499fc08a71296bafa74a159fa33.png",
+                            ""
+                        ),
+                        ModuleAuthor.Decorate(
+                            2426,
+                            1,
+                            "湊-阿库娅",
+                            "http://i0.hdslb.com/bfs/garb/item/5ebada630d1897124a9f33dd2d5c9566d02fcc72.png",
+                            "https://www.bilibili.com/h5/mall/fans/recommend/2452?navhide=1&mid=186463&from=dynamic&isdiy=0",
+                            ModuleAuthor.Decorate.Fan(
+                                "",
+                                false,
+                                "",
+                                0
+                            )
+                        )
+                    ),
+
+                    ModuleDynamic(
+                        desc = ModuleDynamic.Desc(
+                            listOf(
+                                ModuleDynamic.Desc.RichTextNode(
+                                    "RICH_TEXT_NODE_TYPE_TEXT",
+                                    "好唯美的😶‍🌫️曲调，好温柔👩🏻‍⚕️🙃的歌声",
+                                    "好唯美的\uD83D\uDE36\u200D\uD83C\uDF2B️曲调，好温柔\uD83D\uDC69\uD83C\uDFFB\u200D⚕️\uD83D\uDE43的歌声",
+                                ),
+                                //ModuleDynamic.Desc.RichTextNode(
+                                //    "RICH_TEXT_NODE_TYPE_EMOJI",
+                                //    "[tv_难过]",
+                                //    "[tv_难过]",
+                                //    emoji = ModuleDynamic.Desc.RichTextNode.Emoji(
+                                //        1,
+                                //        "http://i0.hdslb.com/bfs/emote/87f46748d3f142ebc6586ff58860d0e2fc8263ba.png",
+                                //        1,
+                                //        "[tv_难过]"
+                                //    )
+                                //),
+                                ModuleDynamic.Desc.RichTextNode(
+                                    "RICH_TEXT_NODE_TYPE_TEXT",
+                                    "感受到雨中\n\n的茶香了吗？",
+                                    "感受到雨中\n\n的茶香了吗？",
+                                ),
+                                // 𓂚𓈖𓇋𓂝𓎛𓇹 鬼
+                                ModuleDynamic.Desc.RichTextNode(
+                                    "RICH_TEXT_NODE_TYPE_TEXT",
+                                    "𓂚𓈖𓇋𓂝𓎛𓇹\n",
+                                    "𓂚𓈖𓇋𓂝𓎛𓇹\n",
+                                ),
+                                ModuleDynamic.Desc.RichTextNode(
+                                    "RICH_TEXT_NODE_TYPE_TEXT",
+                                    "नमस्ते\n",
+                                    "नमस्ते\n",
+                                ),
+                                ModuleDynamic.Desc.RichTextNode(
+                                    "RICH_TEXT_NODE_TYPE_TEXT",
+                                    "Olá\n",
+                                    "Olá\n",
+                                ),
+                                ModuleDynamic.Desc.RichTextNode(
+                                    "RICH_TEXT_NODE_TYPE_TEXT",
+                                    "Здравствуйте\n",
+                                    "Здравствуйте\n",
+                                ),
+                                ModuleDynamic.Desc.RichTextNode(
+                                    "RICH_TEXT_NODE_TYPE_TOPIC",
+                                    "#原创歌曲#",
+                                    "#原创歌曲#",
+                                ),
+                                ModuleDynamic.Desc.RichTextNode(
+                                    "RICH_TEXT_NODE_TYPE_TOPIC",
+                                    "#虚拟歌手#",
+                                    "#虚拟歌手#",
+                                ),
+                                ModuleDynamic.Desc.RichTextNode(
+                                    "RICH_TEXT_NODE_TYPE_WEB",
+                                    "https://www.bilibili.com/medialist/play/ml1604262874",
+                                    "网页链接",
+                                    jumpUrl = "https://www.bilibili.com/medialist/play/ml1604262874"
+                                ),
+                            ),
+                            "好唯美的\uD83D\uDE36\u200D\uD83C\uDF2B️曲调，好温柔\uD83D\uDC69\uD83C\uDFFB\u200D⚕️\uD83D\uDE43的歌声[tv_难过]感受到雨中\n\n\n\n\n\n\n\n的茶香了吗？#原创歌曲##虚拟歌手#网页链接"
+                        ),
+
+                        major = ModuleDynamic.Major(
+                            "MAJOR_TYPE_ARCHIVE",
+                            ModuleDynamic.Major.Archive(
+                                1,
+                                "341097266",
+                                "BV14R4y1P7Me",
+                                "【杂谈】她好像知道自己很可爱",
+                                "",
+                                "20220329－－封面：早乙女aku 翻译：土間うまる 时轴：予之笑颜 校对：剪辑也很可爱 剪辑：Canizza 压制：伊落校对：剪辑也很可爱 剪辑：Canizza 压制：伊落校对：剪辑也很可爱 剪辑：Canizza 压制：伊落",
+                                false,
+                                "04:02",
+                                "",
+                                ModuleDynamic.Major.Stat(
+                                    "1236",
+                                    "1.2万"
+                                ),
+                                ModuleDynamic.Major.Badge(
+                                    "",
+                                    "",
+                                    "投稿视频"
+                                )
+                            ),
+                        ),
+                        additional = ModuleDynamic.Additional(
+                            ""
+                        )
+                    )
+
+                )
             )
-        )
-        makeCardBg(dynamic)
+
+        ).makeDrawDynamic()
+
+
+        //DynamicDraw.makeDynamic(dynamic)
+
     }
 
     @Test
@@ -308,7 +377,7 @@ internal class PluginTest {
         val jsonStr = "{\"basic\": {\"comment_id_str\": \"193712377\",\"comment_type\": 11,\"like_icon\": {\"action_url\": \"\",\"end_url\": \"\",\"id\": 0,\"start_url\": \"\"},\"rid_str\": \"193712377\"},\"id_str\": \"656453757984309256\",\"modules\": {\"module_author\": {\"face\": \"http://i1.hdslb.com/bfs/face/5cf0b8f6acb15c6051e57e31503fb3d3ad945f96.jpg\",\"face_nft\": false,\"following\": true,\"jump_url\": \"//space.bilibili.com/697091119/dynamic\",\"label\": \"\",\"mid\": 697091119,\"name\": \"猫雷NyaRu_Official\",\"official_verify\": {\"desc\": \"\",\"type\": 0},\"pendant\": {\"expire\": 0,\"image\": \"\",\"image_enhance\": \"\",\"image_enhance_frame\": \"\",\"name\": \"\",\"pid\": 0},\"pub_action\": \"\",\"pub_time\": \"2022-05-05 00:15\",\"pub_ts\": 1651680951,\"type\": \"AUTHOR_TYPE_NORMAL\",\"vip\": {\"avatar_subscript\": 1,\"avatar_subscript_url\": \"http://i0.hdslb.com/bfs/vip/icon_Certification_big_member_22_3x.png\",\"due_date\": 1711123200000,\"label\": {\"bg_color\": \"#FB7299\",\"bg_style\": 1,\"border_color\": \"\",\"label_theme\": \"annual_vip\",\"path\": \"\",\"text\": \"年度大会员\",\"text_color\": \"#FFFFFF\"},\"nickname_color\": \"#FB7299\",\"status\": 1,\"theme_type\": 0,\"type\": 2}},\"module_dynamic\": {\"additional\": null,\"desc\": {\"rich_text_nodes\": [{\"orig_text\": \"みんなは今何してる〜？\\n今日はおでかけでつかれちゃった！\\nおやすみ\uD83D\uDC99\uD83D\uDC99mua\",\"text\": \"みんなは今何してる〜？\\n今日はおでかけでつかれちゃった！\\nおやすみ\uD83D\uDC99\uD83D\uDC99mua\",\"type\": \"RICH_TEXT_NODE_TYPE_TEXT\"}],\"text\": \"みんなは今何してる〜？\\n今日はおでかけでつかれちゃった！\\nおやすみ\uD83D\uDC99\uD83D\uDC99mua\"},\"major\": {\"draw\": {\"id\": 193712377,\"items\": [{\"height\": 1000,\"size\": 345.55078,\"src\": \"https://i0.hdslb.com/bfs/album/874ecf3eb8681d8a4b73ec70006ab2d0f8066a96.jpg\",\"tags\": [],\"width\": 1000}]},\"type\": \"MAJOR_TYPE_DRAW\"},\"topic\": null},\"module_more\": {\"three_point_items\": [{\"label\": \"举报\",\"type\": \"THREE_POINT_REPORT\"}]},\"module_stat\": {\"comment\": {\"count\": 180,\"forbidden\": false},\"forward\": {\"count\": 4,\"forbidden\": false},\"like\": {\"count\": 1150,\"forbidden\": false,\"status\": false}}},\"type\": \"DYNAMIC_TYPE_DRAW\",\"visible\": true}"
 
         val item = json.decodeFromString<DynamicItem>(json.serializersModule.serializer(), jsonStr)
-        item.draw()
+        //item.draw()
         println()
         println(item.type)
 
@@ -325,9 +394,31 @@ internal class PluginTest {
                 1000f,
                 ""
             ))
-        ).makeDrawContent()
+        ).drawGeneral()
 
     }
+
+    @Test
+    fun charTest(): Unit = runBlocking{
+
+        val text = "\uD80C\uDC9A\uD80C\uDE16\uD80C\uDDCB\uD80C\uDC9D\uD80C\uDF9B\uD80C\uDDF9"
+        //val text = "啊这"
+        println(text)
+
+        for (c in text.codePoints()){
+            println(String(intArrayOf(c), 0, intArrayOf(c).size))
+        }
+
+    }
+
+    @Test
+    fun colorTest(): Unit = runBlocking{
+
+        println(generateLinearGradient(listOf(0xFFffffb2.toInt(), 0xFFd9ffb2.toInt())).toList())
+
+    }
+
+
 
 
 }

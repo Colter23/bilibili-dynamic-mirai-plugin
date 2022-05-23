@@ -86,6 +86,7 @@ data class TranslateConfig(
 data class ImageConfig(
     val quality: Int = 1,
     val font: String = "",
+    val fontSizeMultiple: Float = 1.0f
 )
 
 @Serializable

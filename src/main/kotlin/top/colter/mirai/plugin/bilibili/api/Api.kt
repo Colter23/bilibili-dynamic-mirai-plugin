@@ -7,3 +7,5 @@ const val LOGIN_INFO = "http://passport.bilibili.com/qrcode/getLoginInfo"
 // Dynamic
 const val NEW_DYNAMIC = "https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/all"
 
+const val IS_FOLLOW = "https://api.bilibili.com/x/relation"
+

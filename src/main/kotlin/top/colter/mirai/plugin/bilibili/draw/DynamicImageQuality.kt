@@ -1,5 +1,8 @@
 package top.colter.mirai.plugin.bilibili.draw
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Quality(
     val imageWidth: Int = 0,
     val cardMargin: Int = 0,
@@ -18,10 +21,14 @@ data class Quality(
     val lineHeight: Float = 0f,
     val lineSpace: Int = 0,
 
-    var drawSpace: Int = 0,
+    val drawSpace: Int = 0,
+
+    val smallCardHeight: Int = 0,
+    val additionalCardHeight: Int = 0,
 
     val mainFontSize: Float = 0f,
     val subFontSize: Float = 0f,
+
     val emojiSize: Float = 0f,
     val iconSize: Float = 0f
 ){
@@ -49,6 +56,8 @@ data class Quality(
             lineSpace = 5,
 
             drawSpace = 10,
+            smallCardHeight = 160,
+            additionalCardHeight = 100,
 
             mainFontSize = 22f,
             subFontSize = 18f,
@@ -73,6 +82,8 @@ data class Quality(
             lineSpace = 8,
 
             drawSpace = 15,
+            smallCardHeight = 200,
+            additionalCardHeight = 150,
 
             mainFontSize = 26f,
             subFontSize = 22f,
