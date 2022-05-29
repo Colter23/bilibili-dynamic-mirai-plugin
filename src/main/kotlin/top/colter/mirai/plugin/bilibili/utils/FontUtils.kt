@@ -18,9 +18,9 @@ object FontUtils {
 
     fun matchFamily(familyName: String): FontStyleSet {
         val fa = fontProvider.matchFamily(familyName)
-        if (fa.count() != 0){
+        if (fa.count() != 0) {
             return fa
-        }else {
+        } else {
             return fontMgr.matchFamily(familyName)
         }
     }

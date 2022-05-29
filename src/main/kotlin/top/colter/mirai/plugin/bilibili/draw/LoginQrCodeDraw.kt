@@ -18,7 +18,8 @@ object LoginQrCodeDraw {
     fun qrCode(url: String): Image {
         val qrCodeWriter = QRCodeWriter()
 
-        val bitMatrix = qrCodeWriter.encode(url, BarcodeFormat.QR_CODE, 250, 250,
+        val bitMatrix = qrCodeWriter.encode(
+            url, BarcodeFormat.QR_CODE, 250, 250,
             mapOf(
                 EncodeHintType.MARGIN to 1,
                 EncodeHintType.ERROR_CORRECTION to ErrorCorrectionLevel.H
@@ -54,7 +55,7 @@ object LoginQrCodeDraw {
 
     }
 
-    fun SVGDOM.makeImage(width: Float, height: Float): Image{
+    fun SVGDOM.makeImage(width: Float, height: Float): Image {
         setContainerSize(width, height)
         return Surface.makeRasterN32Premul(width.toInt(), height.toInt()).apply { render(canvas) }.makeImageSnapshot()
     }

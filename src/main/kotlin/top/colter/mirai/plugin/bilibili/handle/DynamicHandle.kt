@@ -4,12 +4,12 @@ import top.colter.mirai.plugin.bilibili.data.DynamicItem
 
 object DynamicHandle {
 
-    fun String.dd(){
+    fun String.dd() {
 
     }
 
-    fun buildDynamicImage(dynamic: DynamicItem){
-        when (dynamic.type){
+    fun buildDynamicImage(dynamic: DynamicItem) {
+        when (dynamic.type) {
 
         }
 

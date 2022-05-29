@@ -28,7 +28,7 @@ data class LoginResult(
     val status: Boolean? = null,
     @SerialName("data")
     val data: LoginData? = null
-){
+) {
     @Serializable
     data class LoginData(
         @SerialName("url")

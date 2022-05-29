@@ -55,6 +55,12 @@ object BiliDynamicConfig : AutoSavePluginConfig("BiliPluginConfig") {
     @ValueDescription("百度翻译")
     val baiduTranslate: TranslateConfig by value()
 
+
+
+
+    @ValueDescription("图片配置")
+    val debugMode: Boolean by value(false)
+
     @ValueDescription("图片配置")
     val imageConfig: ImageConfig by value()
 
@@ -91,7 +97,14 @@ data class ImageConfig(
     val theme: String = "",
     val font: String = "",
     val fontSizeMultiple: Float = 1.0f,
-    val cardOrnament: String = "fanCard qrCode none"
+    val badgeEnable: Boolean = true,
+    /**
+     * 可选值:
+     * fanCard 粉丝卡片
+     * qrCode  动态链接二维码
+     * none    无
+     */
+    val cardOrnament: String = "fanCard"
 )
 
 @Serializable

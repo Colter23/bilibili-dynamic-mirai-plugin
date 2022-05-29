@@ -8,7 +8,7 @@ import top.colter.mirai.plugin.bilibili.draw.makeDrawDynamic
 import top.colter.mirai.plugin.bilibili.utils.formatTime
 import top.colter.mirai.plugin.bilibili.utils.time
 
-object MessageTasker: BiliTasker() {
+object MessageTasker : BiliTasker() {
 
     override val interval: Int = 0
 
@@ -32,14 +32,14 @@ object MessageTasker: BiliTasker() {
         )
     }
 
-    fun DynamicItem.textContent(): String{
-        return when (type){
+    fun DynamicItem.textContent(): String {
+        return when (type) {
             DynamicType.DYNAMIC_TYPE_FORWARD -> {
                 orig?.textContent()!!
             }
             DynamicType.DYNAMIC_TYPE_WORD,
             DynamicType.DYNAMIC_TYPE_DRAW -> {
-                modules.moduleDynamic.desc?.text?: ""
+                modules.moduleDynamic.desc?.text ?: ""
             }
             DynamicType.DYNAMIC_TYPE_ARTICLE -> {
                 modules.moduleDynamic.major?.article?.title!!
@@ -69,9 +69,9 @@ object MessageTasker: BiliTasker() {
 
     }
 
-    fun DynamicItem.dynamicImages(): List<String>?{
+    fun DynamicItem.dynamicImages(): List<String>? {
 
-        return when (type){
+        return when (type) {
             DynamicType.DYNAMIC_TYPE_FORWARD -> {
                 orig?.dynamicImages()!!
             }
@@ -107,17 +107,18 @@ object MessageTasker: BiliTasker() {
 
     }
 
-    fun DynamicItem.dynamicLinks(): List<DynamicMessage.Link>{
+    fun DynamicItem.dynamicLinks(): List<DynamicMessage.Link> {
 
         return listOf(
             DynamicMessage.Link(
-            "",
-            ""
-        ))
+                "",
+                ""
+            )
+        )
 
     }
 
-    suspend fun DynamicItem.makeDynamic(): String?{
+    suspend fun DynamicItem.makeDynamic(): String? {
         val drawEnable = true
         return if (drawEnable) makeDrawDynamic() else null
     }

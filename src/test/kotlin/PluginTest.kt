@@ -179,16 +179,16 @@ internal class PluginTest {
                         ""
                     ),
                     ModuleAuthor.Decorate(
-                        2426,
-                        1,
-                        "湊-阿库娅",
-                        "http://i0.hdslb.com/bfs/garb/item/5ebada630d1897124a9f33dd2d5c9566d02fcc72.png",
+                        6562,
+                        3,
+                        "花园Serena2粉丝",
+                        "http://i0.hdslb.com/bfs/garb/item/5db26595431f8af25ae269e47da9f1d8c06bb657.png",
                         "https://www.bilibili.com/h5/mall/fans/recommend/2452?navhide=1&mid=186463&from=dynamic&isdiy=0",
                         ModuleAuthor.Decorate.Fan(
-                            "",
+                            "#ffb48d",
                             false,
-                            "",
-                            0
+                            "000001",
+                            1
                         )
                     )
                 ),
@@ -206,17 +206,17 @@ internal class PluginTest {
                                 "AAAAAA好唯美的😶‍🌫️曲调，好温柔👩🏻‍⚕️🙃的歌声",
                                 "AAAAAA好唯美的\uD83D\uDE36\u200D\uD83C\uDF2B️曲调，好温柔\uD83D\uDC69\uD83C\uDFFB\u200D⚕️\uD83D\uDE43的歌声",
                             ),
-                            //ModuleDynamic.Desc.RichTextNode(
-                            //    "RICH_TEXT_NODE_TYPE_EMOJI",
-                            //    "[tv_难过]",
-                            //    "[tv_难过]",
-                            //    emoji = ModuleDynamic.Desc.RichTextNode.Emoji(
-                            //        1,
-                            //        "http://i0.hdslb.com/bfs/emote/87f46748d3f142ebc6586ff58860d0e2fc8263ba.png",
-                            //        1,
-                            //        "[tv_难过]"
-                            //    )
-                            //),
+                            ModuleDynamic.Desc.RichTextNode(
+                                "RICH_TEXT_NODE_TYPE_EMOJI",
+                                "[tv_难过]",
+                                "[tv_难过]",
+                                emoji = ModuleDynamic.Desc.RichTextNode.Emoji(
+                                    1,
+                                    "http://i0.hdslb.com/bfs/emote/87f46748d3f142ebc6586ff58860d0e2fc8263ba.png",
+                                    1,
+                                    "[tv_难过]"
+                                )
+                            ),
                             ModuleDynamic.Desc.RichTextNode(
                                 "RICH_TEXT_NODE_TYPE_TEXT",
                                 "测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试",
@@ -225,6 +225,29 @@ internal class PluginTest {
                         ),
                         "AAAAAA好唯美的\uD83D\uDE36\u200D\uD83C\uDF2B️曲调，好温柔\uD83D\uDC69\uD83C\uDFFB\u200D⚕️\uD83D\uDE43的歌声[tv_难过]测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试"
                     ),
+                    //major = ModuleDynamic.Major(
+                    //    "MAJOR_TYPE_ARCHIVE",
+                    //    ModuleDynamic.Major.Archive(
+                    //        1,
+                    //        "341097266",
+                    //        "BV14R4y1P7Me",
+                    //        "【杂谈】她好像知道自己很可爱",
+                    //        "https://i2.hdslb.com/bfs/archive/f1d0fb9dbee0066997546a1951f90aeccc95808c.jpg",
+                    //        "20220329－－封面：早乙女aku 翻译：土間うまる 时轴：予之笑颜 校对：剪辑也很可爱 剪辑：Canizza 压制：伊落校对：剪辑也很可爱 剪辑：Canizza 压制：伊落校对：剪辑也很可爱 剪辑：Canizza 压制：伊落",
+                    //        false,
+                    //        "04:02",
+                    //        "",
+                    //        ModuleDynamic.Major.Stat(
+                    //            "1236",
+                    //            "1.2万"
+                    //        ),
+                    //        ModuleDynamic.Major.Badge(
+                    //            "",
+                    //            "",
+                    //            "投稿视频"
+                    //        )
+                    //    ),
+                    //),
                 )
 
             ),
@@ -364,7 +387,7 @@ internal class PluginTest {
                                 "341097266",
                                 "BV14R4y1P7Me",
                                 "【杂谈】她好像知道自己很可爱",
-                                "",
+                                "https://i2.hdslb.com/bfs/archive/f1d0fb9dbee0066997546a1951f90aeccc95808c.jpg",
                                 "20220329－－封面：早乙女aku 翻译：土間うまる 时轴：予之笑颜 校对：剪辑也很可爱 剪辑：Canizza 压制：伊落校对：剪辑也很可爱 剪辑：Canizza 压制：伊落校对：剪辑也很可爱 剪辑：Canizza 压制：伊落",
                                 false,
                                 "04:02",

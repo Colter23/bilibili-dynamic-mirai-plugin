@@ -6,14 +6,14 @@ import kotlin.coroutines.CoroutineContext
 
 abstract class BiliTasker(
     private val taskerName: String? = null
-): CoroutineScope, CompletableJob by SupervisorJob(BiliBiliDynamic.coroutineContext.job) {
+) : CoroutineScope, CompletableJob by SupervisorJob(BiliBiliDynamic.coroutineContext.job) {
     override val coroutineContext: CoroutineContext
-        get() = this + CoroutineName(taskerName?: this::class.simpleName ?: "Tasker")
+        get() = this + CoroutineName(taskerName ?: this::class.simpleName ?: "Tasker")
 
-    companion object{
+    companion object {
         val taskers = mutableListOf<BiliTasker>()
 
-        fun cancelAll(){
+        fun cancelAll() {
             taskers.forEach {
                 it.cancel()
             }
@@ -28,10 +28,10 @@ abstract class BiliTasker(
 
     override fun start(): Boolean {
         job = launch(coroutineContext) {
-            if (interval == -1){
+            if (interval == -1) {
                 main()
-            }else{
-                while (isActive){
+            } else {
+                while (isActive) {
                     try {
                         main()
                     } catch (e: Throwable) {

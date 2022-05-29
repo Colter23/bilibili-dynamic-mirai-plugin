@@ -23,7 +23,7 @@ data class DynamicImageTheme(
     val linkColor: Int = 0,
 
 
-){
+    ) {
     @Serializable
     data class Shadow(
         val shadowColor: Int = 0,

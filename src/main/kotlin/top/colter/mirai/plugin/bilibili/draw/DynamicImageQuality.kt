@@ -14,7 +14,7 @@ data class Quality(
     val pendantSize: Float = 0f,
     val verifyIconSize: Float = 0f,
 
-    val badgeHeight: Int = 0,
+    var badgeHeight: Int = 0,
     val badgePadding: Int = 0,
     val badgeArc: Float = 0f,
 
@@ -36,21 +36,21 @@ data class Quality(
 
     val emojiSize: Float = 0f,
     val iconSize: Float = 0f
-){
+) {
 
 //    data class VideoCard(
 //
 //    )
 
-    companion object{
+    companion object {
         val low = Quality(
-            imageWidth =  800,
-            cardMargin =  20,
+            imageWidth = 800,
+            cardMargin = 20,
             cardPadding = 20,
-            cardArc =  10f,
+            cardArc = 10f,
             faceSize = 64f,
             noPendantFaceInflate = 5f,
-            pendantSize =  112f,
+            pendantSize = 112f,
             verifyIconSize = 20f,
 
             // 36   5
@@ -81,14 +81,16 @@ data class Quality(
             iconSize = 30f,
         )
         val middle = Quality(
-            imageWidth =  1000,
-            cardMargin =  30,
+            imageWidth = 1000,
+            cardMargin = 30,
             cardPadding = 30,
-            cardArc =  15f,
+            cardArc = 15f,
+            // 80
             faceSize = 80f,
             noPendantFaceInflate = 10f,
-            pendantSize =  120f,
-            verifyIconSize = 25f,
+            // 120
+            pendantSize = 140f,
+            verifyIconSize = 30f,
 
             badgeHeight = 45,
             badgePadding = 8,
@@ -103,13 +105,19 @@ data class Quality(
 
             mainFontSize = 26f,
             subFontSize = 22f,
+
+            nameFontSize = 36f,
+            titleFontSize = 32f,
+            subTitleFontSize = 28f,
+            contentFontSize = 32f,
+
             emojiSize = 36f,
             iconSize = 31f,
         )
-        val high = Quality(1200, 50, 20, 35f,10f,64f,112f, 20f,20)
+        val high = Quality(1200, 50, 20, 35f, 10f, 64f, 112f, 20f, 20)
 
         fun level(level: Int): Quality {
-            return when(level){
+            return when (level) {
                 1 -> low
                 2 -> middle
                 3 -> high
@@ -120,7 +128,4 @@ data class Quality(
             }
         }
     }
-
-
-
 }

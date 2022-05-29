@@ -10,7 +10,7 @@ import top.colter.mirai.plugin.bilibili.utils.sendAll
 import top.colter.mirai.plugin.bilibili.utils.time
 import java.time.Instant
 
-object DynamicCheckTasker: BiliTasker() {
+object DynamicCheckTasker : BiliTasker() {
 
     override val interval: Int = BiliDynamicConfig.checkConfig.interval
 
@@ -24,16 +24,17 @@ object DynamicCheckTasker: BiliTasker() {
 
     private var lastDynamic: Long = Instant.now().epochSecond
 
-    override suspend fun main(){
+    override suspend fun main() {
         val dynamicList = client.getNewDynamic()
-        if (dynamicList != null){
+        if (dynamicList != null) {
             val dynamics = dynamicList.items
                 .filter {
                     !banType.contains(it.type)
                 }.filter {
                     it.time > lastDynamic
                 }.filter {
-                    subDynamic.filter{ it.value.contacts.isNotEmpty() }.map{ it.key }.contains(it.modules.moduleAuthor.mid)
+                    subDynamic.filter { it.value.contacts.isNotEmpty() }.map { it.key }
+                        .contains(it.modules.moduleAuthor.mid)
                 }.sortedBy {
                     it.time
                 }

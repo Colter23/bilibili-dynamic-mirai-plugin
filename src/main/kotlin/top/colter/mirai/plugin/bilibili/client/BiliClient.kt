@@ -17,25 +17,27 @@ import top.colter.mirai.plugin.bilibili.BiliDynamicConfig.proxy
 import top.colter.mirai.plugin.bilibili.utils.isNotBlank
 import top.colter.mirai.plugin.bilibili.utils.json
 
-open class BiliClient: Closeable {
+open class BiliClient : Closeable {
     override fun close() = clients.forEach { it.close() }
 
-    val proxys = if (proxy.isNotBlank()){
-            mutableListOf<ProxyConfig>().apply {
-                proxy.forEach {
-                    if (it != ""){ add(ProxyBuilder.http(it)) }
+    val proxys = if (proxy.isNotBlank()) {
+        mutableListOf<ProxyConfig>().apply {
+            proxy.forEach {
+                if (it != "") {
+                    add(ProxyBuilder.http(it))
                 }
             }
-        }else{
-            null
         }
+    } else {
+        null
+    }
 
 
-    val clients = MutableList(3){ client() }
+    val clients = MutableList(3) { client() }
 
     var cookie: BiliCookie? = null
 
-    protected fun client() = HttpClient(OkHttp){
+    protected fun client() = HttpClient(OkHttp) {
         defaultRequest {
             header(HttpHeaders.Origin, "https://t.bilibili.com")
             header(HttpHeaders.Referrer, "https://t.bilibili.com")
@@ -50,7 +52,7 @@ open class BiliClient: Closeable {
 
     suspend inline fun <reified T> get(url: String, crossinline block: HttpRequestBuilder.() -> Unit = {}): T =
         json.decodeFromString(json.serializersModule.serializer(), useHttpClient {
-            it.get(url){
+            it.get(url) {
                 header(HttpHeaders.Cookie, cookie)
                 block()
             }
@@ -59,8 +61,8 @@ open class BiliClient: Closeable {
     private var clientIndex = 0
     private var proxyIndex = 0
 
-    suspend fun <T> useHttpClient(block: suspend (HttpClient) -> T): T = supervisorScope{
-        while (isActive){
+    suspend fun <T> useHttpClient(block: suspend (HttpClient) -> T): T = supervisorScope {
+        while (isActive) {
             try {
                 val client = clients[clientIndex]
                 if (proxys != null && enableConfig.proxyEnable) {
@@ -68,7 +70,7 @@ open class BiliClient: Closeable {
                     proxyIndex = (proxyIndex + 1) % proxys.size
                 }
                 return@supervisorScope block(client)
-            }catch (throwable: Throwable){
+            } catch (throwable: Throwable) {
                 if (isActive) {
                     clientIndex = (clientIndex + 1) % clients.size
                 } else {

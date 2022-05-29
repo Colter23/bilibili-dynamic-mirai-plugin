@@ -4,7 +4,6 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 
-
 /**
  * 动态列表
  * @param hasMore 是否有更多动态
@@ -28,7 +27,7 @@ data class DynamicList(
     val items: List<DynamicItem>,
 )
 
-enum class DynamicType(val text: String){
+enum class DynamicType(val text: String) {
     DYNAMIC_TYPE_WORD("动态"),
     DYNAMIC_TYPE_DRAW("动态"),
     DYNAMIC_TYPE_ARTICLE("文章"),
@@ -80,7 +79,7 @@ data class DynamicItem(
     val modules: Modules,
     @SerialName("orig")
     val orig: DynamicItem? = null,
-){
+) {
     /**
      * 基本
      */
@@ -94,7 +93,7 @@ data class DynamicItem(
         val ridStr: String,
         @SerialName("like_icon")
         val likeIcon: LikeIcon,
-    ){
+    ) {
         @Serializable
         data class LikeIcon(
             @SerialName("id")
@@ -192,7 +191,7 @@ data class ModuleAuthor(
     val pendant: Pendant? = null,
     @SerialName("decorate")
     val decorate: Decorate? = null,
-){
+) {
     /**
      * 头像挂件
      * @param pid 挂件ID
@@ -261,7 +260,7 @@ data class ModuleAuthor(
         val status: Int,
         @SerialName("theme_type")
         val themeType: Int,
-    ){
+    ) {
         /**
          * 标签
          * @param bgColor 背景颜色
@@ -314,7 +313,7 @@ data class ModuleAuthor(
         val jumpUrl: String,
         @SerialName("fan")
         val fan: Fan? = null,
-    ){
+    ) {
         /**
          * 粉丝卡片
          * @param color 颜色
@@ -353,7 +352,7 @@ data class ModuleDynamic(
     val major: Major? = null,
     @SerialName("topic")
     val topic: Topic? = null,
-){
+) {
     /**
      * 附加卡片
      * @param type 卡片类型
@@ -385,7 +384,7 @@ data class ModuleDynamic(
         val ugc: Ugc? = null,
         @SerialName("goods")
         val goods: Goods? = null,
-    ){
+    ) {
         /**
          * 活动
          * https://t.bilibili.com/649704659492012038
@@ -468,7 +467,7 @@ data class ModuleDynamic(
             val jumpUrl: String,
             @SerialName("button")
             val button: Button,
-        ){
+        ) {
             /**
              * 预约描述
              * @param text 文字
@@ -593,7 +592,7 @@ data class ModuleDynamic(
             val jumpUrl: String,
             @SerialName("items")
             val items: List<GoodItem>,
-        ){
+        ) {
             /**
              * 商品项
              * @param id 商品ID b站商品为Long 外站商品为String
@@ -646,7 +645,7 @@ data class ModuleDynamic(
             val check: Check,
             @SerialName("uncheck")
             val uncheck: Check,
-        ){
+        ) {
             /**
              * 点击
              * @param text 文字
@@ -693,7 +692,7 @@ data class ModuleDynamic(
         val richTextNodes: List<RichTextNode>,
         @SerialName("text")
         val text: String,
-    ){
+    ) {
         /**
          * 文字节点
          * @param type 节点类型
@@ -730,7 +729,7 @@ data class ModuleDynamic(
             val jumpUrl: String? = null,
             @SerialName("emoji")
             val emoji: Emoji? = null,
-        ){
+        ) {
             /**
              * Emoji
              * @param type 类型
@@ -799,7 +798,7 @@ data class ModuleDynamic(
         val common: Common? = null,
         @SerialName("none")
         val none: None? = null,
-    ){
+    ) {
         /**
          * 视频
          * @param type 类型
@@ -851,7 +850,7 @@ data class ModuleDynamic(
             val id: Long,
             @SerialName("items")
             val items: List<DrawItem>,
-        ){
+        ) {
             /**
              * 图片项
              * @param width 宽度
@@ -872,7 +871,7 @@ data class ModuleDynamic(
                 val src: String,
                 @SerialName("tags")
                 val tags: List<Tag>? = null,
-            ){
+            ) {
                 /**
                  * TAG
                  * https://t.bilibili.com/649677042850201602
@@ -1211,7 +1210,7 @@ data class ModuleFold(
 data class ModuleMore(
     @SerialName("three_point_items")
     val threePointItems: List<ThreePointItem>,
-){
+) {
     /**
      * @param type 类型
      * @param label 标签
@@ -1230,7 +1229,7 @@ data class ModuleMore(
         val label: String,
         @SerialName("modal")
         val modal: Modal? = null,
-    ){
+    ) {
         /**
          * @param title 标题
          * @param content 内容
@@ -1265,7 +1264,7 @@ data class ModuleStat(
     val forward: Stat,
     @SerialName("like")
     val like: Stat,
-){
+) {
     /**
      * 统计
      * @param text 数量文字

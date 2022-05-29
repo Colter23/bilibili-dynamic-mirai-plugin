@@ -15,7 +15,7 @@ data class DynamicMessage(
     val images: List<String>?,
     val links: List<Link>?,
     val drawPath: String? = null
-){
+) {
     @Serializable
     data class Link(
         val tag: String,

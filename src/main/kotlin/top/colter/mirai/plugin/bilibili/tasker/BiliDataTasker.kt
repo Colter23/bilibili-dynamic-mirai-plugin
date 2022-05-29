@@ -88,68 +88,71 @@ object BiliDataTasker {
     //}
 
     suspend fun addFilter(regex: String, uid: Long, subject: String, mode: Boolean = true) = mutex.withLock {
-        if (dynamic.containsKey(uid)){
+        if (dynamic.containsKey(uid)) {
             val filter = if (mode) dynamic[uid]?.filter else dynamic[uid]?.containFilter
-            if (filter?.containsKey(subject) == true){
+            if (filter?.containsKey(subject) == true) {
                 filter[subject]?.add(regex)
-            }else{
+            } else {
                 filter?.set(subject, mutableListOf(regex))
             }
             "设置成功"
-        }else{
+        } else {
             "还未关注此人哦"
         }
     }
 
     suspend fun listFilter(uid: Long, subject: String) = mutex.withLock {
-        if (dynamic.containsKey(uid)){
+        if (dynamic.containsKey(uid)) {
             return@withLock buildString {
                 appendLine("过滤 ")
-                if (dynamic[uid]?.filter?.containsKey(subject) == true && dynamic[uid]?.filter?.get(subject)?.size!! > 0){
+                if (dynamic[uid]?.filter?.containsKey(subject) == true && dynamic[uid]?.filter?.get(subject)?.size!! > 0) {
                     dynamic[uid]?.filter?.get(subject)?.forEachIndexed { index, s ->
                         appendLine("f$index: $s")
                     }
-                }else{
+                } else {
                     appendLine("还没有设置过滤哦")
                 }
                 appendLine("包含 ")
-                if (dynamic[uid]?.containFilter?.containsKey(subject) == true && dynamic[uid]?.containFilter?.get(subject)?.size!! > 0){
+                if (dynamic[uid]?.containFilter?.containsKey(subject) == true && dynamic[uid]?.containFilter?.get(
+                        subject
+                    )?.size!! > 0
+                ) {
                     dynamic[uid]?.containFilter?.get(subject)?.forEachIndexed { index, s ->
                         appendLine("c$index: $s")
                     }
-                }else{
+                } else {
                     appendLine("还没有设置包含哦")
                 }
             }
-        }else{
+        } else {
             "还未关注此人哦"
         }
     }
 
     suspend fun delFilter(uid: Long, subject: String, index: String) = mutex.withLock {
-        if (dynamic.containsKey(uid)){
+        if (dynamic.containsKey(uid)) {
             var i = 0
             runCatching {
                 i = index.substring(1).toInt()
             }.onFailure {
                 return@withLock "索引错误"
             }
-            val filter = if (index[0] == 'f'){
+            val filter = if (index[0] == 'f') {
                 dynamic[uid]?.filter
-            }else if (index[0] == 'c'){
+            } else if (index[0] == 'c') {
                 dynamic[uid]?.containFilter
-            }else{
+            } else {
                 return@withLock "索引值错误"
             }
-            if (filter?.containsKey(subject) == true){
+            if (filter?.containsKey(subject) == true) {
                 if (filter[subject]?.size!! < i) return@withLock "索引超出范围"
                 val ft = filter[subject]?.get(i)
                 filter[subject]?.removeAt(i)
                 "已删除 $ft 过滤"
-            }else{
+            } else {
                 "还没有设置过滤哦"
             }
-        }else{
+        } else {
             "还未关注此人哦"
         }
     }
@@ -182,7 +185,7 @@ object BiliDataTasker {
         }
     }
 
-    suspend fun listAll( ) = mutex.withLock {
+    suspend fun listAll() = mutex.withLock {
         var count = 0
         buildString {
             appendLine("名称@UID#订阅人数")

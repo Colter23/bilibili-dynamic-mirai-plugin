@@ -19,7 +19,7 @@ import top.colter.mirai.plugin.bilibili.utils.uploadImage
 import kotlin.io.path.notExists
 import kotlin.io.path.readBytes
 
-object SendTasker: BiliTasker() {
+object SendTasker : BiliTasker() {
 
     override val interval: Int = 0
 
@@ -45,8 +45,7 @@ object SendTasker: BiliTasker() {
         }
     }
 
-    fun DynamicMessage.sendMessage(messages: List<Message>){
-
+    fun DynamicMessage.sendMessage(messages: List<Message>) {
 
 
     }
@@ -75,7 +74,7 @@ object SendTasker: BiliTasker() {
         var index = 0
 
         res.forEach { mr ->
-            if (mr.range.first > index){
+            if (mr.range.first > index) {
                 msgList.addAll(buildMsgList(msgTemplate.substring(index, mr.range.first), this, contact))
             }
             msgList.add(buildForwardMessage(contact,
@@ -96,7 +95,7 @@ object SendTasker: BiliTasker() {
                         return buildSimpleTemplate(forwardCardTemplate.title, this@buildMessage)
                     }
                 }
-                ){
+            ) {
                 buildMsgList(mr.destructured.component1(), this@buildMessage, contact).forEach {
                     contact.bot named this@buildMessage.uname at this@buildMessage.timestamp says it
                 }
@@ -104,7 +103,7 @@ object SendTasker: BiliTasker() {
             index = mr.range.last + 1
         }
 
-        if (index < msgTemplate.length){
+        if (index < msgTemplate.length) {
             msgList.addAll(buildMsgList(msgTemplate.substring(index, msgTemplate.length), this, contact))
         }
 
@@ -114,7 +113,7 @@ object SendTasker: BiliTasker() {
     private suspend fun buildMsgList(template: String, dm: DynamicMessage, contact: Contact): List<Message> {
         val msgs = template.split("\\r", "\r")
         val msgList = mutableListOf<Message>()
-        msgs.forEach{ ms ->
+        msgs.forEach { ms ->
             msgList.add(MiraiCode.deserializeMiraiCode(buildMsg(ms, dm, contact)))
         }
         return msgList.toList()
@@ -130,13 +129,13 @@ object SendTasker: BiliTasker() {
             .replace("{link}", dm.links?.get(0)?.value!!)
     }
 
-    private suspend fun buildMsg(ms: String, dm: DynamicMessage, contact: Contact): String{
+    private suspend fun buildMsg(ms: String, dm: DynamicMessage, contact: Contact): String {
         var p = 0
         var content = ms
 
-        while (true){
+        while (true) {
             val key = tagRegex.find(content, p) ?: break
-            val rep = when (key.destructured.component1()){
+            val rep = when (key.destructured.component1()) {
                 "name" -> dm.uname
                 "uid" -> dm.uid.toString()
                 "did" -> dm.did
@@ -152,13 +151,13 @@ object SendTasker: BiliTasker() {
                     }
                 }
                 "draw" -> {
-                    if (dm.drawPath == null){
+                    if (dm.drawPath == null) {
                         "[绘制动态失败]"
-                    }else {
+                    } else {
                         val path = cachePath.resolve(dm.drawPath)
-                        if (path.notExists()){
+                        if (path.notExists()) {
                             "[未找到绘制的动态]"
-                        }else {
+                        } else {
                             contact.uploadImage(
                                 cachePath.resolve(dm.drawPath).readBytes().toExternalResource().toAutoCloseable()
                             ).serializeToMiraiCode()
