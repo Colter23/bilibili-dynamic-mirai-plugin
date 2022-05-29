@@ -45,6 +45,17 @@ fun Canvas.drawScaleWidthImage(image: Image, width: Float, x: Float, y: Float, p
     drawImageRect(image, src, dst, FilterMipmap(FilterMode.LINEAR, MipmapMode.NEAREST), paint, true)
 }
 
+fun Canvas.drawScaleWidthImageOutline(image: Image, width: Float, x: Float, y: Float, isForward: Boolean = false, paint: Paint = Paint()){
+    drawScaleWidthImage(image, width, x, y, paint)
+    val dst = Rect.makeXYWH(x, y, width, width * image.height / image.width).toRRect()
+    drawRRect(dst, Paint().apply {
+        color = if (isForward) Color.BLUE else Color.GREEN
+        mode = PaintMode.STROKE
+        strokeWidth = 2f
+        isAntiAlias = true
+    })
+}
+
 fun Rect.toRRect() =
     RRect.makeLTRB(left, top, right, bottom, 0f)
 

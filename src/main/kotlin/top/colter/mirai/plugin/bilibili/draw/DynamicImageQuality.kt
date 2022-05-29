@@ -29,6 +29,11 @@ data class Quality(
     val mainFontSize: Float = 0f,
     val subFontSize: Float = 0f,
 
+    val nameFontSize: Float = 0f,
+    val titleFontSize: Float = 0f,
+    val subTitleFontSize: Float = 0f,
+    val contentFontSize: Float = 0f,
+
     val emojiSize: Float = 0f,
     val iconSize: Float = 0f
 ){
@@ -48,21 +53,32 @@ data class Quality(
             pendantSize =  112f,
             verifyIconSize = 20f,
 
+            // 36   5
             badgeHeight = 36,
             badgePadding = 5,
             badgeArc = 5f,
 
             lineHeight = 30f,
-            lineSpace = 5,
+            lineSpace = 8,
 
             drawSpace = 10,
             smallCardHeight = 160,
             additionalCardHeight = 100,
 
-            mainFontSize = 22f,
-            subFontSize = 18f,
-            emojiSize = 30f,
-            iconSize = 26f,
+            //mainFontSize = 22f,
+            //subFontSize = 18f,
+            //emojiSize = 30f,
+            //iconSize = 26f,
+            mainFontSize = 28f,
+            subFontSize = 20f,
+
+            nameFontSize = 30f,
+            titleFontSize = 26f,
+            subTitleFontSize = 22f,
+            contentFontSize = 26f,
+
+            emojiSize = 34f,
+            iconSize = 30f,
         )
         val middle = Quality(
             imageWidth =  1000,

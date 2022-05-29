@@ -14,7 +14,14 @@ data class DynamicImageTheme(
     val subBadgeBgAlpha: Int = 0,
 
     val smallCardShadow: Shadow,
-    val cardShadow: Shadow
+    val cardShadow: Shadow,
+
+    val nameColor: Int = 0,
+    val titleColor: Int = 0,
+    val subTitleColor: Int = 0,
+    val contentColor: Int = 0,
+    val linkColor: Int = 0,
+
 
 ){
     @Serializable

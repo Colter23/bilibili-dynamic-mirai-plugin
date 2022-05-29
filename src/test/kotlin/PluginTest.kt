@@ -13,14 +13,15 @@ import top.colter.mirai.plugin.bilibili.data.ModuleAuthor
 import top.colter.mirai.plugin.bilibili.data.ModuleDynamic
 import top.colter.mirai.plugin.bilibili.draw.*
 import top.colter.mirai.plugin.bilibili.utils.json
+import java.nio.file.Path
+import kotlin.io.path.*
 
 
 internal class PluginTest {
 
 
-
     @Test
-    fun httpTest(): Unit = runBlocking{
+    fun httpTest(): Unit = runBlocking {
 
 //        val client = HttpClient()
 //        client.get<HttpResponse>("aa")
@@ -29,7 +30,7 @@ internal class PluginTest {
     }
 
     @Test
-    fun cookieTest(): Unit = runBlocking{
+    fun cookieTest(): Unit = runBlocking {
 
         val client = BiliClient()
 
@@ -50,7 +51,7 @@ internal class PluginTest {
 
 
     @Test
-    fun drawTest(): Unit = runBlocking{
+    fun drawTest(): Unit = runBlocking {
 
         LoginQrCodeDraw.qrCode("https://passport.bilibili.com/qrcode/h5/login?oauthKey=c3bd5286a2b40a822f5f60e9bf3f602e")
     }
@@ -58,17 +59,16 @@ internal class PluginTest {
     sealed class RichText {
         data class Text(
             val value: String
-        ):RichText()
+        ) : RichText()
 
         data class Emoji(
             val value: String
-        ):RichText()
+        ) : RichText()
     }
 
 
     @Test
-    fun emojiTest(): Unit = runBlocking{
-
+    fun emojiTest(): Unit = runBlocking {
 
 
         val text = "AAAAA👩🏻‍⚕️👩🏻‍🏫👩🏻‍⚕️👩🏻‍🏫AAvv"
@@ -78,26 +78,29 @@ internal class PluginTest {
         var index = 0
 
         emojiRegex.findAll(text).forEach {
-            if (index != it.range.first){
+            if (index != it.range.first) {
                 textNode.add(RichText.Text(text.substring(index, it.range.first)))
             }
             textNode.add(RichText.Emoji(it.value))
             index = it.range.last + 1
         }
 
-        if (index != text.length){
+        if (index != text.length) {
             textNode.add(RichText.Text(text.substring(index, text.length)))
         }
 
 
-        val font = Font(Typeface.makeFromFile("E:/Desktop/资源/字体/HarmonyOS Sans/HarmonyOS_Sans_SC/HarmonyOS_Sans_SC_Medium.ttf"), 22f)
+        val font = Font(
+            Typeface.makeFromFile("E:/Desktop/资源/字体/HarmonyOS Sans/HarmonyOS_Sans_SC/HarmonyOS_Sans_SC_Medium.ttf"),
+            22f
+        )
 
-        Surface.makeRasterN32Premul(500,500).apply {
+        Surface.makeRasterN32Premul(500, 500).apply {
             canvas.apply {
                 var y = 20f
 
                 textNode.forEach {
-                    when (it){
+                    when (it) {
                         is RichText.Text -> {
                             val tl = TextLine.make(it.value, font)
                             drawTextLine(tl, 20f, y, Paint().apply {
@@ -125,7 +128,7 @@ internal class PluginTest {
     }
 
     @Test
-    fun drawDynamicTest(): Unit = runBlocking{
+    fun drawDynamicTest(): Unit = runBlocking {
         val dynamic = DynamicItem(
 //            "DYNAMIC_TYPE_WORD",
             DynamicType.DYNAMIC_TYPE_FORWARD,
@@ -191,15 +194,36 @@ internal class PluginTest {
                 ),
 
                 ModuleDynamic(
+                    topic = ModuleDynamic.Topic(
+                        1,
+                        "测试主题",
+                        ""
+                    ),
                     desc = ModuleDynamic.Desc(
                         listOf(
                             ModuleDynamic.Desc.RichTextNode(
                                 "RICH_TEXT_NODE_TYPE_TEXT",
                                 "AAAAAA好唯美的😶‍🌫️曲调，好温柔👩🏻‍⚕️🙃的歌声",
                                 "AAAAAA好唯美的\uD83D\uDE36\u200D\uD83C\uDF2B️曲调，好温柔\uD83D\uDC69\uD83C\uDFFB\u200D⚕️\uD83D\uDE43的歌声",
-                            )
+                            ),
+                            //ModuleDynamic.Desc.RichTextNode(
+                            //    "RICH_TEXT_NODE_TYPE_EMOJI",
+                            //    "[tv_难过]",
+                            //    "[tv_难过]",
+                            //    emoji = ModuleDynamic.Desc.RichTextNode.Emoji(
+                            //        1,
+                            //        "http://i0.hdslb.com/bfs/emote/87f46748d3f142ebc6586ff58860d0e2fc8263ba.png",
+                            //        1,
+                            //        "[tv_难过]"
+                            //    )
+                            //),
+                            ModuleDynamic.Desc.RichTextNode(
+                                "RICH_TEXT_NODE_TYPE_TEXT",
+                                "测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试",
+                                "测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试",
+                            ),
                         ),
-                        "AAAAAA好唯美的\uD83D\uDE36\u200D\uD83C\uDF2B️曲调，好温柔\uD83D\uDC69\uD83C\uDFFB\u200D⚕️\uD83D\uDE43的歌声"
+                        "AAAAAA好唯美的\uD83D\uDE36\u200D\uD83C\uDF2B️曲调，好温柔\uD83D\uDC69\uD83C\uDFFB\u200D⚕️\uD83D\uDE43的歌声[tv_难过]测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试"
                     ),
                 )
 
@@ -372,9 +396,10 @@ internal class PluginTest {
     }
 
     @Test
-    fun jsonTest(): Unit = runBlocking{
+    fun jsonTest(): Unit = runBlocking {
 
-        val jsonStr = "{\"basic\": {\"comment_id_str\": \"193712377\",\"comment_type\": 11,\"like_icon\": {\"action_url\": \"\",\"end_url\": \"\",\"id\": 0,\"start_url\": \"\"},\"rid_str\": \"193712377\"},\"id_str\": \"656453757984309256\",\"modules\": {\"module_author\": {\"face\": \"http://i1.hdslb.com/bfs/face/5cf0b8f6acb15c6051e57e31503fb3d3ad945f96.jpg\",\"face_nft\": false,\"following\": true,\"jump_url\": \"//space.bilibili.com/697091119/dynamic\",\"label\": \"\",\"mid\": 697091119,\"name\": \"猫雷NyaRu_Official\",\"official_verify\": {\"desc\": \"\",\"type\": 0},\"pendant\": {\"expire\": 0,\"image\": \"\",\"image_enhance\": \"\",\"image_enhance_frame\": \"\",\"name\": \"\",\"pid\": 0},\"pub_action\": \"\",\"pub_time\": \"2022-05-05 00:15\",\"pub_ts\": 1651680951,\"type\": \"AUTHOR_TYPE_NORMAL\",\"vip\": {\"avatar_subscript\": 1,\"avatar_subscript_url\": \"http://i0.hdslb.com/bfs/vip/icon_Certification_big_member_22_3x.png\",\"due_date\": 1711123200000,\"label\": {\"bg_color\": \"#FB7299\",\"bg_style\": 1,\"border_color\": \"\",\"label_theme\": \"annual_vip\",\"path\": \"\",\"text\": \"年度大会员\",\"text_color\": \"#FFFFFF\"},\"nickname_color\": \"#FB7299\",\"status\": 1,\"theme_type\": 0,\"type\": 2}},\"module_dynamic\": {\"additional\": null,\"desc\": {\"rich_text_nodes\": [{\"orig_text\": \"みんなは今何してる〜？\\n今日はおでかけでつかれちゃった！\\nおやすみ\uD83D\uDC99\uD83D\uDC99mua\",\"text\": \"みんなは今何してる〜？\\n今日はおでかけでつかれちゃった！\\nおやすみ\uD83D\uDC99\uD83D\uDC99mua\",\"type\": \"RICH_TEXT_NODE_TYPE_TEXT\"}],\"text\": \"みんなは今何してる〜？\\n今日はおでかけでつかれちゃった！\\nおやすみ\uD83D\uDC99\uD83D\uDC99mua\"},\"major\": {\"draw\": {\"id\": 193712377,\"items\": [{\"height\": 1000,\"size\": 345.55078,\"src\": \"https://i0.hdslb.com/bfs/album/874ecf3eb8681d8a4b73ec70006ab2d0f8066a96.jpg\",\"tags\": [],\"width\": 1000}]},\"type\": \"MAJOR_TYPE_DRAW\"},\"topic\": null},\"module_more\": {\"three_point_items\": [{\"label\": \"举报\",\"type\": \"THREE_POINT_REPORT\"}]},\"module_stat\": {\"comment\": {\"count\": 180,\"forbidden\": false},\"forward\": {\"count\": 4,\"forbidden\": false},\"like\": {\"count\": 1150,\"forbidden\": false,\"status\": false}}},\"type\": \"DYNAMIC_TYPE_DRAW\",\"visible\": true}"
+        val jsonStr =
+            "{\"basic\": {\"comment_id_str\": \"193712377\",\"comment_type\": 11,\"like_icon\": {\"action_url\": \"\",\"end_url\": \"\",\"id\": 0,\"start_url\": \"\"},\"rid_str\": \"193712377\"},\"id_str\": \"656453757984309256\",\"modules\": {\"module_author\": {\"face\": \"http://i1.hdslb.com/bfs/face/5cf0b8f6acb15c6051e57e31503fb3d3ad945f96.jpg\",\"face_nft\": false,\"following\": true,\"jump_url\": \"//space.bilibili.com/697091119/dynamic\",\"label\": \"\",\"mid\": 697091119,\"name\": \"猫雷NyaRu_Official\",\"official_verify\": {\"desc\": \"\",\"type\": 0},\"pendant\": {\"expire\": 0,\"image\": \"\",\"image_enhance\": \"\",\"image_enhance_frame\": \"\",\"name\": \"\",\"pid\": 0},\"pub_action\": \"\",\"pub_time\": \"2022-05-05 00:15\",\"pub_ts\": 1651680951,\"type\": \"AUTHOR_TYPE_NORMAL\",\"vip\": {\"avatar_subscript\": 1,\"avatar_subscript_url\": \"http://i0.hdslb.com/bfs/vip/icon_Certification_big_member_22_3x.png\",\"due_date\": 1711123200000,\"label\": {\"bg_color\": \"#FB7299\",\"bg_style\": 1,\"border_color\": \"\",\"label_theme\": \"annual_vip\",\"path\": \"\",\"text\": \"年度大会员\",\"text_color\": \"#FFFFFF\"},\"nickname_color\": \"#FB7299\",\"status\": 1,\"theme_type\": 0,\"type\": 2}},\"module_dynamic\": {\"additional\": null,\"desc\": {\"rich_text_nodes\": [{\"orig_text\": \"みんなは今何してる〜？\\n今日はおでかけでつかれちゃった！\\nおやすみ\uD83D\uDC99\uD83D\uDC99mua\",\"text\": \"みんなは今何してる〜？\\n今日はおでかけでつかれちゃった！\\nおやすみ\uD83D\uDC99\uD83D\uDC99mua\",\"type\": \"RICH_TEXT_NODE_TYPE_TEXT\"}],\"text\": \"みんなは今何してる〜？\\n今日はおでかけでつかれちゃった！\\nおやすみ\uD83D\uDC99\uD83D\uDC99mua\"},\"major\": {\"draw\": {\"id\": 193712377,\"items\": [{\"height\": 1000,\"size\": 345.55078,\"src\": \"https://i0.hdslb.com/bfs/album/874ecf3eb8681d8a4b73ec70006ab2d0f8066a96.jpg\",\"tags\": [],\"width\": 1000}]},\"type\": \"MAJOR_TYPE_DRAW\"},\"topic\": null},\"module_more\": {\"three_point_items\": [{\"label\": \"举报\",\"type\": \"THREE_POINT_REPORT\"}]},\"module_stat\": {\"comment\": {\"count\": 180,\"forbidden\": false},\"forward\": {\"count\": 4,\"forbidden\": false},\"like\": {\"count\": 1150,\"forbidden\": false,\"status\": false}}},\"type\": \"DYNAMIC_TYPE_DRAW\",\"visible\": true}"
 
         val item = json.decodeFromString<DynamicItem>(json.serializersModule.serializer(), jsonStr)
         //item.draw()
@@ -384,46 +409,193 @@ internal class PluginTest {
     }
 
     @Test
-    fun rectTest(): Unit = runBlocking{
+    fun rectTest(): Unit = runBlocking {
 
         ModuleDynamic.Major.Draw(
             1L,
-            listOf(ModuleDynamic.Major.Draw.DrawItem(
-                50,
-                150,
-                1000f,
-                ""
-            ))
+            listOf(
+                ModuleDynamic.Major.Draw.DrawItem(
+                    50,
+                    150,
+                    1000f,
+                    ""
+                )
+            )
         ).drawGeneral()
 
     }
 
     @Test
-    fun charTest(): Unit = runBlocking{
+    fun charTest(): Unit = runBlocking {
 
         val text = "\uD80C\uDC9A\uD80C\uDE16\uD80C\uDDCB\uD80C\uDC9D\uD80C\uDF9B\uD80C\uDDF9"
         //val text = "啊这"
         println(text)
 
-        for (c in text.codePoints()){
+        for (c in text.codePoints()) {
             println(String(intArrayOf(c), 0, intArrayOf(c).size))
         }
 
     }
 
     @Test
-    fun colorTest(): Unit = runBlocking{
+    fun colorTest(): Unit = runBlocking {
 
         println(generateLinearGradient(listOf(0xFFffffb2.toInt(), 0xFFd9ffb2.toInt())).toList())
 
     }
 
 
+    @Test
+    fun templateTest(): Unit = runBlocking {
+
+        val msgTemplate = "【{name}】{type}\n{draw}\n{link} {>>}作者：{name}\nUID：{uid}\n时间：{time}\n类型：{type}\n链接：{link}\r{content}\r{images}{<<}aaaa{link}".replace("\n", "\\n").replace("\r", "\\r")
+
+        val forwardRegex = """\{>>}(.*?)\{<<}""".toRegex()
+
+        val tagRegex = """\{([a-z]+)}""".toRegex()
+
+        val res = forwardRegex.findAll(msgTemplate)
+
+        fun buildMsg(ms: String): String{
+            var p = 0
+            var content = ms
+
+            while (true){
+                val key = tagRegex.find(content, p) ?: break
+                val rep = when (key.destructured.component1()){
+                    "name" -> {
+                        "猫芒ベル_Official"
+                    }
+                    "uid" -> {
+                        "487550002"
+                    }
+                    "did" -> {
+                        "664612572403597363"
+                    }
+                    "time" -> {
+                        "2022年05月28日 10:46:01"
+                    }
+                    "type" -> {
+                        "动态"
+                    }
+                    "content" -> {
+                        "晚安！！！！！！[tv_腼腆]\n" +
+                            "\n" +
+                            "↓今天的封面[呆]"
+                    }
+                    "link" -> {
+                        "https://t.bilibili.com/664612572403597363"
+                    }
+                    "images" -> {
+                        "[mirai:image:{693B9DBC-0997-B38B-89C1-108401BCDBCA}.jpg]"
+                    }
+                    "draw" -> {
+                        "[mirai:image:{D4D8346D-97C7-559D-FC4F-B8FCC37A721F}.jpg]"
+                    }
+                    else -> {
+                        "不支持的类型: ${key.destructured.component1()}"
+                    }
+                }
+                content = content.replaceRange(key.range, rep)
+                p = key.range.first + rep.length
+            }
+
+            return content
+        }
+
+        var index = 0
+
+        res.forEach { mr ->
+            if (mr.range.first > index){
+                val msgStr = msgTemplate.substring(index, mr.range.first)
+
+                val msgs = msgStr.split("\\r", "\r")
+
+                msgs.forEach{ ms ->
+
+                    val content = buildMsg(ms)
+                    //MiraiCode.deserializeMiraiCode(content)
+                    println(content)
+                    println()
+
+                    //[mirai:origin:FORWARD,HkGpLUGt3szZfWf76JMyCoerYer0HXTbTdarETiAyC0BP7zRv5K/P9wQ99N3Xzfu]ForwardMessage(preview=[Colter:  dream by wombo, Colter:  http://www.ruanyifeng.com/blog/2016/0…, Colter:  https://ecchi.iwara.tv/users/xinhai99…], title=群聊的聊天记录, brief=[聊天记录], source=聊天记录, summary=查看3条转发消息, nodeList=[Node(senderId=3375582524, time=1653576908, senderName=Colter, messageChain=dream by wombo), Node(senderId=3375582524, time=1653616935, senderName=Colter, messageChain=http://www.ruanyifeng.com/blog/2016/04/same-origin-policy.html), Node(senderId=3375582524, time=1653629438, senderName=Colter, messageChain=https://ecchi.iwara.tv/users/xinhai999/videos?page=1)])
+
+                }
+            }
+            //buildForwardMessage(){
+            val fmsgs = mr.destructured.component1().split("\\r", "\r")
+
+            fmsgs.forEach { ms ->
+                val content = buildMsg(ms)
+                //MiraiCode.deserializeMiraiCode(content)
+                println("forward")
+                println(content)
+                println()
+            }
+            //}
+
+            index = mr.range.last + 1
+
+        }
+
+        if (index < msgTemplate.length){
+            val msgStr = msgTemplate.substring(index, msgTemplate.length)
+
+            val msgs = msgStr.split("\\r", "\r")
+
+            msgs.forEach{ ms ->
+
+                val content = buildMsg(ms)
+                //MiraiCode.deserializeMiraiCode(content)
+                println(content)
+                println()
+
+            }
+        }
+
+    }
+
+    @Test
+    fun otherTest(): Unit = runBlocking {
+
+        val url = "http://i0.hdslb.com/bfs/archive/0ffac4d927f2e1b1aef32ae7e73a887405018d50.jpg@672w_378h_1c?aa=11&bb=22"
+        //val url = "0ffac4d927f2e1b1aef32ae7e73a887405018d50.jpg"
+        println(url.split("?").first().split("@").first().split("/").last())
+
+    }
+
+    @Test
+    fun pathTest(): Unit = runBlocking {
+
+        //val path = kotlin.io.path.Path("src/main/kotlin/top/colter/mirai/plugin/bilibili")
+        val path = kotlin.io.path.Path("src")
+
+        println(path.absolutePathString())
+        println(path.exists())
+        println()
+
+        println(path.findFile("DynamicDraw.kt")?.absolutePathString())
+
+    }
+
+    fun java.nio.file.Path.findFile(file: String): Path? {
+        forEachDirectoryEntry {
+            if (it.isDirectory()){
+                val path = it.findFile(file)
+                if (path != null) return path
+            }else{
+                if (it.name == file) return it
+            }
+        }
+        return null
+    }
 
 
 }
 
-const val emojiCharacter = "(?:[\\uD83C\\uDF00-\\uD83D\\uDDFF]|[\\uD83E\\uDD00-\\uD83E\\uDDFF]|[\\uD83D\\uDE00-\\uD83D\\uDE4F]|[\\uD83D\\uDE80-\\uD83D\\uDEFF]|[\\u2600-\\u26FF]\\uFE0F?|[\\u2700-\\u27BF]\\uFE0F?|\\u24C2\\uFE0F?|[\\uD83C\\uDDE6-\\uD83C\\uDDFF]{1,2}|[\\uD83C\\uDD70\\uD83C\\uDD71\\uD83C\\uDD7E\\uD83C\\uDD7F\\uD83C\\uDD8E\\uD83C\\uDD91-\\uD83C\\uDD9A]\\uFE0F?|[\\u0023\\u002A\\u0030-\\u0039]\\uFE0F?\\u20E3|[\\u2194-\\u2199\\u21A9-\\u21AA]\\uFE0F?|[\\u2B05-\\u2B07\\u2B1B\\u2B1C\\u2B50\\u2B55]\\uFE0F?|[\\u2934\\u2935]\\uFE0F?|[\\u3030\\u303D]\\uFE0F?|[\\u3297\\u3299]\\uFE0F?|[\\uD83C\\uDE01\\uD83C\\uDE02\\uD83C\\uDE1A\\uD83C\\uDE2F\\uD83C\\uDE32-\\uD83C\\uDE3A\\uD83C\\uDE50\\uD83C\\uDE51]\\uFE0F?|[\\u203C\\u2049]\\uFE0F?|[\\u25AA\\u25AB\\u25B6\\u25C0\\u25FB-\\u25FE]\\uFE0F?|[\\u00A9\\u00AE]\\uFE0F?|[\\u2122\\u2139]\\uFE0F?|\\uD83C\\uDC04\\uFE0F?|\\uD83C\\uDCCF\\uFE0F?|[\\u231A\\u231B\\u2328\\u23CF\\u23E9-\\u23F3\\u23F8-\\u23FA]\\uFE0F?)(?:[\\uD83C\\uDFFB-\\uD83C\\uDFFF]|[\\uD83E\\uDDB0-\\uD83E\\uDDB3])?"
+const val emojiCharacter =
+    "(?:[\\uD83C\\uDF00-\\uD83D\\uDDFF]|[\\uD83E\\uDD00-\\uD83E\\uDDFF]|[\\uD83D\\uDE00-\\uD83D\\uDE4F]|[\\uD83D\\uDE80-\\uD83D\\uDEFF]|[\\u2600-\\u26FF]\\uFE0F?|[\\u2700-\\u27BF]\\uFE0F?|\\u24C2\\uFE0F?|[\\uD83C\\uDDE6-\\uD83C\\uDDFF]{1,2}|[\\uD83C\\uDD70\\uD83C\\uDD71\\uD83C\\uDD7E\\uD83C\\uDD7F\\uD83C\\uDD8E\\uD83C\\uDD91-\\uD83C\\uDD9A]\\uFE0F?|[\\u0023\\u002A\\u0030-\\u0039]\\uFE0F?\\u20E3|[\\u2194-\\u2199\\u21A9-\\u21AA]\\uFE0F?|[\\u2B05-\\u2B07\\u2B1B\\u2B1C\\u2B50\\u2B55]\\uFE0F?|[\\u2934\\u2935]\\uFE0F?|[\\u3030\\u303D]\\uFE0F?|[\\u3297\\u3299]\\uFE0F?|[\\uD83C\\uDE01\\uD83C\\uDE02\\uD83C\\uDE1A\\uD83C\\uDE2F\\uD83C\\uDE32-\\uD83C\\uDE3A\\uD83C\\uDE50\\uD83C\\uDE51]\\uFE0F?|[\\u203C\\u2049]\\uFE0F?|[\\u25AA\\u25AB\\u25B6\\u25C0\\u25FB-\\u25FE]\\uFE0F?|[\\u00A9\\u00AE]\\uFE0F?|[\\u2122\\u2139]\\uFE0F?|\\uD83C\\uDC04\\uFE0F?|\\uD83C\\uDCCF\\uFE0F?|[\\u231A\\u231B\\u2328\\u23CF\\u23E9-\\u23F3\\u23F8-\\u23FA]\\uFE0F?)(?:[\\uD83C\\uDFFB-\\uD83C\\uDFFF]|[\\uD83E\\uDDB0-\\uD83E\\uDDB3])?"
 
 val emojiRegex = "${emojiCharacter}(?:\\u200D${emojiCharacter})*".toRegex()
 

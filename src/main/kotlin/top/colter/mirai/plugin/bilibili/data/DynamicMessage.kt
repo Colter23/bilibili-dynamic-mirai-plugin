@@ -10,6 +10,7 @@ data class DynamicMessage(
     val uname: String,
     val type: String,
     val time: String,
+    val timestamp: Int,
     val content: String,
     val images: List<String>?,
     val links: List<Link>?,

@@ -67,6 +67,9 @@ object BiliDynamicConfig : AutoSavePluginConfig("BiliPluginConfig") {
     @ValueDescription("代理")
     val checkConfig: CheckConfig by value()
 
+    @ValueDescription("代理")
+    val templateConfig: TemplateConfig by value()
+
 }
 
 @Serializable
@@ -85,8 +88,10 @@ data class TranslateConfig(
 @Serializable
 data class ImageConfig(
     val quality: Int = 1,
+    val theme: String = "",
     val font: String = "",
-    val fontSizeMultiple: Float = 1.0f
+    val fontSizeMultiple: Float = 1.0f,
+    val cardOrnament: String = "fanCard qrCode none"
 )
 
 @Serializable
@@ -110,3 +115,24 @@ data class CheckConfig(
 data class PushConfig(
     val quality: Int = 1,
 )
+
+@Serializable
+data class TemplateConfig(
+    val dynamic: String = "【{name}】{type}\n{draw}\n{link} {>>}作者：{name}\nUID：{uid}\n时间：{time}\n类型：{type}\n链接：{link}\n{content}\n{images}{<<}aaaa{link}",
+    val live: String = "",
+    val forwardCard: ForwardDisplay = ForwardDisplay()
+)
+
+@Serializable
+data class ForwardDisplay(
+    val title: String = "{name} {type} 详情",
+    val summary: String = "ID: {did}",
+    val brief: String = "[{name} {type}]",
+    val preview: String = "时间: {time}\n{content}"
+)
+
+@Serializable
+data class CacheConfig(
+    val dynamicDraw: Int = 1,
+)
+

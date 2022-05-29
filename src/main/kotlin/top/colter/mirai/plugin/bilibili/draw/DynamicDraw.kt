@@ -19,6 +19,7 @@ import top.colter.mirai.plugin.bilibili.draw.Position.*
 import top.colter.mirai.plugin.bilibili.utils.FontUtils.fonts
 import top.colter.mirai.plugin.bilibili.utils.FontUtils.loadTypeface
 import top.colter.mirai.plugin.bilibili.utils.formatTime
+import top.colter.mirai.plugin.bilibili.utils.plusOrNull
 import java.io.File
 import kotlin.math.ceil
 
@@ -42,17 +43,17 @@ private val mainTypeface: Typeface by lazy {
 }
 
 private val font: Font by lazy {
-    Font(mainTypeface, quality.mainFontSize)
+    Font(mainTypeface, quality.contentFontSize)
 }
 
 
 val titleTextStyle = TextStyle().apply {
-    fontSize = quality.mainFontSize
+    fontSize = quality.titleFontSize
     color = Color.makeRGB(49, 49, 49)
     typeface = mainTypeface
 }
 val descTextStyle = TextStyle().apply {
-    fontSize = quality.subFontSize
+    fontSize = quality.subTitleFontSize
     color = Color.makeRGB(102, 102, 102)
     typeface = mainTypeface
 }
@@ -82,45 +83,56 @@ enum class Position{
     BOTTOM_RIGHT
 }
 
-suspend fun DynamicItem.makeDrawDynamic(){
+suspend fun DynamicItem.makeDrawDynamic(): String{
 
     val dynamic = drawDynamic()
     //val forward = orig?.drawDynamic()
 
     val path = "dynamic.png"
-    makeCardBg(path, quality.cardMargin *2 + dynamic.height){
-        it.drawImage(dynamic, (quality.cardMargin - quality.cardPadding).toFloat(), quality.cardPadding.toFloat())
+    makeCardBg(path,  dynamic.height){
+        it.drawImage(dynamic, 0f, 0f)
     }
-
+    return path
 }
 
 suspend fun DynamicItem.drawDynamic(isForward: Boolean = false): Image{
 
-    val forward = orig?.drawDynamic(type == DYNAMIC_TYPE_FORWARD)
+    val imgList = modules.makeGeneral(formatTime, isForward).plusOrNull(
+        orig?.drawDynamic(type == DYNAMIC_TYPE_FORWARD)
+    )
 
-    val imgList = if (forward != null){
-        modules.makeGeneral(formatTime, isForward).plus(forward)
-    }else{
-        modules.makeGeneral(formatTime, isForward)
+    val height = imgList.sumOf {
+        if (it.width > cardRect.width){
+            (cardRect.width * it.height / it.width + 10).toInt()
+        }else{
+            it.height + 10
+        }
     }
 
-
-    val height = imgList.sumOf { it.height + 10 }
+    val margin = if (isForward) quality.cardPadding * 2 else quality.cardMargin * 2
 
     return Surface.makeRasterN32Premul(
-        (quality.cardPadding * 2 + cardRect.width).toInt(),
-        height + quality.cardMargin * 2 + quality.badgeHeight + quality.cardPadding
+        (cardRect.width + margin).toInt(),
+        height + quality.badgeHeight + margin
     ).apply {
         canvas.apply {
 
             val rrect = RRect.makeXYWH(
-                quality.cardPadding.toFloat(),
-                (quality.cardPadding + quality.badgeHeight).toFloat(), cardRect.width,
-                (height + quality.cardPadding).toFloat(), 0f,0f,quality.cardArc,quality.cardArc)
+                margin / 2f,
+                quality.badgeHeight + margin / 2f,
+                cardRect.width,
+                height.toFloat(),
+                0f,0f,quality.cardArc,quality.cardArc)
 
             drawCard(rrect)
 
-            drawRectShadowAntiAlias(rrect.inflate(1f), 6f, 6f, 25f, 0f, Color.makeARGB(70, 0, 0, 0))
+            if (isForward){
+                drawRectShadowAntiAlias(rrect.inflate(1f), 5f, 5f, 15f, 0f, Color.makeARGB(30, 0, 0, 0))
+            }else {
+                drawRectShadowAntiAlias(rrect.inflate(1f), 6f, 6f, 25f, 0f, Color.makeARGB(70, 0, 0, 0))
+            }
+
+
 
             drawBadge("动态", font, Color.makeRGB(0, 203, 255), Color.WHITE, 120, rrect, TOP_LEFT)
             drawBadge(this@drawDynamic.idStr, font, Color.WHITE, Color.makeRGB(72, 199, 240), 255, rrect, TOP_RIGHT)
@@ -129,6 +141,7 @@ suspend fun DynamicItem.drawDynamic(isForward: Boolean = false): Image{
             for (img in imgList){
 
                 drawScaleWidthImage(img, cardRect.width, quality.cardMargin.toFloat(), top)
+                //drawScaleWidthImageOutline(img, cardRect.width, quality.cardMargin.toFloat(), top, isForward)
 
                 top += img.height + 10
             }
@@ -236,7 +249,7 @@ fun ModuleDispute.drawGeneral(): Image {
 fun ModuleDynamic.Topic.drawGeneral(): Image {
 
     val lineCount = if (TextLine.make(name, font).width / cardContentRect.width > 1) 2 else 1
-    val textCardHeight = (quality.mainFontSize * 1.4f + quality.lineSpace * 2) * lineCount
+    val textCardHeight = (quality.contentFontSize + quality.lineSpace * 2) * lineCount
 
     val textCardRect = Rect.makeXYWH(
         quality.cardPadding.toFloat(),
@@ -248,12 +261,12 @@ fun ModuleDynamic.Topic.drawGeneral(): Image {
     return Surface.makeRasterN32Premul(cardRect.width.toInt(), textCardHeight.toInt()).apply {
         canvas.apply {
             var x = quality.cardPadding.toFloat()
-            var y = quality.mainFontSize + quality.lineSpace
+            var y = quality.contentFontSize * 0.8f + quality.lineSpace
             try {
                 //val svg = SVGDOM(Data.makeFromBytes(BiliBiliDynamic.getResourceAsStream("src/main/resources/icon/RICH_TEXT_NODE_TYPE_WEB.svg")!!.readBytes()))
                 val svg = SVGDOM(Data.makeFromFileName("src/main/resources/icon/TOPIC.svg"))
-                val iconSize = quality.mainFontSize * 1.2f
-                drawImage(svg.makeImage(iconSize,iconSize), x, y - quality.mainFontSize)
+                val iconSize = quality.contentFontSize
+                drawImage(svg.makeImage(iconSize,iconSize), x, y - quality.contentFontSize * 0.8f)
                 x += iconSize
             }catch (e: Exception){
                 logger.warning("未找到类型为 TOPIC 的图标")
@@ -275,7 +288,7 @@ suspend fun ModuleDynamic.Desc.drawGeneral(): Image{
 
     //val lineCount = (TextLine.make(text, font).width / cardContentRect.width).toInt() + 1
 
-    val textCardHeight = (quality.mainFontSize * 1.4f + quality.lineSpace * 2) * textParagraph.lineNumber
+    val textCardHeight = (quality.contentFontSize + quality.lineSpace * 2) * textParagraph.lineNumber
 
     val textCardRect = Rect.makeXYWH(
         quality.cardPadding.toFloat(),
@@ -285,7 +298,7 @@ suspend fun ModuleDynamic.Desc.drawGeneral(): Image{
     )
 
     var x = textCardRect.left
-    var y = quality.mainFontSize + quality.lineSpace
+    var y = quality.contentFontSize + quality.lineSpace
 
     return Surface.makeRasterN32Premul(cardRect.width.toInt(), textCardHeight.toInt()).apply {
         canvas.apply {
@@ -298,13 +311,15 @@ suspend fun ModuleDynamic.Desc.drawGeneral(): Image{
                     }
                     "RICH_TEXT_NODE_TYPE_EMOJI" -> {
                         val img = Image.makeFromEncoded(HttpClient(OkHttp).get<ByteArray>(it.emoji?.iconUrl!!))
-                        val emojiSize = quality.mainFontSize * 1.4f
+
+                        val emojiSize = TextLine.make("🙂", font).height
+
                         if (x + emojiSize > textCardRect.right){
                             x = textCardRect.left
                             y += emojiSize + quality.lineSpace
                         }
                         val srcRect = Rect.makeXYWH(0f, 0f, img.width.toFloat(), img.height.toFloat())
-                        val tarRect = Rect.makeXYWH(x, y - quality.mainFontSize*1.1f, emojiSize, emojiSize)
+                        val tarRect = Rect.makeXYWH(x, y - emojiSize * 0.8f, emojiSize, emojiSize)
                         drawImageRect(img, srcRect, tarRect, FilterMipmap(FilterMode.LINEAR, MipmapMode.NEAREST), null, true)
                         x += emojiSize
                     }
@@ -315,8 +330,8 @@ suspend fun ModuleDynamic.Desc.drawGeneral(): Image{
                         try {
                             //val svg = SVGDOM(Data.makeFromBytes(BiliBiliDynamic.getResourceAsStream("src/main/resources/icon/RICH_TEXT_NODE_TYPE_WEB.svg")!!.readBytes()))
                             val svg = SVGDOM(Data.makeFromFileName("src/main/resources/icon/${it.type}.svg"))
-                            val iconSize = quality.mainFontSize * 1.2f
-                            drawImage(svg.makeImage(iconSize,iconSize), x, y - quality.mainFontSize)
+                            val iconSize = quality.contentFontSize
+                            drawImage(svg.makeImage(iconSize,iconSize), x, y - quality.contentFontSize * 0.9f)
                             x += iconSize
                         }catch (e: Exception){
                             logger.warning("未找到类型为 ${it.type} 的图标")
@@ -862,12 +877,12 @@ fun Canvas.drawTextArea(text: String,rect: Rect, textX: Float, textY: Float, fon
                     val c = String(intArrayOf(point), 0, intArrayOf(point).size)
                     if (c == "\n"){
                         x = rect.left
-                        y += quality.mainFontSize * 1.4f + quality.lineSpace
+                        y += quality.contentFontSize + quality.lineSpace
                     }else{
                         val charLine = TextLine.make(c, font)
                         if (x + charLine.width > rect.right){
                             x = rect.left
-                            y += quality.mainFontSize * 1.4f + quality.lineSpace
+                            y += quality.contentFontSize + quality.lineSpace
                         }
                         drawTextLine(charLine, x, y, paint)
                         x += charLine.width
@@ -992,6 +1007,14 @@ fun ModuleAuthor.drawForward(time: String): Image {
     ).apply{
         canvas.apply {
 
+            drawAvatar(this@drawForward.face, "", this@drawForward.officialVerify?.type, quality.faceSize * 0.7f, quality.verifyIconSize * 0.9f)
+
+            val textLineName = TextLine.make(this@drawForward.name, font.makeWithSize(quality.nameFontSize))
+            drawTextLine(textLineName, 100f, 60f,Paint().apply { color = Color.makeRGB(251, 114, 153) })
+
+            val textLineTime = TextLine.make(time, font.makeWithSize(quality.subTitleFontSize))
+            drawTextLine(textLineTime, textLineName.width + 120f, 60f, Paint().apply { color = Color.makeRGB(156, 156, 156) })
+
         }
     }.makeImageSnapshot()
 }
@@ -1002,13 +1025,27 @@ fun ModuleAuthor.drawGeneral(time: String): Image {
     ).apply surface@{
         canvas.apply {
 
-            drawAvatar(this@drawGeneral.face, this@drawGeneral.pendant?.image, this@drawGeneral.officialVerify?.type)
+            drawAvatar(this@drawGeneral.face, pendant?.image, officialVerify?.type, quality.faceSize, quality.verifyIconSize)
 
-            val textLineName = TextLine.make(this@drawGeneral.name, font.makeWithSize(quality.mainFontSize * 1.5f))
-            drawTextLine(textLineName, 150f, 60f,Paint().apply { color = Color.makeRGB(251, 114, 153) })
+            val hasPendant = pendant != null && pendant.image != ""
 
-            val textLineTime = TextLine.make(time, font.makeWithSize(quality.mainFontSize * 1.1f))
-            drawTextLine(textLineTime, 150f, 90f, Paint().apply { color = Color.makeRGB(156, 156, 156) })
+            val textLineName = TextLine.make(name, font.makeWithSize(quality.nameFontSize))
+
+            var x = quality.faceSize + quality.cardPadding * if (hasPendant) 3.5f else 3f
+            var y = textLineName.height / 2 + quality.cardPadding * if (hasPendant) 2f else 1.5f
+            println(x)
+            println(y)
+
+            // 150 60     150 90
+
+            drawTextLine(textLineName, x, y, Paint().apply { color = Color.makeRGB(251, 114, 153) })
+
+
+            val textLineTime = TextLine.make(time, font.makeWithSize(quality.subTitleFontSize))
+
+            y += textLineTime.height
+            println(y)
+            drawTextLine(textLineTime, x, y, Paint().apply { color = Color.makeRGB(156, 156, 156) })
 
 
             val fan = Image.makeFromEncoded(File("D:/Desktop/bilibili动态/d73dd984b8b55e56ac6bdad583a754d147ebd0fa.png").readBytes())
@@ -1017,7 +1054,7 @@ fun ModuleAuthor.drawGeneral(time: String): Image {
 
             // 100 300
             val tarWidth = 300
-            val tarFRect = Rect.makeXYWH(this@surface.width-tarWidth-20f, 20f,
+            val tarFRect = Rect.makeXYWH(width-tarWidth-20f, 20f,
                 tarWidth.toFloat(),
                 (tarWidth * fan.height / fan.width).toFloat()
             )
@@ -1027,35 +1064,37 @@ fun ModuleAuthor.drawGeneral(time: String): Image {
             val typeface1 = Typeface.makeFromFile("D:/Desktop/bilibili动态/fansCard.ttf")
             val font1 = Font(typeface1, 25f)
             val textLineFan = TextLine.make("001107",font1.makeWithSize(20f))
-            drawTextLine(textLineFan, this@surface.width-200f, 70f, Paint().apply { color = Color.makeRGB(213, 122, 255) })
+            drawTextLine(textLineFan, width-200f, 70f, Paint().apply { color = Color.makeRGB(213, 122, 255) })
 
         }
     }.makeImageSnapshot()
 }
 
 
-fun Canvas.drawAvatar(face: String, pendant: String?, verifyType: Int?) {
+fun Canvas.drawAvatar(face: String, pendant: String?, verifyType: Int?, faceSize: Float, verifyIconSize: Float) {
     //val avatarSize = (quality.cardPadding * 4 + quality.faceSize).toInt()
     //return Surface.makeRasterN32Premul(avatarSize, avatarSize).apply {
     //    canvas.apply {
 
     val faceImg = Image.makeFromEncoded(File("D:/Desktop/bilibili动态/625896a6d3a355f3925b8da02f30917e986822b0.jpg").readBytes())
 
+    val hasPendant = pendant != null && pendant != ""
+
     var tarFaceRect = RRect.makeXYWH(
-        quality.cardPadding*2f,
-        quality.cardPadding*1.5f,
-        quality.faceSize,
-        quality.faceSize,
-        quality.faceSize/2
+        quality.cardPadding * if (hasPendant) 2f else 1.5f,
+        quality.cardPadding * if (hasPendant) 1.5f else 1f,
+        faceSize,
+        faceSize,
+        faceSize/2
     )
-     if (pendant == null || pendant == ""){
+     if (!hasPendant){
          tarFaceRect = tarFaceRect.inflate(quality.noPendantFaceInflate) as RRect
          drawCircle(tarFaceRect.left+tarFaceRect.width/2,tarFaceRect.top+tarFaceRect.width/2,tarFaceRect.width/2+2,Paint().apply { color = Color.WHITE; alpha = 160 })
     }
 
     drawImageRRect(faceImg, tarFaceRect)
 
-    if (pendant != null && pendant != ""){
+    if (hasPendant){
         //val pand = Image.makeFromEncoded(File("D:/Desktop/d8f6dec3bd0bcdb09fcfd99fba620aa7da91dd8e.png").readBytes())
         //val pand = Image.makeFromEncoded(File("D:/Desktop/1cdf174c75dd6493f3c8f0797e972b69e3293870.png").readBytes())
         val pendantImg = Image.makeFromEncoded(File("D:/Desktop/bilibili动态/5c004d76ba9f57c00d7972de411c3989efebe120.png").readBytes())
@@ -1076,7 +1115,7 @@ fun Canvas.drawAvatar(face: String, pendant: String?, verifyType: Int?) {
 
     if (verifyIcon != ""){
         val svg = SVGDOM(Data.makeFromFileName("src/main/resources/icon/$verifyIcon.svg"))
-        drawImage(svg.makeImage(quality.verifyIconSize,quality.verifyIconSize), tarFaceRect.right-quality.verifyIconSize, tarFaceRect.bottom-quality.verifyIconSize)
+        drawImage(svg.makeImage(verifyIconSize,verifyIconSize), tarFaceRect.right-verifyIconSize, tarFaceRect.bottom-verifyIconSize)
     }
 
         //}
