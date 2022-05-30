@@ -131,7 +131,7 @@ data class PushConfig(
 
 @Serializable
 data class TemplateConfig(
-    val dynamic: String = "【{name}】{type}\n{draw}\n{link} {>>}作者：{name}\nUID：{uid}\n时间：{time}\n类型：{type}\n链接：{link}\n{content}\n{images}{<<}aaaa{link}",
+    val dynamic: String = "【{name}】{type}\n{draw}\n{link} {>>}作者：{name}\nUID：{uid}\n时间：{time}\n类型：{type}\n链接：{link}\r{content}\r{images}{<<}aaaa{link}",
     val live: String = "",
     val forwardCard: ForwardDisplay = ForwardDisplay()
 )

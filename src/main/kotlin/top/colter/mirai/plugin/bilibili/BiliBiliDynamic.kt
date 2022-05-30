@@ -16,7 +16,7 @@ import top.colter.mirai.plugin.bilibili.tasker.SendTasker
 
 object BiliBiliDynamic : KotlinPlugin(
     JvmPluginDescription(
-        id = "top.colter.bilibili-dynamic",
+        id = "top.colter.bilibili-dynamic-mirai-plugin",
         name = "BiliBili Dynamic",
         version = "3.0.0-M1",
     ) {

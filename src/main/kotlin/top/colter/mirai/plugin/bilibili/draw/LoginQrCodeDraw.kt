@@ -43,7 +43,7 @@ object LoginQrCodeDraw {
                     color = Color.makeRGB(2, 181, 218)
                 })
 
-                val svg = SVGDOM(Data.makeFromFileName("D:/Desktop/bilibili动态/bilibili-brands.svg"))
+                val svg = SVGDOM(Data.makeFromFileName("src/main/resources/icon/BILIBILI_LOGO.svg"))
                 drawImage(svg.makeImage(40f, 40f), 105f, 105f, Paint().apply {
                     colorFilter = ColorFilter.makeBlend(Color.WHITE, BlendMode.SRC_ATOP)
                 })

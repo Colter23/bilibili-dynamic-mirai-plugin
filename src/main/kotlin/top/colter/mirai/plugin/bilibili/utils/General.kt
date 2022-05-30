@@ -2,9 +2,13 @@ package top.colter.mirai.plugin.bilibili.utils
 
 import io.ktor.client.request.*
 import kotlinx.coroutines.channels.Channel
+import net.mamoe.mirai.Bot
 import net.mamoe.mirai.contact.Contact
+import net.mamoe.mirai.contact.Group
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
 import org.jetbrains.skia.Image
+import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
+import top.colter.mirai.plugin.bilibili.BiliBiliDynamic.dataFolderPath
 import top.colter.mirai.plugin.bilibili.client.BiliClient
 import top.colter.mirai.plugin.bilibili.data.DynamicItem
 import top.colter.mirai.plugin.bilibili.data.DynamicType.*
@@ -35,13 +39,18 @@ fun <T> Collection<T>.plusOrNull(element: T?): List<T> {
     }
 }
 
+val DynamicItem.uid: Long
+    get() = modules.moduleAuthor.mid
 
 val DynamicItem.time: Long
     get() = (idStr.toLong() shr 32) + 1498838400L
 
 val DynamicItem.formatTime: String
+    get() = time.formatTime
+
+val Long.formatTime: String
     get() = DateTimeFormatter.ofPattern("yyyy年MM月dd日 HH:mm:ss")
-        .format(LocalDateTime.ofEpochSecond(time, 0, OffsetDateTime.now().offset))
+        .format(LocalDateTime.ofEpochSecond(this, 0, OffsetDateTime.now().offset))
 
 val DynamicItem.link: String
     get() = when (type) {
@@ -59,10 +68,17 @@ val DynamicItem.link: String
     }
 
 
+fun loadResource(file: String) =
+    BiliBiliDynamic::class.java.getResource(file)?.path!!
+    //BiliBiliDynamic::class.java.getResource(file)!!.openStream().use { it.readBytes() }
+
+fun loadResourceBytes(path: String) =
+    BiliBiliDynamic.getResourceAsStream(path)!!.readBytes()
+
 val cachePath: Path by lazy {
     ///////////////////////临时临时临时临时临时临时临时临时临时临时临时临时临时临时临时//////////////////////////////////////////
-    Path("data/top.colter.bilibili-dynamic-mirai-plugin").resolve("cache")
-    //dataFolderPath.resolve("cache")
+    //Path("data/top.colter.bilibili-dynamic-mirai-plugin").resolve("cache")
+    dataFolderPath.resolve("cache")
 }
 
 fun CacheType.cachePath(): Path {
@@ -71,8 +87,13 @@ fun CacheType.cachePath(): Path {
     }
 }
 
-fun CacheType.cachePath(file: String): Path {
-    return cachePath().resolve(file)
+fun CacheType.cacheFile(filePath: String): Path {
+    val split = filePath.split("/")
+    val path = split.dropLast(1).joinToString("/")
+    val file = split.last()
+    return cachePath().resolve(path).apply {
+        if (notExists()) createDirectories()
+    }.resolve(file)
 }
 
 enum class CacheType(val path: String) {
@@ -97,14 +118,20 @@ fun Path.findFile(file: String): Path? {
     return null
 }
 
+fun cacheImage(image: Image, path: String, cacheType: CacheType): String {
+    val file = cacheType.cacheFile(path)
+    file.writeBytes(image.encodeToData()!!.bytes)
+    return "${cacheType.path}/$path"
+}
+
 val imageClient = BiliClient()
 suspend fun getOrDownload(url: String, cacheType: CacheType = CacheType.UNKNOWN): ByteArray {
     val fileName = url.split("?").first().split("@").first().split("/").last()
 
     val filePath = if (cacheType == CacheType.UNKNOWN) {
-        cachePath.findFile(fileName) ?: CacheType.OTHER.cachePath(fileName)
+        cachePath.findFile(fileName) ?: CacheType.OTHER.cacheFile(fileName)
     } else {
-        cacheType.cachePath(fileName)
+        cacheType.cacheFile(fileName)
     }
     return if (filePath.exists()) {
         filePath.readBytes()
@@ -123,4 +150,40 @@ suspend fun getOrDownloadImage(url: String, cacheType: CacheType = CacheType.UNK
 suspend fun uploadImage(url: String, cacheType: CacheType = CacheType.UNKNOWN, contact: Contact) =
     contact.uploadImage(getOrDownload(url, cacheType).toExternalResource().toAutoCloseable())
 
+val contactMap: MutableMap<Long, Contact> = mutableMapOf()
 
+/**
+ * 查找Contact
+ */
+fun findContact(del: String, ): Contact? = synchronized(contactMap) {
+    if (del.isBlank()) return@synchronized null
+    val delegate = del.toLong()
+    contactMap.compute(delegate) { _, _ ->
+        for (bot in Bot.instances) {
+            if (delegate < 0) {
+                for (group in bot.groups) {
+                    if (group.id == delegate * -1) return@compute group
+                }
+            } else {
+                for (friend in bot.friends) {
+                    if (friend.id == delegate) return@compute friend
+                }
+                for (stranger in bot.strangers) {
+                    if (stranger.id == delegate) return@compute stranger
+                }
+                for (group in bot.groups) {
+                    for (member in group.members) {
+                        if (member.id == delegate) return@compute member
+                    }
+                }
+            }
+        }
+        null
+    }
+}
+
+/**
+ * 通过正负号区分群和用户
+ * @author cssxsh
+ */
+val Contact.delegate get() = (if (this is Group) id * -1 else id).toString()

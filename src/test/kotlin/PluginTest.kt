@@ -180,9 +180,10 @@ internal class PluginTest {
                     ),
                     ModuleAuthor.Decorate(
                         6562,
-                        3,
+                        2,
                         "花园Serena2粉丝",
-                        "http://i0.hdslb.com/bfs/garb/item/5db26595431f8af25ae269e47da9f1d8c06bb657.png",
+                        "http://i0.hdslb.com/bfs/garb/item/5ebada630d1897124a9f33dd2d5c9566d02fcc72.png",
+                        //"http://i0.hdslb.com/bfs/garb/item/5db26595431f8af25ae269e47da9f1d8c06bb657.png",
                         "https://www.bilibili.com/h5/mall/fans/recommend/2452?navhide=1&mid=186463&from=dynamic&isdiy=0",
                         ModuleAuthor.Decorate.Fan(
                             "#ffb48d",
@@ -248,6 +249,38 @@ internal class PluginTest {
                     //        )
                     //    ),
                     //),
+                    additional = ModuleDynamic.Additional(
+                        "ADDITIONAL_TYPE_COMMON",
+                        common = ModuleDynamic.Additional.Common(
+                            "80",
+                            "阴阳师",
+                            "https://i0.hdslb.com/bfs/game/5a163e68a73a074cd48db9eab8a2fc1ad1a6841f.png",
+                            "game",
+                            "卡牌/二次元/唯美",
+                            "神堕八岐大蛇 5月18日上线",
+                            "相关游戏",
+                            "https://www.biligame.com/detail?id=80&sourceFrom=1005",
+                            1,
+                            ModuleDynamic.Additional.Button(1,1,null,null,null,null)
+                        ),
+                        reserve = ModuleDynamic.Additional.Reserve(
+                            564323,
+                            1802011210,
+                            "直播预约：玥玥春日新衣发布",
+                            2623,
+                            ModuleDynamic.Additional.Reserve.Desc("04-17 20:00 直播", 0),
+                            ModuleDynamic.Additional.Reserve.Desc("2623人预约", 0),
+                            ModuleDynamic.Additional.Reserve.Desc("预约有奖：新衣立牌*3份、玥玥钥匙扣*3份", 0),
+
+                            null,
+                            0,
+                            2,
+                            "",
+                            ModuleDynamic.Additional.Button(1,1,null,null,null,null)
+                        )
+
+                    )
+
                 )
 
             ),
@@ -403,16 +436,14 @@ internal class PluginTest {
                                 )
                             ),
                         ),
-                        additional = ModuleDynamic.Additional(
-                            ""
-                        )
+
                     )
 
                 )
             )
 
         ).makeDrawDynamic()
-
+        println(dynamic)
 
         //DynamicDraw.makeDynamic(dynamic)
 

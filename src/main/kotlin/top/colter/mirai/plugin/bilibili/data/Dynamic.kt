@@ -172,7 +172,7 @@ data class ModuleAuthor(
     @SerialName("face_nft")
     val faceNFT: Boolean? = null,
     @SerialName("following")
-    val following: Boolean,
+    val following: Boolean? = null,
     @SerialName("label")
     val label: String = "",
     @SerialName("jump_url")
@@ -293,7 +293,7 @@ data class ModuleAuthor(
     /**
      * 粉丝套装卡片
      * @param id 套装ID
-     * @param type 套装类型 图标(1) 专属卡片编号(3)
+     * @param type 套装类型 图标(1, 2) 专属卡片编号(3)
      * @param name 套装名称
      * @param cardUrl 套装图片链接
      * @param jumpUrl 跳转链接
@@ -387,12 +387,12 @@ data class ModuleDynamic(
     ) {
         /**
          * 活动
-         * https://t.bilibili.com/649704659492012038
-         * https://t.bilibili.com/643984810881056769
+         * https://t.bilibili.com/666029864355102737
+         * https://t.bilibili.com/665881610678173713
          * @param idStr ID字符串
          * @param title 标题
          * @param cover 封面
-         * @param subType 类型 游戏(game) 番剧(ogv) 装扮(decoration)
+         * @param subType 类型 游戏(game) 番剧(ogv) 装扮(decoration) 官方活动(official_activity)
          * @param desc1 第一行描述
          * @param desc2 第二行描述
          * @param headText 头文字描述(相关游戏)
@@ -479,10 +479,10 @@ data class ModuleDynamic(
             data class Desc(
                 @SerialName("text")
                 val text: String,
-                @SerialName("jump_url")
-                val jumpUrl: String? = null,
                 @SerialName("style")
                 val style: Int,
+                @SerialName("jump_url")
+                val jumpUrl: String? = null,
                 @SerialName("visible")
                 val visible: Boolean? = null,
             )
@@ -525,9 +525,9 @@ data class ModuleDynamic(
             @SerialName("desc")
             val desc: String,
             @SerialName("type")
-            val type: Int,
+            val type: Int?,
             @SerialName("status")
-            val status: Int,
+            val status: Int?,
             @SerialName("join_num")
             val joinNum: Int,
             @SerialName("end_time")
@@ -636,15 +636,15 @@ data class ModuleDynamic(
             @SerialName("type")
             val type: Int,
             @SerialName("status")
-            val status: Int,
+            val status: Int? = null,
             @SerialName("jump_url")
-            val jumpUrl: String,
+            val jumpUrl: String? = null,
             @SerialName("jump_style")
-            val jumpStyle: JumpStyle,
+            val jumpStyle: JumpStyle? = null,
             @SerialName("check")
-            val check: Check,
+            val check: Check? = null,
             @SerialName("uncheck")
-            val uncheck: Check,
+            val uncheck: Check? = null,
         ) {
             /**
              * 点击

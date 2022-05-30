@@ -95,6 +95,31 @@ fun Canvas.drawImageClip(
     drawImageRRect(image, srcRect, dstRect, paint)
 }
 
+fun Color.makeRGB(hex: String): Int {
+    require(hex.startsWith("#")) { "Hex format error: $hex" }
+    require(hex.length == 7 || hex.length == 9) { "Hex length error: $hex" }
+    return when (hex.length){
+        7 -> {
+            makeRGB(
+                Integer.valueOf(hex.substring(1, 3), 16),
+                Integer.valueOf(hex.substring(3, 5), 16),
+                Integer.valueOf(hex.substring(5), 16)
+            )
+        }
+        9 -> {
+            makeARGB(
+                Integer.valueOf(hex.substring(1, 3), 16),
+                Integer.valueOf(hex.substring(3, 5), 16),
+                Integer.valueOf(hex.substring(5, 7), 16),
+                Integer.valueOf(hex.substring(7), 16)
+            )
+        }
+        else -> {
+            WHITE
+        }
+    }
+}
+
 fun rgb2hsb(rgbR: Int, rgbG: Int, rgbB: Int): FloatArray {
 
     val rgb = intArrayOf(rgbR, rgbG, rgbB)
@@ -161,3 +186,32 @@ fun hsb2rgb(h: Float, s: Float, v: Float): IntArray {
     return intArrayOf((r * 255.0).toInt(), (g * 255.0).toInt(), (b * 255.0).toInt())
 }
 
+fun generateLinearGradient(colors: List<Int>): IntArray {
+    return if (colors.size == 1) {
+        val hsb = rgb2hsb(Color.getR(colors[0]), Color.getG(colors[0]), Color.getB(colors[0]))
+        hsb[1] = 0.3f
+        hsb[2] = 1f
+        val linearLayerCount = 3
+        val linearLayerStep = 40
+        val llc = if (linearLayerCount % 2 == 0) linearLayerCount + 1 else linearLayerCount
+        val ia = IntArray(llc)
+        hsb[0] = (hsb[0] + linearLayerCount / 2 * linearLayerStep) % 360
+        repeat(llc) {
+            val c = hsb2rgb(hsb[0], hsb[1], hsb[2])
+            ia[it] = Color.makeRGB(c[0], c[1], c[2])
+            hsb[0] = if (hsb[0] - linearLayerStep < 0) hsb[0] + 360 - linearLayerStep else hsb[0] - linearLayerStep
+        }
+        ia
+    } else {
+        val llc = colors.size
+        val ia = IntArray(llc)
+        repeat(llc) {
+            val hsb = rgb2hsb(Color.getR(colors[it]), Color.getG(colors[it]), Color.getB(colors[it]))
+            hsb[1] = 0.3f
+            hsb[2] = 1f
+            val c = hsb2rgb(hsb[0], hsb[1], hsb[2])
+            ia[it] = Color.makeRGB(c[0], c[1], c[2])
+        }
+        ia
+    }
+}

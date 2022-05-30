@@ -1,5 +1,6 @@
 package top.colter.mirai.plugin.bilibili.tasker
 
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.withLock
 import net.mamoe.mirai.contact.Contact
 import net.mamoe.mirai.message.code.MiraiCode
@@ -15,6 +16,7 @@ import top.colter.mirai.plugin.bilibili.data.DynamicMessage
 import top.colter.mirai.plugin.bilibili.tasker.BiliDataTasker.mutex
 import top.colter.mirai.plugin.bilibili.utils.CacheType
 import top.colter.mirai.plugin.bilibili.utils.cachePath
+import top.colter.mirai.plugin.bilibili.utils.findContact
 import top.colter.mirai.plugin.bilibili.utils.uploadImage
 import kotlin.io.path.notExists
 import kotlin.io.path.readBytes
@@ -26,8 +28,11 @@ object SendTasker : BiliTasker() {
     override suspend fun main() {
         val dynamicMessage = BiliBiliDynamic.messageChannel.receive()
 
+        //getDynamicContactList(dynamicMessage.uid, false)
 
-        //dynamicMessage.sendMessage(dynamicMessage.buildMessage())
+        val msgList = dynamicMessage.buildMessage(findContact("")!!)
+
+        findContact("")!!.sendMessage(msgList)
     }
 
     private suspend fun getDynamicContactList(uid: Long, isVideo: Boolean): MutableSet<String>? = mutex.withLock {
@@ -45,9 +50,11 @@ object SendTasker : BiliTasker() {
         }
     }
 
-    fun DynamicMessage.sendMessage(messages: List<Message>) {
-
-
+    suspend fun Contact.sendMessage(messages: List<Message>) {
+        messages.forEach {
+            sendMessage(it)
+            delay(100)
+        }
     }
 
     private val forwardRegex = """\{>>}(.*?)\{<<}""".toRegex()

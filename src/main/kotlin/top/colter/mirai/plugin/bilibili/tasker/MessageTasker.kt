@@ -4,6 +4,7 @@ import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
 import top.colter.mirai.plugin.bilibili.data.DynamicItem
 import top.colter.mirai.plugin.bilibili.data.DynamicMessage
 import top.colter.mirai.plugin.bilibili.data.DynamicType
+import top.colter.mirai.plugin.bilibili.draw.logger
 import top.colter.mirai.plugin.bilibili.draw.makeDrawDynamic
 import top.colter.mirai.plugin.bilibili.utils.formatTime
 import top.colter.mirai.plugin.bilibili.utils.time
@@ -14,6 +15,7 @@ object MessageTasker : BiliTasker() {
 
     override suspend fun main() {
         val dynamicItem = BiliBiliDynamic.dynamicChannel.receive()
+        logger.debug(dynamicItem.idStr)
         BiliBiliDynamic.messageChannel.send(dynamicItem.buildMessage())
     }
 
@@ -112,7 +114,7 @@ object MessageTasker : BiliTasker() {
         return listOf(
             DynamicMessage.Link(
                 "",
-                ""
+                "https://t.bilibili.com/$idStr"
             )
         )
 

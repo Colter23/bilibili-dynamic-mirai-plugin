@@ -18,12 +18,13 @@ import top.colter.mirai.plugin.bilibili.draw.Position.*
 import top.colter.mirai.plugin.bilibili.utils.*
 import top.colter.mirai.plugin.bilibili.utils.FontUtils.fonts
 import top.colter.mirai.plugin.bilibili.utils.FontUtils.loadTypeface
-import java.io.File
+import kotlin.io.path.pathString
 import kotlin.math.ceil
 
 internal val logger by BiliBiliDynamic::logger
 
-private const val resourcesPath = "src/main/resources"
+//private const val resourcesPath = "src/main/resources"
+private val resourcesPath = loadResource("")
 
 private val quality: Quality by lazy {
     Quality.level(imageConfig.quality).apply {
@@ -40,7 +41,8 @@ private val cardContentRect: Rect by lazy {
 }
 
 private val mainTypeface: Typeface by lazy {
-    loadTypeface("data/top.colter.bilibili-dynamic-mirai-plugin/font/HarmonyOS_Sans_SC_Medium.ttf")
+    //loadTypeface("data/top.colter.bilibili-dynamic-mirai-plugin/font/HarmonyOS_Sans_SC_Medium.ttf")
+    loadTypeface("${BiliBiliDynamic.dataFolderPath.pathString}/font/HarmonyOS_Sans_SC_Medium.ttf")
 }
 
 private val font: Font by lazy {
@@ -92,20 +94,30 @@ enum class Position {
 suspend fun DynamicItem.makeDrawDynamic(): String {
 
     val dynamic = drawDynamic()
-    //val forward = orig?.drawDynamic()
 
-    val path = "dynamic.png"
-    makeCardBg(path, dynamic.height) {
+    val img = makeCardBg(dynamic.height) {
         it.drawImage(dynamic, 0f, 0f)
     }
-    return path
+    return cacheImage(img, "$uid/$idStr.png", CacheType.DRAW_DYNAMIC)
 }
 
 suspend fun DynamicItem.drawDynamic(isForward: Boolean = false): Image {
 
-    val imgList = modules.makeGeneral(formatTime, link, isForward).plusOrNull(
-        orig?.drawDynamic(type == DYNAMIC_TYPE_FORWARD)
-    )
+    val orig = orig?.drawDynamic(type == DYNAMIC_TYPE_FORWARD)
+
+    var imgList = modules.makeGeneral(formatTime, link, isForward)
+
+    if (orig != null){
+        imgList = if (this.modules.moduleDynamic.additional != null){
+            val result = ArrayList<Image>(imgList.size + 1)
+            result.addAll(imgList.subList(0, imgList.size - 1))
+            result.add(orig)
+            result.add(imgList.last())
+            result
+        }else {
+            imgList.plus(orig)
+        }
+    }
 
     val height = imgList.sumOf {
         if (it.width > cardRect.width) {
@@ -140,6 +152,8 @@ suspend fun DynamicItem.drawDynamic(isForward: Boolean = false): Image {
             }
 
             if (imageConfig.badgeEnable) {
+                val svg = SVGDOM(Data.makeFromBytes(loadResourceBytes("icon/${if (isForward) "FORWARD" else "BILIBILI_LOGO"}.svg")))
+                //val svg = SVGDOM(Data.makeFromFileName("$resourcesPath/icon/${if (isForward) "FORWARD" else "BILIBILI_LOGO"}.svg"))
                 drawBadge(
                     if (isForward) "转发动态" else "动态",
                     font,
@@ -147,8 +161,10 @@ suspend fun DynamicItem.drawDynamic(isForward: Boolean = false): Image {
                     Color.WHITE,
                     120,
                     rrect,
-                    TOP_LEFT
+                    TOP_LEFT,
+                    svg.makeImage(quality.contentFontSize, quality.contentFontSize)
                 )
+
                 drawBadge(idStr, font, Color.WHITE, Color.makeRGB(72, 199, 240), 255, rrect, TOP_RIGHT)
             }
 
@@ -161,7 +177,11 @@ suspend fun DynamicItem.drawDynamic(isForward: Boolean = false): Image {
                     drawScaleWidthImage(img, cardRect.width, quality.cardMargin.toFloat(), top)
                 }
 
-                top += img.height + 10
+                top += if (img.width > cardRect.width) {
+                    (cardRect.width * img.height / img.width + 10).toInt()
+                } else {
+                    img.height + 10
+                }
             }
 
         }
@@ -187,16 +207,63 @@ suspend fun ModuleDynamic.makeGeneral(isForward: Boolean = false): List<Image> {
     }
 }
 
-fun ModuleDynamic.Additional.makeGeneral(): Image? {
-    return drawAdditionalCard()
-    //return when (type){
-    //    "ADDITIONAL_TYPE_COMMON" -> {null}
-    //    "ADDITIONAL_TYPE_RESERVE" -> {null}
-    //    "ADDITIONAL_TYPE_VOTE" -> {null}
-    //    "ADDITIONAL_TYPE_UGC" -> {null}
-    //    "ADDITIONAL_TYPE_GOODS" -> {null}
-    //    else -> {null}
-    //}
+suspend fun ModuleDynamic.Additional.makeGeneral(): Image? {
+    return when (type) {
+        "ADDITIONAL_TYPE_COMMON" -> {
+            drawAdditionalCard(
+                common!!.headText,
+                common.cover,
+                common.title,
+                common.desc1,
+                common.desc2
+            )
+        }
+        "ADDITIONAL_TYPE_RESERVE" -> {
+            drawAdditionalCard(
+                when (reserve!!.stype){
+                    1 -> "视频预约"
+                    2 -> "直播预约"
+                    4 -> "首映预告"
+                    else -> "预约"
+                },
+                reserve.premiere?.cover,
+                reserve.title,
+                "${reserve.desc1.text}  ${reserve.desc2.text}",
+                reserve.desc3?.text
+            )
+        }
+        "ADDITIONAL_TYPE_VOTE" -> {
+            drawAdditionalCard(
+                "投票",
+                null,
+                vote!!.desc,
+                "结束时间 ${vote.endTime.formatTime}",
+                null
+            )
+        }
+        "ADDITIONAL_TYPE_UGC" -> {
+            drawAdditionalCard(
+                ugc!!.headText,
+                ugc.cover,
+                ugc.title,
+                "时长 ${ugc.duration}  ${ugc.descSecond}",
+                null
+            )
+        }
+        "ADDITIONAL_TYPE_GOODS" -> {
+            drawAdditionalCard(
+                goods!!.headText,
+                goods.items[0].cover,
+                goods.items[0].name,
+                "${goods.items[0].price} 起",
+                null
+            )
+        }
+        else -> {
+            logger.warning("未知类型附加卡片 $type")
+            null
+        }
+    }
 }
 
 suspend fun ModuleDynamic.Major.makeGeneral(isForward: Boolean = false): Image? {
@@ -263,7 +330,8 @@ fun ModuleDynamic.Topic.drawGeneral(): Image {
             var y = quality.contentFontSize * 0.8f + quality.lineSpace
             try {
                 //val svg = SVGDOM(Data.makeFromBytes(BiliBiliDynamic.getResourceAsStream("src/main/resources/icon/RICH_TEXT_NODE_TYPE_WEB.svg")!!.readBytes()))
-                val svg = SVGDOM(Data.makeFromFileName("$resourcesPath/icon/TOPIC.svg"))
+                val svg = SVGDOM(Data.makeFromBytes(loadResourceBytes("icon/TOPIC.svg")))
+                //val svg = SVGDOM(Data.makeFromFileName("$resourcesPath/icon/TOPIC.svg"))
                 val iconSize = quality.contentFontSize
                 drawImage(svg.makeImage(iconSize, iconSize), x, y - quality.contentFontSize * 0.9f)
                 x += iconSize + quality.lineSpace
@@ -332,8 +400,8 @@ suspend fun ModuleDynamic.Desc.drawGeneral(): Image {
                     "RICH_TEXT_NODE_TYPE_LOTTERY",
                     "RICH_TEXT_NODE_TYPE_BV" -> {
                         try {
-                            //val svg = SVGDOM(Data.makeFromBytes(BiliBiliDynamic.getResourceAsStream("src/main/resources/icon/RICH_TEXT_NODE_TYPE_WEB.svg")!!.readBytes()))
-                            val svg = SVGDOM(Data.makeFromFileName("$resourcesPath/icon/${it.type}.svg"))
+                            val svg = SVGDOM(Data.makeFromBytes(loadResourceBytes("icon/${it.type}.svg")))
+                            //val svg = SVGDOM(Data.makeFromFileName("$resourcesPath/icon/${it.type}.svg"))
                             val iconSize = quality.contentFontSize
                             drawImage(svg.makeImage(iconSize, iconSize), x, y - quality.contentFontSize * 0.9f)
                             x += iconSize
@@ -356,82 +424,94 @@ suspend fun ModuleDynamic.Desc.drawGeneral(): Image {
     }.makeImageSnapshot(IRect.makeXYWH(0, 0, cardRect.width.toInt(), ceil(y + quality.lineSpace * 2).toInt()))!!
 }
 
-fun ModuleDynamic.Additional.drawAdditionalCard(): Image {
+suspend fun drawAdditionalCard(
+    label: String,
+    cover: String?,
+    title: String,
+    desc1: String,
+    desc2: String?
+): Image {
+
+    val paragraphStyle = ParagraphStyle().apply {
+        maxLinesCount = 1
+        ellipsis = "..."
+        alignment = Alignment.LEFT
+        textStyle = titleTextStyle.apply {
+            fontSize = quality.titleFontSize * 0.8f
+        }
+    }
+
+    val height = if (cover != null || desc2 != null)
+        quality.additionalCardHeight.toFloat()
+    else
+        quality.additionalCardHeight * 0.7f
+
 
     val additionalCardRect = RRect.makeXYWH(
         quality.cardPadding.toFloat(),
-        quality.subFontSize + quality.cardPadding + 1f,
+        quality.subTitleFontSize + quality.cardPadding + 1f,
         cardContentRect.width,
-        quality.additionalCardHeight.toFloat(),
+        height,
         quality.cardArc
     )
 
     return Surface.makeRasterN32Premul(
         cardRect.width.toInt(),
-        (quality.additionalCardHeight + quality.subFontSize + quality.cardPadding * 2f).toInt()
+        (height + quality.subTitleFontSize + quality.cardPadding * 2f).toInt()
     ).apply {
         canvas.apply {
             drawCard(additionalCardRect)
             drawRectShadowAntiAlias(additionalCardRect.inflate(1f), 5f, 5f, 15f, 0f, Color.makeARGB(30, 0, 0, 0))
 
-            val img =
-                Image.makeFromEncoded(File("D:/Desktop/bilibili动态/625896a6d3a355f3925b8da02f30917e986822b0.jpg").readBytes())
-            val imgRect = RRect.makeXYWH(
-                quality.cardPadding.toFloat(),
-                quality.subFontSize + quality.cardPadding + 1f,
-                quality.additionalCardHeight.toFloat(),
-                quality.additionalCardHeight.toFloat(),
-                quality.cardArc
-            ).inflate(-1f) as RRect
-            drawImageRRect(img, imgRect)
-
-            val labelTextLine = TextLine.make("直播预约", font.makeWithSize(quality.subFontSize))
-            drawTextLine(labelTextLine, additionalCardRect.left + 8, quality.subFontSize, Paint().apply {
+            val labelTextLine = TextLine.make(label, font.makeWithSize(quality.subTitleFontSize))
+            drawTextLine(labelTextLine, additionalCardRect.left + 8, quality.subTitleFontSize, Paint().apply {
                 color = Color.BLACK
                 alpha = 130
             })
 
-            var y = quality.subFontSize + quality.cardPadding * 2.8f
-            val titleTextLine = TextLine.make("直播预约：玥玥春日新衣发布", font)
-            drawTextLine(titleTextLine, imgRect.right + quality.cardPadding, y, Paint())
+            var x = quality.cardPadding.toFloat()
 
-            y += quality.cardPadding * 1.2f
+            if (cover != null) {
+                val img = getOrDownloadImage(cover, CacheType.IMAGES)
+                val imgRect = RRect.makeXYWH(
+                    quality.cardPadding.toFloat(),
+                    quality.subTitleFontSize + quality.cardPadding + 1f,
+                    quality.additionalCardHeight.toFloat() * img.width / img.height,
+                    quality.additionalCardHeight.toFloat(),
+                    quality.cardArc
+                ).inflate(-1f) as RRect
+                drawImageRRect(img, imgRect)
+                x += imgRect.width
+            }
 
-            val desc1TextLine = TextLine.make("04-17 20:00 直播 2623人预约", font.makeWithSize(quality.subFontSize))
-            drawTextLine(desc1TextLine, imgRect.right + quality.cardPadding, y, Paint().apply {
-                color = Color.BLACK
-                alpha = 130
-            })
+            x += quality.cardPadding
 
-            y += quality.cardPadding * 1.2f
+            val titleParagraph = ParagraphBuilder(paragraphStyle, fonts).addText(title).build().layout(cardContentRect.width - x)
+            paragraphStyle.apply {
+                textStyle = descTextStyle.apply {
+                    fontSize = quality.subTitleFontSize * 0.8f
+                }
+            }
+            val desc1Paragraph = ParagraphBuilder(paragraphStyle, fonts).addText(desc1).build().layout(cardContentRect.width - x)
+            val desc2Paragraph = desc2?.let { ParagraphBuilder(paragraphStyle, fonts).addText(it).build().layout(cardContentRect.width - x) }
 
-            val desc2TextLine = TextLine.make("预约有奖：新衣立牌*3份、玥玥钥匙扣*3份", font.makeWithSize(quality.subFontSize))
-            drawTextLine(desc2TextLine, imgRect.right + quality.cardPadding, y, Paint().apply {
-                color = Color.makeRGB(0, 203, 255)
-            })
+            val top = (additionalCardRect.height - (titleParagraph.height * if (desc2==null) 2 else 3))/2
 
-            val buttonRect = RRect.makeXYWH(
-                additionalCardRect.right - quality.cardPadding - 90f,
-                quality.subFontSize + quality.cardPadding + quality.cardPadding * 1.5f,
-                90f,
-                35f,
-                5f
-            )
-            drawRRect(buttonRect, Paint().apply {
-                color = Color.makeRGB(0, 203, 255)
-            })
+            var y = additionalCardRect.top + top
+            titleParagraph.paint(this, x, y)
 
-            val buttonTextLine = TextLine.make("去观看", font.makeWithSize(quality.subFontSize))
-            drawTextLine(buttonTextLine, buttonRect.left + quality.cardPadding, buttonRect.bottom - 11, Paint().apply {
-                color = Color.WHITE
-            })
+            y += titleParagraph.height
+            desc1Paragraph.paint(this, x, y)
 
+            if (desc2Paragraph != null){
+                y += titleParagraph.height
+                desc2Paragraph.paint(this, x, y)
+            }
         }
     }.makeImageSnapshot()
 
 
 }
-
 
 suspend fun ModuleDynamic.Major.Archive.drawGeneral(): Image {
 
@@ -580,7 +660,7 @@ suspend fun ModuleDynamic.Major.Archive.drawSmall(): Image {
     val titleParagraph = ParagraphBuilder(paragraphStyle, fonts).addText(title).build().layout(paragraphWidth)
 
     paragraphStyle.apply {
-        maxLinesCount = 2
+        maxLinesCount = if (titleParagraph.lineNumber == 1) 3 else 2
         textStyle = descTextStyle
     }
 
@@ -634,44 +714,24 @@ suspend fun ModuleDynamic.Major.Archive.drawSmall(): Image {
             ).inflate(-1f) as RRect
             drawImageRRect(coverImg, coverRRect)
 
+            val y = videoCardRect.top + (videoCardRect.height - titleParagraph.height - descParagraph.height) / 2
             titleParagraph.paint(
                 this,
                 quality.cardPadding * 1.5f + videoCoverWidth,
-                quality.badgeHeight + quality.cardPadding / 2f
+                 y
             )
 
             descParagraph.paint(
                 this,
                 quality.cardPadding * 1.5f + videoCoverWidth,
-                quality.badgeHeight + quality.cardPadding / 2f + titleParagraph.height
+                y + titleParagraph.height
             )
 
-            var x = coverRRect.right + quality.cardPadding * 1.3f
-            var y = videoCardRect.bottom - quality.cardPadding * 1.3f
-            x += drawLabelCard(
-                "投稿视频",
-                font.makeWithSize(quality.subFontSize),
-                Color.WHITE,
-                Color.makeRGB(251, 114, 153),
-                255,
-                x,
-                y
-            ) + quality.cardPadding
+            drawLabelCard(
+                durationText, font.makeWithSize(quality.subTitleFontSize), Color.WHITE, Color.BLACK, 130,
+                coverRRect.left + quality.badgePadding * 2, coverRRect.bottom - quality.subTitleFontSize - quality.badgePadding
+            )
 
-            x += drawLabelCard(
-                durationText, font.makeWithSize(quality.subFontSize), Color.WHITE, Color.BLACK, 130,
-                x, y
-            ) + quality.cardPadding
-
-            x += drawLabelCard(
-                "${stat.play}观看 ${stat.danmaku}弹幕",
-                font.makeWithSize(quality.subFontSize),
-                Color.WHITE,
-                Color.makeRGB(26, 198, 255),
-                255,
-                x,
-                y
-            ) + quality.cardPadding
         }
     }.makeImageSnapshot()
 }
@@ -1010,7 +1070,7 @@ fun Canvas.drawTextArea(text: String, rect: Rect, textX: Float, textY: Float, fo
 }
 
 
-suspend fun DynamicItem.makeCardBg(path: String, height: Int, block: (Canvas) -> Unit) {
+suspend fun DynamicItem.makeCardBg(height: Int, block: (Canvas) -> Unit): Image {
 
     //val imageWidth = 800
     val imageHeight = 930
@@ -1024,7 +1084,7 @@ suspend fun DynamicItem.makeCardBg(path: String, height: Int, block: (Canvas) ->
         height - quality.cardMargin.toFloat()
     )
 
-    Surface.makeRasterN32Premul(imageRect.width.toInt(), height).apply {
+    return Surface.makeRasterN32Premul(imageRect.width.toInt(), height).apply {
         canvas.apply {
 
             drawRect(imageRect, Paint().apply {
@@ -1081,38 +1141,7 @@ suspend fun DynamicItem.makeCardBg(path: String, height: Int, block: (Canvas) ->
 
         }
 
-    }.saveImage(path)
-}
-
-
-fun generateLinearGradient(colors: List<Int>): IntArray {
-    return if (colors.size == 1) {
-        val hsb = rgb2hsb(Color.getR(colors[0]), Color.getG(colors[0]), Color.getB(colors[0]))
-        hsb[1] = 0.3f
-        hsb[2] = 1f
-        val linearLayerCount = 3
-        val linearLayerStep = 40
-        val llc = if (linearLayerCount % 2 == 0) linearLayerCount + 1 else linearLayerCount
-        val ia = IntArray(llc)
-        hsb[0] = (hsb[0] + linearLayerCount / 2 * linearLayerStep) % 360
-        repeat(llc) {
-            val c = hsb2rgb(hsb[0], hsb[1], hsb[2])
-            ia[it] = Color.makeRGB(c[0], c[1], c[2])
-            hsb[0] = if (hsb[0] - linearLayerStep < 0) hsb[0] + 360 - linearLayerStep else hsb[0] - linearLayerStep
-        }
-        ia
-    } else {
-        val llc = colors.size
-        val ia = IntArray(llc)
-        repeat(llc) {
-            val hsb = rgb2hsb(Color.getR(colors[it]), Color.getG(colors[it]), Color.getB(colors[it]))
-            hsb[1] = 0.3f
-            hsb[2] = 1f
-            val c = hsb2rgb(hsb[0], hsb[1], hsb[2])
-            ia[it] = Color.makeRGB(c[0], c[1], c[2])
-        }
-        ia
-    }
+    }.makeImageSnapshot()
 }
 
 suspend fun ModuleAuthor.drawForward(time: String): Image {
@@ -1172,25 +1201,41 @@ suspend fun Canvas.drawOrnament(decorate: ModuleAuthor.Decorate?, link: String) 
     when (imageConfig.cardOrnament) {
         "fanCard" -> {
             if (decorate != null) {
-                val fan = getOrDownloadImage(decorate.cardUrl, CacheType.USER)
-                val srcFRect = Rect(0f, 0f, fan.width.toFloat(), fan.height.toFloat())
+                val fanImg = getOrDownloadImage(decorate.cardUrl, CacheType.USER)
+                val srcFRect = Rect(0f, 0f, fanImg.width.toFloat(), fanImg.height.toFloat())
 
-                // 100 300
-                val tarWidth = 300
+                val cardHeight = when (decorate.type) {
+                    1, 2 -> quality.fanCardHeight * 0.6f
+                    else -> quality.fanCardHeight
+                }
+
+                val cardWidth = fanImg.width * cardHeight / fanImg.height
+
+                val y = ((quality.faceSize - cardHeight) / 2) + quality.cardPadding
                 val tarFRect = Rect.makeXYWH(
-                    cardContentRect.right - tarWidth - 20f, 20f,
-                    tarWidth.toFloat(),
-                    (tarWidth * fan.height / fan.width).toFloat()
+                    cardContentRect.right - cardWidth - 20f,
+                    y,
+                    cardWidth,
+                    cardHeight
                 )
-                drawImageRect(fan, srcFRect, tarFRect, FilterMipmap(FilterMode.LINEAR, MipmapMode.NEAREST), null, true)
 
-                if (decorate.fan?.numStr != "") {
+                drawImageRect(
+                    fanImg,
+                    srcFRect,
+                    tarFRect,
+                    FilterMipmap(FilterMode.LINEAR, MipmapMode.NEAREST),
+                    null,
+                    true
+                )
+
+                if (decorate.type == 3 && decorate.fan?.numStr != "") {
                     val textLineFan = TextLine.make(decorate.fan?.numStr, fansCardFont)
                     drawTextLine(
                         textLineFan,
-                        cardContentRect.right - 200f,
-                        70f,
-                        Paint().apply { color = Color.makeRGB(213, 122, 255) })
+                        tarFRect.right - textLineFan.width * 2,
+                        tarFRect.bottom - (cardHeight - fansCardFont.size) / 2,
+                        Paint().apply { color = Color.makeRGB(decorate.fan!!.color) }
+                    )
                 }
             }
         }
@@ -1258,7 +1303,9 @@ suspend fun Canvas.drawAvatar(
     }
 
     if (verifyIcon != "") {
-        val svg = SVGDOM(Data.makeFromFileName("$resourcesPath/icon/$verifyIcon.svg"))
+        //val svg = SVGDOM(Data.makeFromFileName("$resourcesPath/icon/$verifyIcon.svg"))
+        //val svg = SVGDOM(Data.makeFromFileName(loadResource("icon/$verifyIcon.svg")))
+        val svg = SVGDOM(Data.makeFromBytes(loadResourceBytes("icon/$verifyIcon.svg")))
         drawImage(
             svg.makeImage(verifyIconSize, verifyIconSize),
             tarFaceRect.right - verifyIconSize,
@@ -1275,12 +1322,13 @@ fun Canvas.drawBadge(
     bgColor: Int,
     bgAlpha: Int,
     cardRect: Rect,
-    position: Position
+    position: Position,
+    icon: Image? = null
 ) {
 
     val textLine = TextLine.make(text, font)
 
-    val badgeWidth = textLine.width + quality.badgePadding * 8
+    val badgeWidth = textLine.width + quality.badgePadding * 8 + (icon?.width?:0)
 
     val rrect = when (position) {
         TOP_LEFT -> RRect.makeXYWH(
@@ -1304,9 +1352,16 @@ fun Canvas.drawBadge(
 
     drawCard(rrect, bgColor, bgAlpha)
 
+    var x = rrect.left + quality.badgePadding * 4
+    if (icon != null){
+        x -= quality.badgePadding
+        drawImage(icon, x, rrect.top + (quality.badgeHeight - icon.height)/2)
+        x += icon.width + quality.badgePadding * 2
+    }
+
     drawTextLine(
         textLine,
-        rrect.left + quality.badgePadding * 4,
+        x,
         rrect.bottom - (quality.badgeHeight - textLine.capHeight) / 2,
         Paint().apply { color = fontColor })
 
