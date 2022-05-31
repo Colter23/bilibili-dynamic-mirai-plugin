@@ -150,36 +150,33 @@ suspend fun getOrDownloadImage(url: String, cacheType: CacheType = CacheType.UNK
 suspend fun uploadImage(url: String, cacheType: CacheType = CacheType.UNKNOWN, contact: Contact) =
     contact.uploadImage(getOrDownload(url, cacheType).toExternalResource().toAutoCloseable())
 
-val contactMap: MutableMap<Long, Contact> = mutableMapOf()
 
 /**
  * 查找Contact
  */
-fun findContact(del: String, ): Contact? = synchronized(contactMap) {
-    if (del.isBlank()) return@synchronized null
+fun findContact(del: String): Contact? {
+    if (del.isBlank()) return null
     val delegate = del.toLong()
-    contactMap.compute(delegate) { _, _ ->
-        for (bot in Bot.instances) {
-            if (delegate < 0) {
-                for (group in bot.groups) {
-                    if (group.id == delegate * -1) return@compute group
-                }
-            } else {
-                for (friend in bot.friends) {
-                    if (friend.id == delegate) return@compute friend
-                }
-                for (stranger in bot.strangers) {
-                    if (stranger.id == delegate) return@compute stranger
-                }
-                for (group in bot.groups) {
-                    for (member in group.members) {
-                        if (member.id == delegate) return@compute member
-                    }
+    for (bot in Bot.instances) {
+        if (delegate < 0) {
+            for (group in bot.groups) {
+                if (group.id == delegate * -1) return group
+            }
+        } else {
+            for (friend in bot.friends) {
+                if (friend.id == delegate) return friend
+            }
+            for (stranger in bot.strangers) {
+                if (stranger.id == delegate) return stranger
+            }
+            for (group in bot.groups) {
+                for (member in group.members) {
+                    if (member.id == delegate) return member
                 }
             }
         }
-        null
     }
+    return null
 }
 
 /**

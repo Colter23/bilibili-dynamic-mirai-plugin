@@ -24,6 +24,9 @@ object BiliBiliDynamic : KotlinPlugin(
     }
 ) {
 
+    var mid: Long = 0L
+    var tagid: Int = 0
+
     val dynamicChannel = Channel<DynamicItem>(20)
     val messageChannel = Channel<DynamicMessage>(20)
 
@@ -46,6 +49,9 @@ object BiliBiliDynamic : KotlinPlugin(
     }
 
     override fun onDisable() {
+        dynamicChannel.close()
+        messageChannel.close()
+
         BiliTasker.cancelAll()
 
         BiliSubscribeData.save()

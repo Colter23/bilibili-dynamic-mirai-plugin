@@ -5,7 +5,6 @@ import kotlinx.serialization.serializer
 import top.colter.mirai.plugin.bilibili.client.BiliClient
 import top.colter.mirai.plugin.bilibili.data.DynamicList
 import top.colter.mirai.plugin.bilibili.data.DynamicResult
-import top.colter.mirai.plugin.bilibili.data.IsFollow
 import top.colter.mirai.plugin.bilibili.draw.logger
 import top.colter.mirai.plugin.bilibili.utils.json
 
@@ -28,12 +27,6 @@ suspend fun BiliClient.getNewDynamic(page: Int = 1, type: String = "all"): Dynam
         parameter("timezone_offset", "-480")
         parameter("type", type)
         parameter("page", page)
-    }
-}
-
-suspend fun BiliClient.isFollow(uid: Long): IsFollow? {
-    return getData(IS_FOLLOW) {
-        parameter("fid", uid)
     }
 }
 

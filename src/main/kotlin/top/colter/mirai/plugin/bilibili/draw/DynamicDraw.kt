@@ -32,6 +32,10 @@ private val quality: Quality by lazy {
     }
 }
 
+private val theme: Theme by lazy {
+    Theme.v3
+}
+
 private val cardRect: Rect by lazy {
     Rect.makeLTRB(quality.cardMargin.toFloat(), 0f, quality.imageWidth - quality.cardMargin.toFloat(), 0f)
 }
@@ -50,17 +54,17 @@ private val font: Font by lazy {
 }
 
 private val fansCardFont: Font by lazy {
-    Font(loadTypeface("$resourcesPath/font/FansCard.ttf"), quality.subTitleFontSize)
+    Font(loadTypeface(Data.makeFromBytes(loadResourceBytes("font/FansCard.ttf"))), quality.subTitleFontSize)
 }
 
 val titleTextStyle = TextStyle().apply {
     fontSize = quality.titleFontSize
-    color = Color.makeRGB(49, 49, 49)
+    color = theme.titleColor
     typeface = mainTypeface
 }
 val descTextStyle = TextStyle().apply {
     fontSize = quality.subTitleFontSize
-    color = Color.makeRGB(102, 102, 102)
+    color = theme.descColor
     typeface = mainTypeface
 }
 
@@ -70,11 +74,11 @@ else
     floatArrayOf(quality.cardArc, quality.cardArc, quality.cardArc, quality.cardArc)
 
 val linkPaint = Paint().apply {
-    color = Color.makeRGB(23, 139, 207)
+    color = theme.linkColor
     isAntiAlias = true
 }
 val generalPaint = Paint().apply {
-    color = Color.makeRGB(34, 34, 34)
+    color = theme.contentColor
     isAntiAlias = true
 }
 
@@ -741,7 +745,7 @@ suspend fun ModuleDynamic.Major.Draw.drawGeneral(): Image {
     var drawItemWidth = 0f
     var drawItemHeight = 0f
     var drawItemSpace = quality.drawSpace * 2
-    var drawItemNum = 0
+    var drawItemNum = 1
 
     when (items.size) {
         1 -> {
@@ -1101,7 +1105,8 @@ suspend fun DynamicItem.makeCardBg(height: Int, block: (Canvas) -> Unit): Image 
                     //intArrayOf(
                     //    0xFFffb2ff.toInt(),0xFFffb2e5.toInt(), 0xFFffb2cc.toInt(), 0xFFffb2b2.toInt(), 0xFFffccb2.toInt()
                     //)
-                    generateLinearGradient(listOf(0xFFffb2cc.toInt(), 0xFFffb2b2.toInt()))
+                    //generateLinearGradient(listOf(0xFFffb2cc.toInt(), 0xFFffb2b2.toInt()))
+                    generateLinearGradient(listOf(0xFFd3edfa.toInt()))
                 )
             })
             val rrect = RRect.makeLTRB(

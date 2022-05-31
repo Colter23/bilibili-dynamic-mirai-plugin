@@ -57,7 +57,6 @@ object BiliDynamicConfig : AutoSavePluginConfig("BiliPluginConfig") {
 
 
 
-
     @ValueDescription("图片配置")
     val debugMode: Boolean by value(false)
 
@@ -66,6 +65,9 @@ object BiliDynamicConfig : AutoSavePluginConfig("BiliPluginConfig") {
 
     @ValueDescription("代理")
     val proxy: List<String> by value()
+
+    @ValueDescription("代理")
+    val biliAccountConfig: BiliAccountConfig by value()
 
     @ValueDescription("代理")
     val enableConfig: EnableConfig by value()
@@ -115,7 +117,9 @@ data class ProxyConfig(
 
 @Serializable
 data class BiliAccountConfig(
-    val quality: Int = 1,
+    val cookie: String = "",
+    val autoFollow: Boolean = true,
+    val followGroup: String = "Bot关注"
 )
 
 @Serializable
@@ -131,7 +135,7 @@ data class PushConfig(
 
 @Serializable
 data class TemplateConfig(
-    val dynamic: String = "【{name}】{type}\n{draw}\n{link} {>>}作者：{name}\nUID：{uid}\n时间：{time}\n类型：{type}\n链接：{link}\r{content}\r{images}{<<}aaaa{link}",
+    val dynamic: String = "【{name}】{type}\r{draw}\n{link} {>>}作者：{name}\nUID：{uid}\n时间：{time}\n类型：{type}\n链接：{link}\r{content}\r{images}{<<}",
     val live: String = "",
     val forwardCard: ForwardDisplay = ForwardDisplay()
 )

@@ -1,9 +1,6 @@
 package top.colter.mirai.plugin.bilibili.utils
 
-import org.jetbrains.skia.FontMgr
-import org.jetbrains.skia.FontStyleSet
-import org.jetbrains.skia.Typeface
-import org.jetbrains.skia.makeFromFile
+import org.jetbrains.skia.*
 import org.jetbrains.skia.paragraph.FontCollection
 import org.jetbrains.skia.paragraph.TypefaceFontProvider
 
@@ -27,6 +24,12 @@ object FontUtils {
 
     fun loadTypeface(path: String, index: Int = 0): Typeface {
         val face = Typeface.makeFromFile(path, index)
+        registerTypeface(face)
+        return face
+    }
+
+    fun loadTypeface(data: Data, index: Int = 0): Typeface {
+        val face = Typeface.makeFromData(data, index)
         registerTypeface(face)
         return face
     }

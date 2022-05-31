@@ -18,7 +18,9 @@ object DynamicCheckTasker : BiliTasker() {
 
     private val allMessageMode = true
 
-    private val client = BiliClient()
+    private val client = BiliClient().apply {
+        cookie = BiliCookie.parse(BiliDynamicConfig.biliAccountConfig.cookie)
+    }
 
     private val banType = listOf(
         DynamicType.DYNAMIC_TYPE_LIVE,
@@ -28,9 +30,6 @@ object DynamicCheckTasker : BiliTasker() {
 
     private var lastDynamic: Long = Instant.now().epochSecond
 
-    init {
-        client.cookie = BiliCookie("f6157d07%2C1657251675%2C00db3*11", "f8934ab39f7940ca5237381e07115e7e")
-    }
 
     override suspend fun main() {
         logger.info("Check Dynamic...")
@@ -52,6 +51,8 @@ object DynamicCheckTasker : BiliTasker() {
                 }.sortedBy {
                     it.time
                 }
+
+            if (dynamics.isNotEmpty()) lastDynamic = dynamics.last().time
             dynamicChannel.sendAll(dynamics)
         }
     }

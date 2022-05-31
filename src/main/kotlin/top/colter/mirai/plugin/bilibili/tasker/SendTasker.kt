@@ -28,21 +28,31 @@ object SendTasker : BiliTasker() {
     override suspend fun main() {
         val dynamicMessage = BiliBiliDynamic.messageChannel.receive()
 
-        //getDynamicContactList(dynamicMessage.uid, false)
+        val contactIdList = getDynamicContactList(dynamicMessage.uid)
+        if (contactIdList != null) {
+            val contactList = mutableListOf<Contact>()
+            contactIdList.forEach {
+                val c = findContact(it)
+                if (c != null){
+                    contactList.add(c)
+                }
+            }
+            val msg = dynamicMessage.buildMessage(contactList.first())
 
-        val msgList = dynamicMessage.buildMessage(findContact("")!!)
+            for (contact in contactList){
+                contact.sendMessage(msg)
+            }
+        }
 
-        findContact("")!!.sendMessage(msgList)
     }
 
-    private suspend fun getDynamicContactList(uid: Long, isVideo: Boolean): MutableSet<String>? = mutex.withLock {
+    private suspend fun getDynamicContactList(uid: Long): MutableSet<String>? = mutex.withLock {
         return try {
             val all = dynamic[0] ?: return null
             val list: MutableSet<String> = mutableSetOf()
             list.addAll(all.contacts.keys)
             val subData = dynamic[uid] ?: return list
-            if (isVideo) list.addAll(subData.contacts.filter { it.value[0] == '1' || it.value[0] == '2' }.keys)
-            else list.addAll(subData.contacts.filter { it.value[0] == '1' }.keys)
+            list.addAll(subData.contacts.keys)
             list.removeAll(subData.banList.keys)
             list
         } catch (e: Throwable) {
@@ -50,7 +60,7 @@ object SendTasker : BiliTasker() {
         }
     }
 
-    suspend fun Contact.sendMessage(messages: List<Message>) {
+    private suspend fun Contact.sendMessage(messages: List<Message>) {
         messages.forEach {
             sendMessage(it)
             delay(100)
@@ -121,6 +131,9 @@ object SendTasker : BiliTasker() {
         val msgs = template.split("\\r", "\r")
         val msgList = mutableListOf<Message>()
         msgs.forEach { ms ->
+
+            println(ms)
+
             msgList.add(MiraiCode.deserializeMiraiCode(buildMsg(ms, dm, contact)))
         }
         return msgList.toList()

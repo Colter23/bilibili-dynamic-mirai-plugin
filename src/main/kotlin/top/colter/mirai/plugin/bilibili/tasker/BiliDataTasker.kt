@@ -2,11 +2,30 @@ package top.colter.mirai.plugin.bilibili.tasker
 
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import net.mamoe.mirai.contact.Friend
+import net.mamoe.mirai.contact.Group
+import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
+import top.colter.mirai.plugin.bilibili.BiliDynamicConfig
+import top.colter.mirai.plugin.bilibili.BiliDynamicConfig.biliAccountConfig
 import top.colter.mirai.plugin.bilibili.BiliSubscribeData
 import top.colter.mirai.plugin.bilibili.SubData
+import top.colter.mirai.plugin.bilibili.api.follow
+import top.colter.mirai.plugin.bilibili.api.groupAddUser
+import top.colter.mirai.plugin.bilibili.api.isFollow
+import top.colter.mirai.plugin.bilibili.api.userInfo
+import top.colter.mirai.plugin.bilibili.client.BiliClient
+import top.colter.mirai.plugin.bilibili.data.BiliCookie
+import top.colter.mirai.plugin.bilibili.utils.findContact
+
+internal val logger by BiliBiliDynamic::logger
 
 object BiliDataTasker {
+
     val mutex = Mutex()
+
+    val client = BiliClient().apply {
+        cookie = BiliCookie.parse(BiliDynamicConfig.biliAccountConfig.cookie)
+    }
 
     val dynamic: MutableMap<Long, SubData> by BiliSubscribeData::dynamic
 
@@ -24,33 +43,32 @@ object BiliDataTasker {
         dynamic[0]?.contacts?.remove(subject)
     }
 
-    //private fun followUser(uid: Long): String {
-    //    if (uid == PluginMain.mid) {
-    //        return ""
-    //    }
-    //    val attr = httpUtils.getAndDecode<IsFollow>(IS_FOLLOW(uid)).attribute
-    //    if (attr == 0) {
-    //        if (!BiliPluginConfig.autoFollow) {
-    //            return "未关注此用户"
-    //        } else {
-    //            val postBody = "fid=$uid&act=1&re_src=11&csrf=${PluginMain.biliJct}"
-    //            val res = httpUtils.post(FOLLOW, postBody).decode<ResultData>()
-    //            if (res.code != 0) {
-    //                return "关注失败: ${res.message}"
-    //            }
-    //            if (BiliPluginConfig.followGroup.isNotEmpty()) {
-    //                val pb = "fids=${uid}&tagids=${PluginMain.tagid}&csrf=${PluginMain.biliJct}"
-    //                val res1 = httpUtils.post(ADD_USER, pb).decode<ResultData>()
-    //                if (res1.code != 0) {
-    //                    logger.error("移动分组失败: ${res1.message}")
-    //                }
-    //            }
-    //        }
-    //    } else if (attr == 128) {
-    //        return "此账号已被拉黑"
-    //    }
-    //    return ""
-    //}
+    private suspend fun followUser(uid: Long): String {
+        if (uid == BiliBiliDynamic.mid) {
+            return ""
+        }
+
+        val attr = client.isFollow(uid)?.attribute
+        if (attr == 0) {
+            if (!biliAccountConfig.autoFollow) {
+                return "未关注此用户"
+            } else {
+                val res = client.follow(uid)
+                if (res.code != 0) {
+                    return "关注失败: ${res.message}"
+                }
+                if (biliAccountConfig.followGroup.isNotEmpty()) {
+                    val res1 = client.groupAddUser(uid, BiliBiliDynamic.tagid)
+                    if (res1.code != 0) {
+                        logger.error("移动分组失败: ${res1.message}")
+                    }
+                }
+            }
+        } else if (attr == 128) {
+            return "此账号已被拉黑"
+        }
+        return ""
+    }
 
     suspend fun setColor(uid: Long, color: String): String {
         if (color.first() != '#' || color.length != 7) {
@@ -62,30 +80,31 @@ object BiliDataTasker {
         return "设置完成"
     }
 
-    //suspend fun addSubscribe(uid: Long, subject: String) = mutex.withLock {
-    //    if (dynamic[0]?.contacts?.contains(subject) == true) {
-    //        dynamic[0]?.contacts?.remove(subject)
-    //    }
-    //    val m = followUser(uid)
-    //    if (m != "") {
-    //        return@withLock m
-    //    }
-    //    val user = dynamic[uid]
-    //    if (user == null) {
-    //        val subData = SubData(httpUtils.getAndDecode<User>(USER_INFO(uid)).name)
-    //        subData.contacts[subject] = "11"
-    //        dynamic[uid] = subData
-    //        "订阅 ${dynamic[uid]?.name} 成功! \n默认检测 动态+视频+直播 如果需要调整请发送/bili set $uid\n如要设置主题色请发送/bili color $uid <16进制颜色>"
-    //    } else {
-    //        if (user.contacts.contains(subject)) {
-    //            "之前订阅过这个人哦"
-    //        } else {
-    //            user.contacts[subject] = "11"
-    //            "订阅 ${dynamic[uid]?.name} 成功! \n默认检测 动态+视频+直播 如果需要调整请发送/bili set $uid"
-    //        }
-    //
-    //    }
-    //}
+    suspend fun addSubscribe(uid: Long, subject: String) = mutex.withLock {
+        if (dynamic[0]?.contacts?.contains(subject) == true) {
+            dynamic[0]?.contacts?.remove(subject)
+        }
+        val m = followUser(uid)
+        if (m != "") {
+            return@withLock m
+        }
+        val user = dynamic[uid]
+        if (user == null) {
+            val u = client.userInfo(uid)
+            val subData = SubData(u!!.name)
+            subData.contacts[subject] = "11"
+            dynamic[uid] = subData
+            "订阅 ${dynamic[uid]?.name} 成功! \n默认检测 动态+视频+直播 如果需要调整请发送/bili set $uid\n如要设置主题色请发送/bili color $uid <16进制颜色>"
+        } else {
+            if (user.contacts.contains(subject)) {
+                "之前订阅过这个人哦"
+            } else {
+                user.contacts[subject] = "11"
+                "订阅 ${dynamic[uid]?.name} 成功! \n默认检测 动态+视频+直播 如果需要调整请发送/bili set $uid"
+            }
+
+        }
+    }
 
     suspend fun addFilter(regex: String, uid: Long, subject: String, mode: Boolean = true) = mutex.withLock {
         if (dynamic.containsKey(uid)) {
@@ -199,42 +218,42 @@ object BiliDataTasker {
         }
     }
 
-    //suspend fun listUser() = mutex.withLock {
-    //    buildString {
-    //        val user = mutableSetOf<String>()
-    //        dynamic.forEach { (uid, sub) ->
-    //            user.addAll(sub.contacts.keys)
-    //        }
-    //        val group = StringBuilder()
-    //        val friend = StringBuilder()
-    //        user.forEach {
-    //            findContact(it).apply {
-    //                when (this){
-    //                    is Group -> group.appendLine("${name}@${id}")
-    //                    is Friend -> friend.appendLine("${nick}@${id}")
-    //                }
-    //            }
-    //        }
-    //        appendLine("====群====")
-    //        append(group.ifEmpty { "无\n" })
-    //        appendLine("====好友====")
-    //        append(friend.ifEmpty { "无\n" })
-    //        appendLine()
-    //        append("共 ${user.size} 名用户")
-    //    }
-    //}
-    //
+    suspend fun listUser() = mutex.withLock {
+        buildString {
+            val user = mutableSetOf<String>()
+            dynamic.forEach { (uid, sub) ->
+                user.addAll(sub.contacts.keys)
+            }
+            val group = StringBuilder()
+            val friend = StringBuilder()
+            user.forEach {
+                findContact(it).apply {
+                    when (this){
+                        is Group -> group.appendLine("${name}@${id}")
+                        is Friend -> friend.appendLine("${nick}@${id}")
+                    }
+                }
+            }
+            appendLine("====群====")
+            append(group.ifEmpty { "无\n" })
+            appendLine("====好友====")
+            append(friend.ifEmpty { "无\n" })
+            appendLine()
+            append("共 ${user.size} 名用户")
+        }
+    }
+
     //suspend fun login(contact: Contact){
-    //    val loginData = httpUtils.getAndDecode<LoginResult.LoginData>(LOGIN_URL)
+    //    val loginData = client.getLoginUrl().data
     //    val qrCodeWriter = QRCodeWriter()
-    //    val bitMatrix = qrCodeWriter.encode(loginData.url, BarcodeFormat.QR_CODE, 250, 250)
-    //    val file = PluginMain.resolveDataFile("qrcode.png")
-    //    MatrixToImageWriter.writeToPath(bitMatrix, "PNG", file.toPath())
-    //    contact.sendMessage(file.uploadAsImage(contact) + "请使用BiliBili手机APP扫码登录 3分钟有效")
+    //    val bitMatrix = qrCodeWriter.encode(loginData?.url, BarcodeFormat.QR_CODE, 250, 250)
+    //    val file = cachePath.resolve("qrcode.png")
+    //    MatrixToImageWriter.writeToPath(bitMatrix, "PNG", file)
+    //    contact.sendMessage(file.toFile().uploadAsImage(contact) + "请使用BiliBili手机APP扫码登录 3分钟有效")
     //    runCatching {
     //        withTimeout(180000){
     //            while (true){
-    //                val loginInfo = httpUtils.post(LOGIN_INFO,"oauthKey=${loginData.oauthKey}").decode<ResultData>()
+    //                val loginInfo = httpUtils.post(LOGIN_INFO,"oauthKey=${loginData?.oauthKey}").decode<ResultData>()
     //                if (loginInfo.status == true){
     //                    val url = loginInfo.data?.decode<LoginResult.LoginData>()?.url
     //                    val querys = URI(url).query.split("&")

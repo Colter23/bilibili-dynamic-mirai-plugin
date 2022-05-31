@@ -4,7 +4,6 @@ import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
 import top.colter.mirai.plugin.bilibili.data.DynamicItem
 import top.colter.mirai.plugin.bilibili.data.DynamicMessage
 import top.colter.mirai.plugin.bilibili.data.DynamicType
-import top.colter.mirai.plugin.bilibili.draw.logger
 import top.colter.mirai.plugin.bilibili.draw.makeDrawDynamic
 import top.colter.mirai.plugin.bilibili.utils.formatTime
 import top.colter.mirai.plugin.bilibili.utils.time
@@ -15,7 +14,7 @@ object MessageTasker : BiliTasker() {
 
     override suspend fun main() {
         val dynamicItem = BiliBiliDynamic.dynamicChannel.receive()
-        logger.debug(dynamicItem.idStr)
+        //logger.debug(dynamicItem.idStr)
         BiliBiliDynamic.messageChannel.send(dynamicItem.buildMessage())
     }
 
@@ -37,7 +36,7 @@ object MessageTasker : BiliTasker() {
     fun DynamicItem.textContent(): String {
         return when (type) {
             DynamicType.DYNAMIC_TYPE_FORWARD -> {
-                orig?.textContent()!!
+                "${modules.moduleDynamic.desc?.text}\n\n 转发动态:\n${orig?.textContent()}"
             }
             DynamicType.DYNAMIC_TYPE_WORD,
             DynamicType.DYNAMIC_TYPE_DRAW -> {
