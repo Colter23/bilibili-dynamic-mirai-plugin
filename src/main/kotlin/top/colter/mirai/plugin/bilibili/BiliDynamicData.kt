@@ -13,6 +13,7 @@ object BiliDynamicData : AutoSavePluginData("BiliSubscribeData") {
 
     @ValueDescription("动态推送模板")
     val dynamicPushTemplate: MutableMap<String, MutableSet<Long>> by value()
+
     @ValueDescription("直播推送模板")
     val livePushTemplate: MutableMap<String, MutableSet<Long>> by value()
 }
@@ -36,4 +37,4 @@ data class SubData(
     @SerialName("containFilter")
     val containFilter: MutableMap<String, MutableList<String>> = mutableMapOf(),
 
-)
+    )

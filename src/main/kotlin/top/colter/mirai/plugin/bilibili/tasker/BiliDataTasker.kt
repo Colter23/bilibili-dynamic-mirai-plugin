@@ -227,7 +227,7 @@ object BiliDataTasker {
             val friend = StringBuilder()
             user.forEach {
                 findContact(it).apply {
-                    when (this){
+                    when (this) {
                         is Group -> group.appendLine("${name}@${id}")
                         is Friend -> friend.appendLine("${nick}@${id}")
                     }
@@ -242,7 +242,7 @@ object BiliDataTasker {
         }
     }
 
-    suspend fun login(contact: Contact){
+    suspend fun login(contact: Contact) {
         val loginData = client.getLoginUrl().data!!
 
         val image = LoginQrCodeDraw.qrCode(loginData.url)
@@ -250,11 +250,11 @@ object BiliDataTasker {
         contact.sendMessage("请使用BiliBili手机APP扫码登录 3分钟有效")
 
         runCatching {
-            withTimeout(180000){
-                while (true){
+            withTimeout(180000) {
+                while (true) {
                     val loginInfo = client.loginInfo(loginData.oauthKey!!)
 
-                    if (loginInfo.status == true){
+                    if (loginInfo.status == true) {
                         val url = loginInfo.data!!.url
                         val querys = URI(url).query.split("&")
                         val cookie = buildString {

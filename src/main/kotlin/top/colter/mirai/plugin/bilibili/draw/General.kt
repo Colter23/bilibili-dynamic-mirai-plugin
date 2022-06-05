@@ -98,7 +98,7 @@ fun Canvas.drawImageClip(
 fun Color.makeRGB(hex: String): Int {
     require(hex.startsWith("#")) { "Hex format error: $hex" }
     require(hex.length == 7 || hex.length == 9) { "Hex length error: $hex" }
-    return when (hex.length){
+    return when (hex.length) {
         7 -> {
             makeRGB(
                 Integer.valueOf(hex.substring(1, 3), 16),

@@ -23,7 +23,6 @@ data class Theme(
     val linkColorHex: String = "",
 
 
-
     ) {
     @Serializable
     data class Shadow(
@@ -32,12 +31,13 @@ data class Theme(
         val offsetY: Float = 0f,
         val blur: Float = 0f,
         val spread: Float = 0f,
-    ){
+    ) {
         val shadowColor: Int = Color.makeRGB(shadowColorHex)
     }
+
     val cardBgColor: Int = Color.makeRGB(cardBgColorHex)
 
-    val cardOutlineColor:Int = Color.makeRGB(cardOutlineColorHex)
+    val cardOutlineColor: Int = Color.makeRGB(cardOutlineColorHex)
 
     val nameColor: Int = Color.makeRGB(nameColorHex)
     val titleColor: Int = Color.makeRGB(titleColorHex)

@@ -56,7 +56,6 @@ object BiliDynamicConfig : AutoSavePluginConfig("BiliPluginConfig") {
     val baiduTranslate: TranslateConfig by value()
 
 
-
     @ValueDescription("图片配置")
     val debugMode: Boolean by value(false)
 

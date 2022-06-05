@@ -12,5 +12,5 @@ val json = Json {
     allowStructuredMapKeys = true
 }
 
-inline fun <reified T> String.decode(): T = json.decodeFromString(json.serializersModule.serializer(),this)
+inline fun <reified T> String.decode(): T = json.decodeFromString(json.serializersModule.serializer(), this)
 inline fun <reified T> JsonElement.decode(): T = json.decodeFromJsonElement(this)

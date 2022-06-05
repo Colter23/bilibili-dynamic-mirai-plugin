@@ -70,7 +70,7 @@ val DynamicItem.link: String
 
 fun loadResource(file: String) =
     BiliBiliDynamic::class.java.getResource(file)?.path!!
-    //BiliBiliDynamic::class.java.getResource(file)!!.openStream().use { it.readBytes() }
+//BiliBiliDynamic::class.java.getResource(file)!!.openStream().use { it.readBytes() }
 
 fun loadResourceBytes(path: String) =
     BiliBiliDynamic.getResourceAsStream(path)!!.readBytes()

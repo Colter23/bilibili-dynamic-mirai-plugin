@@ -109,14 +109,14 @@ suspend fun DynamicItem.drawDynamic(isForward: Boolean = false): Image {
 
     var imgList = modules.makeGeneral(formatTime, link, isForward)
 
-    if (orig != null){
-        imgList = if (this.modules.moduleDynamic.additional != null){
+    if (orig != null) {
+        imgList = if (this.modules.moduleDynamic.additional != null) {
             val result = ArrayList<Image>(imgList.size + 1)
             result.addAll(imgList.subList(0, imgList.size - 1))
             result.add(orig)
             result.add(imgList.last())
             result
-        }else {
+        } else {
             imgList.plus(orig)
         }
     }
@@ -129,7 +129,7 @@ suspend fun DynamicItem.drawDynamic(isForward: Boolean = false): Image {
         }
     }
 
-    if (type == DynamicType.DYNAMIC_TYPE_WORD || type == DYNAMIC_TYPE_NONE){
+    if (type == DynamicType.DYNAMIC_TYPE_WORD || type == DYNAMIC_TYPE_NONE) {
         height += quality.contentSpace * 2
     }
 
@@ -158,7 +158,8 @@ suspend fun DynamicItem.drawDynamic(isForward: Boolean = false): Image {
             }
 
             if (imageConfig.badgeEnable) {
-                val svg = SVGDOM(Data.makeFromBytes(loadResourceBytes("icon/${if (isForward) "FORWARD" else "BILIBILI_LOGO"}.svg")))
+                val svg =
+                    SVGDOM(Data.makeFromBytes(loadResourceBytes("icon/${if (isForward) "FORWARD" else "BILIBILI_LOGO"}.svg")))
                 //val svg = SVGDOM(Data.makeFromFileName("$resourcesPath/icon/${if (isForward) "FORWARD" else "BILIBILI_LOGO"}.svg"))
                 drawBadge(
                     if (isForward) "转发动态" else "动态",
@@ -226,7 +227,7 @@ suspend fun ModuleDynamic.Additional.makeGeneral(): Image? {
         }
         "ADDITIONAL_TYPE_RESERVE" -> {
             drawAdditionalCard(
-                when (reserve!!.stype){
+                when (reserve!!.stype) {
                     1 -> "视频预约"
                     2 -> "直播预约"
                     4 -> "首映预告"
@@ -492,16 +493,20 @@ suspend fun drawAdditionalCard(
 
             x += quality.cardPadding
 
-            val titleParagraph = ParagraphBuilder(paragraphStyle, fonts).addText(title).build().layout(cardContentRect.width - x)
+            val titleParagraph =
+                ParagraphBuilder(paragraphStyle, fonts).addText(title).build().layout(cardContentRect.width - x)
             paragraphStyle.apply {
                 textStyle = descTextStyle.apply {
                     fontSize = quality.subTitleFontSize * 0.8f
                 }
             }
-            val desc1Paragraph = ParagraphBuilder(paragraphStyle, fonts).addText(desc1).build().layout(cardContentRect.width - x)
-            val desc2Paragraph = desc2?.let { ParagraphBuilder(paragraphStyle, fonts).addText(it).build().layout(cardContentRect.width - x) }
+            val desc1Paragraph =
+                ParagraphBuilder(paragraphStyle, fonts).addText(desc1).build().layout(cardContentRect.width - x)
+            val desc2Paragraph = desc2?.let {
+                ParagraphBuilder(paragraphStyle, fonts).addText(it).build().layout(cardContentRect.width - x)
+            }
 
-            val top = (additionalCardRect.height - (titleParagraph.height * if (desc2==null) 2 else 3))/2
+            val top = (additionalCardRect.height - (titleParagraph.height * if (desc2 == null) 2 else 3)) / 2
 
             var y = additionalCardRect.top + top
             titleParagraph.paint(this, x, y)
@@ -509,7 +514,7 @@ suspend fun drawAdditionalCard(
             y += titleParagraph.height
             desc1Paragraph.paint(this, x, y)
 
-            if (desc2Paragraph != null){
+            if (desc2Paragraph != null) {
                 y += titleParagraph.height
                 desc2Paragraph.paint(this, x, y)
             }
@@ -548,13 +553,13 @@ suspend fun ModuleDynamic.Major.Common.drawGeneral(): Image {
             drawCard(commonCardRect)
             drawRectShadowAntiAlias(commonCardRect.inflate(1f), 5f, 5f, 15f, 0f, Color.makeARGB(30, 0, 0, 0))
 
-            if (badge.text.isNotBlank()){
+            if (badge.text.isNotBlank()) {
                 val labelTextLine = TextLine.make(badge.text, font.makeWithSize(quality.subTitleFontSize))
 
                 drawLabelCard(
                     labelTextLine,
                     commonCardRect.right - labelTextLine.width - quality.badgePadding * 4 - quality.cardPadding,
-                     1 + (height - labelTextLine.height) / 2,
+                    1 + (height - labelTextLine.height) / 2,
                     Paint().apply {
                         color = Color.makeRGB(badge.color)
                     },
@@ -578,16 +583,19 @@ suspend fun ModuleDynamic.Major.Common.drawGeneral(): Image {
             x += imgRect.width + quality.cardPadding
 
 
-            val titleParagraph = ParagraphBuilder(paragraphStyle, fonts).addText(title).build().layout(cardContentRect.width - x)
+            val titleParagraph =
+                ParagraphBuilder(paragraphStyle, fonts).addText(title).build().layout(cardContentRect.width - x)
             paragraphStyle.apply {
                 textStyle = descTextStyle.apply {
                     fontSize = quality.subTitleFontSize * 0.8f
                 }
             }
-            val desc1Paragraph = ParagraphBuilder(paragraphStyle, fonts).addText(desc).build().layout(cardContentRect.width - x)
-            val desc2Paragraph = if (label.isNotBlank()) ParagraphBuilder(paragraphStyle, fonts).addText(label).build().layout(cardContentRect.width - x) else null
+            val desc1Paragraph =
+                ParagraphBuilder(paragraphStyle, fonts).addText(desc).build().layout(cardContentRect.width - x)
+            val desc2Paragraph = if (label.isNotBlank()) ParagraphBuilder(paragraphStyle, fonts).addText(label).build()
+                .layout(cardContentRect.width - x) else null
 
-            val top = (commonCardRect.height - (titleParagraph.height * 3))/2
+            val top = (commonCardRect.height - (titleParagraph.height * 3)) / 2
 
             var y = commonCardRect.top + top + if (label.isBlank()) titleParagraph.height / 4 else 0f
             titleParagraph.paint(this, x, y)
@@ -595,7 +603,7 @@ suspend fun ModuleDynamic.Major.Common.drawGeneral(): Image {
             y += titleParagraph.height + if (label.isBlank()) titleParagraph.height / 2 else 0f
             desc1Paragraph.paint(this, x, y)
 
-            if (desc2Paragraph != null){
+            if (desc2Paragraph != null) {
                 y += titleParagraph.height
                 desc2Paragraph.paint(this, x, y)
             }
@@ -622,7 +630,8 @@ suspend fun ModuleDynamic.Major.Archive.drawGeneral(): Image {
         textStyle = descTextStyle
     }
 
-    val descParagraph = ParagraphBuilder(paragraphStyle, fonts).addText(desc.replace("\n", " ")).build().layout(paragraphWidth)
+    val descParagraph =
+        ParagraphBuilder(paragraphStyle, fonts).addText(desc.replace("\n", " ")).build().layout(paragraphWidth)
 
     val videoCoverHeight = cardContentRect.width * 0.625f  // 封面比例 16:10
     val videoCardHeight = videoCoverHeight + titleParagraph.height + descParagraph.height + quality.cardPadding
@@ -669,7 +678,7 @@ suspend fun ModuleDynamic.Major.Archive.drawGeneral(): Image {
                     videoCardRect,
                     TOP_RIGHT
                 )
-            }else{
+            } else {
                 val labelTextLine = TextLine.make(badge.text, font.makeWithSize(quality.subTitleFontSize))
 
                 drawLabelCard(
@@ -806,7 +815,7 @@ suspend fun ModuleDynamic.Major.Archive.drawSmall(): Image {
             titleParagraph.paint(
                 this,
                 quality.cardPadding * 1.5f + videoCoverWidth,
-                 y
+                y
             )
 
             descParagraph.paint(
@@ -820,9 +829,9 @@ suspend fun ModuleDynamic.Major.Archive.drawSmall(): Image {
                 durationTextLine,
                 coverRRect.left + quality.badgePadding * 2,
                 coverRRect.bottom - durationTextLine.height - quality.badgePadding * 2,
-                Paint().apply { color = Color.WHITE } ,
+                Paint().apply { color = Color.WHITE },
                 Paint().apply {
-                   color =  Color.BLACK
+                    color = Color.BLACK
                     alpha = 130
                 }
             )
@@ -963,10 +972,10 @@ suspend fun ModuleDynamic.Major.Article.drawGeneral(): Image {
                 articleCoverHeight,
                 topTwoBadgeCardArc
             ).inflate(-1f) as RRect
-            if (covers.size == 1){
+            if (covers.size == 1) {
                 val coverImg = getOrDownloadImage(covers[0], CacheType.IMAGES)
                 drawImageRRect(coverImg, coverRRect)
-            }else{
+            } else {
                 var imgX = articleCardRect.left
                 val imgW = articleCardRect.width / 3 - 4
                 save()
@@ -993,11 +1002,11 @@ suspend fun ModuleDynamic.Major.Article.drawGeneral(): Image {
                     articleCardRect,
                     TOP_RIGHT
                 )
-            }else{
+            } else {
                 val labelTextLine = TextLine.make("专栏", font.makeWithSize(quality.subTitleFontSize))
                 drawLabelCard(
                     labelTextLine,
-                    articleCardRect.right - labelTextLine.width - quality.badgePadding * 4 - quality.cardPadding ,
+                    articleCardRect.right - labelTextLine.width - quality.badgePadding * 4 - quality.cardPadding,
                     articleCardRect.top + quality.cardPadding * 0.8f,
                     Paint().apply { color = Color.WHITE },
                     Paint().apply { color = Color.makeRGB(251, 114, 153) }
@@ -1451,7 +1460,7 @@ fun Canvas.drawBadge(
 
     val textLine = TextLine.make(text, font)
 
-    val badgeWidth = textLine.width + quality.badgePadding * 8 + (icon?.width?:0)
+    val badgeWidth = textLine.width + quality.badgePadding * 8 + (icon?.width ?: 0)
 
     val rrect = when (position) {
         TOP_LEFT -> RRect.makeXYWH(
@@ -1476,9 +1485,9 @@ fun Canvas.drawBadge(
     drawCard(rrect, bgColor, bgAlpha)
 
     var x = rrect.left + quality.badgePadding * 4
-    if (icon != null){
+    if (icon != null) {
         x -= quality.badgePadding
-        drawImage(icon, x, rrect.top + (quality.badgeHeight - icon.height)/2)
+        drawImage(icon, x, rrect.top + (quality.badgeHeight - icon.height) / 2)
         x += icon.width + quality.badgePadding * 2
     }
 

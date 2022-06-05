@@ -30,21 +30,23 @@ object SendTasker : BiliTasker() {
     override suspend fun main() {
         val dynamicMessage = BiliBiliDynamic.messageChannel.receive()
 
-        val contactIdList = if (dynamicMessage.contact == null) getDynamicContactList(dynamicMessage.uid) else listOf(dynamicMessage.contact)
+        val contactIdList =
+            if (dynamicMessage.contact == null) getDynamicContactList(dynamicMessage.uid) else listOf(dynamicMessage.contact)
 
         if (contactIdList != null) {
             val contactList = mutableListOf<Contact>()
             contactIdList.forEach {
                 val c = findContact(it)
-                if (c != null){
+                if (c != null) {
                     contactList.add(c)
                 }
             }
 
             val templateMap: MutableMap<String, MutableSet<Contact>> = mutableMapOf()
 
-            if (BiliDynamicData.dynamicPushTemplate.isEmpty()){
-                if (templateMap[templateConfig.defaultDynamicTemplate] == null) templateMap[templateConfig.defaultDynamicTemplate] = mutableSetOf()
+            if (BiliDynamicData.dynamicPushTemplate.isEmpty()) {
+                if (templateMap[templateConfig.defaultDynamicTemplate] == null) templateMap[templateConfig.defaultDynamicTemplate] =
+                    mutableSetOf()
                 contactList.forEach {
                     templateMap[templateConfig.defaultDynamicTemplate]!!.add(it)
                 }
@@ -52,11 +54,12 @@ object SendTasker : BiliTasker() {
 
             BiliDynamicData.dynamicPushTemplate.forEach { (t, u) ->
                 contactList.forEach {
-                    if (u.contains(it.id)){
+                    if (u.contains(it.id)) {
                         if (templateMap[t] == null) templateMap[t] = mutableSetOf()
                         templateMap[t]!!.add(it)
-                    }else{
-                        if (templateMap[templateConfig.defaultDynamicTemplate] == null) templateMap[templateConfig.defaultDynamicTemplate] = mutableSetOf()
+                    } else {
+                        if (templateMap[templateConfig.defaultDynamicTemplate] == null) templateMap[templateConfig.defaultDynamicTemplate] =
+                            mutableSetOf()
                         templateMap[templateConfig.defaultDynamicTemplate]!!.add(it)
                     }
                 }
@@ -64,10 +67,11 @@ object SendTasker : BiliTasker() {
 
             val templateMsgMap: MutableMap<String, List<Message>> = mutableMapOf()
             templateMap.forEach {
-                templateMsgMap[it.key] = dynamicMessage.buildMessage(contactList.first(), templateConfig.dynamic[it.key]!!)
+                templateMsgMap[it.key] =
+                    dynamicMessage.buildMessage(contactList.first(), templateConfig.dynamic[it.key]!!)
             }
 
-            for (temp in templateMap){
+            for (temp in templateMap) {
                 temp.value.forEach {
                     templateMsgMap[temp.key]?.let { it1 -> it.sendMessage(it1) }
                 }
@@ -131,7 +135,10 @@ object SendTasker : BiliTasker() {
                     }
 
                     override fun generatePreview(forward: RawForwardMessage): List<String> {
-                        return buildSimpleTemplate(forwardCardTemplate.preview, this@buildMessage).split("\\n", "\n")
+                        return buildSimpleTemplate(forwardCardTemplate.preview, this@buildMessage).split(
+                            "\\n",
+                            "\n"
+                        )
                     }
 
                     override fun generateSummary(forward: RawForwardMessage): String {

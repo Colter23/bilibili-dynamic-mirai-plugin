@@ -9,7 +9,7 @@ import top.colter.mirai.plugin.bilibili.utils.decode
 suspend fun BiliClient.getLoginUrl(): LoginResult = get(LOGIN_URL)
 suspend fun BiliClient.loginInfo(oauthKey: String): LoginResult {
     return useHttpClient {
-        it.post(LOGIN_INFO){
+        it.post(LOGIN_INFO) {
             parameter("oauthKey", oauthKey)
         }
     }
@@ -36,14 +36,14 @@ suspend fun BiliClient.followGroup(): List<FollowGroup>? {
 }
 
 suspend fun BiliClient.createGroup(tagName: String): FollowGroup? {
-    return post<BiliResult>(CREATE_GROUP){
+    return post<BiliResult>(CREATE_GROUP) {
         parameter("tag", tagName)
         parameter("csrf", BiliBiliDynamic.cookie.biliJct)
     }.data?.decode()
 }
 
 suspend fun BiliClient.follow(uid: Long): BiliResult {
-    return post(FOLLOW){
+    return post(FOLLOW) {
         parameter("fid", uid)
         parameter("act", 1)
         parameter("re_src", 11)
@@ -52,7 +52,7 @@ suspend fun BiliClient.follow(uid: Long): BiliResult {
 }
 
 suspend fun BiliClient.groupAddUser(uid: Long, tagid: Int): BiliResult {
-    return post(ADD_USER){
+    return post(ADD_USER) {
         parameter("fids", uid)
         parameter("tagids", tagid)
         parameter("csrf", BiliBiliDynamic.cookie.biliJct)

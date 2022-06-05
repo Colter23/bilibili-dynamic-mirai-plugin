@@ -40,9 +40,9 @@ object DynamicCheckTasker : BiliTasker() {
                 }.filter {
                     it.time > lastDynamic
                 }.filter {
-                    if (listenAllDynamicMode){
+                    if (listenAllDynamicMode) {
                         true
-                    }else{
+                    } else {
                         subDynamic.filter { it.value.contacts.isNotEmpty() }.map { it.key }
                             .contains(it.modules.moduleAuthor.mid)
                     }

@@ -17,7 +17,7 @@ object ListenerTasker : BiliTasker() {
             println(it.message.content)
             val regex = """^#bili s (.+)""".toRegex()
             val s = regex.find(it.message.content)
-            if (s != null){
+            if (s != null) {
                 val detail = biliClient.getDynamicDetail(s.destructured.component1())
                 if (detail != null) it.subject.sendMessage("绘图中，请稍等")
                 detail?.let { d -> dynamicChannel.send(DynamicDetail(d, it.subject.delegate)) }

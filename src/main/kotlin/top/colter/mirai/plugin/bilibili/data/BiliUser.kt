@@ -65,7 +65,7 @@ data class BiliUser(
     //@SerialName("sys_notice")
     //val sysNotice: ?,
 
-){
+) {
     @Serializable
     data class Nameplate(
         @SerialName("nid")
@@ -128,7 +128,7 @@ data class FansMedal(
     val wear: Boolean,
     @SerialName("medal")
     val medal: Medal,
-){
+) {
     @Serializable
     data class Medal(
         @SerialName("uid")
@@ -198,7 +198,7 @@ data class LiveRoom(
     val broadcastType: Int,
     @SerialName("watched_show")
     val watchedShow: WatchedShow,
-){
+) {
     @Serializable
     data class WatchedShow(
         @SerialName("switch")
