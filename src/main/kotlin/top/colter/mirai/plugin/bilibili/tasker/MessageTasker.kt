@@ -13,12 +13,13 @@ object MessageTasker : BiliTasker() {
     override val interval: Int = 0
 
     override suspend fun main() {
-        val dynamicItem = BiliBiliDynamic.dynamicChannel.receive()
-        //logger.debug(dynamicItem.idStr)
-        BiliBiliDynamic.messageChannel.send(dynamicItem.buildMessage())
+        val dynamicDetail = BiliBiliDynamic.dynamicChannel.receive()
+        val dynamicItem = dynamicDetail.item
+        logger.debug(dynamicItem.idStr)
+        BiliBiliDynamic.messageChannel.send(dynamicItem.buildMessage(dynamicDetail.contact))
     }
 
-    suspend fun DynamicItem.buildMessage(): DynamicMessage {
+    suspend fun DynamicItem.buildMessage(contact: String? = null): DynamicMessage {
         return DynamicMessage(
             idStr,
             modules.moduleAuthor.mid,
@@ -29,7 +30,8 @@ object MessageTasker : BiliTasker() {
             textContent(),
             dynamicImages(),
             dynamicLinks(),
-            makeDynamic()
+            makeDynamic(),
+            contact
         )
     }
 

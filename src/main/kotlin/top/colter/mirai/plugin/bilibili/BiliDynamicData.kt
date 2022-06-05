@@ -7,9 +7,14 @@ import net.mamoe.mirai.console.data.ValueDescription
 import net.mamoe.mirai.console.data.value
 import java.time.Instant
 
-object BiliSubscribeData : AutoSavePluginData("BiliSubscribeData") {
+object BiliDynamicData : AutoSavePluginData("BiliSubscribeData") {
     @ValueDescription("订阅信息")
     val dynamic: MutableMap<Long, SubData> by value(mutableMapOf(0L to SubData("ALL")))
+
+    @ValueDescription("动态推送模板")
+    val dynamicPushTemplate: MutableMap<String, MutableSet<Long>> by value()
+    @ValueDescription("直播推送模板")
+    val livePushTemplate: MutableMap<String, MutableSet<Long>> by value()
 }
 
 @Serializable
@@ -29,5 +34,6 @@ data class SubData(
     @SerialName("filter")
     val filter: MutableMap<String, MutableList<String>> = mutableMapOf(),
     @SerialName("containFilter")
-    val containFilter: MutableMap<String, MutableList<String>> = mutableMapOf()
+    val containFilter: MutableMap<String, MutableList<String>> = mutableMapOf(),
+
 )

@@ -21,6 +21,8 @@ data class Quality(
     val lineHeight: Float = 0f,
     val lineSpace: Int = 0,
 
+    val contentSpace: Int = 0,
+
     val fanCardHeight: Float = 0f,
 
     val drawSpace: Int = 0,
@@ -31,6 +33,7 @@ data class Quality(
     val nameFontSize: Float = 0f,
     val titleFontSize: Float = 0f,
     val subTitleFontSize: Float = 0f,
+    val descFontSize: Float = 0f,
     val contentFontSize: Float = 0f,
 
     val emojiSize: Float = 0f,
@@ -60,6 +63,8 @@ data class Quality(
             lineHeight = 30f,
             lineSpace = 8,
 
+            contentSpace = 10,
+
             drawSpace = 10,
             smallCardHeight = 160,
             additionalCardHeight = 90,
@@ -73,6 +78,7 @@ data class Quality(
             nameFontSize = 30f,
             titleFontSize = 26f,
             subTitleFontSize = 22f,
+            descFontSize = 20f,
             contentFontSize = 26f,
 
             emojiSize = 34f,
@@ -97,6 +103,8 @@ data class Quality(
             lineHeight = 35f,
             lineSpace = 8,
 
+            contentSpace = 15,
+
             fanCardHeight = 115f,
 
             drawSpace = 15,
@@ -106,6 +114,7 @@ data class Quality(
             nameFontSize = 36f,
             titleFontSize = 32f,
             subTitleFontSize = 28f,
+            descFontSize = 24f,
             contentFontSize = 32f,
 
             emojiSize = 36f,

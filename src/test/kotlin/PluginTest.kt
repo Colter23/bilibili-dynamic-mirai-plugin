@@ -6,7 +6,6 @@ import kotlinx.serialization.serializer
 import org.jetbrains.skia.*
 import org.junit.Test
 import top.colter.mirai.plugin.bilibili.client.BiliClient
-import top.colter.mirai.plugin.bilibili.client.BiliLogin
 import top.colter.mirai.plugin.bilibili.data.DynamicItem
 import top.colter.mirai.plugin.bilibili.data.DynamicType
 import top.colter.mirai.plugin.bilibili.data.ModuleAuthor
@@ -25,7 +24,7 @@ internal class PluginTest {
 
 //        val client = HttpClient()
 //        client.get<HttpResponse>("aa")
-        BiliLogin().getLoginQrCode()
+//        BiliLogin().getLoginQrCode()
 
     }
 

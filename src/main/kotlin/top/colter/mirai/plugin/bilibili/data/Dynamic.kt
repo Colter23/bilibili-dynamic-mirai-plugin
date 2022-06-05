@@ -27,6 +27,15 @@ data class DynamicList(
     val items: List<DynamicItem>,
 )
 
+@Serializable
+data class DynamicDetail(
+    @SerialName("item")
+    val item: DynamicItem,
+
+    @SerialName("contact")
+    val contact: String? = null
+)
+
 enum class DynamicType(val text: String) {
     DYNAMIC_TYPE_WORD("动态"),
     DYNAMIC_TYPE_DRAW("动态"),

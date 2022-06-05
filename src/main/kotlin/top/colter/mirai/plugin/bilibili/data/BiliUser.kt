@@ -8,57 +8,58 @@ data class BiliUser(
     @SerialName("mid")
     val mid: Long,
     @SerialName("name")
-    val name: String,
-    @SerialName("sex")
-    val sex: String,
-    @SerialName("face")
-    val face: String,
-    @SerialName("face_nft")
-    val faceNft: Int,
-    @SerialName("face_nft_type")
-    val faceNftType: Int,
-    @SerialName("rank")
-    val rank: Int,
-    @SerialName("level")
-    val level: Int,
-    @SerialName("moral")
-    val moral: Int,
-    @SerialName("silence")
-    val silence: Int,
-    @SerialName("coins")
-    val coins: Int,
-    @SerialName("is_followed")
-    val isFollowed: Boolean,
-    @SerialName("top_photo")
-    val top_photo: String,
-    @SerialName("birthday")
-    val birthday: String,
-    @SerialName("is_senior_member")
-    val isSeniorMember: Int,
-    @SerialName("fans_badge")
-    val fansBadge: Boolean,
-    @SerialName("fans_medal")
-    val fansMedal: FansMedal,
-    @SerialName("official")
-    val official: Official,
-    @SerialName("vip")
-    val vip: ModuleAuthor.Vip,
-    @SerialName("pendant")
-    val pendant: ModuleAuthor.Pendant,
-    @SerialName("nameplate")
-    val nameplate: Nameplate,
-    @SerialName("user_honour_info")
-    val userHonourInfo: UserHonourInfo,
-    @SerialName("live_room")
-    val liveRoom: LiveRoom,
-    @SerialName("school")
-    val school: School,
-    @SerialName("profession")
-    val profession: Profession,
-    @SerialName("tags")
-    val tags: List<String>,
-    @SerialName("series")
-    val series: Series,
+    val name: String? = "",
+    //@SerialName("sex")
+    //val sex: String,
+    //@SerialName("face")
+    //val face: String,
+    //@SerialName("face_nft")
+    //val faceNft: Int,
+    //@SerialName("face_nft_type")
+    //val faceNftType: Int,
+    //@SerialName("rank")
+    //val rank: Int,
+    //@SerialName("level")
+    //val level: Int,
+    //@SerialName("moral")
+    //val moral: Int,
+    //@SerialName("silence")
+    //val silence: Int,
+    //@SerialName("coins")
+    //val coins: Int,
+    //@SerialName("is_followed")
+    //val isFollowed: Boolean,
+    //@SerialName("top_photo")
+    //val top_photo: String,
+    //@SerialName("birthday")
+    //val birthday: String,
+    //@SerialName("is_senior_member")
+    //val isSeniorMember: Int,
+    //@SerialName("fans_badge")
+    //val fansBadge: Boolean,
+    //@SerialName("fans_medal")
+    //val fansMedal: FansMedal,
+    //@SerialName("official")
+    //val official: Official,
+    //@SerialName("vip")
+    //val vip: ModuleAuthor.Vip,
+    //@SerialName("pendant")
+    //val pendant: ModuleAuthor.Pendant,
+    //@SerialName("nameplate")
+    //val nameplate: Nameplate,
+    //@SerialName("user_honour_info")
+    //val userHonourInfo: UserHonourInfo,
+    //@SerialName("live_room")
+    //val liveRoom: LiveRoom,
+    //@SerialName("school")
+    //val school: School,
+    //@SerialName("profession")
+    //val profession: Profession,
+    //@SerialName("tags")
+    //val tags: List<String>,
+    //@SerialName("series")
+    //val series: Series,
+
     //@SerialName("theme")
     //val theme: ?,
     //@SerialName("sys_notice")

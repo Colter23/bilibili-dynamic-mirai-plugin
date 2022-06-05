@@ -67,7 +67,7 @@ object BiliDynamicConfig : AutoSavePluginConfig("BiliPluginConfig") {
     val proxy: List<String> by value()
 
     @ValueDescription("代理")
-    val biliAccountConfig: BiliAccountConfig by value()
+    val accountConfig: BiliAccountConfig by value()
 
     @ValueDescription("代理")
     val enableConfig: EnableConfig by value()
@@ -117,7 +117,7 @@ data class ProxyConfig(
 
 @Serializable
 data class BiliAccountConfig(
-    val cookie: String = "",
+    var cookie: String = "",
     val autoFollow: Boolean = true,
     val followGroup: String = "Bot关注"
 )
@@ -135,7 +135,14 @@ data class PushConfig(
 
 @Serializable
 data class TemplateConfig(
-    val dynamic: String = "【{name}】{type}\r{draw}\n{link} {>>}作者：{name}\nUID：{uid}\n时间：{time}\n类型：{type}\n链接：{link}\r{content}\r{images}{<<}",
+    val defaultDynamicTemplate: String = "defaultOneMsg",
+    val dynamic: MutableMap<String, String> = mutableMapOf(
+        "drawOnly" to "{draw}",
+        "defaultOneMsg" to "{draw}\n{name}@{type}\n{link}",
+        "defaultTwoMsg" to "{draw}\r{name}@{uid}@{type}\n{time}\n{link}",
+        "defaultForwardMsg" to "{draw}{>>}作者：{name}\nUID：{uid}\n时间：{time}\n类型：{type}\n链接：{link}\r{content}\r{images}{<<}",
+        //"defaultForwardMsg" to "【{name}】{type}\r{draw}\n{link} {>>}作者：{name}\nUID：{uid}\n时间：{time}\n类型：{type}\n链接：{link}\r{content}\r{images}{<<}",
+    ),
     val live: String = "",
     val forwardCard: ForwardDisplay = ForwardDisplay()
 )

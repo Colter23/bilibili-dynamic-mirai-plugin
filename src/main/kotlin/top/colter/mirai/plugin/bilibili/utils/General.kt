@@ -76,8 +76,6 @@ fun loadResourceBytes(path: String) =
     BiliBiliDynamic.getResourceAsStream(path)!!.readBytes()
 
 val cachePath: Path by lazy {
-    ///////////////////////临时临时临时临时临时临时临时临时临时临时临时临时临时临时临时//////////////////////////////////////////
-    //Path("data/top.colter.bilibili-dynamic-mirai-plugin").resolve("cache")
     dataFolderPath.resolve("cache")
 }
 
@@ -124,7 +122,7 @@ fun cacheImage(image: Image, path: String, cacheType: CacheType): String {
     return "${cacheType.path}/$path"
 }
 
-val imageClient = BiliClient()
+val biliClient = BiliClient()
 suspend fun getOrDownload(url: String, cacheType: CacheType = CacheType.UNKNOWN): ByteArray {
     val fileName = url.split("?").first().split("@").first().split("/").last()
 
@@ -136,7 +134,7 @@ suspend fun getOrDownload(url: String, cacheType: CacheType = CacheType.UNKNOWN)
     return if (filePath.exists()) {
         filePath.readBytes()
     } else {
-        imageClient.useHttpClient {
+        biliClient.useHttpClient {
             it.get<ByteArray>(url).apply {
                 filePath.writeBytes(this)
             }

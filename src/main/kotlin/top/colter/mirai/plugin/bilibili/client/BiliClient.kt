@@ -10,12 +10,11 @@ import io.ktor.utils.io.core.*
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.supervisorScope
-import kotlinx.serialization.serializer
-import top.colter.mirai.plugin.bilibili.data.BiliCookie
+import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
 import top.colter.mirai.plugin.bilibili.BiliDynamicConfig.enableConfig
 import top.colter.mirai.plugin.bilibili.BiliDynamicConfig.proxy
+import top.colter.mirai.plugin.bilibili.utils.decode
 import top.colter.mirai.plugin.bilibili.utils.isNotBlank
-import top.colter.mirai.plugin.bilibili.utils.json
 
 open class BiliClient : Closeable {
     override fun close() = clients.forEach { it.close() }
@@ -35,7 +34,7 @@ open class BiliClient : Closeable {
 
     val clients = MutableList(3) { client() }
 
-    var cookie: BiliCookie? = null
+    //var cookie: BiliCookie? = BiliBiliDynamic.cookie
 
     protected fun client() = HttpClient(OkHttp) {
         defaultRequest {
@@ -51,12 +50,20 @@ open class BiliClient : Closeable {
     }
 
     suspend inline fun <reified T> get(url: String, crossinline block: HttpRequestBuilder.() -> Unit = {}): T =
-        json.decodeFromString(json.serializersModule.serializer(), useHttpClient {
+        useHttpClient<String> {
             it.get(url) {
-                header(HttpHeaders.Cookie, cookie)
+                header(HttpHeaders.Cookie, BiliBiliDynamic.cookie.toString())
                 block()
             }
-        })
+        }.decode()
+
+    suspend inline fun <reified T> post(url: String, crossinline block: HttpRequestBuilder.() -> Unit = {}): T =
+        useHttpClient<String> {
+            it.post(url) {
+                header(HttpHeaders.Cookie, BiliBiliDynamic.cookie.toString())
+                block()
+            }
+        }.decode()
 
     private var clientIndex = 0
     private var proxyIndex = 0

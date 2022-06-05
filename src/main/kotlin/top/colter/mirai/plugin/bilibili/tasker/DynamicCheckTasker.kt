@@ -5,7 +5,7 @@ import top.colter.mirai.plugin.bilibili.BiliBiliDynamic.subDynamic
 import top.colter.mirai.plugin.bilibili.BiliDynamicConfig
 import top.colter.mirai.plugin.bilibili.api.getNewDynamic
 import top.colter.mirai.plugin.bilibili.client.BiliClient
-import top.colter.mirai.plugin.bilibili.data.BiliCookie
+import top.colter.mirai.plugin.bilibili.data.DynamicDetail
 import top.colter.mirai.plugin.bilibili.data.DynamicType
 import top.colter.mirai.plugin.bilibili.draw.logger
 import top.colter.mirai.plugin.bilibili.utils.sendAll
@@ -16,11 +16,9 @@ object DynamicCheckTasker : BiliTasker() {
 
     override val interval: Int = BiliDynamicConfig.checkConfig.interval
 
-    private val allMessageMode = true
+    private val listenAllDynamicMode = true
 
-    private val client = BiliClient().apply {
-        cookie = BiliCookie.parse(BiliDynamicConfig.biliAccountConfig.cookie)
-    }
+    private val client = BiliClient()
 
     private val banType = listOf(
         DynamicType.DYNAMIC_TYPE_LIVE,
@@ -42,7 +40,7 @@ object DynamicCheckTasker : BiliTasker() {
                 }.filter {
                     it.time > lastDynamic
                 }.filter {
-                    if (allMessageMode){
+                    if (listenAllDynamicMode){
                         true
                     }else{
                         subDynamic.filter { it.value.contacts.isNotEmpty() }.map { it.key }
@@ -53,7 +51,7 @@ object DynamicCheckTasker : BiliTasker() {
                 }
 
             if (dynamics.isNotEmpty()) lastDynamic = dynamics.last().time
-            dynamicChannel.sendAll(dynamics)
+            dynamicChannel.sendAll(dynamics.map { DynamicDetail(it) })
         }
     }
 

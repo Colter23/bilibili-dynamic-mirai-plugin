@@ -1,24 +1,25 @@
 package top.colter.mirai.plugin.bilibili.api
 
 import io.ktor.client.request.*
-import kotlinx.serialization.serializer
 import top.colter.mirai.plugin.bilibili.client.BiliClient
+import top.colter.mirai.plugin.bilibili.data.BiliResult
+import top.colter.mirai.plugin.bilibili.data.DynamicDetail
+import top.colter.mirai.plugin.bilibili.data.DynamicItem
 import top.colter.mirai.plugin.bilibili.data.DynamicList
-import top.colter.mirai.plugin.bilibili.data.DynamicResult
-import top.colter.mirai.plugin.bilibili.draw.logger
-import top.colter.mirai.plugin.bilibili.utils.json
+import top.colter.mirai.plugin.bilibili.tasker.logger
+import top.colter.mirai.plugin.bilibili.utils.decode
 
 internal suspend inline fun <reified T> BiliClient.getData(
     url: String,
     crossinline block: HttpRequestBuilder.() -> Unit = {}
 ): T? {
-    val res = get<DynamicResult>(url, block)
+    val res = get<BiliResult>(url, block)
 
     return if (res.code != 0 || res.data == null) {
         logger.error("URL:${url} ${res.message}")
         null
     } else {
-        json.decodeFromJsonElement(json.serializersModule.serializer(), res.data)
+        res.data.decode()
     }
 }
 
@@ -28,5 +29,12 @@ suspend fun BiliClient.getNewDynamic(page: Int = 1, type: String = "all"): Dynam
         parameter("type", type)
         parameter("page", page)
     }
+}
+
+suspend fun BiliClient.getDynamicDetail(did: String): DynamicItem? {
+    return getData<DynamicDetail>(DYNAMIC_DETAIL) {
+        parameter("timezone_offset", "-480")
+        parameter("id", did)
+    }?.item
 }
 

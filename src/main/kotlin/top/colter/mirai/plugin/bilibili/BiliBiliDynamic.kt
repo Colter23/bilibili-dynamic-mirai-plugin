@@ -1,18 +1,17 @@
 package top.colter.mirai.plugin.bilibili
 
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.launch
 import net.mamoe.mirai.Bot
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescription
 import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
 import net.mamoe.mirai.event.events.BotOnlineEvent
 import net.mamoe.mirai.event.globalEventChannel
 import net.mamoe.mirai.utils.info
-import top.colter.mirai.plugin.bilibili.data.DynamicItem
+import top.colter.mirai.plugin.bilibili.data.BiliCookie
+import top.colter.mirai.plugin.bilibili.data.DynamicDetail
 import top.colter.mirai.plugin.bilibili.data.DynamicMessage
-import top.colter.mirai.plugin.bilibili.tasker.BiliTasker
-import top.colter.mirai.plugin.bilibili.tasker.DynamicCheckTasker
-import top.colter.mirai.plugin.bilibili.tasker.MessageTasker
-import top.colter.mirai.plugin.bilibili.tasker.SendTasker
+import top.colter.mirai.plugin.bilibili.tasker.*
 
 object BiliBiliDynamic : KotlinPlugin(
     JvmPluginDescription(
@@ -27,23 +26,30 @@ object BiliBiliDynamic : KotlinPlugin(
     var mid: Long = 0L
     var tagid: Int = 0
 
-    val dynamicChannel = Channel<DynamicItem>(20)
+    var cookie = BiliCookie()
+
+    val dynamicChannel = Channel<DynamicDetail>(20)
     val messageChannel = Channel<DynamicMessage>(20)
 
-    val subDynamic: MutableMap<Long, SubData> by BiliSubscribeData::dynamic
+    val subDynamic: MutableMap<Long, SubData> by BiliDynamicData::dynamic
 
     override fun onEnable() {
         logger.info { "Plugin loaded" }
 
-        BiliSubscribeData.reload()
+        BiliDynamicData.reload()
         BiliDynamicConfig.reload()
 
-        this.dataFolderPath
+        cookie.parse(BiliDynamicConfig.accountConfig.cookie)
+
+        launch {
+            initTagid()
+        }
 
         waitOnline {
             DynamicCheckTasker.start()
             MessageTasker.start()
             SendTasker.start()
+            ListenerTasker.start()
         }
 
     }
@@ -54,7 +60,7 @@ object BiliBiliDynamic : KotlinPlugin(
 
         BiliTasker.cancelAll()
 
-        BiliSubscribeData.save()
+        BiliDynamicData.save()
         BiliDynamicConfig.save()
     }
 

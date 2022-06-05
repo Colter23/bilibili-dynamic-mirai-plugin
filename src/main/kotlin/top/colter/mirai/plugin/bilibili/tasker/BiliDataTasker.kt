@@ -1,21 +1,22 @@
 package top.colter.mirai.plugin.bilibili.tasker
 
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withTimeout
+import net.mamoe.mirai.contact.Contact
 import net.mamoe.mirai.contact.Friend
 import net.mamoe.mirai.contact.Group
-import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
-import top.colter.mirai.plugin.bilibili.BiliDynamicConfig
-import top.colter.mirai.plugin.bilibili.BiliDynamicConfig.biliAccountConfig
-import top.colter.mirai.plugin.bilibili.BiliSubscribeData
-import top.colter.mirai.plugin.bilibili.SubData
-import top.colter.mirai.plugin.bilibili.api.follow
-import top.colter.mirai.plugin.bilibili.api.groupAddUser
-import top.colter.mirai.plugin.bilibili.api.isFollow
-import top.colter.mirai.plugin.bilibili.api.userInfo
+import net.mamoe.mirai.utils.ExternalResource.Companion.sendAsImageTo
+import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
+import top.colter.mirai.plugin.bilibili.*
+import top.colter.mirai.plugin.bilibili.BiliBiliDynamic.save
+import top.colter.mirai.plugin.bilibili.BiliDynamicConfig.accountConfig
+import top.colter.mirai.plugin.bilibili.api.*
 import top.colter.mirai.plugin.bilibili.client.BiliClient
-import top.colter.mirai.plugin.bilibili.data.BiliCookie
+import top.colter.mirai.plugin.bilibili.draw.LoginQrCodeDraw
 import top.colter.mirai.plugin.bilibili.utils.findContact
+import java.net.URI
 
 internal val logger by BiliBiliDynamic::logger
 
@@ -23,11 +24,9 @@ object BiliDataTasker {
 
     val mutex = Mutex()
 
-    val client = BiliClient().apply {
-        cookie = BiliCookie.parse(BiliDynamicConfig.biliAccountConfig.cookie)
-    }
+    val client = BiliClient()
 
-    val dynamic: MutableMap<Long, SubData> by BiliSubscribeData::dynamic
+    val dynamic: MutableMap<Long, SubData> by BiliDynamicData::dynamic
 
     suspend fun listenAll(subject: String) = mutex.withLock {
         dynamic.forEach { (uid, sub) ->
@@ -50,14 +49,14 @@ object BiliDataTasker {
 
         val attr = client.isFollow(uid)?.attribute
         if (attr == 0) {
-            if (!biliAccountConfig.autoFollow) {
+            if (!accountConfig.autoFollow) {
                 return "未关注此用户"
             } else {
                 val res = client.follow(uid)
                 if (res.code != 0) {
                     return "关注失败: ${res.message}"
                 }
-                if (biliAccountConfig.followGroup.isNotEmpty()) {
+                if (accountConfig.followGroup.isNotEmpty()) {
                     val res1 = client.groupAddUser(uid, BiliBiliDynamic.tagid)
                     if (res1.code != 0) {
                         logger.error("移动分组失败: ${res1.message}")
@@ -91,7 +90,7 @@ object BiliDataTasker {
         val user = dynamic[uid]
         if (user == null) {
             val u = client.userInfo(uid)
-            val subData = SubData(u!!.name)
+            val subData = SubData(u?.name!!)
             subData.contacts[subject] = "11"
             dynamic[uid] = subData
             "订阅 ${dynamic[uid]?.name} 成功! \n默认检测 动态+视频+直播 如果需要调整请发送/bili set $uid\n如要设置主题色请发送/bili color $uid <16进制颜色>"
@@ -243,41 +242,41 @@ object BiliDataTasker {
         }
     }
 
-    //suspend fun login(contact: Contact){
-    //    val loginData = client.getLoginUrl().data
-    //    val qrCodeWriter = QRCodeWriter()
-    //    val bitMatrix = qrCodeWriter.encode(loginData?.url, BarcodeFormat.QR_CODE, 250, 250)
-    //    val file = cachePath.resolve("qrcode.png")
-    //    MatrixToImageWriter.writeToPath(bitMatrix, "PNG", file)
-    //    contact.sendMessage(file.toFile().uploadAsImage(contact) + "请使用BiliBili手机APP扫码登录 3分钟有效")
-    //    runCatching {
-    //        withTimeout(180000){
-    //            while (true){
-    //                val loginInfo = httpUtils.post(LOGIN_INFO,"oauthKey=${loginData?.oauthKey}").decode<ResultData>()
-    //                if (loginInfo.status == true){
-    //                    val url = loginInfo.data?.decode<LoginResult.LoginData>()?.url
-    //                    val querys = URI(url).query.split("&")
-    //                    val cookie = buildString {
-    //                        querys.forEach {
-    //                            if (it.contains("SESSDATA") || it.contains("bili_jct")) append("$it; ")
-    //                        }
-    //                    }
-    //                    BiliPluginConfig.cookie = cookie
-    //                    BiliPluginConfig.save()
-    //                    logger.info("Cookie: ${BiliPluginConfig.cookie}")
-    //                    initCookie()
-    //                    initTagid()
-    //                    getHistoryDynamic()
-    //                    contact.sendMessage("登录成功!")
-    //                    break
-    //                }
-    //                delay(5000)
-    //            }
-    //        }
-    //    }.onFailure {
-    //        contact.sendMessage("登录失败 ${it.message}")
-    //    }
-    //    file.delete()
-    //}
+    suspend fun login(contact: Contact){
+        val loginData = client.getLoginUrl().data!!
+
+        val image = LoginQrCodeDraw.qrCode(loginData.url)
+        image.encodeToData()!!.bytes.toExternalResource().toAutoCloseable().sendAsImageTo(contact)
+        contact.sendMessage("请使用BiliBili手机APP扫码登录 3分钟有效")
+
+        runCatching {
+            withTimeout(180000){
+                while (true){
+                    val loginInfo = client.loginInfo(loginData.oauthKey!!)
+
+                    if (loginInfo.status == true){
+                        val url = loginInfo.data!!.url
+                        val querys = URI(url).query.split("&")
+                        val cookie = buildString {
+                            querys.forEach {
+                                if (it.contains("SESSDATA") || it.contains("bili_jct")) append("$it; ")
+                            }
+                        }
+                        accountConfig.cookie = cookie
+                        BiliDynamicConfig.save()
+                        BiliBiliDynamic.cookie.parse(cookie)
+                        initTagid()
+                        //getHistoryDynamic()
+                        contact.sendMessage("登录成功!")
+                        break
+                    }
+                    delay(3000)
+                }
+            }
+        }.onFailure {
+            contact.sendMessage("登录失败 ${it.message}")
+        }
+
+    }
 
 }

@@ -9,6 +9,7 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
 import org.jetbrains.skia.*
 import org.jetbrains.skia.svg.SVGDOM
 import org.jetbrains.skiko.toBitmap
+import top.colter.mirai.plugin.bilibili.utils.loadResourceBytes
 
 object LoginQrCodeDraw {
 
@@ -43,7 +44,7 @@ object LoginQrCodeDraw {
                     color = Color.makeRGB(2, 181, 218)
                 })
 
-                val svg = SVGDOM(Data.makeFromFileName("src/main/resources/icon/BILIBILI_LOGO.svg"))
+                val svg = SVGDOM(Data.makeFromBytes(loadResourceBytes("icon/BILIBILI_LOGO.svg")))
                 drawImage(svg.makeImage(40f, 40f), 105f, 105f, Paint().apply {
                     colorFilter = ColorFilter.makeBlend(Color.WHITE, BlendMode.SRC_ATOP)
                 })

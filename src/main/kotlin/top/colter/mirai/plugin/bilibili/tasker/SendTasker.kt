@@ -10,8 +10,9 @@ import net.mamoe.mirai.message.data.RawForwardMessage
 import net.mamoe.mirai.message.data.buildForwardMessage
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
-import top.colter.mirai.plugin.bilibili.BiliDynamicConfig
-import top.colter.mirai.plugin.bilibili.BiliSubscribeData.dynamic
+import top.colter.mirai.plugin.bilibili.BiliDynamicConfig.templateConfig
+import top.colter.mirai.plugin.bilibili.BiliDynamicData
+import top.colter.mirai.plugin.bilibili.BiliDynamicData.dynamic
 import top.colter.mirai.plugin.bilibili.data.DynamicMessage
 import top.colter.mirai.plugin.bilibili.tasker.BiliDataTasker.mutex
 import top.colter.mirai.plugin.bilibili.utils.CacheType
@@ -20,6 +21,7 @@ import top.colter.mirai.plugin.bilibili.utils.findContact
 import top.colter.mirai.plugin.bilibili.utils.uploadImage
 import kotlin.io.path.notExists
 import kotlin.io.path.readBytes
+import kotlin.text.Regex.Companion.escapeReplacement
 
 object SendTasker : BiliTasker() {
 
@@ -28,7 +30,8 @@ object SendTasker : BiliTasker() {
     override suspend fun main() {
         val dynamicMessage = BiliBiliDynamic.messageChannel.receive()
 
-        val contactIdList = getDynamicContactList(dynamicMessage.uid)
+        val contactIdList = if (dynamicMessage.contact == null) getDynamicContactList(dynamicMessage.uid) else listOf(dynamicMessage.contact)
+
         if (contactIdList != null) {
             val contactList = mutableListOf<Contact>()
             contactIdList.forEach {
@@ -37,10 +40,37 @@ object SendTasker : BiliTasker() {
                     contactList.add(c)
                 }
             }
-            val msg = dynamicMessage.buildMessage(contactList.first())
 
-            for (contact in contactList){
-                contact.sendMessage(msg)
+            val templateMap: MutableMap<String, MutableSet<Contact>> = mutableMapOf()
+
+            if (BiliDynamicData.dynamicPushTemplate.isEmpty()){
+                if (templateMap[templateConfig.defaultDynamicTemplate] == null) templateMap[templateConfig.defaultDynamicTemplate] = mutableSetOf()
+                contactList.forEach {
+                    templateMap[templateConfig.defaultDynamicTemplate]!!.add(it)
+                }
+            }
+
+            BiliDynamicData.dynamicPushTemplate.forEach { (t, u) ->
+                contactList.forEach {
+                    if (u.contains(it.id)){
+                        if (templateMap[t] == null) templateMap[t] = mutableSetOf()
+                        templateMap[t]!!.add(it)
+                    }else{
+                        if (templateMap[templateConfig.defaultDynamicTemplate] == null) templateMap[templateConfig.defaultDynamicTemplate] = mutableSetOf()
+                        templateMap[templateConfig.defaultDynamicTemplate]!!.add(it)
+                    }
+                }
+            }
+
+            val templateMsgMap: MutableMap<String, List<Message>> = mutableMapOf()
+            templateMap.forEach {
+                templateMsgMap[it.key] = dynamicMessage.buildMessage(contactList.first(), templateConfig.dynamic[it.key]!!)
+            }
+
+            for (temp in templateMap){
+                temp.value.forEach {
+                    templateMsgMap[temp.key]?.let { it1 -> it.sendMessage(it1) }
+                }
             }
         }
 
@@ -78,13 +108,13 @@ object SendTasker : BiliTasker() {
         val preview: String = "时间: {time}\n{content}"
     )
 
-    suspend fun DynamicMessage.buildMessage(contact: Contact): List<Message> {
+    suspend fun DynamicMessage.buildMessage(contact: Contact, template: String): List<Message> {
 
         val msgList = mutableListOf<Message>()
 
-        val msgTemplate = BiliDynamicConfig.templateConfig.dynamic.replace("\n", "\\n").replace("\r", "\\r")
+        val msgTemplate = escapeReplacement(template)
 
-        val forwardCardTemplate = ForwardDisplay()
+        val forwardCardTemplate = templateConfig.forwardCard
 
         val res = forwardRegex.findAll(msgTemplate)
 
@@ -101,7 +131,7 @@ object SendTasker : BiliTasker() {
                     }
 
                     override fun generatePreview(forward: RawForwardMessage): List<String> {
-                        return buildSimpleTemplate(forwardCardTemplate.preview, this@buildMessage).split("\n")
+                        return buildSimpleTemplate(forwardCardTemplate.preview, this@buildMessage).split("\\n", "\n")
                     }
 
                     override fun generateSummary(forward: RawForwardMessage): String {
@@ -131,9 +161,6 @@ object SendTasker : BiliTasker() {
         val msgs = template.split("\\r", "\r")
         val msgList = mutableListOf<Message>()
         msgs.forEach { ms ->
-
-            println(ms)
-
             msgList.add(MiraiCode.deserializeMiraiCode(buildMsg(ms, dm, contact)))
         }
         return msgList.toList()
@@ -191,8 +218,6 @@ object SendTasker : BiliTasker() {
             content = content.replaceRange(key.range, rep)
             p = key.range.first + rep.length
         }
-
         return content
     }
-
 }
