@@ -7,6 +7,9 @@
 ![Downloads](https://img.shields.io/github/downloads/Colter23/bilibili-dynamic-mirai-plugin/total)
 [![Release](https://img.shields.io/github/v/release/Colter23/bilibili-dynamic-mirai-plugin)](https://github.com/Colter23/bilibili-dynamic-mirai-plugin/releases)
 
+## [V3版本重构中...](https://github.com/Colter23/bilibili-dynamic-mirai-plugin/tree/v3)
+v3使用skiko绘图, 更加美观。同时增加稳定性与可配置性 [v3](https://github.com/Colter23/bilibili-dynamic-mirai-plugin/tree/v3)
+
 ## 特性    
 **无论多少订阅均可在最低 10s 内检测所有动态**  
 Java 原生 API 绘图  
