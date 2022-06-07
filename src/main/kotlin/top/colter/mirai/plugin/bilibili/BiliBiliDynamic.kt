@@ -42,6 +42,7 @@ object BiliBiliDynamic : KotlinPlugin(
         cookie.parse(BiliDynamicConfig.accountConfig.cookie)
 
         launch {
+            checkCookie()
             initTagid()
         }
 

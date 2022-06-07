@@ -30,10 +30,10 @@ object DynamicCheckTasker : BiliTasker() {
 
 
     override suspend fun main() {
-        logger.info("Check Dynamic...")
+        logger.debug("Check Dynamic...")
         val dynamicList = client.getNewDynamic()
         if (dynamicList != null) {
-            logger.info(dynamicList.updateBaseline)
+            //logger.info(dynamicList.updateBaseline)
             val dynamics = dynamicList.items
                 .filter {
                     !banType.contains(it.type)

@@ -12,16 +12,16 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.supervisorScope
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
 import top.colter.mirai.plugin.bilibili.BiliDynamicConfig.enableConfig
-import top.colter.mirai.plugin.bilibili.BiliDynamicConfig.proxy
+import top.colter.mirai.plugin.bilibili.BiliDynamicConfig.proxyConfig
 import top.colter.mirai.plugin.bilibili.utils.decode
 import top.colter.mirai.plugin.bilibili.utils.isNotBlank
 
 open class BiliClient : Closeable {
     override fun close() = clients.forEach { it.close() }
 
-    val proxys = if (proxy.isNotBlank()) {
+    val proxys = if (proxyConfig.proxy.isNotBlank()) {
         mutableListOf<ProxyConfig>().apply {
-            proxy.forEach {
+            proxyConfig.proxy.forEach {
                 if (it != "") {
                     add(ProxyBuilder.http(it))
                 }

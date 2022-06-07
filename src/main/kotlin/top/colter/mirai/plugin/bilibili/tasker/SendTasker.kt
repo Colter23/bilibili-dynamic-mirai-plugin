@@ -10,7 +10,7 @@ import net.mamoe.mirai.message.data.RawForwardMessage
 import net.mamoe.mirai.message.data.buildForwardMessage
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
-import top.colter.mirai.plugin.bilibili.BiliDynamicConfig.templateConfig
+import top.colter.mirai.plugin.bilibili.BiliDynamicConfig
 import top.colter.mirai.plugin.bilibili.BiliDynamicData
 import top.colter.mirai.plugin.bilibili.BiliDynamicData.dynamic
 import top.colter.mirai.plugin.bilibili.data.DynamicMessage
@@ -26,6 +26,8 @@ import kotlin.text.Regex.Companion.escapeReplacement
 object SendTasker : BiliTasker() {
 
     override val interval: Int = 0
+
+    private val templateConfig by BiliDynamicConfig::templateConfig
 
     override suspend fun main() {
         val dynamicMessage = BiliBiliDynamic.messageChannel.receive()
@@ -45,10 +47,10 @@ object SendTasker : BiliTasker() {
             val templateMap: MutableMap<String, MutableSet<Contact>> = mutableMapOf()
 
             if (BiliDynamicData.dynamicPushTemplate.isEmpty()) {
-                if (templateMap[templateConfig.defaultDynamicTemplate] == null) templateMap[templateConfig.defaultDynamicTemplate] =
+                if (templateMap[templateConfig.defaultDynamicPush] == null) templateMap[templateConfig.defaultDynamicPush] =
                     mutableSetOf()
                 contactList.forEach {
-                    templateMap[templateConfig.defaultDynamicTemplate]!!.add(it)
+                    templateMap[templateConfig.defaultDynamicPush]!!.add(it)
                 }
             }
 
@@ -58,9 +60,9 @@ object SendTasker : BiliTasker() {
                         if (templateMap[t] == null) templateMap[t] = mutableSetOf()
                         templateMap[t]!!.add(it)
                     } else {
-                        if (templateMap[templateConfig.defaultDynamicTemplate] == null) templateMap[templateConfig.defaultDynamicTemplate] =
+                        if (templateMap[templateConfig.defaultDynamicPush] == null) templateMap[templateConfig.defaultDynamicPush] =
                             mutableSetOf()
-                        templateMap[templateConfig.defaultDynamicTemplate]!!.add(it)
+                        templateMap[templateConfig.defaultDynamicPush]!!.add(it)
                     }
                 }
             }
@@ -68,7 +70,7 @@ object SendTasker : BiliTasker() {
             val templateMsgMap: MutableMap<String, List<Message>> = mutableMapOf()
             templateMap.forEach {
                 templateMsgMap[it.key] =
-                    dynamicMessage.buildMessage(contactList.first(), templateConfig.dynamic[it.key]!!)
+                    dynamicMessage.buildMessage(contactList.first(), templateConfig.dynamicPush[it.key]!!)
             }
 
             for (temp in templateMap) {

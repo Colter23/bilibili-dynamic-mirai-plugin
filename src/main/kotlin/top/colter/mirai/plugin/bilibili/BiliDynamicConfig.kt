@@ -9,77 +9,38 @@ import top.colter.mirai.plugin.bilibili.utils.CacheType
 
 object BiliDynamicConfig : AutoSavePluginConfig("BiliPluginConfig") {
 
+    @ValueDescription("具体的配置文件描述请前往下方链接查看")
+    val help: String by value("https://github.com/Colter23/bilibili-dynamic-mirai-plugin")
 
-    @ValueDescription("管理员")
+    @ValueDescription("管理员QQ号")
     val admin: String by value("")
 
-    @ValueDescription("推送模式\n0: 文字推送\n1: 图片推送")
-    val pushMode: Int by value(1)
-
-    @ValueDescription("添加订阅时是否允许 bot 自动关注未关注的用户")
-    val autoFollow: Boolean by value(true)
-
-    @ValueDescription("Bot 关注时保存的分组(最长16字符)")
-    val followGroup: String by value("Bot关注")
-
-    @ValueDescription("检测间隔(推荐 15-30) 单位秒")
-    val interval: Int by value(15)
-
-    @ValueDescription("直播检测间隔(与动态检测独立) 单位秒")
-    val liveInterval: Int by value(20)
-
-    @ValueDescription("低频检测时间段与倍率(例: 3-8x2 三点到八点检测间隔为正常间隔的2倍) 24小时制")
-    val lowSpeed: String by value("0-0x2")
-
-    @ValueDescription("图片推送模式用的字体, 详细请看 readme")
-    val font: String by value("")
-
-    @ValueDescription("动态/视频推送文字模板, 参数请看 readme")
-    val pushTemplate: String by value("{name}@{type}\n{link}")
-
-    @ValueDescription("直播推送文字模板, 如不配置则与上面的动态推送模板一致")
-    val livePushTemplate: String by value("")
-
-    @ValueDescription("页脚模板")
-    val footerTemplate: String by value("{type}ID: {id}")
-
-    @ValueDescription("是否开启图片二维码")
-    val qrCode: Boolean by value(false)
-
-    @ValueDescription("卡片圆角大小")
-    val cardArc: Int by value(20)
-
-    //@Suppress(stringSerialization = DOUBLE_QUOTATION)
-    @ValueDescription("cookie, 请使用双引号")
-    var cookie: String by value("")
-
-    @ValueDescription("百度翻译")
-    val baiduTranslate: TranslateConfig by value()
-
-
-    @ValueDescription("图片配置")
+    @ValueDescription("Debug模式")
     val debugMode: Boolean by value(false)
 
-    @ValueDescription("图片配置")
-    val imageConfig: ImageConfig by value()
-
-    @ValueDescription("代理")
-    val proxy: List<String> by value()
-
-    @ValueDescription("代理")
-    val accountConfig: BiliAccountConfig by value()
-
-    @ValueDescription("代理")
+    @ValueDescription("功能开关:\n")
     val enableConfig: EnableConfig by value()
 
-    @ValueDescription("代理")
+    @ValueDescription("账号配置:\ncookie: BiliBili的cookie, 可使用 /bili login 自动获取\nautoFollow: 添加订阅时是否允许 bot 自动关注未关注的用户\nfollowGroup: Bot 关注时保存的分组(最长16字符)")
+    val accountConfig: BiliAccountConfig by value()
+
+    @ValueDescription("检测配置:\ninterval: 动态检测间隔(推荐 15-30) 单位秒\nliveInterval: 直播检测间隔(与动态检测独立) 单位秒\nlowSpeed: 低频检测时间段与倍率(例: 3-8x2 三点到八点检测间隔为正常间隔的2倍) 24小时制")
     val checkConfig: CheckConfig by value()
 
-    @ValueDescription("代理")
+    @ValueDescription("图片配置:\nquality: 图片质量(分辨率), 内置 1: 800px, 2: 1000px, 3: 1200px, 4: 1500px(图片宽度)\ntheme: 绘图主题, 内置 v3: 新版绘图主题, v2: 旧版绘图主题")
+    val imageConfig: ImageConfig by value()
+
+    @ValueDescription("模板配置:\ndefaultDynamicPush: 默认使用的推送模板, 填写下方动态模板名\ndynamicPush: 动态推送模板\nlivePush: 直播推送模板\nforwardCard: 转发卡片模板\nfooter: 图片页脚")
+    val templateConfig: TemplateConfig by value()
+
+    @ValueDescription("缓存配置:\nexpires: 图片过期时长 单位天\n为 0 时表示不清理此类图片\n当图片在指定时间内未被再次使用,就会被删除\n可选类型:\nDRAW: 由插件绘制的图片\nIMAGES: 动态图和封面等\nEMOJI: B站的Emoji\nUSER: 用户头像,头像挂件,粉丝卡片套装等\nOTHER: 其他图片")
     val cacheConfig: CacheConfig by value()
 
-    @ValueDescription("代理")
-    val templateConfig: TemplateConfig by value()
+    @ValueDescription("代理配置:\nproxy: 代理列表")
+    val proxyConfig: ProxyConfig by value()
+
+    @ValueDescription("翻译配置:\n百度翻译 API 密钥\nhttps://api.fanyi.baidu.com/")
+    val translateConfig: TranslateConfig by value()
 
 }
 
@@ -92,7 +53,6 @@ data class EnableConfig(
 
 @Serializable
 data class TranslateConfig(
-    val enable: Boolean = false,
     val APP_ID: String = "",
     val SECURITY_KEY: String = "",
 )
@@ -100,7 +60,7 @@ data class TranslateConfig(
 @Serializable
 data class ImageConfig(
     val quality: Int = 1,
-    val theme: String = "",
+    val theme: String = "v3",
     val font: String = "",
     val fontSizeMultiple: Float = 1.0f,
     val badgeEnable: Boolean = true,
@@ -129,6 +89,9 @@ data class BiliAccountConfig(
 @Serializable
 data class CheckConfig(
     val interval: Int = 15,
+    val liveInterval: Int = 20,
+    val lowSpeed: String = "0-0x2",
+
 )
 
 
@@ -139,16 +102,17 @@ data class PushConfig(
 
 @Serializable
 data class TemplateConfig(
-    val defaultDynamicTemplate: String = "defaultOneMsg",
-    val dynamic: MutableMap<String, String> = mutableMapOf(
+    val defaultDynamicPush: String = "defaultOneMsg",
+    val dynamicPush: MutableMap<String, String> = mutableMapOf(
         "drawOnly" to "{draw}",
         "defaultOneMsg" to "{draw}\n{name}@{type}\n{link}",
         "defaultTwoMsg" to "{draw}\r{name}@{uid}@{type}\n{time}\n{link}",
         "defaultForwardMsg" to "{draw}{>>}作者：{name}\nUID：{uid}\n时间：{time}\n类型：{type}\n链接：{link}\r{content}\r{images}{<<}",
         //"defaultForwardMsg" to "【{name}】{type}\r{draw}\n{link} {>>}作者：{name}\nUID：{uid}\n时间：{time}\n类型：{type}\n链接：{link}\r{content}\r{images}{<<}",
     ),
-    val live: String = "",
-    val forwardCard: ForwardDisplay = ForwardDisplay()
+    val livePush: String = "",
+    val forwardCard: ForwardDisplay = ForwardDisplay(),
+    val footer: String = ""
 )
 
 @Serializable
