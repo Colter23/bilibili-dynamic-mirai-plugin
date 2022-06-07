@@ -7,6 +7,10 @@ import top.colter.mirai.plugin.bilibili.api.followGroup
 import top.colter.mirai.plugin.bilibili.api.userInfo
 import top.colter.mirai.plugin.bilibili.client.BiliClient
 
+
+fun checkCookie(){
+
+}
 suspend fun initTagid() {
     val client = BiliClient()
     runCatching {

@@ -95,6 +95,7 @@ fun CacheType.cacheFile(filePath: String): Path {
 }
 
 enum class CacheType(val path: String) {
+    DRAW("draw"),
     DRAW_DYNAMIC("draw/dynamic"),
     DRAW_LIVE("draw/live"),
     IMAGES("images"),

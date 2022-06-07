@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 import net.mamoe.mirai.console.data.AutoSavePluginConfig
 import net.mamoe.mirai.console.data.ValueDescription
 import net.mamoe.mirai.console.data.value
+import top.colter.mirai.plugin.bilibili.utils.CacheType
 
 
 object BiliDynamicConfig : AutoSavePluginConfig("BiliPluginConfig") {
@@ -75,6 +76,9 @@ object BiliDynamicConfig : AutoSavePluginConfig("BiliPluginConfig") {
     val checkConfig: CheckConfig by value()
 
     @ValueDescription("代理")
+    val cacheConfig: CacheConfig by value()
+
+    @ValueDescription("代理")
     val templateConfig: TemplateConfig by value()
 
 }
@@ -83,6 +87,7 @@ object BiliDynamicConfig : AutoSavePluginConfig("BiliPluginConfig") {
 data class EnableConfig(
     val enable: Boolean = true,
     val proxyEnable: Boolean = true,
+    val cacheClearEnable: Boolean = true,
 )
 
 @Serializable
@@ -156,6 +161,13 @@ data class ForwardDisplay(
 
 @Serializable
 data class CacheConfig(
-    val dynamicDraw: Int = 1,
+    val expires: Map<CacheType, Int> = mapOf(
+        CacheType.DRAW to 7,
+        CacheType.IMAGES to 7,
+        CacheType.EMOJI to 7,
+        CacheType.USER to 7,
+        CacheType.OTHER to 7,
+    )
+
 )
 

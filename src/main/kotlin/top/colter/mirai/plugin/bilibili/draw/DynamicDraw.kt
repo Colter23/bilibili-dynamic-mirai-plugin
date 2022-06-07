@@ -288,7 +288,7 @@ suspend fun ModuleDynamic.Major.makeGeneral(isForward: Boolean = false): Image? 
             music!!.drawGeneral()
         }
         "MAJOR_TYPE_LIVE" -> {
-            null
+            live!!.drawGeneral()
         }
         "MAJOR_TYPE_LIVE_RCMD" -> {
             null
@@ -350,6 +350,15 @@ fun ModuleDynamic.Topic.drawGeneral(): Image {
         }
     }.makeImageSnapshot()
 
+}
+
+suspend fun ModuleDynamic.Major.Live.drawGeneral(): Image {
+
+    return Surface.makeRasterN32Premul(100, 100).apply {
+        canvas.apply {
+
+        }
+    }.makeImageSnapshot()
 }
 
 suspend fun ModuleDynamic.Desc.drawGeneral(): Image {
@@ -520,8 +529,6 @@ suspend fun drawAdditionalCard(
             }
         }
     }.makeImageSnapshot()
-
-
 }
 
 suspend fun ModuleDynamic.Major.Common.drawGeneral(): Image {
@@ -609,7 +616,6 @@ suspend fun ModuleDynamic.Major.Common.drawGeneral(): Image {
             }
         }
     }.makeImageSnapshot()
-
 }
 
 suspend fun ModuleDynamic.Major.Archive.drawGeneral(): Image {

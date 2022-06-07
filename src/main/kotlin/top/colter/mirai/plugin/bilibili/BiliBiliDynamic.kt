@@ -50,6 +50,7 @@ object BiliBiliDynamic : KotlinPlugin(
             MessageTasker.start()
             SendTasker.start()
             ListenerTasker.start()
+            CacheClearTasker.start()
         }
 
     }
