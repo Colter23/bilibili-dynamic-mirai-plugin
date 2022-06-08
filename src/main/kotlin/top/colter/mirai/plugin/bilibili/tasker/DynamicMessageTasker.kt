@@ -8,15 +8,18 @@ import top.colter.mirai.plugin.bilibili.draw.makeDrawDynamic
 import top.colter.mirai.plugin.bilibili.utils.formatTime
 import top.colter.mirai.plugin.bilibili.utils.time
 
-object MessageTasker : BiliTasker() {
+object DynamicMessageTasker : BiliTasker() {
 
     override val interval: Int = 0
 
+    private val dynamicChannel by BiliBiliDynamic::dynamicChannel
+    private val messageChannel by BiliBiliDynamic::messageChannel
+
     override suspend fun main() {
-        val dynamicDetail = BiliBiliDynamic.dynamicChannel.receive()
+        val dynamicDetail = dynamicChannel.receive()
         val dynamicItem = dynamicDetail.item
         logger.debug(dynamicItem.idStr)
-        BiliBiliDynamic.messageChannel.send(dynamicItem.buildMessage(dynamicDetail.contact))
+        messageChannel.send(dynamicItem.buildMessage(dynamicDetail.contact))
     }
 
     suspend fun DynamicItem.buildMessage(contact: String? = null): DynamicMessage {

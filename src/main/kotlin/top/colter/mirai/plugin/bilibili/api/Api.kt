@@ -8,6 +8,8 @@ const val LOGIN_INFO = "http://passport.bilibili.com/qrcode/getLoginInfo"
 const val NEW_DYNAMIC = "https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/all"
 const val DYNAMIC_DETAIL = "https://api.bilibili.com/x/polymer/web-dynamic/v1/detail"
 
+// Live
+const val LIVE_LIST = "https://api.live.bilibili.com/xlive/web-ucenter/v1/xfetter/GetWebList"
 
 // User
 const val USER_INFO = "https://api.bilibili.com/x/space/acc/info"

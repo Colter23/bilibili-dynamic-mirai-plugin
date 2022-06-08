@@ -1,6 +1,6 @@
 package top.colter.mirai.plugin.bilibili.tasker
 
-import top.colter.mirai.plugin.bilibili.BiliBiliDynamic.dynamicChannel
+import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic.subDynamic
 import top.colter.mirai.plugin.bilibili.BiliDynamicConfig
 import top.colter.mirai.plugin.bilibili.api.getNewDynamic
@@ -16,6 +16,8 @@ object DynamicCheckTasker : BiliTasker() {
 
     override val interval: Int = BiliDynamicConfig.checkConfig.interval
 
+    private val dynamicChannel by BiliBiliDynamic::dynamicChannel
+
     private val listenAllDynamicMode = true
 
     private val client = BiliClient()
@@ -27,7 +29,6 @@ object DynamicCheckTasker : BiliTasker() {
     )
 
     private var lastDynamic: Long = Instant.now().epochSecond
-
 
     override suspend fun main() {
         logger.debug("Check Dynamic...")

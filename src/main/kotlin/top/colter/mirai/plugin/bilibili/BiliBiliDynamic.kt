@@ -9,8 +9,9 @@ import net.mamoe.mirai.event.events.BotOnlineEvent
 import net.mamoe.mirai.event.globalEventChannel
 import net.mamoe.mirai.utils.info
 import top.colter.mirai.plugin.bilibili.data.BiliCookie
+import top.colter.mirai.plugin.bilibili.data.BiliMessage
 import top.colter.mirai.plugin.bilibili.data.DynamicDetail
-import top.colter.mirai.plugin.bilibili.data.DynamicMessage
+import top.colter.mirai.plugin.bilibili.data.LiveDetail
 import top.colter.mirai.plugin.bilibili.tasker.*
 
 object BiliBiliDynamic : KotlinPlugin(
@@ -29,7 +30,8 @@ object BiliBiliDynamic : KotlinPlugin(
     var cookie = BiliCookie()
 
     val dynamicChannel = Channel<DynamicDetail>(20)
-    val messageChannel = Channel<DynamicMessage>(20)
+    val liveChannel = Channel<LiveDetail>(20)
+    val messageChannel = Channel<BiliMessage>(20)
 
     val subDynamic: MutableMap<Long, SubData> by BiliDynamicData::dynamic
 
@@ -48,7 +50,9 @@ object BiliBiliDynamic : KotlinPlugin(
 
         waitOnline {
             DynamicCheckTasker.start()
-            MessageTasker.start()
+            LiveCheckTasker.start()
+            DynamicMessageTasker.start()
+            LiveMessageTasker.start()
             SendTasker.start()
             ListenerTasker.start()
             CacheClearTasker.start()

@@ -13,6 +13,8 @@ import top.colter.mirai.plugin.bilibili.client.BiliClient
 import top.colter.mirai.plugin.bilibili.data.DynamicItem
 import top.colter.mirai.plugin.bilibili.data.DynamicType.*
 import java.nio.file.Path
+import java.nio.file.attribute.FileTime
+import java.time.Instant
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
@@ -49,7 +51,10 @@ val DynamicItem.formatTime: String
     get() = time.formatTime
 
 val Long.formatTime: String
-    get() = DateTimeFormatter.ofPattern("yyyy年MM月dd日 HH:mm:ss")
+    get() = formatTime()
+
+fun Long.formatTime(template: String = "yyyy年MM月dd日 HH:mm:ss"): String
+    = DateTimeFormatter.ofPattern(template)
         .format(LocalDateTime.ofEpochSecond(this, 0, OffsetDateTime.now().offset))
 
 val DynamicItem.link: String
@@ -133,6 +138,7 @@ suspend fun getOrDownload(url: String, cacheType: CacheType = CacheType.UNKNOWN)
         cacheType.cacheFile(fileName)
     }
     return if (filePath.exists()) {
+        filePath.setLastModifiedTime(FileTime.from(Instant.now()))
         filePath.readBytes()
     } else {
         biliClient.useHttpClient {

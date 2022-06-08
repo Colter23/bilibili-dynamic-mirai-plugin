@@ -102,15 +102,20 @@ data class PushConfig(
 
 @Serializable
 data class TemplateConfig(
-    val defaultDynamicPush: String = "defaultOneMsg",
+    val defaultDynamicPush: String = "oneMsg",
+    val defaultLivePush: String = "oneMsg",
     val dynamicPush: MutableMap<String, String> = mutableMapOf(
         "drawOnly" to "{draw}",
-        "defaultOneMsg" to "{draw}\n{name}@{type}\n{link}",
-        "defaultTwoMsg" to "{draw}\r{name}@{uid}@{type}\n{time}\n{link}",
-        "defaultForwardMsg" to "{draw}{>>}作者：{name}\nUID：{uid}\n时间：{time}\n类型：{type}\n链接：{link}\r{content}\r{images}{<<}",
-        //"defaultForwardMsg" to "【{name}】{type}\r{draw}\n{link} {>>}作者：{name}\nUID：{uid}\n时间：{time}\n类型：{type}\n链接：{link}\r{content}\r{images}{<<}",
+        "oneMsg" to "{draw}\n{name}@{type}\n{link}",
+        "twoMsg" to "{draw}\r{name}@{uid}@{type}\n{time}\n{link}",
+        "forwardMsg" to "{draw}{>>}作者：{name}\nUID：{uid}\n时间：{time}\n类型：{type}\n链接：{link}\r{content}\r{images}{<<}",
     ),
-    val livePush: String = "",
+    val livePush: MutableMap<String, String> = mutableMapOf(
+        "drawOnly" to "{draw}",
+        "oneMsg" to "{draw}\n{name}@直播\n{link}",
+        "oneMsgAtAll" to "{draw}\n{name}@直播\n{link}",
+        "twoMsg" to "{draw}\r{name}@{uid}@直播\n{title}\n{time}\n{link}",
+    ),
     val forwardCard: ForwardDisplay = ForwardDisplay(),
     val footer: String = ""
 )
