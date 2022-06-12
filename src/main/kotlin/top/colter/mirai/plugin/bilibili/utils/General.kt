@@ -20,6 +20,11 @@ import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.io.path.*
 
+
+internal val logger by BiliBiliDynamic::logger
+
+val biliClient = BiliClient()
+
 fun List<String>.isBlank(): Boolean {
     if (size == 0) return true
     forEach { if (it != "") return false }
@@ -128,7 +133,6 @@ fun cacheImage(image: Image, path: String, cacheType: CacheType): String {
     return "${cacheType.path}/$path"
 }
 
-val biliClient = BiliClient()
 suspend fun getOrDownload(url: String, cacheType: CacheType = CacheType.UNKNOWN): ByteArray {
     val fileName = url.split("?").first().split("@").first().split("/").last()
 

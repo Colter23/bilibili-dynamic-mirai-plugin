@@ -8,12 +8,7 @@ import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
 import net.mamoe.mirai.event.events.BotOnlineEvent
 import net.mamoe.mirai.event.globalEventChannel
 import net.mamoe.mirai.utils.info
-import top.colter.mirai.plugin.bilibili.data.BiliCookie
-import top.colter.mirai.plugin.bilibili.data.BiliMessage
-import top.colter.mirai.plugin.bilibili.data.DynamicDetail
-import top.colter.mirai.plugin.bilibili.data.LiveDetail
-import top.colter.mirai.plugin.bilibili.draw.BiliImageQuality
-import top.colter.mirai.plugin.bilibili.draw.BiliImageTheme
+import top.colter.mirai.plugin.bilibili.data.*
 import top.colter.mirai.plugin.bilibili.tasker.*
 
 object BiliBiliDynamic : KotlinPlugin(
@@ -38,7 +33,7 @@ object BiliBiliDynamic : KotlinPlugin(
     val subDynamic: MutableMap<Long, SubData> by BiliData::dynamic
 
     override fun onEnable() {
-        logger.info { "Plugin loaded" }
+        logger.info { "BiliBili Dynamic Plugin loaded" }
 
         BiliData.reload()
         BiliConfig.reload()
@@ -50,6 +45,7 @@ object BiliBiliDynamic : KotlinPlugin(
         launch {
             checkCookie()
             initTagid()
+            loadFonts()
         }
 
         waitOnline {

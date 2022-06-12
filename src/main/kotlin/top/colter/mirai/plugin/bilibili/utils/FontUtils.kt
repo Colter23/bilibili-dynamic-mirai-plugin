@@ -25,6 +25,7 @@ object FontUtils {
     fun loadTypeface(path: String, index: Int = 0): Typeface {
         val face = Typeface.makeFromFile(path, index)
         registerTypeface(face)
+        logger.info("加载字体 ${face.familyName} 成功")
         return face
     }
 

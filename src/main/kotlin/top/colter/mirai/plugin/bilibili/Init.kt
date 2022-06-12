@@ -4,7 +4,9 @@ import top.colter.mirai.plugin.bilibili.BiliConfig.accountConfig
 import top.colter.mirai.plugin.bilibili.api.createGroup
 import top.colter.mirai.plugin.bilibili.api.followGroup
 import top.colter.mirai.plugin.bilibili.api.userInfo
+import top.colter.mirai.plugin.bilibili.utils.FontUtils.loadTypeface
 import top.colter.mirai.plugin.bilibili.utils.biliClient
+import kotlin.io.path.forEachDirectoryEntry
 
 
 suspend fun checkCookie(){
@@ -32,5 +34,11 @@ suspend fun initTagid() {
             return
         }
         BiliBiliDynamic.tagid = res.tagId
+    }
+}
+
+fun loadFonts(){
+    BiliBiliDynamic.dataFolderPath.resolve("font").forEachDirectoryEntry {
+        loadTypeface(it.toString())
     }
 }

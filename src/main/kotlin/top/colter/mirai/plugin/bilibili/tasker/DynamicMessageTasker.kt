@@ -1,12 +1,16 @@
 package top.colter.mirai.plugin.bilibili.tasker
 
+import org.jetbrains.skia.Color
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
+import top.colter.mirai.plugin.bilibili.BiliBiliDynamic.subDynamic
 import top.colter.mirai.plugin.bilibili.data.DynamicItem
 import top.colter.mirai.plugin.bilibili.data.DynamicMessage
 import top.colter.mirai.plugin.bilibili.data.DynamicType
 import top.colter.mirai.plugin.bilibili.draw.makeDrawDynamic
+import top.colter.mirai.plugin.bilibili.draw.makeRGB
 import top.colter.mirai.plugin.bilibili.utils.formatTime
 import top.colter.mirai.plugin.bilibili.utils.time
+import top.colter.mirai.plugin.bilibili.utils.uid
 
 object DynamicMessageTasker : BiliTasker() {
 
@@ -126,7 +130,11 @@ object DynamicMessageTasker : BiliTasker() {
 
     suspend fun DynamicItem.makeDynamic(): String? {
         val drawEnable = true
-        return if (drawEnable) makeDrawDynamic() else null
+
+        val color = subDynamic[uid]?.color?:"#d3edfa"
+        val colors = color.split(";", "；").map { Color.makeRGB(it.trim()) }
+
+        return if (drawEnable) makeDrawDynamic(colors) else null
     }
 
 }

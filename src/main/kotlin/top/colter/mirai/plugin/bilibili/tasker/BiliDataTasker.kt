@@ -14,7 +14,7 @@ import top.colter.mirai.plugin.bilibili.BiliBiliDynamic.save
 import top.colter.mirai.plugin.bilibili.BiliConfig.accountConfig
 import top.colter.mirai.plugin.bilibili.api.*
 import top.colter.mirai.plugin.bilibili.client.BiliClient
-import top.colter.mirai.plugin.bilibili.draw.LoginQrCodeDraw
+import top.colter.mirai.plugin.bilibili.draw.loginQrCode
 import top.colter.mirai.plugin.bilibili.utils.findContact
 import java.net.URI
 
@@ -245,7 +245,7 @@ object BiliDataTasker {
     suspend fun login(contact: Contact) {
         val loginData = client.getLoginUrl().data!!
 
-        val image = LoginQrCodeDraw.qrCode(loginData.url)
+        val image = loginQrCode(loginData.url)
         image.encodeToData()!!.bytes.toExternalResource().toAutoCloseable().sendAsImageTo(contact)
         contact.sendMessage("请使用BiliBili手机APP扫码登录 3分钟有效")
 

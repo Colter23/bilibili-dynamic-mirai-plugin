@@ -1,4 +1,4 @@
-package top.colter.mirai.plugin.bilibili.draw
+package top.colter.mirai.plugin.bilibili.data
 
 import kotlinx.serialization.Serializable
 import net.mamoe.mirai.console.data.ReadOnlyPluginConfig
@@ -23,7 +23,6 @@ object BiliImageQuality : ReadOnlyPluginConfig("ImageQuality") {
                 pendantSize = 112f,
                 verifyIconSize = 20f,
 
-                // 36   5
                 badgeHeight = 36,
                 badgePadding = 5,
                 badgeArc = 5f,
@@ -37,10 +36,10 @@ object BiliImageQuality : ReadOnlyPluginConfig("ImageQuality") {
                 smallCardHeight = 160,
                 additionalCardHeight = 90,
 
-                //mainFontSize = 22f,
-                //subFontSize = 18f,
-                //emojiSize = 30f,
-                //iconSize = 26f,
+                cardOutlineWidth = 2f,
+                drawOutlineWidth = 2f,
+
+                //qrCodeWidth = 90,
                 fanCardHeight = 90f,
 
                 nameFontSize = 30f,
@@ -49,8 +48,6 @@ object BiliImageQuality : ReadOnlyPluginConfig("ImageQuality") {
                 descFontSize = 20f,
                 contentFontSize = 26f,
 
-                emojiSize = 34f,
-                iconSize = 30f,
             ),
             "1000w" to Quality(
                 imageWidth = 1000,
@@ -73,11 +70,15 @@ object BiliImageQuality : ReadOnlyPluginConfig("ImageQuality") {
 
                 contentSpace = 15,
 
+                //qrCodeWidth = 115,
                 fanCardHeight = 115f,
 
                 drawSpace = 15,
                 smallCardHeight = 200,
                 additionalCardHeight = 130,
+
+                cardOutlineWidth = 2f,
+                drawOutlineWidth = 2f,
 
                 nameFontSize = 36f,
                 titleFontSize = 32f,
@@ -85,8 +86,6 @@ object BiliImageQuality : ReadOnlyPluginConfig("ImageQuality") {
                 descFontSize = 24f,
                 contentFontSize = 32f,
 
-                emojiSize = 36f,
-                iconSize = 31f,
             ),
             "1200w" to Quality(
                 imageWidth = 1000,
@@ -115,14 +114,15 @@ object BiliImageQuality : ReadOnlyPluginConfig("ImageQuality") {
                 smallCardHeight = 200,
                 additionalCardHeight = 130,
 
+                cardOutlineWidth = 2f,
+                drawOutlineWidth = 2f,
+
                 nameFontSize = 36f,
                 titleFontSize = 32f,
                 subTitleFontSize = 28f,
                 descFontSize = 24f,
                 contentFontSize = 32f,
 
-                emojiSize = 36f,
-                iconSize = 31f,
             ),
             "1500w" to Quality(
                 imageWidth = 1000,
@@ -151,14 +151,15 @@ object BiliImageQuality : ReadOnlyPluginConfig("ImageQuality") {
                 smallCardHeight = 200,
                 additionalCardHeight = 130,
 
+                cardOutlineWidth = 2f,
+                drawOutlineWidth = 2f,
+
                 nameFontSize = 36f,
                 titleFontSize = 32f,
                 subTitleFontSize = 28f,
                 descFontSize = 24f,
                 contentFontSize = 32f,
 
-                emojiSize = 36f,
-                iconSize = 31f,
             ),
         )
     )
@@ -167,38 +168,39 @@ object BiliImageQuality : ReadOnlyPluginConfig("ImageQuality") {
 
 @Serializable
 data class Quality(
-    val imageWidth: Int = 0,
-    val cardMargin: Int = 0,
-    val cardPadding: Int = 0,
-    val cardArc: Float = 0f,
+    val imageWidth: Int,
+    val cardMargin: Int,
+    val cardPadding: Int,
+    val cardArc: Float,
 
-    val faceSize: Float = 0f,
-    val noPendantFaceInflate: Float = 0f,
-    val pendantSize: Float = 0f,
-    val verifyIconSize: Float = 0f,
+    val faceSize: Float,
+    val noPendantFaceInflate: Float,
+    val pendantSize: Float,
+    val verifyIconSize: Float,
 
-    var badgeHeight: Int = 0,
-    val badgePadding: Int = 0,
-    val badgeArc: Float = 0f,
+    var badgeHeight: Int,
+    val badgePadding: Int,
+    val badgeArc: Float,
 
-    val lineHeight: Float = 0f,
-    val lineSpace: Int = 0,
+    val lineHeight: Float,
+    val lineSpace: Int,
 
-    val contentSpace: Int = 0,
+    val contentSpace: Int,
 
-    val fanCardHeight: Float = 0f,
+    val fanCardHeight: Float,
 
-    val drawSpace: Int = 0,
+    val drawSpace: Int,
 
-    val smallCardHeight: Int = 0,
-    val additionalCardHeight: Int = 0,
+    val smallCardHeight: Int,
+    val additionalCardHeight: Int,
 
-    val nameFontSize: Float = 0f,
-    val titleFontSize: Float = 0f,
-    val subTitleFontSize: Float = 0f,
-    val descFontSize: Float = 0f,
-    val contentFontSize: Float = 0f,
+    val cardOutlineWidth: Float,
+    val drawOutlineWidth: Float,
 
-    val emojiSize: Float = 0f,
-    val iconSize: Float = 0f
+    //val qrCodeWidth: Int,
+    val nameFontSize: Float,
+    val titleFontSize: Float,
+    val subTitleFontSize: Float,
+    val descFontSize: Float,
+    val contentFontSize: Float,
 )

@@ -33,7 +33,7 @@ object BiliConfig : AutoSavePluginConfig("BiliPluginConfig") {
     @ValueDescription("模板配置:\ndefaultDynamicPush: 默认使用的推送模板, 填写下方动态模板名\ndynamicPush: 动态推送模板\nlivePush: 直播推送模板\nforwardCard: 转发卡片模板\nfooter: 图片页脚")
     val templateConfig: TemplateConfig by value()
 
-    @ValueDescription("缓存配置:\nexpires: 图片过期时长 单位天\n为 0 时表示不清理此类图片\n当图片在指定时间内未被再次使用,就会被删除\n可选类型:\nDRAW: 由插件绘制的图片\nIMAGES: 动态图和封面等\nCOVER: 动态图和封面等\nEMOJI: B站的Emoji\nUSER: 用户头像,头像挂件,粉丝卡片套装等\nOTHER: 其他图片")
+    @ValueDescription("缓存配置:\nexpires: 图片过期时长 单位天\n为 0 时表示不清理此类图片\n当图片在指定时间内未被再次使用,就会被删除\n可选类型:\nDRAW: 由插件绘制的图片\nIMAGES: 动态图和封面等\nEMOJI: B站的Emoji\nUSER: 用户头像,头像挂件,粉丝卡片套装等\nOTHER: 其他图片")
     val cacheConfig: CacheConfig by value()
 
     @ValueDescription("代理配置:\nproxy: 代理列表")
@@ -61,17 +61,25 @@ data class TranslateConfig(
 data class ImageConfig(
     val quality: String = "1000w",
     val theme: String = "v3",
-    val font: String = "",
+    val font: String = "HarmonyOS Sans_SC Medium",
     val fontSizeMultiple: Float = 1.0f,
-    val badgeEnable: Boolean = true,
     /**
      * 可选值:
      * fanCard 粉丝卡片
      * qrCode  动态链接二维码
      * none    无
      */
-    val cardOrnament: String = "fanCard"
+    val cardOrnament: String = "fanCard",
+    val badgeEnable: BadgeEnable = BadgeEnable(),
 )
+
+@Serializable
+data class BadgeEnable(
+    val left: Boolean = true,
+    val right: Boolean = false,
+){
+    val enable: Boolean = left || right
+}
 
 @Serializable
 data class ProxyConfig(
@@ -91,7 +99,6 @@ data class CheckConfig(
     val interval: Int = 15,
     val liveInterval: Int = 20,
     val lowSpeed: String = "0-0x2",
-
 )
 
 

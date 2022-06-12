@@ -16,11 +16,11 @@ import top.colter.mirai.plugin.bilibili.draw.Position.*
 import top.colter.mirai.plugin.bilibili.utils.*
 import top.colter.mirai.plugin.bilibili.utils.FontUtils.fonts
 import top.colter.mirai.plugin.bilibili.utils.FontUtils.loadTypeface
-import kotlin.io.path.pathString
+import top.colter.mirai.plugin.bilibili.utils.FontUtils.matchFamily
 import kotlin.math.ceil
 
 
-internal val logger by BiliBiliDynamic::logger
+private val logger by BiliBiliDynamic::logger
 
 private val quality: Quality by lazy {
     var quality = BiliImageQuality.quality[imageConfig.quality]
@@ -29,7 +29,7 @@ private val quality: Quality by lazy {
         quality = BiliImageQuality.quality.firstNotNullOf { it.value }
     }
     quality.apply {
-        badgeHeight = if (imageConfig.badgeEnable) badgeHeight else 0
+        badgeHeight = if (imageConfig.badgeEnable.enable) badgeHeight else 0
     }
 }
 
@@ -51,8 +51,13 @@ private val cardContentRect: Rect by lazy {
 }
 
 private val mainTypeface: Typeface by lazy {
-    //loadTypeface("data/top.colter.bilibili-dynamic-mirai-plugin/font/HarmonyOS_Sans_SC_Medium.ttf")
-    loadTypeface("${BiliBiliDynamic.dataFolderPath.pathString}/font/HarmonyOS_Sans_SC_Medium.ttf")
+    //loadTypeface("${BiliBiliDynamic.dataFolderPath.pathString}/font/HarmonyOS_Sans_SC_Medium.ttf")
+    try {
+        matchFamily(imageConfig.font).matchStyle(FontStyle.NORMAL)!!
+    }catch (e: Exception){
+        logger.error("加载主字体 ${imageConfig.font} 失败")
+        matchFamily("思源黑体").matchStyle(FontStyle.NORMAL)!!
+    }
 }
 
 private val font: Font by lazy {
@@ -74,10 +79,11 @@ val descTextStyle = TextStyle().apply {
     typeface = mainTypeface
 }
 
-val topTwoBadgeCardArc = if (imageConfig.badgeEnable)
-    floatArrayOf(0f, 0f, quality.cardArc, quality.cardArc)
-else
-    floatArrayOf(quality.cardArc, quality.cardArc, quality.cardArc, quality.cardArc)
+val cardBadgeArc: FloatArray by lazy {
+    val left = if (imageConfig.badgeEnable.left) quality.cardArc else 0f
+    val right = if (imageConfig.badgeEnable.right) quality.cardArc else 0f
+    floatArrayOf(left, right, quality.cardArc, quality.cardArc)
+}
 
 val linkPaint = Paint().apply {
     color = theme.linkColor
@@ -88,22 +94,9 @@ val generalPaint = Paint().apply {
     isAntiAlias = true
 }
 
-
-enum class Position {
-    TOP_LEFT,
-    TOP,
-    TOP_RIGHT,
-    LEFT,
-    CENTER,
-    RIGHT,
-    BOTTOM_LEFT,
-    BOTTOM,
-    BOTTOM_RIGHT
-}
-
-suspend fun DynamicItem.makeDrawDynamic(): String {
-    val dynamic = drawDynamic()
-    val img = makeCardBg(dynamic.height) {
+suspend fun DynamicItem.makeDrawDynamic(colors: List<Int>): String {
+    val dynamic = drawDynamic(colors.first())
+    val img = makeCardBg(dynamic.height, colors) {
         it.drawImage(dynamic, 0f, 0f)
     }
     return cacheImage(img, "$uid/$idStr.png", CacheType.DRAW_DYNAMIC)
@@ -111,7 +104,7 @@ suspend fun DynamicItem.makeDrawDynamic(): String {
 
 suspend fun LiveInfo.makeDrawLive(): String {
     val live = drawLive()
-    val img = makeCardBg(live.height) {
+    val img = makeCardBg(live.height, listOf()) {
         it.drawImage(live, 0f, 0f)
     }
     return cacheImage(img, "$uid/${liveTime.formatTime("yyyyMMddHHmmss")}.png", CacheType.DRAW_LIVE)
@@ -136,26 +129,26 @@ suspend fun LiveInfo.drawLive(): Image{
                 quality.badgeHeight + margin / 2f,
                 cardRect.width,
                 height.toFloat(),
-                topTwoBadgeCardArc
+                cardBadgeArc
             )
 
             drawCard(rrect)
-            drawRectShadowAntiAlias(rrect.inflate(1f), 6f, 6f, 25f, 0f, Color.makeARGB(70, 0, 0, 0))
+            drawRectShadowAntiAlias(rrect.inflate(1f), theme.cardShadow)
 
-            if (imageConfig.badgeEnable) {
+            if (imageConfig.badgeEnable.left) {
                 val svg = SVGDOM(Data.makeFromBytes(loadResourceBytes("icon/LIVE.svg")))
                 drawBadge(
                     "直播",
                     font,
-                    Color.makeRGB(0, 203, 255),
-                    Color.WHITE,
-                    120,
+                    theme.mainLeftBadge.fontColor,
+                    theme.mainLeftBadge.bgColor,
                     rrect,
                     TOP_LEFT,
                     svg.makeImage(quality.contentFontSize, quality.contentFontSize)
                 )
-
-                drawBadge(roomId.toString(), font, Color.WHITE, Color.makeRGB(72, 199, 240), 255, rrect, TOP_RIGHT)
+            }
+            if (imageConfig.badgeEnable.right){
+                drawBadge(roomId.toString(), font, Color.WHITE, Color.makeRGB(72, 199, 240) , rrect, TOP_RIGHT)
             }
 
             var top = quality.cardMargin + quality.badgeHeight.toFloat()
@@ -163,7 +156,7 @@ suspend fun LiveInfo.drawLive(): Image{
             drawScaleWidthImage(avatar, cardRect.width, quality.cardMargin.toFloat(), top)
             top += avatar.height + quality.contentSpace
 
-            val dst = RRect.makeComplexXYWH(quality.cardMargin.toFloat(), top, cardRect.width, cardRect.width * cover.height / cover.width, topTwoBadgeCardArc)
+            val dst = RRect.makeComplexXYWH(quality.cardMargin.toFloat(), top, cardRect.width, cardRect.width * cover.height / cover.width, cardBadgeArc)
             drawImageRRect(cover, dst)
 
         }
@@ -184,10 +177,10 @@ suspend fun LiveInfo.drawAvatar(): Image {
             var x = quality.faceSize + quality.cardPadding * 3f
             var y = ((quality.faceSize - (quality.nameFontSize + textLineTime.height)) / 2) + quality.nameFontSize + (quality.cardPadding * 1.2f)
 
-            drawTextLine(textLineTitle, x, y, Paint().apply { color = Color.makeRGB(0, 0, 0) })
+            drawTextLine(textLineTitle, x, y, Paint().apply { color = theme.titleColor })
 
             y += textLineTime.height
-            drawTextLine(textLineTime, x, y, Paint().apply { color = Color.makeRGB(156, 156, 156) })
+            drawTextLine(textLineTime, x, y, Paint().apply { color = theme.subTitleColor })
 
             //drawOrnament(decorate, link)
         }
@@ -195,11 +188,11 @@ suspend fun LiveInfo.drawAvatar(): Image {
 }
 
 
-suspend fun DynamicItem.drawDynamic(isForward: Boolean = false): Image {
+suspend fun DynamicItem.drawDynamic(themeColor: Int, isForward: Boolean = false): Image {
 
-    val orig = orig?.drawDynamic(type == DYNAMIC_TYPE_FORWARD)
+    val orig = orig?.drawDynamic(themeColor, type == DYNAMIC_TYPE_FORWARD)
 
-    var imgList = modules.makeGeneral(formatTime, link, isForward)
+    var imgList = modules.makeGeneral(formatTime, link,themeColor, isForward)
 
     // 调整附加卡片位置
     if (orig != null) {
@@ -239,33 +232,33 @@ suspend fun DynamicItem.drawDynamic(isForward: Boolean = false): Image {
                 quality.badgeHeight + margin / 2f,
                 cardRect.width,
                 height.toFloat(),
-                topTwoBadgeCardArc
+                cardBadgeArc
             )
 
             drawCard(rrect)
 
             if (isForward) {
-                drawRectShadowAntiAlias(rrect.inflate(1f), 5f, 5f, 15f, 0f, Color.makeARGB(30, 0, 0, 0))
+                drawRectShadowAntiAlias(rrect.inflate(1f), theme.smallCardShadow)
             } else {
-                drawRectShadowAntiAlias(rrect.inflate(1f), 6f, 6f, 25f, 0f, Color.makeARGB(70, 0, 0, 0))
+                drawRectShadowAntiAlias(rrect.inflate(1f), theme.cardShadow)
             }
 
-            if (imageConfig.badgeEnable) {
+            if (imageConfig.badgeEnable.left) {
                 val svg =
                     SVGDOM(Data.makeFromBytes(loadResourceBytes("icon/${if (isForward) "FORWARD" else "BILIBILI_LOGO"}.svg")))
                 //val svg = SVGDOM(Data.makeFromFileName("$resourcesPath/icon/${if (isForward) "FORWARD" else "BILIBILI_LOGO"}.svg"))
                 drawBadge(
                     if (isForward) "转发动态" else "动态",
                     font,
-                    Color.makeRGB(0, 203, 255),
-                    Color.WHITE,
-                    120,
+                    theme.mainLeftBadge.fontColor,
+                    theme.mainLeftBadge.bgColor,
                     rrect,
                     TOP_LEFT,
                     svg.makeImage(quality.contentFontSize, quality.contentFontSize)
                 )
-
-                drawBadge(idStr, font, Color.WHITE, Color.makeRGB(72, 199, 240), 255, rrect, TOP_RIGHT)
+            }
+            if (imageConfig.badgeEnable.right) {
+                drawBadge(idStr, font, theme.mainRightBadge.fontColor, theme.mainRightBadge.bgColor, rrect, TOP_RIGHT)
             }
 
             var top = quality.cardMargin + quality.badgeHeight.toFloat()
@@ -290,9 +283,9 @@ suspend fun DynamicItem.drawDynamic(isForward: Boolean = false): Image {
 
 }
 
-suspend fun DynamicItem.Modules.makeGeneral(time: String, link: String, isForward: Boolean = false): List<Image> {
+suspend fun DynamicItem.Modules.makeGeneral(time: String, link: String, themeColor: Int, isForward: Boolean = false): List<Image> {
     return mutableListOf<Image>().apply {
-        add(if (isForward) moduleAuthor.drawForward(time) else moduleAuthor.drawGeneral(time, link))
+        add(if (isForward) moduleAuthor.drawForward(time) else moduleAuthor.drawGeneral(time, link, themeColor))
         moduleDispute?.drawGeneral()?.let { add(it) }
         addAll(moduleDynamic.makeGeneral(isForward))
     }
@@ -465,8 +458,6 @@ fun ModuleDynamic.Topic.drawGeneral(): Image {
 }
 
 
-
-
 suspend fun ModuleDynamic.Major.Live.drawGeneral(): Image {
     return drawSmallCard(title, "$descFirst $descSecond", cover, badge.text, "$id", null)
 }
@@ -587,12 +578,11 @@ suspend fun drawAdditionalCard(
     ).apply {
         canvas.apply {
             drawCard(additionalCardRect)
-            drawRectShadowAntiAlias(additionalCardRect.inflate(1f), 5f, 5f, 15f, 0f, Color.makeARGB(30, 0, 0, 0))
+            drawRectShadowAntiAlias(additionalCardRect.inflate(1f), theme.smallCardShadow)
 
             val labelTextLine = TextLine.make(label, font.makeWithSize(quality.subTitleFontSize))
             drawTextLine(labelTextLine, additionalCardRect.left + 8, quality.subTitleFontSize, Paint().apply {
-                color = Color.BLACK
-                alpha = 130
+                color = theme.subTitleColor
             })
 
             var x = quality.cardPadding.toFloat()
@@ -668,7 +658,7 @@ suspend fun ModuleDynamic.Major.Common.drawGeneral(): Image {
     ).apply {
         canvas.apply {
             drawCard(commonCardRect)
-            drawRectShadowAntiAlias(commonCardRect.inflate(1f), 5f, 5f, 15f, 0f, Color.makeARGB(30, 0, 0, 0))
+            drawRectShadowAntiAlias(commonCardRect.inflate(1f), theme.smallCardShadow)
 
             if (badge.text.isNotBlank()) {
                 val labelTextLine = TextLine.make(badge.text, font.makeWithSize(quality.subTitleFontSize))
@@ -698,7 +688,6 @@ suspend fun ModuleDynamic.Major.Common.drawGeneral(): Image {
             ).inflate(-1f) as RRect
             drawImageRRect(img, imgRect)
             x += imgRect.width + quality.cardPadding
-
 
             val titleParagraph =
                 ParagraphBuilder(paragraphStyle, fonts).addText(title).build().layout(cardContentRect.width - x)
@@ -757,7 +746,7 @@ suspend fun ModuleDynamic.Major.Archive.drawGeneral(): Image {
         quality.badgeHeight + 1f,
         cardContentRect.width,
         videoCardHeight,
-        topTwoBadgeCardArc
+        cardBadgeArc
     )
 
     return Surface.makeRasterN32Premul(
@@ -769,7 +758,7 @@ suspend fun ModuleDynamic.Major.Archive.drawGeneral(): Image {
             // 绘制卡片背景
             drawCard(videoCardRect)
             // 卡片阴影
-            drawRectShadowAntiAlias(videoCardRect.inflate(1f), 5f, 5f, 15f, 0f, Color.makeARGB(30, 0, 0, 0))
+            drawRectShadowAntiAlias(videoCardRect.inflate(1f), theme.smallCardShadow)
 
             // 封面
             val coverImg = getOrDownloadImage(cover, CacheType.IMAGES)
@@ -778,22 +767,13 @@ suspend fun ModuleDynamic.Major.Archive.drawGeneral(): Image {
                 videoCardRect.top,
                 videoCardRect.width,
                 videoCoverHeight,
-                topTwoBadgeCardArc
+                cardBadgeArc
             ).inflate(-1f) as RRect
             drawImageRRect(coverImg, coverRRect)
 
             // 徽章
-            if (imageConfig.badgeEnable) {
-                drawBadge(badge.text, font, Color.WHITE, Color.makeRGB(251, 114, 153), 255, videoCardRect, TOP_LEFT)
-                drawBadge(
-                    "av$aid  |  $bvid",
-                    font,
-                    Color.makeRGB(badge.color),
-                    Color.makeRGB(badge.bgColor),
-                    255,
-                    videoCardRect,
-                    TOP_RIGHT
-                )
+            if (imageConfig.badgeEnable.left) {
+                drawBadge(badge.text, font, theme.subLeftBadge.fontColor, theme.subLeftBadge.bgColor, videoCardRect, TOP_LEFT)
             } else {
                 val labelTextLine = TextLine.make(badge.text, font.makeWithSize(quality.subTitleFontSize))
 
@@ -805,6 +785,16 @@ suspend fun ModuleDynamic.Major.Archive.drawGeneral(): Image {
                     Paint().apply { color = Color.makeRGB(badge.bgColor) }
                 )
             }
+            if (imageConfig.badgeEnable.right){
+                drawBadge(
+                    "av$aid  |  $bvid",
+                    font,
+                    theme.subRightBadge.fontColor,
+                    theme.subRightBadge.bgColor,
+                    videoCardRect,
+                    TOP_RIGHT
+                )
+            }
 
             // 封面遮罩
             val coverMaskRRect = RRect.makeComplexLTRB(
@@ -812,7 +802,7 @@ suspend fun ModuleDynamic.Major.Archive.drawGeneral(): Image {
                 coverRRect.bottom - videoCoverHeight * 0.2f,
                 coverRRect.right,
                 coverRRect.bottom,
-                topTwoBadgeCardArc
+                cardBadgeArc
             )
             drawRRect(coverMaskRRect, Paint().apply {
                 color = Color.BLACK
@@ -851,11 +841,9 @@ suspend fun ModuleDynamic.Major.Archive.drawGeneral(): Image {
                 quality.cardPadding * 1.5f,
                 quality.badgeHeight + videoCoverHeight + quality.cardPadding / 2 + titleParagraph.height
             )
-
         }
     }.makeImageSnapshot()
 }
-
 
 suspend fun ModuleDynamic.Major.Archive.drawSmall(): Image {
     return drawSmallCard(title, desc, cover, badge.text, "av$aid  |  $bvid", durationText)
@@ -886,7 +874,7 @@ suspend fun drawSmallCard(title: String, desc: String, cover: String, lbadge: St
         quality.badgeHeight + 1f,
         cardContentRect.width,
         quality.smallCardHeight.toFloat(),
-        topTwoBadgeCardArc
+        cardBadgeArc
     )
 
     return Surface.makeRasterN32Premul(
@@ -898,25 +886,25 @@ suspend fun drawSmallCard(title: String, desc: String, cover: String, lbadge: St
             // 绘制卡片背景
             drawCard(videoCardRect)
             // 卡片阴影
-            drawRectShadowAntiAlias(videoCardRect.inflate(1f), 5f, 5f, 15f, 0f, Color.makeARGB(30, 0, 0, 0))
+            drawRectShadowAntiAlias(videoCardRect.inflate(1f), theme.smallCardShadow)
 
             // 徽章
-            if (imageConfig.badgeEnable) {
+            if (imageConfig.badgeEnable.left) {
                 drawBadge(
                     lbadge,
                     font,
-                    Color.WHITE,
-                    Color.makeRGB(251, 114, 153),
-                    255,
+                    theme.subLeftBadge.fontColor,
+                    theme.subLeftBadge.bgColor,
                     videoCardRect,
                     TOP_LEFT
                 )
+            }
+            if (imageConfig.badgeEnable.right) {
                 drawBadge(
                     rbadge,
                     font,
-                    Color.WHITE,
-                    Color.makeRGB(72, 199, 240),
-                    255,
+                    theme.subRightBadge.fontColor,
+                    theme.subRightBadge.bgColor,
                     videoCardRect,
                     TOP_RIGHT
                 )
@@ -926,7 +914,7 @@ suspend fun drawSmallCard(title: String, desc: String, cover: String, lbadge: St
             val coverImg = getOrDownloadImage(cover, CacheType.IMAGES)
             val coverRRect = RRect.makeComplexXYWH(
                 videoCardRect.left, videoCardRect.top, coverWidth,
-                quality.smallCardHeight.toFloat(), topTwoBadgeCardArc
+                quality.smallCardHeight.toFloat(), cardBadgeArc
             ).inflate(-1f) as RRect
             drawImageRRect(coverImg, coverRRect)
 
@@ -1024,9 +1012,9 @@ suspend fun ModuleDynamic.Major.Draw.drawGeneral(): Image {
                 drawImageClip(img, dstRect)
 
                 drawRRect(dstRect, Paint().apply {
-                    color = Color.WHITE
+                    color = theme.cardOutlineColor
                     mode = PaintMode.STROKE
-                    strokeWidth = 2f
+                    strokeWidth = quality.drawOutlineWidth
                     isAntiAlias = true
                 })
 
@@ -1070,7 +1058,7 @@ suspend fun ModuleDynamic.Major.Article.drawGeneral(): Image {
         quality.badgeHeight + 1f,
         cardContentRect.width,
         articleCardHeight,
-        topTwoBadgeCardArc
+        cardBadgeArc
     )
 
     return Surface.makeRasterN32Premul(
@@ -1082,7 +1070,7 @@ suspend fun ModuleDynamic.Major.Article.drawGeneral(): Image {
             // 绘制卡片背景
             drawCard(articleCardRect)
             // 卡片阴影
-            drawRectShadowAntiAlias(articleCardRect.inflate(1f), 5f, 5f, 15f, 0f, Color.makeARGB(30, 0, 0, 0))
+            drawRectShadowAntiAlias(articleCardRect.inflate(1f), theme.smallCardShadow)
 
             // 封面
             val coverRRect = RRect.makeComplexXYWH(
@@ -1090,7 +1078,7 @@ suspend fun ModuleDynamic.Major.Article.drawGeneral(): Image {
                 articleCardRect.top,
                 articleCardRect.width,
                 articleCoverHeight,
-                topTwoBadgeCardArc
+                cardBadgeArc
             ).inflate(-1f) as RRect
             if (covers.size == 1) {
                 val coverImg = getOrDownloadImage(covers[0], CacheType.IMAGES)
@@ -1111,17 +1099,8 @@ suspend fun ModuleDynamic.Major.Article.drawGeneral(): Image {
             }
 
             // 徽章
-            if (imageConfig.badgeEnable) {
-                drawBadge("专栏", font, Color.WHITE, Color.makeRGB(251, 114, 153), 255, articleCardRect, TOP_LEFT)
-                drawBadge(
-                    "cv$id",
-                    font,
-                    Color.WHITE,
-                    Color.makeRGB(72, 199, 240),
-                    255,
-                    articleCardRect,
-                    TOP_RIGHT
-                )
+            if (imageConfig.badgeEnable.left) {
+                drawBadge("专栏", font, theme.subLeftBadge.fontColor, theme.subLeftBadge.bgColor, articleCardRect, TOP_LEFT)
             } else {
                 val labelTextLine = TextLine.make("专栏", font.makeWithSize(quality.subTitleFontSize))
                 drawLabelCard(
@@ -1130,6 +1109,16 @@ suspend fun ModuleDynamic.Major.Article.drawGeneral(): Image {
                     articleCardRect.top + quality.cardPadding * 0.8f,
                     Paint().apply { color = Color.WHITE },
                     Paint().apply { color = Color.makeRGB(251, 114, 153) }
+                )
+            }
+            if (imageConfig.badgeEnable.right){
+                drawBadge(
+                    "cv$id",
+                    font,
+                    theme.subRightBadge.fontColor,
+                    theme.subRightBadge.bgColor,
+                    articleCardRect,
+                    TOP_RIGHT
                 )
             }
 
@@ -1175,7 +1164,7 @@ suspend fun ModuleDynamic.Major.Music.drawGeneral(): Image {
         quality.badgeHeight + 1f,
         cardContentRect.width,
         musicCardHeight,
-        topTwoBadgeCardArc
+        cardBadgeArc
     )
 
     return Surface.makeRasterN32Premul(
@@ -1187,21 +1176,23 @@ suspend fun ModuleDynamic.Major.Music.drawGeneral(): Image {
             // 绘制卡片背景
             drawCard(musicCardRect)
             // 卡片阴影
-            drawRectShadowAntiAlias(musicCardRect.inflate(1f), 5f, 5f, 15f, 0f, Color.makeARGB(30, 0, 0, 0))
+            drawRectShadowAntiAlias(musicCardRect.inflate(1f), theme.smallCardShadow)
 
             // 徽章
-            if (imageConfig.badgeEnable) {
-                drawBadge("音乐", font, Color.WHITE, Color.makeRGB(251, 114, 153), 255, musicCardRect, TOP_LEFT)
+            if (imageConfig.badgeEnable.left) {
+                drawBadge("音乐", font, theme.subLeftBadge.fontColor, theme.subLeftBadge.bgColor, musicCardRect, TOP_LEFT)
+            }
+            if (imageConfig.badgeEnable.right){
                 drawBadge(
                     "au$id",
                     font,
-                    Color.WHITE,
-                    Color.makeRGB(72, 199, 240),
-                    255,
+                    theme.subRightBadge.fontColor,
+                    theme.subRightBadge.bgColor,
                     musicCardRect,
                     TOP_RIGHT
                 )
             }
+
             // 封面
             val coverImg = getOrDownloadImage(cover, CacheType.IMAGES)
             val coverRRect = RRect.makeComplexXYWH(
@@ -1209,7 +1200,7 @@ suspend fun ModuleDynamic.Major.Music.drawGeneral(): Image {
                 musicCardRect.top,
                 musicCardHeight,
                 musicCardHeight,
-                topTwoBadgeCardArc
+                cardBadgeArc
             ).inflate(-1f) as RRect
             drawImageRRect(coverImg, coverRRect)
 
@@ -1235,22 +1226,18 @@ fun Rect.textVertical(text: TextLine) =
     bottom - (height - text.capHeight) / 2
 
 
-fun Canvas.drawCard(rrect: RRect, bgColor: Int = Color.WHITE, bgAlpha: Int = 160) {
-    // alpha = 120
+fun Canvas.drawCard(rrect: RRect, bgColor: Int = theme.cardBgColor) {
     drawRRect(rrect, Paint().apply {
         color = bgColor
-        alpha = bgAlpha
         mode = PaintMode.FILL
         isAntiAlias = true
     })
-
     drawRRect(rrect, Paint().apply {
-        color = Color.WHITE
+        color = theme.cardOutlineColor
         mode = PaintMode.STROKE
-        strokeWidth = 2f
+        strokeWidth = quality.cardOutlineWidth
         isAntiAlias = true
     })
-
 }
 
 sealed class RichText(
@@ -1319,20 +1306,8 @@ fun Canvas.drawTextArea(text: String, rect: Rect, textX: Float, textY: Float, fo
 }
 
 
-suspend fun makeCardBg(height: Int, block: (Canvas) -> Unit): Image {
-
-    //val imageWidth = 800
-    val imageHeight = 930
-    //val imageHeight = 1330
-    //val imageHeight = 2000
+fun makeCardBg(height: Int, colors: List<Int>, block: (Canvas) -> Unit): Image {
     val imageRect = Rect.makeXYWH(0f, 0f, quality.imageWidth.toFloat(), height.toFloat())
-    val cardRect = Rect.makeLTRB(
-        quality.cardMargin.toFloat(),
-        quality.cardMargin.toFloat() + quality.badgeHeight,
-        quality.imageWidth.toFloat() - quality.cardMargin.toFloat(),
-        height - quality.cardMargin.toFloat()
-    )
-
     return Surface.makeRasterN32Premul(imageRect.width.toInt(), height).apply {
         canvas.apply {
             drawRect(imageRect, Paint().apply {
@@ -1341,7 +1316,8 @@ suspend fun makeCardBg(height: Int, block: (Canvas) -> Unit): Image {
                     Point(imageRect.right, imageRect.bottom),
                     // H：色相   S：30   B：100
                     //generateLinearGradient(listOf(0xFFffb2cc.toInt(), 0xFFffb2b2.toInt()))
-                    generateLinearGradient(listOf(0xFFd3edfa.toInt()))
+                    //generateLinearGradient(listOf(0xFFd3edfa.toInt()))
+                    generateLinearGradient(colors)
                 )
             })
             block(this)
@@ -1365,17 +1341,17 @@ suspend fun ModuleAuthor.drawForward(time: String): Image {
             var x = faceSize + quality.cardPadding * 2.5f
             var y = ((faceSize - quality.nameFontSize) / 2) + quality.nameFontSize + quality.cardPadding
 
-            drawTextLine(textLineName, x, y, Paint().apply { color = Color.makeRGB(251, 114, 153) })
+            drawTextLine(textLineName, x, y, Paint().apply { color = theme.nameColor })
 
             y -= (quality.nameFontSize - quality.subTitleFontSize) / 2
             x += textLineName.width + quality.cardPadding
-            drawTextLine(textLineTime, x, y, Paint().apply { color = Color.makeRGB(156, 156, 156) })
+            drawTextLine(textLineTime, x, y, Paint().apply { color = theme.subTitleColor })
 
         }
     }.makeImageSnapshot()
 }
 
-suspend fun ModuleAuthor.drawGeneral(time: String, link: String): Image {
+suspend fun ModuleAuthor.drawGeneral(time: String, link: String, themeColor: Int): Image {
     return Surface.makeRasterN32Premul(
         quality.imageWidth - quality.cardMargin * 2,
         (quality.faceSize + quality.cardPadding * 2f).toInt()
@@ -1386,21 +1362,21 @@ suspend fun ModuleAuthor.drawGeneral(time: String, link: String): Image {
             val textLineName = TextLine.make(name, font.makeWithSize(quality.nameFontSize))
             val textLineTime = TextLine.make(time, font.makeWithSize(quality.subTitleFontSize))
 
-            var x = quality.faceSize + quality.cardPadding * 3f
+            val x = quality.faceSize + quality.cardPadding * 3f
             var y =
                 ((quality.faceSize - (quality.nameFontSize + textLineTime.height)) / 2) + quality.nameFontSize + (quality.cardPadding * 1.2f)
 
-            drawTextLine(textLineName, x, y, Paint().apply { color = Color.makeRGB(251, 114, 153) })
+            drawTextLine(textLineName, x, y, Paint().apply { color = theme.nameColor })
 
             y += textLineTime.height
-            drawTextLine(textLineTime, x, y, Paint().apply { color = Color.makeRGB(156, 156, 156) })
+            drawTextLine(textLineTime, x, y, Paint().apply { color = theme.subTitleColor })
 
-            drawOrnament(decorate, link)
+            drawOrnament(decorate, link, themeColor)
         }
     }.makeImageSnapshot()
 }
 
-suspend fun Canvas.drawOrnament(decorate: ModuleAuthor.Decorate?, link: String) {
+suspend fun Canvas.drawOrnament(decorate: ModuleAuthor.Decorate?, link: String, qrCodeColor: Int) {
 
     when (imageConfig.cardOrnament) {
         "fanCard" -> {
@@ -1444,7 +1420,23 @@ suspend fun Canvas.drawOrnament(decorate: ModuleAuthor.Decorate?, link: String) 
             }
         }
         "qrCode" -> {
-            //TODO
+            val qrCodeImg = qrCode(link, quality.fanCardHeight.toInt(), qrCodeColor)
+            val y = ((quality.faceSize - quality.fanCardHeight) / 2) + quality.cardPadding
+            val tarFRect = Rect.makeXYWH(
+                cardContentRect.right - quality.fanCardHeight - 20f,
+                y,
+                quality.fanCardHeight,
+                quality.fanCardHeight
+            )
+            val srcFRect = Rect(0f, 0f, qrCodeImg.width.toFloat(), qrCodeImg.height.toFloat())
+            drawImageRect(
+                qrCodeImg,
+                srcFRect,
+                tarFRect,
+                FilterMipmap(FilterMode.LINEAR, MipmapMode.NEAREST),
+                null,
+                true
+            )
         }
     }
 }
@@ -1476,7 +1468,7 @@ suspend fun Canvas.drawAvatar(
             tarFaceRect.left + tarFaceRect.width / 2,
             tarFaceRect.top + tarFaceRect.width / 2,
             tarFaceRect.width / 2 + quality.noPendantFaceInflate / 2,
-            Paint().apply { color = Color.WHITE; alpha = 160 })
+            Paint().apply { color = theme.faceOutlineColor })
     }
 
     drawImageRRect(faceImg, tarFaceRect)
@@ -1522,7 +1514,6 @@ fun Canvas.drawBadge(
     font: Font,
     fontColor: Int,
     bgColor: Int,
-    bgAlpha: Int,
     cardRect: Rect,
     position: Position,
     icon: Image? = null
@@ -1552,7 +1543,7 @@ fun Canvas.drawBadge(
         else -> throw Exception("Bad Badge Position!")
     }
 
-    drawCard(rrect, bgColor, bgAlpha)
+    drawCard(rrect, bgColor)
 
     var x = rrect.left + quality.badgePadding * 4
     if (icon != null) {
