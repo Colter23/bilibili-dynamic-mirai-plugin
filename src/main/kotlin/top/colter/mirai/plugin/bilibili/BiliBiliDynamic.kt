@@ -12,6 +12,8 @@ import top.colter.mirai.plugin.bilibili.data.BiliCookie
 import top.colter.mirai.plugin.bilibili.data.BiliMessage
 import top.colter.mirai.plugin.bilibili.data.DynamicDetail
 import top.colter.mirai.plugin.bilibili.data.LiveDetail
+import top.colter.mirai.plugin.bilibili.draw.BiliImageQuality
+import top.colter.mirai.plugin.bilibili.draw.BiliImageTheme
 import top.colter.mirai.plugin.bilibili.tasker.*
 
 object BiliBiliDynamic : KotlinPlugin(
@@ -33,15 +35,17 @@ object BiliBiliDynamic : KotlinPlugin(
     val liveChannel = Channel<LiveDetail>(20)
     val messageChannel = Channel<BiliMessage>(20)
 
-    val subDynamic: MutableMap<Long, SubData> by BiliDynamicData::dynamic
+    val subDynamic: MutableMap<Long, SubData> by BiliData::dynamic
 
     override fun onEnable() {
         logger.info { "Plugin loaded" }
 
-        BiliDynamicData.reload()
-        BiliDynamicConfig.reload()
+        BiliData.reload()
+        BiliConfig.reload()
+        BiliImageTheme.reload()
+        BiliImageQuality.reload()
 
-        cookie.parse(BiliDynamicConfig.accountConfig.cookie)
+        cookie.parse(BiliConfig.accountConfig.cookie)
 
         launch {
             checkCookie()
@@ -66,8 +70,8 @@ object BiliBiliDynamic : KotlinPlugin(
 
         BiliTasker.cancelAll()
 
-        BiliDynamicData.save()
-        BiliDynamicConfig.save()
+        BiliData.save()
+        BiliConfig.save()
     }
 
     /**

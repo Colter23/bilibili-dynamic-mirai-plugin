@@ -11,8 +11,8 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.supervisorScope
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
-import top.colter.mirai.plugin.bilibili.BiliDynamicConfig.enableConfig
-import top.colter.mirai.plugin.bilibili.BiliDynamicConfig.proxyConfig
+import top.colter.mirai.plugin.bilibili.BiliConfig.enableConfig
+import top.colter.mirai.plugin.bilibili.BiliConfig.proxyConfig
 import top.colter.mirai.plugin.bilibili.utils.decode
 import top.colter.mirai.plugin.bilibili.utils.isNotBlank
 

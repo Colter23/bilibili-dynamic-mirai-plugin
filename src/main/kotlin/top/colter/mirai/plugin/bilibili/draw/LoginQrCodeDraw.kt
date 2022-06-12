@@ -29,7 +29,6 @@ object LoginQrCodeDraw {
 
         val config = MatrixToImageConfig(pointColor.toInt(), bgColor.toInt())
 
-
         return Surface.makeRasterN32Premul(250, 250).apply {
             canvas.apply {
 
@@ -50,16 +49,7 @@ object LoginQrCodeDraw {
                 })
 
             }
-//            File("qrcode.png").writeBytes(makeImageSnapshot().encodeToData()!!.bytes)
         }.makeImageSnapshot()
-
-
     }
-
-    fun SVGDOM.makeImage(width: Float, height: Float): Image {
-        setContainerSize(width, height)
-        return Surface.makeRasterN32Premul(width.toInt(), height.toInt()).apply { render(canvas) }.makeImageSnapshot()
-    }
-
 }
 

@@ -10,9 +10,9 @@ import net.mamoe.mirai.message.data.RawForwardMessage
 import net.mamoe.mirai.message.data.buildForwardMessage
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
-import top.colter.mirai.plugin.bilibili.BiliDynamicConfig
-import top.colter.mirai.plugin.bilibili.BiliDynamicData
-import top.colter.mirai.plugin.bilibili.BiliDynamicData.dynamic
+import top.colter.mirai.plugin.bilibili.BiliConfig
+import top.colter.mirai.plugin.bilibili.BiliData
+import top.colter.mirai.plugin.bilibili.BiliData.dynamic
 import top.colter.mirai.plugin.bilibili.data.DynamicMessage
 import top.colter.mirai.plugin.bilibili.data.LiveMessage
 import top.colter.mirai.plugin.bilibili.tasker.BiliDataTasker.mutex
@@ -28,7 +28,11 @@ object SendTasker : BiliTasker() {
 
     override val interval: Int = 0
 
-    private val templateConfig by BiliDynamicConfig::templateConfig
+    private val templateConfig by BiliConfig::templateConfig
+
+    private val forwardRegex = """\{>>}(.*?)\{<<}""".toRegex()
+
+    private val tagRegex = """\{([a-z]+)}""".toRegex()
 
     override suspend fun main() {
         val biliMessage = BiliBiliDynamic.messageChannel.receive()
@@ -60,8 +64,8 @@ object SendTasker : BiliTasker() {
             }
 
             val push = when(biliMessage){
-                is DynamicMessage -> BiliDynamicData.dynamicPushTemplate
-                is LiveMessage -> BiliDynamicData.livePushTemplate
+                is DynamicMessage -> BiliData.dynamicPushTemplate
+                is LiveMessage -> BiliData.livePushTemplate
             }
 
             val defaultTemplate = when(biliMessage){
@@ -93,8 +97,8 @@ object SendTasker : BiliTasker() {
             val templateMsgMap: MutableMap<String, List<Message>> = mutableMapOf()
             templateMap.forEach {
                 templateMsgMap[it.key] = when(biliMessage) {
-                    is DynamicMessage -> biliMessage.buildMessage(contactList.first(), pushTemplates[it.key]!!)
-                    is LiveMessage -> biliMessage.buildMessage(contactList.first(), pushTemplates[it.key]!!)
+                    is DynamicMessage -> biliMessage.buildMessage(pushTemplates[it.key]!!, contactList.first())
+                    is LiveMessage -> biliMessage.buildMessage(pushTemplates[it.key]!!, contactList.first())
                 }
             }
 
@@ -142,19 +146,53 @@ object SendTasker : BiliTasker() {
         }
     }
 
-    private val forwardRegex = """\{>>}(.*?)\{<<}""".toRegex()
 
-    private val tagRegex = """\{([a-z]+)}""".toRegex()
-
-    suspend fun LiveMessage.buildMessage(contact: Contact, template: String): List<Message> {
-        val msgList = mutableListOf<Message>()
-
-        // TODO
-
-        return msgList
+    suspend fun LiveMessage.buildMessage(template: String, contact: Contact): List<Message> {
+        return buildMsgList(template){
+            buildLiveMsg(it, this, contact)
+        }
     }
 
-    suspend fun DynamicMessage.buildMessage(contact: Contact, template: String): List<Message> {
+    private suspend fun buildLiveMsg(ms: String, lm: LiveMessage, contact: Contact): String {
+        var p = 0
+        var content = ms
+
+        while (true) {
+            val key = tagRegex.find(content, p) ?: break
+            val rep = when (key.destructured.component1()) {
+                "name" -> lm.uname
+                "uid" -> lm.uid.toString()
+                "rid" -> lm.rid.toString()
+                "time" -> lm.time
+                "type" -> "直播"
+                "title" -> lm.title
+                "link" -> lm.link
+                "cover" -> uploadImage(lm.cover, CacheType.IMAGES, contact).serializeToMiraiCode()
+                "draw" -> {
+                    if (lm.drawPath == null) {
+                        "[绘制直播图片失败]"
+                    } else {
+                        val path = cachePath.resolve(lm.drawPath)
+                        if (path.notExists()) {
+                            "[未找到绘制的直播图片]"
+                        } else {
+                            contact.uploadImage(
+                                cachePath.resolve(lm.drawPath).readBytes().toExternalResource().toAutoCloseable()
+                            ).serializeToMiraiCode()
+                        }
+                    }
+                }
+                else -> {
+                    "[不支持的类型: ${key.destructured.component1()}]"
+                }
+            }
+            content = content.replaceRange(key.range, rep)
+            p = key.range.first + rep.length
+        }
+        return content
+    }
+
+    suspend fun DynamicMessage.buildMessage(template: String, contact: Contact): List<Message> {
 
         val msgList = mutableListOf<Message>()
 
@@ -168,31 +206,35 @@ object SendTasker : BiliTasker() {
 
         res.forEach { mr ->
             if (mr.range.first > index) {
-                msgList.addAll(buildMsgList(msgTemplate.substring(index, mr.range.first), this, contact))
+                msgList.addAll(buildMsgList(msgTemplate.substring(index, mr.range.first)){
+                    buildMsg(it, this, contact)
+                })
             }
             msgList.add(buildForwardMessage(contact,
                 object : ForwardMessage.DisplayStrategy {
                     override fun generateBrief(forward: RawForwardMessage): String {
-                        return buildSimpleTemplate(forwardCardTemplate.brief, this@buildMessage)
+                        return buildSimpleMsg(forwardCardTemplate.brief, this@buildMessage)
                     }
 
                     override fun generatePreview(forward: RawForwardMessage): List<String> {
-                        return buildSimpleTemplate(forwardCardTemplate.preview, this@buildMessage).split(
+                        return buildSimpleMsg(forwardCardTemplate.preview, this@buildMessage).split(
                             "\\n",
                             "\n"
                         )
                     }
 
                     override fun generateSummary(forward: RawForwardMessage): String {
-                        return buildSimpleTemplate(forwardCardTemplate.summary, this@buildMessage)
+                        return buildSimpleMsg(forwardCardTemplate.summary, this@buildMessage)
                     }
 
                     override fun generateTitle(forward: RawForwardMessage): String {
-                        return buildSimpleTemplate(forwardCardTemplate.title, this@buildMessage)
+                        return buildSimpleMsg(forwardCardTemplate.title, this@buildMessage)
                     }
                 }
             ) {
-                buildMsgList(mr.destructured.component1(), this@buildMessage, contact).forEach {
+                buildMsgList(mr.destructured.component1()){
+                    buildMsg(it, this@buildMessage, contact)
+                }.forEach {
                     contact.bot named this@buildMessage.uname at this@buildMessage.timestamp says it
                 }
             })
@@ -200,22 +242,24 @@ object SendTasker : BiliTasker() {
         }
 
         if (index < msgTemplate.length) {
-            msgList.addAll(buildMsgList(msgTemplate.substring(index, msgTemplate.length), this, contact))
+            msgList.addAll(buildMsgList(msgTemplate.substring(index, msgTemplate.length)){
+                buildMsg(it, this, contact)
+            })
         }
 
         return msgList
     }
 
-    private suspend fun buildMsgList(template: String, dm: DynamicMessage, contact: Contact): List<Message> {
+    private inline fun buildMsgList(template: String, build: (ms: String) -> String): List<Message> {
         val msgs = template.split("\\r", "\r")
         val msgList = mutableListOf<Message>()
         msgs.forEach { ms ->
-            msgList.add(MiraiCode.deserializeMiraiCode(buildMsg(ms, dm, contact)))
+            msgList.add(MiraiCode.deserializeMiraiCode(build(ms)))
         }
         return msgList.toList()
     }
 
-    private fun buildSimpleTemplate(ms: String, dm: DynamicMessage): String {
+    private fun buildSimpleMsg(ms: String, dm: DynamicMessage): String {
         return ms.replace("{name}", dm.uname)
             .replace("{uid}", dm.uid.toString())
             .replace("{did}", dm.did)

@@ -2,7 +2,7 @@ package top.colter.mirai.plugin.bilibili.tasker
 
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic.subDynamic
-import top.colter.mirai.plugin.bilibili.BiliDynamicConfig
+import top.colter.mirai.plugin.bilibili.BiliConfig
 import top.colter.mirai.plugin.bilibili.api.getNewDynamic
 import top.colter.mirai.plugin.bilibili.client.BiliClient
 import top.colter.mirai.plugin.bilibili.data.DynamicDetail
@@ -14,7 +14,7 @@ import java.time.Instant
 
 object DynamicCheckTasker : BiliTasker() {
 
-    override val interval: Int = BiliDynamicConfig.checkConfig.interval
+    override val interval: Int = BiliConfig.checkConfig.interval
 
     private val dynamicChannel by BiliBiliDynamic::dynamicChannel
 

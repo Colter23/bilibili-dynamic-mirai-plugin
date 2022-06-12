@@ -11,7 +11,7 @@ import net.mamoe.mirai.utils.ExternalResource.Companion.sendAsImageTo
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
 import top.colter.mirai.plugin.bilibili.*
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic.save
-import top.colter.mirai.plugin.bilibili.BiliDynamicConfig.accountConfig
+import top.colter.mirai.plugin.bilibili.BiliConfig.accountConfig
 import top.colter.mirai.plugin.bilibili.api.*
 import top.colter.mirai.plugin.bilibili.client.BiliClient
 import top.colter.mirai.plugin.bilibili.draw.LoginQrCodeDraw
@@ -26,7 +26,7 @@ object BiliDataTasker {
 
     val client = BiliClient()
 
-    val dynamic: MutableMap<Long, SubData> by BiliDynamicData::dynamic
+    val dynamic: MutableMap<Long, SubData> by BiliData::dynamic
 
     suspend fun listenAll(subject: String) = mutex.withLock {
         dynamic.forEach { (uid, sub) ->
@@ -263,7 +263,7 @@ object BiliDataTasker {
                             }
                         }
                         accountConfig.cookie = cookie
-                        BiliDynamicConfig.save()
+                        BiliConfig.save()
                         BiliBiliDynamic.cookie.parse(cookie)
                         initTagid()
                         //getHistoryDynamic()

@@ -1,6 +1,6 @@
 package top.colter.mirai.plugin.bilibili
 
-import top.colter.mirai.plugin.bilibili.BiliDynamicConfig.accountConfig
+import top.colter.mirai.plugin.bilibili.BiliConfig.accountConfig
 import top.colter.mirai.plugin.bilibili.api.createGroup
 import top.colter.mirai.plugin.bilibili.api.followGroup
 import top.colter.mirai.plugin.bilibili.api.userInfo
