@@ -86,7 +86,7 @@ data class Theme(
         val blur: Float,
         val spread: Float = 0f,
     ) {
-        val shadowColor: Int = Color.makeRGB(shadowColorHex)
+        val shadowColor: Int get() = Color.makeRGB(shadowColorHex)
     }
 
     @Serializable
@@ -94,20 +94,21 @@ data class Theme(
         val fontColorHex: String,
         val bgColorHex: String,
     ){
-        val fontColor: Int = Color.makeRGB(fontColorHex)
-        val bgColor: Int = Color.makeRGB(bgColorHex)
+
+        val fontColor: Int get() = Color.makeRGB(fontColorHex)
+        val bgColor: Int get() = Color.makeRGB(bgColorHex)
     }
 
-    val cardBgColor: Int = Color.makeRGB(cardBgColorHex)
+    val cardBgColor: Int get() = Color.makeRGB(cardBgColorHex)
 
-    val cardOutlineColor: Int = Color.makeRGB(cardOutlineColorHex)
-    val faceOutlineColor: Int = Color.makeRGB(faceOutlineColorHex)
+    val cardOutlineColor: Int get() = Color.makeRGB(cardOutlineColorHex)
+    val faceOutlineColor: Int get() = Color.makeRGB(faceOutlineColorHex)
 
-    val nameColor: Int = Color.makeRGB(nameColorHex)
-    val titleColor: Int = Color.makeRGB(titleColorHex)
-    val subTitleColor: Int = Color.makeRGB(subTitleColorHex)
-    val descColor: Int = Color.makeRGB(descColorHex)
-    val contentColor: Int = Color.makeRGB(contentColorHex)
-    val linkColor: Int = Color.makeRGB(linkColorHex)
+    val nameColor: Int get() = Color.makeRGB(nameColorHex)
+    val titleColor: Int get() = Color.makeRGB(titleColorHex)
+    val subTitleColor: Int get() = Color.makeRGB(subTitleColorHex)
+    val descColor: Int get() = Color.makeRGB(descColorHex)
+    val contentColor: Int get() = Color.makeRGB(contentColorHex)
+    val linkColor: Int get() = Color.makeRGB(linkColorHex)
 
 }

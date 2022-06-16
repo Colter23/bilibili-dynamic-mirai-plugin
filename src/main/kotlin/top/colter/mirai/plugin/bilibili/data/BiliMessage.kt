@@ -18,7 +18,7 @@ data class DynamicMessage(
     val did: String,
     override val uid: Long,
     override val uname: String,
-    val type: String,
+    val type: DynamicType,
     override val time: String,
     override val timestamp: Int,
     val content: String,

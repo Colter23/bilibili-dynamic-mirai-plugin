@@ -9,11 +9,9 @@ import net.mamoe.mirai.message.data.Message
 import net.mamoe.mirai.message.data.RawForwardMessage
 import net.mamoe.mirai.message.data.buildForwardMessage
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
-import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
-import top.colter.mirai.plugin.bilibili.BiliConfig
-import top.colter.mirai.plugin.bilibili.BiliData
-import top.colter.mirai.plugin.bilibili.BiliData.dynamic
+import top.colter.mirai.plugin.bilibili.*
 import top.colter.mirai.plugin.bilibili.data.DynamicMessage
+import top.colter.mirai.plugin.bilibili.data.DynamicType
 import top.colter.mirai.plugin.bilibili.data.LiveMessage
 import top.colter.mirai.plugin.bilibili.tasker.BiliDataTasker.mutex
 import top.colter.mirai.plugin.bilibili.utils.CacheType
@@ -22,13 +20,16 @@ import top.colter.mirai.plugin.bilibili.utils.findContact
 import top.colter.mirai.plugin.bilibili.utils.uploadImage
 import kotlin.io.path.notExists
 import kotlin.io.path.readBytes
-import kotlin.text.Regex.Companion.escapeReplacement
 
 object SendTasker : BiliTasker() {
 
     override val interval: Int = 0
 
     private val templateConfig by BiliConfig::templateConfig
+
+    private val dynamic by BiliData::dynamic
+
+    private val filter by BiliData::filter
 
     private val forwardRegex = """\{>>}(.*?)\{<<}""".toRegex()
 
@@ -39,7 +40,7 @@ object SendTasker : BiliTasker() {
 
         val contactIdList = if (biliMessage.contact == null) {
             when(biliMessage){
-                is DynamicMessage -> getDynamicContactList(biliMessage.uid)
+                is DynamicMessage -> getDynamicContactList(biliMessage.uid, biliMessage.content, biliMessage.type)
                 is LiveMessage -> getLiveContactList(biliMessage.uid)
             }
         } else {
@@ -111,15 +112,54 @@ object SendTasker : BiliTasker() {
         }
     }
 
-    private suspend fun getDynamicContactList(uid: Long): MutableSet<String>? = mutex.withLock {
+    fun DynamicType.toFilterType() =
+        when (this){
+            DynamicType.DYNAMIC_TYPE_WORD,
+            DynamicType.DYNAMIC_TYPE_DRAW,
+            DynamicType.DYNAMIC_TYPE_COMMON_SQUARE,
+            DynamicType.DYNAMIC_TYPE_NONE -> DynamicFilterType.DYNAMIC
+            DynamicType.DYNAMIC_TYPE_FORWARD -> DynamicFilterType.FORWARD
+            DynamicType.DYNAMIC_TYPE_AV,
+            DynamicType.DYNAMIC_TYPE_PGC -> DynamicFilterType.VIDEO
+            DynamicType.DYNAMIC_TYPE_MUSIC -> DynamicFilterType.MUSIC
+            DynamicType.DYNAMIC_TYPE_ARTICLE -> DynamicFilterType.ARTICLE
+            DynamicType.DYNAMIC_TYPE_LIVE,
+            DynamicType.DYNAMIC_TYPE_LIVE_RCMD -> DynamicFilterType.LIVE
+        }
+
+
+    private suspend fun getDynamicContactList(uid: Long, content: String, type: DynamicType): MutableSet<String>? = mutex.withLock {
         return try {
             val all = dynamic[0] ?: return null
             val list: MutableSet<String> = mutableSetOf()
-            list.addAll(all.contacts.keys)
+            list.addAll(all.contacts)
             val subData = dynamic[uid] ?: return list
-            list.addAll(subData.contacts.keys)
+            list.addAll(subData.contacts)
             list.removeAll(subData.banList.keys)
-            list
+            list.filter {contact ->
+                if (filter.containsKey(contact) && filter[contact]!!.containsKey(uid)){
+                    val dynamicFilter = filter[contact]!![uid]!!
+                    val typeSelect = dynamicFilter.typeSelect
+                    if (typeSelect.list.isNotEmpty()){
+                        val b = typeSelect.list.contains(type.toFilterType())
+                        when (typeSelect.mode){
+                            FilterMode.WHITE_LIST -> if (!b) return@filter false
+                            FilterMode.BLACK_LIST -> if (b) return@filter false
+                        }
+                    }
+                    val regularSelect = dynamicFilter.regularSelect
+                    if (regularSelect.list.isNotEmpty()){
+                        regularSelect.list.forEach{
+                            val b = Regex(it).containsMatchIn(content)
+                            when (regularSelect.mode){
+                                FilterMode.WHITE_LIST -> if (!b) return@filter false
+                                FilterMode.BLACK_LIST -> if (b) return@filter false
+                            }
+                        }
+                    }
+                }
+                true
+            }.toMutableSet()
         } catch (e: Throwable) {
             null
         }
@@ -129,9 +169,9 @@ object SendTasker : BiliTasker() {
         return try {
             val all = dynamic[0] ?: return null
             val list: MutableSet<String> = mutableSetOf()
-            list.addAll(all.contacts.keys)
+            list.addAll(all.contacts)
             val subData = dynamic[uid] ?: return list
-            list.addAll(subData.contacts.filter { it.value[1] == '1' }.keys)
+            list.addAll(subData.contacts)
             list.removeAll(subData.banList.keys)
             list
         } catch (e: Throwable) {
@@ -196,7 +236,7 @@ object SendTasker : BiliTasker() {
 
         val msgList = mutableListOf<Message>()
 
-        val msgTemplate = escapeReplacement(template)
+        val msgTemplate = template.replace("\n", "\\n").replace("\r", "\\r")
 
         val forwardCardTemplate = templateConfig.forwardCard
 
@@ -264,7 +304,7 @@ object SendTasker : BiliTasker() {
             .replace("{uid}", dm.uid.toString())
             .replace("{did}", dm.did)
             .replace("{time}", dm.time)
-            .replace("{type}", dm.type)
+            .replace("{type}", dm.type.text)
             .replace("{content}", dm.content)
             .replace("{link}", dm.links?.get(0)?.value!!)
     }
@@ -280,7 +320,7 @@ object SendTasker : BiliTasker() {
                 "uid" -> dm.uid.toString()
                 "did" -> dm.did
                 "time" -> dm.time
-                "type" -> dm.type
+                "type" -> dm.type.text
                 "content" -> dm.content
                 "link" -> dm.links?.get(0)?.value!!
                 "images" -> {

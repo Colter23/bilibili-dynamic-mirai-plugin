@@ -3,12 +3,16 @@ package top.colter.mirai.plugin.bilibili
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import net.mamoe.mirai.Bot
+import net.mamoe.mirai.console.command.CommandManager.INSTANCE.register
+import net.mamoe.mirai.console.command.CommandManager.INSTANCE.unregister
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescription
 import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
 import net.mamoe.mirai.event.events.BotOnlineEvent
 import net.mamoe.mirai.event.globalEventChannel
 import net.mamoe.mirai.utils.info
+import top.colter.mirai.plugin.bilibili.command.DynamicCommand
 import top.colter.mirai.plugin.bilibili.data.*
+import top.colter.mirai.plugin.bilibili.old.migration
 import top.colter.mirai.plugin.bilibili.tasker.*
 
 object BiliBiliDynamic : KotlinPlugin(
@@ -30,15 +34,17 @@ object BiliBiliDynamic : KotlinPlugin(
     val liveChannel = Channel<LiveDetail>(20)
     val messageChannel = Channel<BiliMessage>(20)
 
-    val subDynamic: MutableMap<Long, SubData> by BiliData::dynamic
-
     override fun onEnable() {
         logger.info { "BiliBili Dynamic Plugin loaded" }
+
+        DynamicCommand.register()
 
         BiliData.reload()
         BiliConfig.reload()
         BiliImageTheme.reload()
         BiliImageQuality.reload()
+
+        migration()
 
         cookie.parse(BiliConfig.accountConfig.cookie)
 
@@ -61,6 +67,7 @@ object BiliBiliDynamic : KotlinPlugin(
     }
 
     override fun onDisable() {
+        DynamicCommand.unregister()
         dynamicChannel.close()
         messageChannel.close()
 

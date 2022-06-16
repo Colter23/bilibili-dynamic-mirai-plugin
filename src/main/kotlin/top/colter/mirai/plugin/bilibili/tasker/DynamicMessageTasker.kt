@@ -2,7 +2,8 @@ package top.colter.mirai.plugin.bilibili.tasker
 
 import org.jetbrains.skia.Color
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
-import top.colter.mirai.plugin.bilibili.BiliBiliDynamic.subDynamic
+import top.colter.mirai.plugin.bilibili.BiliConfig
+import top.colter.mirai.plugin.bilibili.BiliData
 import top.colter.mirai.plugin.bilibili.data.DynamicItem
 import top.colter.mirai.plugin.bilibili.data.DynamicMessage
 import top.colter.mirai.plugin.bilibili.data.DynamicType
@@ -19,6 +20,8 @@ object DynamicMessageTasker : BiliTasker() {
     private val dynamicChannel by BiliBiliDynamic::dynamicChannel
     private val messageChannel by BiliBiliDynamic::messageChannel
 
+    private val dynamic by BiliData::dynamic
+
     override suspend fun main() {
         val dynamicDetail = dynamicChannel.receive()
         val dynamicItem = dynamicDetail.item
@@ -31,7 +34,7 @@ object DynamicMessageTasker : BiliTasker() {
             idStr,
             modules.moduleAuthor.mid,
             modules.moduleAuthor.name,
-            type.text,
+            type,
             formatTime,
             time.toInt(),
             textContent(),
@@ -131,7 +134,7 @@ object DynamicMessageTasker : BiliTasker() {
     suspend fun DynamicItem.makeDynamic(): String? {
         val drawEnable = true
 
-        val color = subDynamic[uid]?.color?:"#d3edfa"
+        val color = dynamic[uid]?.color?:BiliConfig.imageConfig.defaultColor
         val colors = color.split(";", "；").map { Color.makeRGB(it.trim()) }
 
         return if (drawEnable) makeDrawDynamic(colors) else null

@@ -7,16 +7,16 @@ import net.mamoe.mirai.console.data.value
 import top.colter.mirai.plugin.bilibili.utils.CacheType
 
 
-object BiliConfig : AutoSavePluginConfig("BiliPluginConfig") {
+object BiliConfig : AutoSavePluginConfig("BiliConfig") {
 
     @ValueDescription("具体的配置文件描述请前往下方链接查看")
     val help: String by value("https://github.com/Colter23/bilibili-dynamic-mirai-plugin")
 
     @ValueDescription("管理员QQ号")
-    val admin: String by value("")
+    var admin: String by value("")
 
     @ValueDescription("Debug模式")
-    val debugMode: Boolean by value(false)
+    var debugMode: Boolean by value(false)
 
     @ValueDescription("功能开关:\n")
     val enableConfig: EnableConfig by value()
@@ -47,38 +47,45 @@ object BiliConfig : AutoSavePluginConfig("BiliPluginConfig") {
 @Serializable
 data class EnableConfig(
     val enable: Boolean = true,
+    var translateEnable: Boolean = false,
     val proxyEnable: Boolean = true,
     val cacheClearEnable: Boolean = true,
 )
 
 @Serializable
 data class TranslateConfig(
-    val APP_ID: String = "",
-    val SECURITY_KEY: String = "",
+    var baidu: BaiduTranslateConfig = BaiduTranslateConfig()
+)
+
+@Serializable
+data class BaiduTranslateConfig(
+    var APP_ID: String = "",
+    var SECURITY_KEY: String = "",
 )
 
 @Serializable
 data class ImageConfig(
     val quality: String = "1000w",
     val theme: String = "v3",
-    val font: String = "HarmonyOS Sans_SC Medium",
+    var font: String = "HarmonyOS Sans SC Medium",
+    var defaultColor: String = "#d3edfa",
     val fontSizeMultiple: Float = 1.0f,
     /**
      * 可选值:
-     * fanCard 粉丝卡片
-     * qrCode  动态链接二维码
-     * none    无
+     * FanCard 粉丝卡片
+     * QrCode  动态链接二维码
+     * None    无
      */
-    val cardOrnament: String = "fanCard",
+    var cardOrnament: String = "FanCard",
     val badgeEnable: BadgeEnable = BadgeEnable(),
 )
 
 @Serializable
 data class BadgeEnable(
-    val left: Boolean = true,
-    val right: Boolean = false,
+    var left: Boolean = true,
+    var right: Boolean = false,
 ){
-    val enable: Boolean = left || right
+    val enable: Boolean get() = left || right
 }
 
 @Serializable
@@ -90,15 +97,15 @@ data class ProxyConfig(
 @Serializable
 data class BiliAccountConfig(
     var cookie: String = "",
-    val autoFollow: Boolean = true,
-    val followGroup: String = "Bot关注"
+    var autoFollow: Boolean = true,
+    var followGroup: String = "Bot关注"
 )
 
 @Serializable
 data class CheckConfig(
-    val interval: Int = 15,
-    val liveInterval: Int = 20,
-    val lowSpeed: String = "0-0x2",
+    var interval: Int = 15,
+    var liveInterval: Int = 20,
+    var lowSpeed: String = "0-0x2",
 )
 
 
@@ -109,22 +116,23 @@ data class PushConfig(
 
 @Serializable
 data class TemplateConfig(
-    val defaultDynamicPush: String = "oneMsg",
-    val defaultLivePush: String = "oneMsg",
+    var defaultDynamicPush: String = "OneMsg",
+    var defaultLivePush: String = "OneMsg",
     val dynamicPush: MutableMap<String, String> = mutableMapOf(
-        "drawOnly" to "{draw}",
-        "oneMsg" to "{draw}\n{name}@{type}\n{link}",
-        "twoMsg" to "{draw}\r{name}@{uid}@{type}\n{time}\n{link}",
-        "forwardMsg" to "{draw}{>>}作者：{name}\nUID：{uid}\n时间：{time}\n类型：{type}\n链接：{link}\r{content}\r{images}{<<}",
+        "DrawOnly" to "{draw}",
+        "TextOnly" to "{name}@{type}\n{link}\n{content}\n{images}",
+        "OneMsg" to "{draw}\n{name}@{type}\n{link}",
+        "TwoMsg" to "{draw}\r{name}@{uid}@{type}\n{time}\n{link}",
+        "ForwardMsg" to "{draw}{>>}作者：{name}\nUID：{uid}\n时间：{time}\n类型：{type}\n链接：{link}\r{content}\r{images}{<<}",
     ),
     val livePush: MutableMap<String, String> = mutableMapOf(
-        "drawOnly" to "{draw}",
-        "oneMsg" to "{draw}\n{name}@直播\n{link}",
-        "oneMsgAtAll" to "{draw}\n{name}@直播\n{link}",
-        "twoMsg" to "{draw}\r{name}@{uid}@直播\n{title}\n{time}\n{link}",
+        "DrawOnly" to "{draw}",
+        "TextOnly" to "{name}@直播\n{link}\n标题: {title}",
+        "OneMsg" to "{draw}\n{name}@直播\n{link}",
+        "TwoMsg" to "{draw}\r{name}@{uid}@直播\n{title}\n{time}\n{link}",
     ),
     val forwardCard: ForwardDisplay = ForwardDisplay(),
-    val footer: String = ""
+    var footer: String = ""
 )
 
 @Serializable

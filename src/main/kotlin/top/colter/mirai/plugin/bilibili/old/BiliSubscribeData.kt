@@ -11,6 +11,9 @@ import java.time.Instant
  * v2版数据，用于数据迁移
  */
 object BiliSubscribeData : AutoSavePluginData("BiliSubscribeData") {
+    @ValueDescription("数据是否迁移")
+    var migrated: Boolean by value(false)
+
     @ValueDescription("订阅信息")
     val dynamic: MutableMap<Long, SubDataOld> by value(mutableMapOf(0L to SubDataOld("ALL")))
 }

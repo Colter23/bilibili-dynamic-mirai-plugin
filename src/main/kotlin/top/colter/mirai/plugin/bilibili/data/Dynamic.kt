@@ -31,7 +31,6 @@ data class DynamicList(
 data class DynamicDetail(
     @SerialName("item")
     val item: DynamicItem,
-
     @SerialName("contact")
     val contact: String? = null
 )
@@ -39,7 +38,7 @@ data class DynamicDetail(
 enum class DynamicType(val text: String) {
     DYNAMIC_TYPE_WORD("动态"),
     DYNAMIC_TYPE_DRAW("动态"),
-    DYNAMIC_TYPE_ARTICLE("文章"),
+    DYNAMIC_TYPE_ARTICLE("专栏"),
     DYNAMIC_TYPE_FORWARD("转发动态"),
     DYNAMIC_TYPE_AV("投稿视频"),
     DYNAMIC_TYPE_MUSIC("音乐"),

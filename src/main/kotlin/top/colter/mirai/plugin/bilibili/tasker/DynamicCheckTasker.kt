@@ -1,13 +1,12 @@
 package top.colter.mirai.plugin.bilibili.tasker
 
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
-import top.colter.mirai.plugin.bilibili.BiliBiliDynamic.subDynamic
 import top.colter.mirai.plugin.bilibili.BiliConfig
+import top.colter.mirai.plugin.bilibili.BiliData
 import top.colter.mirai.plugin.bilibili.api.getNewDynamic
 import top.colter.mirai.plugin.bilibili.client.BiliClient
 import top.colter.mirai.plugin.bilibili.data.DynamicDetail
 import top.colter.mirai.plugin.bilibili.data.DynamicType
-import top.colter.mirai.plugin.bilibili.draw.logger
 import top.colter.mirai.plugin.bilibili.utils.sendAll
 import top.colter.mirai.plugin.bilibili.utils.time
 import java.time.Instant
@@ -17,6 +16,8 @@ object DynamicCheckTasker : BiliTasker() {
     override val interval: Int = BiliConfig.checkConfig.interval
 
     private val dynamicChannel by BiliBiliDynamic::dynamicChannel
+
+    private val dynamic by BiliData::dynamic
 
     private val listenAllDynamicMode = true
 
@@ -44,7 +45,7 @@ object DynamicCheckTasker : BiliTasker() {
                     if (listenAllDynamicMode) {
                         true
                     } else {
-                        subDynamic.filter { it.value.contacts.isNotEmpty() }.map { it.key }
+                        dynamic.filter { it.value.contacts.isNotEmpty() }.map { it.key }
                             .contains(it.modules.moduleAuthor.mid)
                     }
                 }.sortedBy {

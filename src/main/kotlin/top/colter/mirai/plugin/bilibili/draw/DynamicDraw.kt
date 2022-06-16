@@ -80,8 +80,8 @@ val descTextStyle = TextStyle().apply {
 }
 
 val cardBadgeArc: FloatArray by lazy {
-    val left = if (imageConfig.badgeEnable.left) quality.cardArc else 0f
-    val right = if (imageConfig.badgeEnable.right) quality.cardArc else 0f
+    val left = if (imageConfig.badgeEnable.left) 0f else quality.cardArc
+    val right = if (imageConfig.badgeEnable.right) 0f else quality.cardArc
     floatArrayOf(left, right, quality.cardArc, quality.cardArc)
 }
 
@@ -1237,6 +1237,19 @@ fun Canvas.drawCard(rrect: RRect, bgColor: Int = theme.cardBgColor) {
         mode = PaintMode.STROKE
         strokeWidth = quality.cardOutlineWidth
         isAntiAlias = true
+        shader = Shader.makeSweepGradient(
+            rrect.left+rrect.width/2,
+            rrect.top+rrect.height/2,
+            intArrayOf(
+                0xFFff0000.toInt(),
+                0xFFff00ff.toInt(),
+                0xFF0000ff.toInt(),
+                0xFF00ffff.toInt(),
+                0xFF00ff00.toInt(),
+                0xFFffff00.toInt(),
+                0xFFff0000.toInt(),
+            )
+        )
     })
 }
 
@@ -1379,7 +1392,7 @@ suspend fun ModuleAuthor.drawGeneral(time: String, link: String, themeColor: Int
 suspend fun Canvas.drawOrnament(decorate: ModuleAuthor.Decorate?, link: String, qrCodeColor: Int) {
 
     when (imageConfig.cardOrnament) {
-        "fanCard" -> {
+        "FanCard" -> {
             if (decorate != null) {
                 val fanImg = getOrDownloadImage(decorate.cardUrl, CacheType.USER)
                 val srcFRect = Rect(0f, 0f, fanImg.width.toFloat(), fanImg.height.toFloat())
@@ -1419,7 +1432,7 @@ suspend fun Canvas.drawOrnament(decorate: ModuleAuthor.Decorate?, link: String, 
                 }
             }
         }
-        "qrCode" -> {
+        "QrCode" -> {
             val qrCodeImg = qrCode(link, quality.fanCardHeight.toInt(), qrCodeColor)
             val y = ((quality.faceSize - quality.fanCardHeight) / 2) + quality.cardPadding
             val tarFRect = Rect.makeXYWH(

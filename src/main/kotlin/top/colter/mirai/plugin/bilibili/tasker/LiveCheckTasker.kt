@@ -2,6 +2,7 @@ package top.colter.mirai.plugin.bilibili.tasker
 
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
 import top.colter.mirai.plugin.bilibili.BiliConfig
+import top.colter.mirai.plugin.bilibili.BiliData
 import top.colter.mirai.plugin.bilibili.api.getLive
 import top.colter.mirai.plugin.bilibili.client.BiliClient
 import top.colter.mirai.plugin.bilibili.data.LiveDetail
@@ -12,6 +13,8 @@ object LiveCheckTasker : BiliTasker() {
     override val interval: Int = BiliConfig.checkConfig.liveInterval
 
     private val liveChannel by BiliBiliDynamic::liveChannel
+
+    private val dynamic by BiliData::dynamic
 
     private val client = BiliClient()
 
@@ -27,7 +30,7 @@ object LiveCheckTasker : BiliTasker() {
                     it.liveTime > lastLive
                 }.filter {
                     // TODO
-                    BiliBiliDynamic.subDynamic.filter { it.value.contacts.isNotEmpty() }.map { it.key }
+                    dynamic.filter { it.value.contacts.isNotEmpty() }.map { it.key }
                         .contains(it.uid)
                 }.sortedBy {
                     it.liveTime

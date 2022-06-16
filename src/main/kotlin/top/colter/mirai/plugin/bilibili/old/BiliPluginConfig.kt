@@ -9,6 +9,9 @@ import net.mamoe.mirai.console.data.value
  */
 object BiliPluginConfig : AutoSavePluginConfig("BiliPluginConfig") {
 
+    @ValueDescription("数据是否迁移")
+    var migrated: Boolean by value(false)
+
     @ValueDescription("管理员")
     val admin: String by value("")
 

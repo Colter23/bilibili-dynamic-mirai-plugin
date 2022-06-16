@@ -12,6 +12,7 @@ import top.colter.mirai.plugin.bilibili.data.ModuleAuthor
 import top.colter.mirai.plugin.bilibili.data.ModuleDynamic
 import top.colter.mirai.plugin.bilibili.draw.*
 import top.colter.mirai.plugin.bilibili.utils.json
+import java.io.File
 import java.nio.file.Path
 import kotlin.io.path.*
 
@@ -52,7 +53,7 @@ internal class PluginTest {
     @Test
     fun drawTest(): Unit = runBlocking {
 
-        LoginQrCodeDraw.qrCode("https://passport.bilibili.com/qrcode/h5/login?oauthKey=c3bd5286a2b40a822f5f60e9bf3f602e")
+        loginQrCode("https://passport.bilibili.com/qrcode/h5/login?oauthKey=c3bd5286a2b40a822f5f60e9bf3f602e")
     }
 
     sealed class RichText {
@@ -393,6 +394,16 @@ internal class PluginTest {
                                     "Здравствуйте\n",
                                 ),
                                 ModuleDynamic.Desc.RichTextNode(
+                                    "RICH_TEXT_NODE_TYPE_TEXT",
+                                    "【𝕭𝖊𝖙 𝖔𝖓 𝖒𝖊】\n",
+                                    "【𝕭𝖊𝖙 𝖔𝖓 𝖒𝖊】\n",
+                                ),
+                                ModuleDynamic.Desc.RichTextNode(
+                                    "RICH_TEXT_NODE_TYPE_TEXT",
+                                    "ᵉᵛᵉʳʸ ˡⁱᶠᵉ ᵗʰᵃᵗ ᵍᵒᵉˢ ᵗᵒ ᵈᵉᵃᵗʰ ⁱˢ ᵍʳᵒʷⁱⁿᵍ ᵖᵃˢˢⁱᵒⁿᵃᵗᵉˡʸ.\n",
+                                    "ᵉᵛᵉʳʸ ˡⁱᶠᵉ ᵗʰᵃᵗ ᵍᵒᵉˢ ᵗᵒ ᵈᵉᵃᵗʰ ⁱˢ ᵍʳᵒʷⁱⁿᵍ ᵖᵃˢˢⁱᵒⁿᵃᵗᵉˡʸ.\n",
+                                ),
+                                ModuleDynamic.Desc.RichTextNode(
                                     "RICH_TEXT_NODE_TYPE_TOPIC",
                                     "#原创歌曲#",
                                     "#原创歌曲#",
@@ -409,7 +420,7 @@ internal class PluginTest {
                                     jumpUrl = "https://www.bilibili.com/medialist/play/ml1604262874"
                                 ),
                             ),
-                            "好唯美的\uD83D\uDE36\u200D\uD83C\uDF2B️曲调，好温柔\uD83D\uDC69\uD83C\uDFFB\u200D⚕️\uD83D\uDE43的歌声[tv_难过]感受到雨中\n\n\n\n\n\n\n\n的茶香了吗？#原创歌曲##虚拟歌手#网页链接"
+                            "好唯美的\uD83D\uDE36\u200D\uD83C\uDF2B️曲调，好温柔\uD83D\uDC69\uD83C\uDFFB\u200D⚕️\uD83D\uDE43的歌声[tv_难过]感受到雨中\n\n\n\n\n\n\n\n\n\n\n的茶香了吗？#原创歌曲##虚拟歌手#网页链接"
                         ),
 
                         major = ModuleDynamic.Major(
@@ -441,8 +452,13 @@ internal class PluginTest {
                 )
             )
 
-        ).makeDrawDynamic()
-        println(dynamic)
+        )
+        val dynamics = dynamic.drawDynamic(Color.makeRGB("#d3edfa"), false)
+        val img = makeCardBg(dynamics.height, listOf(Color.makeRGB("#d3edfa"))) {
+            it.drawImage(dynamics, 0f, 0f)
+        }
+        File("dynamic.png").writeBytes(img.encodeToData()!!.bytes)
+
 
         //DynamicDraw.makeDynamic(dynamic)
 
@@ -462,19 +478,95 @@ internal class PluginTest {
     }
 
     @Test
-    fun rectTest(): Unit = runBlocking {
+    fun colorsTest(): Unit = runBlocking {
 
-        ModuleDynamic.Major.Draw(
-            1L,
-            listOf(
-                ModuleDynamic.Major.Draw.DrawItem(
-                    50,
-                    150,
-                    1000f,
-                    ""
-                )
-            )
-        ).drawGeneral()
+        Surface.makeRasterN32Premul(500, 700).apply {
+            canvas.apply {
+
+                val rrect = RRect.makeXYWH(10f, 10f, 480f, 680f, 10f)
+
+                val colors = IntArray(8)
+
+                for (i in 0 until 8) {
+                    val rgb = hsb2rgb(i * 360 / 8f,  1f, 1f)
+                    colors[i] = Color.makeRGB(rgb[0],rgb[1],rgb[2])
+                }
+
+                drawRRect(rrect, Paint().apply {
+                    color = Color.WHITE
+                    mode = PaintMode.STROKE
+                    strokeWidth = 5f
+                    isAntiAlias = true
+                    shader = Shader.makeSweepGradient(
+                        rrect.left+rrect.width/2,
+                        rrect.top+rrect.height/2,
+                        //colors
+                        intArrayOf(
+                            0xFFff0000.toInt(),
+                            0xFFff00ff.toInt(),
+                            0xFF0000ff.toInt(),
+                            0xFF00ffff.toInt(),
+                            0xFF00ff00.toInt(),
+                            0xFFffff00.toInt(),
+                            0xFFff0000.toInt(),
+                        )
+                    )
+                    imageFilter = ImageFilter.makeBlur(
+                        10f,
+                        10f,
+                        FilterTileMode.CLAMP
+                    )
+                })
+                drawRRect(rrect, Paint().apply {
+                    color = Color.WHITE
+                    mode = PaintMode.FILL
+                    isAntiAlias = true
+                    //shader = Shader.makeSweepGradient(
+                    //    rrect.left+rrect.width/2,
+                    //    rrect.top+rrect.height/2,
+                    //    intArrayOf(
+                    //        0xFFff0000.toInt(),
+                    //        0xFFff00ff.toInt(),
+                    //        0xFF0000ff.toInt(),
+                    //        0xFF00ffff.toInt(),
+                    //        0xFF00ff00.toInt(),
+                    //        0xFFffff00.toInt(),
+                    //        0xFFff0000.toInt(),
+                    //    )
+                    //)
+                    //intArrayOf(
+                    //    0xFFfd004c.toInt(),
+                    //    0xFFfe9000.toInt(),
+                    //    0xFFfff020.toInt(),
+                    //    0xFF3edf4b.toInt(),
+                    //    0xFF3363ff.toInt(),
+                    //    0xFFb102b7.toInt(),
+                    //    0xFFfd004c.toInt(),
+                    //)
+                })
+                drawRRect(rrect, Paint().apply {
+                    color = Color.WHITE
+                    mode = PaintMode.STROKE
+                    strokeWidth = 5f
+                    isAntiAlias = true
+                    shader = Shader.makeSweepGradient(
+                        rrect.left+rrect.width/2,
+                        rrect.top+rrect.height/2,
+                        //colors
+                        intArrayOf(
+                            0xFFff0000.toInt(),
+                            0xFFff00ff.toInt(),
+                            0xFF0000ff.toInt(),
+                            0xFF00ffff.toInt(),
+                            0xFF00ff00.toInt(),
+                            0xFFffff00.toInt(),
+                            0xFFff0000.toInt(),
+                        )
+                    )
+                })
+
+            }
+        }.saveImage("colors.png")
 
     }
 
