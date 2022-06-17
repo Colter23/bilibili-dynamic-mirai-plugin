@@ -7,6 +7,7 @@ import top.colter.mirai.plugin.bilibili.api.userInfo
 import top.colter.mirai.plugin.bilibili.utils.FontUtils.loadTypeface
 import top.colter.mirai.plugin.bilibili.utils.biliClient
 import kotlin.io.path.forEachDirectoryEntry
+import kotlin.io.path.name
 
 
 suspend fun checkCookie(){
@@ -39,6 +40,6 @@ suspend fun initTagid() {
 
 fun loadFonts(){
     BiliBiliDynamic.dataFolderPath.resolve("font").forEachDirectoryEntry {
-        loadTypeface(it.toString())
+        loadTypeface(it.toString(), it.name)
     }
 }

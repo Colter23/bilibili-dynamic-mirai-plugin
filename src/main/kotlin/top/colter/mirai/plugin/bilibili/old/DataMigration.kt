@@ -95,15 +95,14 @@ fun migrationConfig(){
         if (!BiliPluginConfig.migrated){
             BiliBiliDynamic.logger.info("开始转移旧版配置...")
 
-
-            BiliConfig.admin = BiliPluginConfig.admin
+            //BiliConfig.admin = BiliPluginConfig.admin
             BiliConfig.accountConfig.cookie = BiliPluginConfig.cookie
             BiliConfig.accountConfig.autoFollow = BiliPluginConfig.autoFollow
             BiliConfig.accountConfig.followGroup = BiliPluginConfig.followGroup
             BiliConfig.checkConfig.interval = BiliPluginConfig.interval
             BiliConfig.checkConfig.liveInterval = BiliPluginConfig.liveInterval
             BiliConfig.checkConfig.lowSpeed = BiliPluginConfig.lowSpeed
-            BiliConfig.imageConfig.font = BiliPluginConfig.font
+            BiliConfig.imageConfig.font = BiliPluginConfig.font.split(";").first().split(".").first()
             //BiliConfig.templateConfig.dynamicPush["OldCustom"] = BiliPluginConfig.pushTemplate
             //BiliConfig.templateConfig.livePush["OldCustom"] = BiliPluginConfig.livePushTemplate
             BiliConfig.templateConfig.footer = BiliPluginConfig.footerTemplate

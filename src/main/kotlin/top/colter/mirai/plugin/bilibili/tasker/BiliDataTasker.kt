@@ -9,7 +9,9 @@ import net.mamoe.mirai.contact.Friend
 import net.mamoe.mirai.contact.Group
 import net.mamoe.mirai.event.events.MessageEvent
 import net.mamoe.mirai.event.selectMessages
+import net.mamoe.mirai.event.whileSelectMessages
 import net.mamoe.mirai.message.data.buildForwardMessage
+import net.mamoe.mirai.message.data.content
 import net.mamoe.mirai.utils.ExternalResource.Companion.sendAsImageTo
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
 import top.colter.mirai.plugin.bilibili.*
@@ -79,52 +81,52 @@ object BiliDataTasker {
         return null
     }
 
-    suspend fun setColor(uid: Long, color: String): String {
-        if (color.first() != '#' || color.length != 7) {
-            return "格式错误，请输入16进制颜色，如: #d3edfa"
+    fun setColor(uid: Long, color: String): String {
+        color.split(";","；").forEach{
+            if (it.first() != '#' || it.length != 7) {
+                return "格式错误，请输入16进制颜色，如: #d3edfa"
+            }
         }
-        mutex.withLock {
-            dynamic[uid]?.color = color
-        }
+        dynamic[uid]?.color = color
         return "设置完成"
     }
 
-    suspend fun addSubscribe(uid: Long, subject: Contact) {
-        val delegate = subject.delegate
-        if (dynamic[0]?.contacts?.contains(delegate) == true) {
-            dynamic[0]?.contacts?.remove(delegate)
+    suspend fun addSubscribe(uid: Long, subject: String): String{
+        if (isFollow(uid, subject)){
+            return "之前订阅过这个人哦"
+        }
+
+        if (dynamic[0]?.contacts?.contains(subject) == true) {
+            dynamic[0]?.contacts?.remove(subject)
         }
         if (!dynamic.containsKey(uid)){
             val m = followUser(uid)
-            if (m != null) {
-                subject.sendMessage(m)
-                return
-            }
+            if (m != null) return m
             val u = client.userInfo(uid)
             dynamic[uid] = SubData(u?.name!!)
         }
-        if (dynamic[uid]!!.contacts.contains(delegate)){
-            subject.sendMessage("之前订阅过这个人哦")
-            return
-        }
-        dynamic[uid]!!.contacts.add(delegate)
-        subject.sendMessage("订阅 ${dynamic[uid]?.name} 成功!")
+
+        dynamic[uid]!!.contacts.add(subject)
+        return "订阅 ${dynamic[uid]?.name} 成功!"
     }
 
-    suspend fun addFilter(type: String, mode: FilterMode?, regex: String, uid: Long, subject: Contact) {
-        val delegate = subject.delegate
-        if (dynamic.containsKey(uid) && dynamic[uid]!!.contacts.contains(delegate)) {
-            if (!filter.containsKey(delegate)){
-                filter[delegate] = mutableMapOf()
-            }
-            if (!filter[delegate]!!.containsKey(uid)){
-                filter[delegate]!![uid] = DynamicFilter()
-            }
+    suspend fun addFilter(type: FilterType, mode: FilterMode?, regex: String?, uid: Long, subject: String) : String{
+        if (!isFollow(uid, subject)){
+            return "还未订阅此人哦"
+        }
 
-            val dynamicFilter = filter[delegate]!![uid]!!
-            when (type){
-                "type" -> {
-                    if (mode != null) dynamicFilter.typeSelect.mode = mode
+        if (!filter.containsKey(subject)){
+            filter[subject] = mutableMapOf()
+        }
+        if (!filter[subject]!!.containsKey(uid)){
+            filter[subject]!![uid] = DynamicFilter()
+        }
+
+        val dynamicFilter = filter[subject]!![uid]!!
+        when (type){
+            FilterType.TYPE -> {
+                if (mode != null) dynamicFilter.typeSelect.mode = mode
+                if (regex != null && regex != ""){
                     val t = when (regex){
                         "动态" -> DynamicFilterType.DYNAMIC
                         "转发动态" -> DynamicFilterType.FORWARD
@@ -132,83 +134,83 @@ object BiliDataTasker {
                         "音乐" -> DynamicFilterType.MUSIC
                         "专栏" -> DynamicFilterType.ARTICLE
                         "直播" -> DynamicFilterType.LIVE
-                        else -> {
-                            subject.sendMessage("没有这个类型 $regex")
-                            return
-                        }
+                        else -> return "没有这个类型 $regex"
                     }
                     dynamicFilter.typeSelect.list.add(t)
                 }
-                "regular" -> {
-                    if (mode != null) dynamicFilter.regularSelect.mode = mode
+            }
+            FilterType.REGULAR -> {
+                if (mode != null) dynamicFilter.regularSelect.mode = mode
+                if (regex != null && regex != ""){
                     dynamicFilter.regularSelect.list.add(regex)
                 }
             }
-            subject.sendMessage("设置成功")
-        } else {
-            subject.sendMessage("还未订阅此人哦")
         }
+        return "设置成功"
     }
 
-    suspend fun listFilter(uid: Long, subject: Contact){
-        val delegate = subject.delegate
-        if (dynamic.containsKey(uid) && dynamic[uid]!!.contacts.contains(delegate)) {
-            if (filter.containsKey(delegate) && filter[delegate]!!.containsKey(uid)) {
-                buildString {
-                    appendLine("当前目标过滤器: ")
-                    appendLine()
-                    val typeSelect = filter[delegate]!![uid]!!.typeSelect
-                    if (typeSelect.list.isNotEmpty()) {
-                        appendLine("动态类型过滤器: ")
-                        appendLine("模式: ${typeSelect.mode.value}")
-                        typeSelect.list.forEach {
-                            appendLine(it.value)
-                        }
-                    }
-                    val regularSelect = filter[delegate]!![uid]!!.regularSelect
-                    if (regularSelect.list.isNotEmpty()) {
-                        appendLine("正则过滤器: ")
-                        appendLine("模式: ${regularSelect.mode.value}")
-                        regularSelect.list.forEach {
-                            appendLine(it)
-                        }
-                    }
+    fun listFilter(uid: Long, subject: String): String {
+        if (!isFollow(uid, subject)){
+            return "还未订阅此人哦"
+        }
+        if (!(filter.containsKey(subject) && filter[subject]!!.containsKey(uid))) {
+            return "当前目标没有过滤器"
+        }
+
+        return buildString {
+            appendLine("当前目标过滤器: ")
+            appendLine()
+
+            val typeSelect = filter[subject]!![uid]!!.typeSelect
+            if (typeSelect.list.isNotEmpty()) {
+                appendLine("动态类型过滤器: ")
+                appendLine("模式: ${typeSelect.mode.value}")
+                typeSelect.list.forEachIndexed { index, type ->
+                    appendLine(" t$index: ${type.value}")
                 }
-            } else {
-                subject.sendMessage("当前目标没有过滤器")
             }
-        }else {
-            subject.sendMessage("还未订阅此人哦")
+            val regularSelect = filter[subject]!![uid]!!.regularSelect
+            if (regularSelect.list.isNotEmpty()) {
+                appendLine("正则过滤器: ")
+                appendLine("模式: ${regularSelect.mode.value}")
+                regularSelect.list.forEachIndexed { index, reg ->
+                appendLine(" r$index: $reg")
+                }
+            }
         }
-
     }
 
-    suspend fun delFilter(uid: Long, subject: String, index: String) = mutex.withLock {
-        if (dynamic.containsKey(uid)) {
-            //var i = 0
-            //runCatching {
-            //    i = index.substring(1).toInt()
-            //}.onFailure {
-            //    return@withLock "索引错误"
-            //}
-            //val filter = if (index[0] == 'f') {
-            //    dynamic[uid]?.filter
-            //} else if (index[0] == 'c') {
-            //    dynamic[uid]?.containFilter
-            //} else {
-            //    return@withLock "索引值错误"
-            //}
-            //if (filter?.containsKey(subject) == true) {
-            //    if (filter[subject]?.size!! < i) return@withLock "索引超出范围"
-            //    val ft = filter[subject]?.get(i)
-            //    filter[subject]?.removeAt(i)
-            //    "已删除 $ft 过滤"
-            //} else {
-            //    "还没有设置过滤哦"
-            //}
-            ""
+    fun delFilter(index: String, uid: Long, subject: String) :String {
+        if (!isFollow(uid, subject)){
+            return "还未订阅此人哦"
+        }
+        if (!(filter.containsKey(subject) && filter[subject]!!.containsKey(uid))) {
+            return "当前目标没有过滤器"
+        }
+
+        var i = 0
+        runCatching {
+            i = index.substring(1).toInt()
+        }.onFailure {
+            return "索引错误"
+        }
+        var flag = false
+        val filter = if (index[0] == 't') {
+            flag = true
+            filter[subject]!![uid]!!.typeSelect.list
+        } else if (index[0] == 'r') {
+            filter[subject]!![uid]!!.regularSelect.list
         } else {
-            "还未关注此人哦"
+            return "索引类型错误"
+        }
+        if (filter.size < i) return "索引超出范围"
+        val t = filter[i]
+        filter.removeAt(i)
+
+        return if (flag){
+            "已删除 ${(t as DynamicFilterType).value} 类型过滤"
+        }else{
+            "已删除 ${(t as String)} 正则过滤"
         }
     }
 
@@ -316,9 +318,15 @@ object BiliDataTasker {
 
     }
 
-    suspend fun listTemplate(subject: Contact){
-
-        val template = BiliConfig.templateConfig.dynamicPush
+    suspend fun listTemplate(type: String, subject: Contact){
+        val template = when (type){
+            "d" -> BiliConfig.templateConfig.dynamicPush
+            "l" -> BiliConfig.templateConfig.livePush
+            else -> {
+                subject.sendMessage("类型错误 d:动态 l:直播")
+                return
+            }
+        }
 
         // https://t.bilibili.com/385190177693666264
         val dynamic = DynamicMessage(
@@ -335,6 +343,7 @@ object BiliDataTasker {
 
         subject.sendMessage(buildForwardMessage(subject){
             var pt = 0
+            subject.bot named dynamic.uname at dynamic.timestamp says if (type=="d") "动态推送模板" else "直播推送模板"
             subject.bot named dynamic.uname at dynamic.timestamp says "下面每个转发消息都代表一个模板推送效果"
             for (t in template){
                 subject.bot named dynamic.uname at dynamic.timestamp + pt says t.key
@@ -352,15 +361,26 @@ object BiliDataTasker {
         })
     }
 
-    suspend fun addTemplate(template: String, subject: Contact){
-        val push = BiliConfig.templateConfig.dynamicPush
-        if (push.containsKey(template)){
-            if (!BiliData.dynamicPushTemplate.containsKey(template))
-                BiliData.dynamicPushTemplate[template] = mutableSetOf()
-            BiliData.dynamicPushTemplate[template]!!.add(subject.id)
-            subject.sendMessage("配置完成")
+    fun setTemplate(type: String, template: String, subject: Contact): String{
+        val pushTemplates = when (type){
+            "d" -> BiliConfig.templateConfig.dynamicPush
+            "l" -> BiliConfig.templateConfig.livePush
+            else -> return "类型错误 d:动态 l:直播"
+        }
+        val push = when(type){
+            "d" -> BiliData.dynamicPushTemplate
+            "l" -> BiliData.livePushTemplate
+            else -> return "类型错误 d:动态 l:直播"
+        }
+        return if (pushTemplates.containsKey(template)){
+            push.forEach { (_, u) ->
+                u.remove(subject.id)
+            }
+            if (!push.containsKey(template)) push[template] = mutableSetOf()
+            push[template]!!.add(subject.id)
+            "配置完成"
         }else {
-            subject.sendMessage("没有这个模板哦 $template")
+            "没有这个模板哦 $template"
         }
     }
 
@@ -418,14 +438,34 @@ object BiliDataTasker {
 
         when (selectConfig){
             "COLOR" -> {
-                subject.sendMessage(setColor(uid, ""))
+                subject.sendMessage("请输入16进制颜色，例如: #d3edfa")
+
+                var count = 0
+                event.whileSelectMessages {
+                    "退出" {
+                        event.subject.sendMessage("已退出")
+                        false // 停止循环
+                    }
+                    default {
+                        val color = message.content
+                        if (color.first() != '#' || color.length != 7) {
+                            subject.sendMessage("格式错误，请输入16进制颜色，例如: #d3edfa")
+                        }else{
+                            subject.sendMessage(setColor(uid, color))
+                            count = 2
+                        }
+                        count++
+                        count < 2
+                    }
+                    timeout(120_000) { false }
+                }
             }
             "PUSH" -> {
                 subject.sendMessage("请选择一个推送模板")
 
                 val template = BiliConfig.templateConfig.dynamicPush
 
-                listTemplate(subject)
+                listTemplate("d", subject)
 
                 val selectTemplate = event.selectMessages {
                     template.forEach { (t, _) ->
@@ -435,7 +475,7 @@ object BiliDataTasker {
                     timeout(120_000)
                 }
 
-                addTemplate(selectTemplate, subject)
+                setTemplate("dynamic", selectTemplate, subject)
             }
             "FILTER" -> {
 
@@ -446,7 +486,8 @@ object BiliDataTasker {
 
     }
 
-
+    fun isFollow(uid: Long, subject: String) =
+        dynamic.containsKey(uid) && dynamic[uid]!!.contacts.contains(subject)
 
 
 }

@@ -7,7 +7,6 @@ import org.jetbrains.skia.paragraph.ParagraphStyle
 import org.jetbrains.skia.paragraph.TextStyle
 import org.jetbrains.skia.svg.SVGDOM
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
-import top.colter.mirai.plugin.bilibili.BiliConfig.debugMode
 import top.colter.mirai.plugin.bilibili.BiliConfig.imageConfig
 import top.colter.mirai.plugin.bilibili.data.*
 import top.colter.mirai.plugin.bilibili.data.DynamicType.DYNAMIC_TYPE_FORWARD
@@ -17,6 +16,7 @@ import top.colter.mirai.plugin.bilibili.utils.*
 import top.colter.mirai.plugin.bilibili.utils.FontUtils.fonts
 import top.colter.mirai.plugin.bilibili.utils.FontUtils.loadTypeface
 import top.colter.mirai.plugin.bilibili.utils.FontUtils.matchFamily
+import top.colter.mirai.plugin.bilibili.utils.translate.trans
 import kotlin.math.ceil
 
 
@@ -51,11 +51,11 @@ private val cardContentRect: Rect by lazy {
 }
 
 private val mainTypeface: Typeface by lazy {
-    //loadTypeface("${BiliBiliDynamic.dataFolderPath.pathString}/font/HarmonyOS_Sans_SC_Medium.ttf")
+    val mainFont = imageConfig.font.split(";").first().split(".").first()
     try {
-        matchFamily(imageConfig.font).matchStyle(FontStyle.NORMAL)!!
+        matchFamily(mainFont).matchStyle(FontStyle.NORMAL)!!
     }catch (e: Exception){
-        logger.error("加载主字体 ${imageConfig.font} 失败")
+        logger.error("加载主字体 $mainFont 失败")
         matchFamily("思源黑体").matchStyle(FontStyle.NORMAL)!!
     }
 }
@@ -264,11 +264,8 @@ suspend fun DynamicItem.drawDynamic(themeColor: Int, isForward: Boolean = false)
             var top = quality.cardMargin + quality.badgeHeight.toFloat()
             for (img in imgList) {
 
-                if (debugMode) {
-                    drawScaleWidthImageOutline(img, cardRect.width, quality.cardMargin.toFloat(), top, isForward)
-                } else {
-                    drawScaleWidthImage(img, cardRect.width, quality.cardMargin.toFloat(), top)
-                }
+                //drawScaleWidthImageOutline(img, cardRect.width, quality.cardMargin.toFloat(), top, isForward)
+                drawScaleWidthImage(img, cardRect.width, quality.cardMargin.toFloat(), top)
 
                 top += if (img.width > cardRect.width) {
                     (cardRect.width * img.height / img.width + quality.contentSpace).toInt()
@@ -386,12 +383,21 @@ suspend fun ModuleDynamic.Major.makeGeneral(isForward: Boolean = false): Image? 
             common!!.drawGeneral()
         }
         "MAJOR_TYPE_NONE" -> {
-            null
+            drawInfoText("源动态被删除")
         }
         else -> {
             null
         }
     }
+}
+
+fun drawInfoText(text: String): Image {
+    return Surface.makeRasterN32Premul(cardRect.width.toInt(), (quality.contentFontSize+quality.cardPadding).toInt()).apply {
+        canvas.apply {
+            val textLine = TextLine.make(text, font)
+            drawTextLine(textLine, quality.cardPadding.toFloat(), quality.contentFontSize+quality.cardPadding/2, generalPaint)
+        }
+    }.makeImageSnapshot()
 }
 
 fun ModuleDispute.drawGeneral(): Image {
@@ -468,7 +474,9 @@ suspend fun ModuleDynamic.Desc.drawGeneral(): Image {
         textStyle = titleTextStyle
     }
 
-    val textParagraph = ParagraphBuilder(paragraphStyle, fonts).addText(text).build().layout(cardContentRect.width)
+    val tra = trans(text)
+
+    val textParagraph = ParagraphBuilder(paragraphStyle, fonts).addText("$text\n\n\n\n$tra").build().layout(cardContentRect.width)
 
     val textCardHeight = (quality.contentFontSize + quality.lineSpace * 2) * (textParagraph.lineNumber + 2)
 
@@ -484,7 +492,20 @@ suspend fun ModuleDynamic.Desc.drawGeneral(): Image {
 
     return Surface.makeRasterN32Premul(cardRect.width.toInt(), textCardHeight.toInt()).apply {
         canvas.apply {
-            this@drawGeneral.richTextNodes.forEach {
+            val nodes = if (tra != null){
+                richTextNodes.plus(ModuleDynamic.Desc.RichTextNode(
+                    "RICH_TEXT_NODE_TYPE_TEXT",
+                    "\n\n〓〓〓 翻译 〓〓〓\n",
+                    "\n\n〓〓〓 翻译 〓〓〓\n"
+                )).plus(ModuleDynamic.Desc.RichTextNode(
+                    "RICH_TEXT_NODE_TYPE_TEXT",
+                        tra,
+                    tra
+                ))
+            }else {
+                richTextNodes
+            }
+            nodes.forEach {
                 when (it.type) {
                     "RICH_TEXT_NODE_TYPE_TEXT" -> {
                         val point = drawTextArea(it.text, textCardRect, x, y, font, generalPaint)

@@ -6,8 +6,13 @@ import net.mamoe.mirai.console.command.CompositeCommand
 import net.mamoe.mirai.console.command.descriptor.CommandArgumentParserException
 import net.mamoe.mirai.contact.Contact
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
+import top.colter.mirai.plugin.bilibili.FilterMode
+import top.colter.mirai.plugin.bilibili.FilterType
+import top.colter.mirai.plugin.bilibili.api.getDynamicDetail
+import top.colter.mirai.plugin.bilibili.data.DynamicDetail
 import top.colter.mirai.plugin.bilibili.old.BiliPluginConfig
 import top.colter.mirai.plugin.bilibili.tasker.BiliDataTasker
+import top.colter.mirai.plugin.bilibili.utils.biliClient
 import top.colter.mirai.plugin.bilibili.utils.delegate
 
 object DynamicCommand : CompositeCommand(
@@ -16,11 +21,6 @@ object DynamicCommand : CompositeCommand(
     description = "动态指令"
 ) {
 
-    @SubCommand("set", "设置")
-    suspend fun CommandSenderOnMessage<*>.set(uid: Long, contact: Contact = Contact()) {
-        //MyEvent(uid, contact.delegate, fromEvent).broadcast()
-    }
-
     @SubCommand("color", "颜色")
     suspend fun CommandSender.color(uid: Long, color: String) = sendMessage(
         BiliDataTasker.setColor(uid, color)
@@ -28,7 +28,7 @@ object DynamicCommand : CompositeCommand(
 
     @SubCommand("add", "添加")
     suspend fun CommandSender.add(uid: Long, contact: Contact = Contact()) =
-        BiliDataTasker.addSubscribe(uid, contact)
+        BiliDataTasker.addSubscribe(uid, contact.delegate)
 
 
 
@@ -49,56 +49,69 @@ object DynamicCommand : CompositeCommand(
 
     @SubCommand("listAll", "la" , "全部订阅列表")
     suspend fun CommandSender.listAll() = sendMessage(
-        if (subject?.isAdmin() == true){
-            BiliDataTasker.listAll()
-        }else{
-            "权限不足"
-        }
+        BiliDataTasker.listAll()
     )
 
     @SubCommand("listUser", "lu" , "用户列表")
     suspend fun CommandSender.listUser() = sendMessage(
-        if (subject?.isAdmin() == true){
-            BiliDataTasker.listUser()
-        }else{
-            "权限不足"
-        }
+        BiliDataTasker.listUser()
     )
 
-    @SubCommand("filter", "f", "过滤")
-    suspend fun CommandSender.filter(regex: String, uid: Long, contact: Contact = Contact()){
-        //BiliDataTasker.addFilter(regex, uid, contact)
-    }
+    @SubCommand("filterMode", "fm", "过滤模式")
+    suspend fun CommandSender.filterMode(type: String, mode: String, uid: Long = 0L, contact: Contact = Contact())= sendMessage(
+        BiliDataTasker.addFilter(
+            if (type=="t") FilterType.TYPE else FilterType.REGULAR,
+            if (mode=="w") FilterMode.WHITE_LIST else FilterMode.BLACK_LIST,
+            type, uid, contact.delegate
+        )
+    )
 
+    @SubCommand("filterType", "ft", "类型过滤")
+    suspend fun CommandSender.filterType(type: String, uid: Long = 0L, contact: Contact = Contact())= sendMessage(
+        BiliDataTasker.addFilter(FilterType.TYPE, null, type, uid, contact.delegate)
+    )
 
-
-    @SubCommand("contain", "c", "包含")
-    suspend fun CommandSender.contain(regex: String, uid: Long, contact: Contact = Contact()) {
-        //BiliDataTasker.addFilter(regex, uid, contact.delegate, false)
-    }
+    @SubCommand("filterReg", "fr", "正则过滤")
+    suspend fun CommandSender.filterReg(reg: String, uid: Long = 0L, contact: Contact = Contact())= sendMessage(
+        BiliDataTasker.addFilter(FilterType.REGULAR, null, reg, uid, contact.delegate)
+    )
 
     @SubCommand("filterList", "fl", "过滤列表")
-    suspend fun CommandSender.filterList(uid: Long, contact: Contact = Contact()) {
-        //BiliDataTasker.listFilter(uid, contact.delegate)
-    }
+    suspend fun CommandSender.filterList(uid: Long, contact: Contact = Contact()) = sendMessage(
+        BiliDataTasker.listFilter(uid, contact.delegate)
+    )
 
     @SubCommand("filterDel", "fd", "过滤删除")
     suspend fun CommandSender.filterDel(index: String, uid: Long, contact: Contact = Contact()) = sendMessage(
-        BiliDataTasker.delFilter(uid, contact.delegate, index)
+        BiliDataTasker.delFilter(index, uid, contact.delegate)
+    )
+
+    @SubCommand("templateList", "tl", "模板列表")
+    suspend fun CommandSenderOnMessage<*>.templateList() {
+        BiliDataTasker.listTemplate("d", Contact())
+        BiliDataTasker.listTemplate("l", Contact())
+    }
+
+    @SubCommand("template", "t", "模板")
+    suspend fun CommandSender.template(type: String, template: String, contact: Contact = Contact()) = sendMessage(
+        BiliDataTasker.setTemplate(type, template, contact)
     )
 
     @SubCommand("login", "登录")
     suspend fun CommandSender.login() {
-        if (subject?.isAdmin() == true){
-            BiliDataTasker.login(Contact())
-        }else{
-            sendMessage("仅Bot管理员可进行登录")
-        }
+        BiliDataTasker.login(Contact())
     }
 
     @SubCommand("config", "配置")
-    suspend fun CommandSenderOnMessage<*>.config(uid: Long = 0L) {
+    suspend fun CommandSenderOnMessage<*>.config(uid: Long = 0L, contact: Contact = Contact()) {
         BiliDataTasker.config(fromEvent, uid)
+    }
+    @SubCommand("search", "s", "搜索")
+    suspend fun CommandSenderOnMessage<*>.search(did: String) {
+        val subject = Contact()
+        val detail = biliClient.getDynamicDetail(did)
+        if (detail != null) subject.sendMessage("请稍等") else subject.sendMessage("未找到动态")
+        detail?.let { d -> BiliBiliDynamic.dynamicChannel.send(DynamicDetail(d, subject.delegate)) }
     }
 
 }

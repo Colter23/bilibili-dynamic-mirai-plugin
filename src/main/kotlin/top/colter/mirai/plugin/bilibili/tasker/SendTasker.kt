@@ -206,6 +206,7 @@ object SendTasker : BiliTasker() {
                 "time" -> lm.time
                 "type" -> "直播"
                 "title" -> lm.title
+                "area" -> lm.area
                 "link" -> lm.link
                 "cover" -> uploadImage(lm.cover, CacheType.IMAGES, contact).serializeToMiraiCode()
                 "draw" -> {

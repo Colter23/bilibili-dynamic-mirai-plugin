@@ -12,12 +12,6 @@ object BiliConfig : AutoSavePluginConfig("BiliConfig") {
     @ValueDescription("具体的配置文件描述请前往下方链接查看")
     val help: String by value("https://github.com/Colter23/bilibili-dynamic-mirai-plugin")
 
-    @ValueDescription("管理员QQ号")
-    var admin: String by value("")
-
-    @ValueDescription("Debug模式")
-    var debugMode: Boolean by value(false)
-
     @ValueDescription("功能开关:\n")
     val enableConfig: EnableConfig by value()
 
