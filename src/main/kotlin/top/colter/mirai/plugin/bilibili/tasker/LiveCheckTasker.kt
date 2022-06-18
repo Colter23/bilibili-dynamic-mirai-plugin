@@ -10,7 +10,7 @@ import top.colter.mirai.plugin.bilibili.utils.sendAll
 import java.time.Instant
 
 object LiveCheckTasker : BiliTasker() {
-    override val interval: Int = BiliConfig.checkConfig.liveInterval
+    override var interval: Int = BiliConfig.checkConfig.liveInterval
 
     private val liveChannel by BiliBiliDynamic::liveChannel
 
@@ -25,13 +25,12 @@ object LiveCheckTasker : BiliTasker() {
         val liveList = client.getLive()
 
         if (liveList != null) {
+            val followingUsers = dynamic.filter { it.value.contacts.isNotEmpty() }.map { it.key }
             val lives = liveList.rooms
                 .filter {
                     it.liveTime > lastLive
                 }.filter {
-                    // TODO
-                    dynamic.filter { it.value.contacts.isNotEmpty() }.map { it.key }
-                        .contains(it.uid)
+                    followingUsers.contains(it.uid)
                 }.sortedBy {
                     it.liveTime
                 }

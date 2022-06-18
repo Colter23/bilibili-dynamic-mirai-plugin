@@ -7,7 +7,7 @@ import kotlin.io.path.forEachDirectoryEntry
 import kotlin.io.path.isDirectory
 
 object CacheClearTasker: BiliTasker() {
-    override val interval: Int = 60 * 60 * 24
+    override var interval: Int = 60 * 60 * 24
 
     private val expires by BiliConfig.cacheConfig::expires
 

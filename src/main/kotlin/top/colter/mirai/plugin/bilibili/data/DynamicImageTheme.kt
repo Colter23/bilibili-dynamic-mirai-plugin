@@ -20,6 +20,25 @@ object BiliImageTheme : ReadOnlyPluginConfig("ImageTheme") {
                 "#A0FFFFFF",
                 "#FFFFFF",
                 "#A0FFFFFF",
+                "#FFFFFF",
+                "#FB7299",
+                "#313131",
+                "#9C9C9C",
+                "#666666",
+                "#222222",
+                "#178BCF",
+                Theme.Shadow("#46000000", 6f, 6f, 25f, 0f),
+                Theme.Shadow("#1E000000", 5f, 5f, 15f, 0f),
+                Theme.BadgeColor("#00CBFF", "#78FFFFFF"),
+                Theme.BadgeColor("#FFFFFF", "#48C7F0"),
+                Theme.BadgeColor("#FFFFFF", "#FB7299"),
+                Theme.BadgeColor("#FFFFFF", "#48C7F0"),
+            ),
+            "v3RainbowOutline" to Theme(
+                "#A0FFFFFF",
+                "#ff0000;#ff00ff;#0000ff;#00ffff;#00ff00;#ffff00;#ff0000",
+                "#A0FFFFFF",
+                "#FFFFFF",
                 "#FB7299",
                 "#313131",
                 "#9C9C9C",
@@ -34,17 +53,18 @@ object BiliImageTheme : ReadOnlyPluginConfig("ImageTheme") {
                 Theme.BadgeColor("#FFFFFF", "#48C7F0"),
             ),
             "v2" to Theme(
-                "#A0FFFFFF",
+                "#C8FFFFFF",
                 "#FFFFFF",
                 "#A0FFFFFF",
+                "#FFFFFF",
                 "#FB7299",
                 "#313131",
                 "#9C9C9C",
                 "#666666",
                 "#222222",
                 "#178BCF",
-                Theme.Shadow("#46000000", 6f, 6f, 25f, 0f),
-                Theme.Shadow("#1E000000", 5f, 5f, 15f, 0f),
+                Theme.Shadow("#00000000", 0f, 0f, 0f, 0f),
+                Theme.Shadow("#00000000", 0f, 0f, 0f, 0f),
                 Theme.BadgeColor("#00CBFF", "#78FFFFFF"),
                 Theme.BadgeColor("#FFFFFF", "#48C7F0"),
                 Theme.BadgeColor("#FFFFFF", "#FB7299"),
@@ -60,6 +80,7 @@ data class Theme(
 
     val cardOutlineColorHex: String,
     val faceOutlineColorHex: String,
+    val drawOutlineColorHex: String,
 
     val nameColorHex: String,
     val titleColorHex: String,
@@ -101,8 +122,10 @@ data class Theme(
 
     val cardBgColor: Int get() = Color.makeRGB(cardBgColorHex)
 
-    val cardOutlineColor: Int get() = Color.makeRGB(cardOutlineColorHex)
+    //val cardOutlineColor: Int get() = Color.makeRGB(cardOutlineColorHex)
+    val cardOutlineColors: IntArray get() = cardOutlineColorHex.split(";").map { Color.makeRGB(it) }.toIntArray()
     val faceOutlineColor: Int get() = Color.makeRGB(faceOutlineColorHex)
+    val drawOutlineColor: Int get() = Color.makeRGB(drawOutlineColorHex)
 
     val nameColor: Int get() = Color.makeRGB(nameColorHex)
     val titleColor: Int get() = Color.makeRGB(titleColorHex)

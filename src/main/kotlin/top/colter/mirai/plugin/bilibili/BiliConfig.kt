@@ -21,6 +21,9 @@ object BiliConfig : AutoSavePluginConfig("BiliConfig") {
     @ValueDescription("检测配置:\ninterval: 动态检测间隔(推荐 15-30) 单位秒\nliveInterval: 直播检测间隔(与动态检测独立) 单位秒\nlowSpeed: 低频检测时间段与倍率(例: 3-8x2 三点到八点检测间隔为正常间隔的2倍) 24小时制")
     val checkConfig: CheckConfig by value()
 
+    @ValueDescription("推送配置:\npushInterval: QQ中连续发送消息的间隔 单位毫秒")
+    val pushConfig: PushConfig by value()
+
     @ValueDescription("图片配置:\nquality: 图片质量(分辨率), 内置 800w: 800px, 1000w: 1000px, 1200w: 1200px, 1500w: 1500px(图片宽度)\ntheme: 绘图主题, 内置 v3: 新版绘图主题, v2: 旧版绘图主题")
     val imageConfig: ImageConfig by value()
 
@@ -40,9 +43,9 @@ object BiliConfig : AutoSavePluginConfig("BiliConfig") {
 
 @Serializable
 data class EnableConfig(
-    val enable: Boolean = true,
+    val drawEnable: Boolean = true,
     var translateEnable: Boolean = false,
-    val proxyEnable: Boolean = true,
+    val proxyEnable: Boolean = false,
     val cacheClearEnable: Boolean = true,
 )
 
@@ -105,7 +108,7 @@ data class CheckConfig(
 
 @Serializable
 data class PushConfig(
-    val quality: Int = 1,
+    val pushInterval: Long = 100,
 )
 
 @Serializable

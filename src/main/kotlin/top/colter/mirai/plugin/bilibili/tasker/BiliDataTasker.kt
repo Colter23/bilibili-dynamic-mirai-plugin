@@ -34,11 +34,11 @@ object BiliDataTasker {
 
     val mutex = Mutex()
 
-    val client = BiliClient()
+    private val client = BiliClient()
 
-    val dynamic by BiliData::dynamic
+    private val dynamic by BiliData::dynamic
 
-    val filter by BiliData::filter
+    private val filter by BiliData::filter
 
     suspend fun listenAll(subject: String) = mutex.withLock {
         dynamic.forEach { (uid, sub) ->
@@ -81,19 +81,19 @@ object BiliDataTasker {
         return null
     }
 
-    fun setColor(uid: Long, color: String): String {
+    suspend fun setColor(uid: Long, color: String) = mutex.withLock {
         color.split(";","；").forEach{
             if (it.first() != '#' || it.length != 7) {
-                return "格式错误，请输入16进制颜色，如: #d3edfa"
+                return@withLock "格式错误，请输入16进制颜色，如: #d3edfa"
             }
         }
         dynamic[uid]?.color = color
-        return "设置完成"
+        "设置完成"
     }
 
-    suspend fun addSubscribe(uid: Long, subject: String): String{
+    suspend fun addSubscribe(uid: Long, subject: String) = mutex.withLock {
         if (isFollow(uid, subject)){
-            return "之前订阅过这个人哦"
+            return@withLock "之前订阅过这个人哦"
         }
 
         if (dynamic[0]?.contacts?.contains(subject) == true) {
@@ -101,18 +101,18 @@ object BiliDataTasker {
         }
         if (!dynamic.containsKey(uid)){
             val m = followUser(uid)
-            if (m != null) return m
+            if (m != null) return@withLock m
             val u = client.userInfo(uid)
             dynamic[uid] = SubData(u?.name!!)
         }
 
         dynamic[uid]!!.contacts.add(subject)
-        return "订阅 ${dynamic[uid]?.name} 成功!"
+        "订阅 ${dynamic[uid]?.name} 成功!"
     }
 
-    suspend fun addFilter(type: FilterType, mode: FilterMode?, regex: String?, uid: Long, subject: String) : String{
+    suspend fun addFilter(type: FilterType, mode: FilterMode?, regex: String?, uid: Long, subject: String) = mutex.withLock {
         if (!isFollow(uid, subject)){
-            return "还未订阅此人哦"
+            return@withLock "还未订阅此人哦"
         }
 
         if (!filter.containsKey(subject)){
@@ -134,7 +134,7 @@ object BiliDataTasker {
                         "音乐" -> DynamicFilterType.MUSIC
                         "专栏" -> DynamicFilterType.ARTICLE
                         "直播" -> DynamicFilterType.LIVE
-                        else -> return "没有这个类型 $regex"
+                        else -> return@withLock "没有这个类型 $regex"
                     }
                     dynamicFilter.typeSelect.list.add(t)
                 }
@@ -146,18 +146,18 @@ object BiliDataTasker {
                 }
             }
         }
-        return "设置成功"
+        "设置成功"
     }
 
-    fun listFilter(uid: Long, subject: String): String {
+    suspend fun listFilter(uid: Long, subject: String) = mutex.withLock {
         if (!isFollow(uid, subject)){
-            return "还未订阅此人哦"
+            return@withLock "还未订阅此人哦"
         }
         if (!(filter.containsKey(subject) && filter[subject]!!.containsKey(uid))) {
-            return "当前目标没有过滤器"
+            return@withLock "当前目标没有过滤器"
         }
 
-        return buildString {
+        buildString {
             appendLine("当前目标过滤器: ")
             appendLine()
 
@@ -180,19 +180,19 @@ object BiliDataTasker {
         }
     }
 
-    fun delFilter(index: String, uid: Long, subject: String) :String {
+    suspend fun delFilter(index: String, uid: Long, subject: String) = mutex.withLock {
         if (!isFollow(uid, subject)){
-            return "还未订阅此人哦"
+            return@withLock "还未订阅此人哦"
         }
         if (!(filter.containsKey(subject) && filter[subject]!!.containsKey(uid))) {
-            return "当前目标没有过滤器"
+            return@withLock "当前目标没有过滤器"
         }
 
         var i = 0
         runCatching {
             i = index.substring(1).toInt()
         }.onFailure {
-            return "索引错误"
+            return@withLock "索引错误"
         }
         var flag = false
         val filter = if (index[0] == 't') {
@@ -201,13 +201,13 @@ object BiliDataTasker {
         } else if (index[0] == 'r') {
             filter[subject]!![uid]!!.regularSelect.list
         } else {
-            return "索引类型错误"
+            return@withLock "索引类型错误"
         }
-        if (filter.size < i) return "索引超出范围"
+        if (filter.size < i) return@withLock "索引超出范围"
         val t = filter[i]
         filter.removeAt(i)
 
-        return if (flag){
+        if (flag){
             "已删除 ${(t as DynamicFilterType).value} 类型过滤"
         }else{
             "已删除 ${(t as String)} 正则过滤"
@@ -221,7 +221,7 @@ object BiliDataTasker {
     }
 
     suspend fun removeAllSubscribe(subject: String) = mutex.withLock {
-        dynamic.count { (uid, sub) ->
+        dynamic.count { (_, sub) ->
             if (sub.contacts.contains(subject)) {
                 sub.contacts.remove(subject)
                 true
@@ -318,7 +318,7 @@ object BiliDataTasker {
 
     }
 
-    suspend fun listTemplate(type: String, subject: Contact){
+    suspend fun listTemplate(type: String, subject: Contact) {
         val template = when (type){
             "d" -> BiliConfig.templateConfig.dynamicPush
             "l" -> BiliConfig.templateConfig.livePush
@@ -361,18 +361,18 @@ object BiliDataTasker {
         })
     }
 
-    fun setTemplate(type: String, template: String, subject: Contact): String{
+    suspend fun setTemplate(type: String, template: String, subject: Contact) = mutex.withLock {
         val pushTemplates = when (type){
             "d" -> BiliConfig.templateConfig.dynamicPush
             "l" -> BiliConfig.templateConfig.livePush
-            else -> return "类型错误 d:动态 l:直播"
+            else -> return@withLock "类型错误 d:动态 l:直播"
         }
         val push = when(type){
             "d" -> BiliData.dynamicPushTemplate
             "l" -> BiliData.livePushTemplate
-            else -> return "类型错误 d:动态 l:直播"
+            else -> return@withLock "类型错误 d:动态 l:直播"
         }
-        return if (pushTemplates.containsKey(template)){
+        if (pushTemplates.containsKey(template)){
             push.forEach { (_, u) ->
                 u.remove(subject.id)
             }

@@ -10,7 +10,6 @@ import top.colter.mirai.plugin.bilibili.FilterMode
 import top.colter.mirai.plugin.bilibili.FilterType
 import top.colter.mirai.plugin.bilibili.api.getDynamicDetail
 import top.colter.mirai.plugin.bilibili.data.DynamicDetail
-import top.colter.mirai.plugin.bilibili.old.BiliPluginConfig
 import top.colter.mirai.plugin.bilibili.tasker.BiliDataTasker
 import top.colter.mirai.plugin.bilibili.utils.biliClient
 import top.colter.mirai.plugin.bilibili.utils.delegate
@@ -115,7 +114,5 @@ object DynamicCommand : CompositeCommand(
     }
 
 }
-
-fun Contact.isAdmin(): Boolean = BiliPluginConfig.admin == id.toString()
 
 fun CommandSender.Contact(): Contact = subject ?: throw CommandArgumentParserException("无法从当前环境获取联系人")

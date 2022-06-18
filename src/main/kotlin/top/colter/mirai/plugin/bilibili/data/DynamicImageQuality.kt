@@ -54,10 +54,8 @@ object BiliImageQuality : ReadOnlyPluginConfig("ImageQuality") {
                 cardMargin = 30,
                 cardPadding = 30,
                 cardArc = 15f,
-                // 80
                 faceSize = 80f,
                 noPendantFaceInflate = 10f,
-                // 120
                 pendantSize = 140f,
                 verifyIconSize = 30f,
 
@@ -66,9 +64,9 @@ object BiliImageQuality : ReadOnlyPluginConfig("ImageQuality") {
                 badgeArc = 8f,
 
                 lineHeight = 35f,
-                lineSpace = 8,
+                lineSpace = 11,
 
-                contentSpace = 15,
+                contentSpace = 12,
 
                 //qrCodeWidth = 115,
                 fanCardHeight = 115f,
@@ -77,89 +75,84 @@ object BiliImageQuality : ReadOnlyPluginConfig("ImageQuality") {
                 smallCardHeight = 200,
                 additionalCardHeight = 130,
 
-                cardOutlineWidth = 2f,
-                drawOutlineWidth = 2f,
+                cardOutlineWidth = 3f,
+                drawOutlineWidth = 3f,
 
                 nameFontSize = 36f,
                 titleFontSize = 32f,
                 subTitleFontSize = 28f,
-                descFontSize = 24f,
+                descFontSize = 26f,
                 contentFontSize = 32f,
 
             ),
             "1200w" to Quality(
-                imageWidth = 1000,
-                cardMargin = 30,
-                cardPadding = 30,
-                cardArc = 15f,
-                // 80
-                faceSize = 80f,
-                noPendantFaceInflate = 10f,
-                // 120
-                pendantSize = 140f,
-                verifyIconSize = 30f,
+                imageWidth = 1200,
+                cardMargin = 40,
+                cardPadding = 40,
+                cardArc = 20f,
+                faceSize = 95f,
+                noPendantFaceInflate = 13f,
+                pendantSize = 170f,
+                verifyIconSize = 40f,
 
-                badgeHeight = 45,
-                badgePadding = 8,
-                badgeArc = 8f,
+                badgeHeight = 55,
+                badgePadding = 11,
+                badgeArc = 11f,
 
-                lineHeight = 35f,
-                lineSpace = 8,
+                lineHeight = 40f,
+                lineSpace = 14,
 
-                contentSpace = 15,
+                contentSpace = 17,
 
-                fanCardHeight = 115f,
+                fanCardHeight = 140f,
 
-                drawSpace = 15,
-                smallCardHeight = 200,
-                additionalCardHeight = 130,
+                drawSpace = 20,
+                smallCardHeight = 240,
+                additionalCardHeight = 160,
 
-                cardOutlineWidth = 2f,
-                drawOutlineWidth = 2f,
+                cardOutlineWidth = 4f,
+                drawOutlineWidth = 4f,
 
-                nameFontSize = 36f,
-                titleFontSize = 32f,
-                subTitleFontSize = 28f,
-                descFontSize = 24f,
-                contentFontSize = 32f,
+                nameFontSize = 42f,
+                titleFontSize = 38f,
+                subTitleFontSize = 34f,
+                descFontSize = 32f,
+                contentFontSize = 38f,
 
             ),
             "1500w" to Quality(
-                imageWidth = 1000,
-                cardMargin = 30,
-                cardPadding = 30,
-                cardArc = 15f,
-                // 80
-                faceSize = 80f,
-                noPendantFaceInflate = 10f,
-                // 120
-                pendantSize = 140f,
-                verifyIconSize = 30f,
+                imageWidth = 1500,
+                cardMargin = 50,
+                cardPadding = 50,
+                cardArc = 30f,
+                faceSize = 100f,
+                noPendantFaceInflate = 18f,
+                pendantSize = 190f,
+                verifyIconSize = 50f,
 
-                badgeHeight = 45,
-                badgePadding = 8,
-                badgeArc = 8f,
+                badgeHeight = 72,
+                badgePadding = 15,
+                badgeArc = 16f,
 
-                lineHeight = 35f,
-                lineSpace = 8,
+                lineHeight = 48f,
+                lineSpace = 20,
 
-                contentSpace = 15,
+                contentSpace = 20,
 
-                fanCardHeight = 115f,
+                fanCardHeight = 150f,
 
-                drawSpace = 15,
-                smallCardHeight = 200,
-                additionalCardHeight = 130,
+                drawSpace = 25,
+                smallCardHeight = 300,
+                additionalCardHeight = 205,
 
-                cardOutlineWidth = 2f,
-                drawOutlineWidth = 2f,
+                cardOutlineWidth = 6f,
+                drawOutlineWidth = 6f,
 
-                nameFontSize = 36f,
-                titleFontSize = 32f,
-                subTitleFontSize = 28f,
-                descFontSize = 24f,
-                contentFontSize = 32f,
-
+                nameFontSize = 51f,
+                titleFontSize = 46f,
+                subTitleFontSize = 43f,
+                descFontSize = 40f,
+                contentFontSize = 47f,
             ),
         )
     )

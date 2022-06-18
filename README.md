@@ -132,23 +132,29 @@ v3数据文件名 `BiliData.yml`
 
 
 ### 配置
-  配置文件位于 `mirai 根目录/config/top.colter.bilibili-dynamic-mirai-plugin/BiliConfig.yml`
+配置文件位于 `mirai 根目录/config/top.colter.bilibili-dynamic-mirai-plugin/`  
+基础配置文件 `BiliConfig.yml`  
+图片分辨率配置 `ImageQuality.yml`   
+图片主题配置 `ImageTheme.yml`  
+分辨率与主题配置已经内置了多套数据，如果你不会改就不要改了
 
-| 配置项               | 取值                                      | 说明             |
-|-------------------|-----------------------------------------|----------------|
-| `enableConfig`    | [EnableConfig](#EnableConfig)           | 功能开关           |
-| `accountConfig`   | [BiliAccountConfig](#BiliAccountConfig) | 账号配置           |
-| `checkConfig`     | [CheckConfig](#CheckConfig)             | 检测配置           |
-| `imageConfig`     | [ImageConfig](#ImageConfig)             | 绘图配置           |
-| `templateConfig`  | [TemplateConfig](#TemplateConfig)       | 模板配置           |
-| `cacheConfig`     | [CacheConfig](#CacheConfig)             | 缓存配置           |
-| `proxyConfig`     | [ProxyConfig](#ProxyConfig)             | 代理配置           |
-| `translateConfig` | [TranslateConfig](#TranslateConfig)     | 翻译配置           |
+#### BiliConfig.yml
+| 配置项               | 取值                                      | 说明   |
+|-------------------|-----------------------------------------|------|
+| `enableConfig`    | [EnableConfig](#EnableConfig)           | 功能开关 |
+| `accountConfig`   | [BiliAccountConfig](#BiliAccountConfig) | 账号配置 |
+| `checkConfig`     | [CheckConfig](#CheckConfig)             | 检测配置 |
+| `pushConfig`      | [PushConfig](#PushConfig)               | 推送配置 |
+| `imageConfig`     | [ImageConfig](#ImageConfig)             | 绘图配置 |
+| `templateConfig`  | [TemplateConfig](#TemplateConfig)       | 模板配置 |
+| `cacheConfig`     | [CacheConfig](#CacheConfig)             | 缓存配置 |
+| `proxyConfig`     | [ProxyConfig](#ProxyConfig)             | 代理配置 |
+| `translateConfig` | [TranslateConfig](#TranslateConfig)     | 翻译配置 |
 
 #### EnableConfig
 | 配置项                | 取值               | 说明     |
 |--------------------|------------------|--------|
-| `enable`           | `true` / `false` | 总开关    |
+| `drawEnable`       | `true` / `false` | 绘图开关   |
 | `translateEnable`  | `true` / `false` | 翻译开关   |
 | `proxyEnable`      | `true` / `false` | 代理开关   |
 | `cacheClearEnable` | `true` / `false` | 缓存清理开关 |
@@ -161,17 +167,22 @@ v3数据文件名 `BiliData.yml`
 | `followGroup` | 最长16字符                        | 关注时保存的分组 |
 
 #### CheckConfig
+| 配置项            | 取值                         | 说明          |
+|----------------|----------------------------|-------------|
+| `interval`     | 推荐 15-60 单位秒               | 动态检测间隔      |
+| `liveInterval` | 单位秒                        | 直播检测间隔      |
+| `lowSpeed`     | 例: 3-8x2 三点到八点检测间隔为正常间隔的2倍 | 低频检测时间段与倍率  |
+
+#### PushConfig
 | 配置项            | 取值                         | 说明               |
 |----------------|----------------------------|------------------|
-| `interval`     | 推荐 15-60 单位秒               | 动态检测间隔           |
-| `liveInterval` | 单位秒                        | 直播检测间隔           |
-| `lowSpeed`     | 例: 3-8x2 三点到八点检测间隔为正常间隔的2倍 | 低频检测时间段与倍率（暂不可用） |
+| `pushInterval` | 单位毫秒                       | QQ中连续发送消息的间隔           |
 
 #### ImageConfig
 | 配置项            | 取值                                                 | 说明                                         |
 |----------------|----------------------------------------------------|--------------------------------------------|
-| `quality`      | `800w` / `1000w` / `1200w` / `1500w` (图片宽度)        | 图片质量(分辨率) 目前只有 `800w` / `1000w`            |
-| `theme`        | `v3` (新版绘图主题) / `v2` (旧版绘图主题)                      | 绘图主题 目前两个效果一致                              |
+| `quality`      | `800w` / `1000w` / `1200w` / `1500w` (图片宽度)        | 图片质量(分辨率)                                  |
+| `theme`        | `v3` (新版绘图主题) / `v2` (旧版绘图主题)                      | 绘图主题 (其实都差不多)                              |
 | `font`         | 字体名                                                | 绘图字体                                       |
 | `defaultColor` | HEX颜色值 (#d3edfa;#fde8ed)                           | 默认绘图主题色 支持多个值自定义渐变 中间用分号`;`号分隔 单个值会自动生成渐变色 |
 | `cardOrnament` | `FanCard` (粉丝卡片) / `QrCode` (动态链接二维码) / `None` (无) | 卡片装饰                                       |
@@ -229,9 +240,9 @@ v3数据文件名 `BiliData.yml`
 
 
 #### CacheConfig
-| 配置项       | 取值                                                                                                                                       | 说明     |
-|-----------|------------------------------------------------------------------------------------------------------------------------------------------|--------|
-| `expires` | 单位`天`  为 `0` 时表示不清理此类图片<br/>`DRAW`: 由插件绘制的图片<br/>`IMAGES`: 动态图和封面等<br/>`EMOJI`: B站的Emoji<br/>`USER`: 用户头像,头像挂件,粉丝卡片套装等<br/>`OTHER`: 其他图片 | 图片过期时长 |
+| 配置项       | 取值                                                                                                                                       | 说明                             |
+|-----------|------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------|
+| `expires` | 单位`天`  为 `0` 时表示不清理此类图片<br/>`DRAW`: 由插件绘制的图片<br/>`IMAGES`: 动态图和封面等<br/>`EMOJI`: B站的Emoji<br/>`USER`: 用户头像,头像挂件,粉丝卡片套装等<br/>`OTHER`: 其他图片 | 图片过期时长, 当图片在指定时间内未被再次使用, 就会被删除 |
 
 #### ProxyConfig
 | 配置项     | 取值    | 说明   |
@@ -392,7 +403,7 @@ translateConfig:
 </details>
 
 #### At全体权限
-新版At全体暂时还每想好怎么搞
+新版At全体暂时还没想好怎么搞
 
 | 权限名   | ID                                                     |
 |-------|--------------------------------------------------------|

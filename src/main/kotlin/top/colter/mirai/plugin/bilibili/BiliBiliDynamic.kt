@@ -5,6 +5,8 @@ import kotlinx.coroutines.launch
 import net.mamoe.mirai.Bot
 import net.mamoe.mirai.console.command.CommandManager.INSTANCE.register
 import net.mamoe.mirai.console.command.CommandManager.INSTANCE.unregister
+import net.mamoe.mirai.console.permission.PermissionId
+import net.mamoe.mirai.console.permission.PermissionService
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescription
 import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
 import net.mamoe.mirai.event.events.BotOnlineEvent
@@ -34,8 +36,14 @@ object BiliBiliDynamic : KotlinPlugin(
     val liveChannel = Channel<LiveDetail>(20)
     val messageChannel = Channel<BiliMessage>(20)
 
+    val liveGwp = PermissionId(BiliBiliDynamic.description.id, "live.atall")
+    val videoGwp = PermissionId(BiliBiliDynamic.description.id, "video.atall")
+
     override fun onEnable() {
         logger.info { "BiliBili Dynamic Plugin loaded" }
+
+        PermissionService.INSTANCE.register(liveGwp, "直播At全体")
+        PermissionService.INSTANCE.register(videoGwp, "视频At全体")
 
         DynamicCommand.register()
 
@@ -46,13 +54,7 @@ object BiliBiliDynamic : KotlinPlugin(
 
         migration()
 
-        cookie.parse(BiliConfig.accountConfig.cookie)
-
-        launch {
-            checkCookie()
-            initTagid()
-            loadFonts()
-        }
+        launch { initData() }
 
         waitOnline {
             DynamicCheckTasker.start()
@@ -81,7 +83,7 @@ object BiliBiliDynamic : KotlinPlugin(
      * author cssxsh
      */
     private fun waitOnline(block: () -> Unit) {
-        if (Bot.instances.isEmpty()) {
+        if (Bot.instances.none { it.isOnline }) {
             globalEventChannel().subscribeOnce<BotOnlineEvent> { block() }
         } else {
             block()

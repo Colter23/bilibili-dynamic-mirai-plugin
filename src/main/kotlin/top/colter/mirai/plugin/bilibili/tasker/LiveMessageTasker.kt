@@ -1,13 +1,18 @@
 package top.colter.mirai.plugin.bilibili.tasker
 
+import org.jetbrains.skia.Color
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
+import top.colter.mirai.plugin.bilibili.BiliConfig
+import top.colter.mirai.plugin.bilibili.BiliData
+import top.colter.mirai.plugin.bilibili.data.LIVE_LINK
 import top.colter.mirai.plugin.bilibili.data.LiveInfo
 import top.colter.mirai.plugin.bilibili.data.LiveMessage
 import top.colter.mirai.plugin.bilibili.draw.makeDrawLive
+import top.colter.mirai.plugin.bilibili.draw.makeRGB
 import top.colter.mirai.plugin.bilibili.utils.formatTime
 
 object LiveMessageTasker : BiliTasker() {
-    override val interval: Int = 0
+    override var interval: Int = 0
 
     private val liveChannel by BiliBiliDynamic::liveChannel
     private val messageChannel by BiliBiliDynamic::messageChannel
@@ -29,15 +34,18 @@ object LiveMessageTasker : BiliTasker() {
             title,
             cover,
             area,
-            "https://live.bilibili.com/$roomId",
+            LIVE_LINK(roomId),
             makeLive(),
             contact
         )
     }
 
     suspend fun LiveInfo.makeLive(): String?{
-        val drawEnable = true
-        return if (drawEnable) makeDrawLive() else null
+        return if (BiliConfig.enableConfig.drawEnable) {
+            val color = BiliData.dynamic[uid]?.color?:BiliConfig.imageConfig.defaultColor
+            val colors = color.split(";", "；").map { Color.makeRGB(it.trim()) }
+            makeDrawLive(colors)
+        } else null
     }
 
 }

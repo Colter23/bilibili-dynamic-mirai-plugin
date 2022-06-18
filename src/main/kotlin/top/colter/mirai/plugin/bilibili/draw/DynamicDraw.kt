@@ -25,7 +25,7 @@ private val logger by BiliBiliDynamic::logger
 private val quality: Quality by lazy {
     var quality = BiliImageQuality.quality[imageConfig.quality]
     if (quality == null){
-        logger.error("未找到 ${imageConfig.quality} 的图片质量配置")
+        logger.error("未找到 ${imageConfig.quality} 的图片分辨率配置")
         quality = BiliImageQuality.quality.firstNotNullOf { it.value }
     }
     quality.apply {
@@ -102,9 +102,9 @@ suspend fun DynamicItem.makeDrawDynamic(colors: List<Int>): String {
     return cacheImage(img, "$uid/$idStr.png", CacheType.DRAW_DYNAMIC)
 }
 
-suspend fun LiveInfo.makeDrawLive(): String {
+suspend fun LiveInfo.makeDrawLive(colors: List<Int>): String {
     val live = drawLive()
-    val img = makeCardBg(live.height, listOf()) {
+    val img = makeCardBg(live.height, colors) {
         it.drawImage(live, 0f, 0f)
     }
     return cacheImage(img, "$uid/${liveTime.formatTime("yyyyMMddHHmmss")}.png", CacheType.DRAW_LIVE)
@@ -1033,7 +1033,7 @@ suspend fun ModuleDynamic.Major.Draw.drawGeneral(): Image {
                 drawImageClip(img, dstRect)
 
                 drawRRect(dstRect, Paint().apply {
-                    color = theme.cardOutlineColor
+                    color = theme.drawOutlineColor
                     mode = PaintMode.STROKE
                     strokeWidth = quality.drawOutlineWidth
                     isAntiAlias = true
@@ -1254,22 +1254,14 @@ fun Canvas.drawCard(rrect: RRect, bgColor: Int = theme.cardBgColor) {
         isAntiAlias = true
     })
     drawRRect(rrect, Paint().apply {
-        color = theme.cardOutlineColor
+        color = theme.cardOutlineColors.first()
         mode = PaintMode.STROKE
         strokeWidth = quality.cardOutlineWidth
         isAntiAlias = true
         shader = Shader.makeSweepGradient(
             rrect.left+rrect.width/2,
             rrect.top+rrect.height/2,
-            intArrayOf(
-                0xFFff0000.toInt(),
-                0xFFff00ff.toInt(),
-                0xFF0000ff.toInt(),
-                0xFF00ffff.toInt(),
-                0xFF00ff00.toInt(),
-                0xFFffff00.toInt(),
-                0xFFff0000.toInt(),
-            )
+            theme.cardOutlineColors
         )
     })
 }
@@ -1468,7 +1460,7 @@ suspend fun Canvas.drawOrnament(decorate: ModuleAuthor.Decorate?, link: String, 
                 srcFRect,
                 tarFRect,
                 FilterMipmap(FilterMode.LINEAR, MipmapMode.NEAREST),
-                null,
+                Paint(),
                 true
             )
         }
@@ -1534,10 +1526,11 @@ suspend fun Canvas.drawAvatar(
 
     if (verifyIcon != "") {
         val svg = SVGDOM(Data.makeFromBytes(loadResourceBytes("icon/$verifyIcon.svg")))
+        val size = if (hasPendant) verifyIconSize - quality.noPendantFaceInflate / 2 else verifyIconSize
         drawImage(
-            svg.makeImage(verifyIconSize, verifyIconSize),
-            tarFaceRect.right - verifyIconSize,
-            tarFaceRect.bottom - verifyIconSize
+            svg.makeImage(size, size),
+            tarFaceRect.right - size,
+            tarFaceRect.bottom - size
         )
     }
 }

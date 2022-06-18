@@ -143,6 +143,8 @@ fun Color.makeRGB(hex: String): Int {
     }
 }
 
+fun Color.getRGB(color: Int) = intArrayOf(getR(color), getG(color), getB(color))
+
 fun rgb2hsb(rgbR: Int, rgbG: Int, rgbB: Int): FloatArray {
 
     val rgb = intArrayOf(rgbR, rgbG, rgbB)

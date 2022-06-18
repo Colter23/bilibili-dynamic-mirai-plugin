@@ -9,8 +9,15 @@ import top.colter.mirai.plugin.bilibili.utils.biliClient
 import kotlin.io.path.forEachDirectoryEntry
 import kotlin.io.path.name
 
+suspend fun initData(){
+    checkCookie()
+    initTagid()
+    loadFonts()
+}
 
 suspend fun checkCookie(){
+    BiliBiliDynamic.cookie.parse(accountConfig.cookie)
+
     runCatching {
         BiliBiliDynamic.mid = biliClient.userInfo()?.mid!!
         BiliBiliDynamic.logger.info("BiliBili UID: ${BiliBiliDynamic.mid}")
@@ -40,6 +47,6 @@ suspend fun initTagid() {
 
 fun loadFonts(){
     BiliBiliDynamic.dataFolderPath.resolve("font").forEachDirectoryEntry {
-        loadTypeface(it.toString(), it.name)
+        loadTypeface(it.toString(), it.name.split(".").first())
     }
 }

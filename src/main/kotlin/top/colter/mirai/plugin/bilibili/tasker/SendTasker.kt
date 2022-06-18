@@ -2,12 +2,12 @@ package top.colter.mirai.plugin.bilibili.tasker
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.withLock
+import net.mamoe.mirai.console.permission.PermissionService.Companion.getPermittedPermissions
+import net.mamoe.mirai.console.permission.PermitteeId.Companion.permitteeId
 import net.mamoe.mirai.contact.Contact
+import net.mamoe.mirai.contact.Group
 import net.mamoe.mirai.message.code.MiraiCode
-import net.mamoe.mirai.message.data.ForwardMessage
-import net.mamoe.mirai.message.data.Message
-import net.mamoe.mirai.message.data.RawForwardMessage
-import net.mamoe.mirai.message.data.buildForwardMessage
+import net.mamoe.mirai.message.data.*
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
 import top.colter.mirai.plugin.bilibili.*
 import top.colter.mirai.plugin.bilibili.data.DynamicMessage
@@ -23,13 +23,15 @@ import kotlin.io.path.readBytes
 
 object SendTasker : BiliTasker() {
 
-    override val interval: Int = 0
+    override var interval: Int = 0
 
     private val templateConfig by BiliConfig::templateConfig
 
     private val dynamic by BiliData::dynamic
 
     private val filter by BiliData::filter
+
+    private val pushInterval = BiliConfig.pushConfig.pushInterval
 
     private val forwardRegex = """\{>>}(.*?)\{<<}""".toRegex()
 
@@ -105,10 +107,33 @@ object SendTasker : BiliTasker() {
 
             for (temp in templateMap) {
                 temp.value.forEach {
-                    templateMsgMap[temp.key]?.let { it1 -> it.sendMessage(it1) }
+                    templateMsgMap[temp.key]?.let { it1 ->
+                        if (it is Group){
+                            val gwp = when(biliMessage){
+                                is DynamicMessage -> if (biliMessage.type == DynamicType.DYNAMIC_TYPE_AV) BiliBiliDynamic.videoGwp else null
+                                is LiveMessage -> BiliBiliDynamic.liveGwp
+                            }
+                            val hasPerm = it.permitteeId.getPermittedPermissions().any{ it.id == gwp }
+                            if (hasPerm){
+                                val last = it1.last().plus("\n").plus(AtAll)
+                                it.sendMessage(it1.dropLast(1).plus(last))
+                            }else{
+                                it.sendMessage(it1)
+                            }
+                        }else{
+                            it.sendMessage(it1)
+                        }
+                    }
                 }
             }
 
+        }
+    }
+
+    private suspend fun Contact.sendMessage(messages: List<Message>) {
+        messages.forEach {
+            sendMessage(it)
+            delay(pushInterval)
         }
     }
 
@@ -173,19 +198,24 @@ object SendTasker : BiliTasker() {
             val subData = dynamic[uid] ?: return list
             list.addAll(subData.contacts)
             list.removeAll(subData.banList.keys)
-            list
+            list.filter {contact ->
+                if (filter.containsKey(contact) && filter[contact]!!.containsKey(uid)){
+                    val dynamicFilter = filter[contact]!![uid]!!
+                    val typeSelect = dynamicFilter.typeSelect
+                    if (typeSelect.list.isNotEmpty()){
+                        val b = typeSelect.list.contains(DynamicFilterType.LIVE)
+                        when (typeSelect.mode){
+                            FilterMode.WHITE_LIST -> if (!b) return@filter false
+                            FilterMode.BLACK_LIST -> if (b) return@filter false
+                        }
+                    }
+                }
+                true
+            }.toMutableSet()
         } catch (e: Throwable) {
             null
         }
     }
-
-    private suspend fun Contact.sendMessage(messages: List<Message>) {
-        messages.forEach {
-            sendMessage(it)
-            delay(100)
-        }
-    }
-
 
     suspend fun LiveMessage.buildMessage(template: String, contact: Contact): List<Message> {
         return buildMsgList(template){

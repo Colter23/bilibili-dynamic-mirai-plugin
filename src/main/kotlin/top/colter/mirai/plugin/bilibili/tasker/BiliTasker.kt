@@ -22,12 +22,15 @@ abstract class BiliTasker(
 
     private var job: Job? = null
 
-    abstract val interval: Int
+    abstract var interval: Int
+
+    protected open fun init(){}
 
     protected abstract suspend fun main()
 
     override fun start(): Boolean {
         job = launch(coroutineContext) {
+            init()
             if (interval == -1) {
                 main()
             } else {
