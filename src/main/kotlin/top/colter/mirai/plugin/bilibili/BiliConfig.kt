@@ -60,6 +60,7 @@ object BiliConfig : AutoSavePluginConfig("BiliConfig") {
           font: 绘图字体 字体名或字体文件名(不用加后缀) 目前仅支持单字体 字体放到插件数据路径下 `font` 文件夹中
           defaultColor: 默认绘图主题色 支持多个值自定义渐变 中间用分号`;`号分隔 单个值会自动生成渐变色
           cardOrnament: 卡片装饰 FanCard(粉丝卡片)  QrCode(动态链接二维码)  None(无)
+          colorGenerator: 渐变色生成器配置 
           badgeEnable: 卡片顶部的标签 左边右边是否开启
     """
     )
@@ -139,8 +140,17 @@ data class ImageConfig(
     var font: String = "HarmonyOS Sans SC Medium",
     var defaultColor: String = "#d3edfa",
     var cardOrnament: String = "FanCard",
+    val colorGenerator: ColorGenerator = ColorGenerator(),
     val badgeEnable: BadgeEnable = BadgeEnable(),
 ) {
+
+    @Serializable
+    data class ColorGenerator(
+        val hueStep: Int = 30,
+        val lockSB: Boolean = true,
+        val saturation: Float = 0.3f,
+        val brightness: Float = 1f,
+    )
 
     @Serializable
     data class BadgeEnable(

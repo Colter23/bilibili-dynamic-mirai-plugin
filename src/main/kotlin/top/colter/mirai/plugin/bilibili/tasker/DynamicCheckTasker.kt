@@ -20,7 +20,7 @@ object DynamicCheckTasker : BiliTasker() {
 
     private val dynamic by BiliData::dynamic
 
-    private val listenAllDynamicMode = true
+    private val listenAllDynamicMode = false
 
     private val client = BiliClient()
 

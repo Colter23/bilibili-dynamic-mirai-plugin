@@ -13,7 +13,7 @@ v3还有很多问题没解决(但还是摸了好长时间才摸出来 后面写�
 目前v3还是测试版, 可能会出现很多问题(请酌情使用)  
 [v2版本](https://github.com/Colter23/bilibili-dynamic-mirai-plugin/tree/v2)  
 
-如果你再使用v3版中有什么问题可统一前往 [V3问题/建议反馈]() 进行反馈  
+如果你再使用v3版中有什么问题可统一前往 [V3问题/建议反馈](https://github.com/Colter23/bilibili-dynamic-mirai-plugin/issues/66) 进行反馈  
 
 ## 数据迁移
 v2与v3的数据结构不一样  
@@ -23,6 +23,8 @@ v3数据文件名 `BiliData.yml`
 
 ## V3样式预览
 <img src="docs/img/demo1.png" width="400" alt="样式1">    
+<img src="docs/img/demo2.png" width="400" alt="样式1">    
+<img src="docs/img/demo3.png" width="400" alt="样式1">    
 
 ## 特性    
 **无论多少订阅均可在最低 10s 内检测所有动态**  
@@ -178,14 +180,23 @@ v3数据文件名 `BiliData.yml`
 | `pushInterval` | 单位毫秒                       | QQ中连续发送消息的间隔           |
 
 #### ImageConfig
-| 配置项            | 取值                                                        | 说明                                         |
-|----------------|-----------------------------------------------------------|--------------------------------------------|
-| `quality`      | `800w` / `1000w` / `1200w` / `1500w` (图片宽度)               | 图片质量(分辨率)                                  |
-| `theme`        | `v3` (新版绘图主题) / `v3RainbowOutline` (彩虹边框) / `v2` (旧版绘图主题) | 绘图主题 (目前两套其实都差不多，鸡肋功能)                     |
-| `font`         | 字体名 / 字体文件名(不用加后缀)                                        | 绘图字体 目前仅支持单字体 字体放到插件数据路径下 `font` 文件夹中      |
-| `defaultColor` | HEX颜色值 (#d3edfa;#fde8ed)                                  | 默认绘图主题色 支持多个值自定义渐变 中间用分号`;`号分隔 单个值会自动生成渐变色 |
-| `cardOrnament` | `FanCard` (粉丝卡片) / `QrCode` (动态链接二维码) / `None` (无)        | 卡片装饰                                       |
-| `badgeEnable`  | `true` / `false`                                          | 卡片顶部的标签                                    |
+| 配置项              | 取值                                                        | 说明                                         |
+|------------------|-----------------------------------------------------------|--------------------------------------------|
+| `quality`        | `800w` / `1000w` / `1200w` / `1500w` (图片宽度)               | 图片质量(分辨率)                                  |
+| `theme`          | `v3` (新版绘图主题) / `v3RainbowOutline` (彩虹边框) / `v2` (旧版绘图主题) | 绘图主题 (目前两套其实都差不多，鸡肋功能)                     |
+| `font`           | 字体名 / 字体文件名(不用加后缀)                                        | 绘图字体 目前仅支持单字体 字体放到插件数据路径下 `font` 文件夹中      |
+| `defaultColor`   | HEX颜色值 (#d3edfa;#fde8ed)                                  | 默认绘图主题色 支持多个值自定义渐变 中间用分号`;`号分隔 单个值会自动生成渐变色 |
+| `cardOrnament`   | `FanCard` (粉丝卡片) / `QrCode` (动态链接二维码) / `None` (无)        | 卡片装饰                                       |
+| `colorGenerator` | [ColorGenerator](#ColorGenerator)                         | 渐变色生成器配置 (用于图片背景) 仅当主题色为单个值时会自动生成          |
+| `badgeEnable`    | `true` / `false`                                          | 卡片顶部的标签                                    |
+
+##### ColorGenerator
+| 配置项          | 取值               | 说明                |
+|--------------|------------------|-------------------|
+| `hueStep`    | `0` ~ `120`      | 渐变色H(色相)步长 (默认三步) |
+| `lockSB`     | `true` / `false` | 锁定 S(饱和度) B(亮度)   |
+| `saturation` | `0.0` ~ `1.0`    | 锁定的饱和度            |
+| `brightness` | `0.0` ~ `1.0`    | 锁定的亮度             |
 
 #### TemplateConfig
 | 配置项                  | 取值                        | 说明       |
@@ -301,6 +312,7 @@ pushConfig:
 #   font: 绘图字体 字体名或字体文件名(不用加后缀) 目前仅支持单字体 字体放到插件数据路径下 `font` 文件夹中
 #   defaultColor: 默认绘图主题色 支持多个值自定义渐变 中间用分号`;`号分隔 单个值会自动生成渐变色
 #   cardOrnament: 卡片装饰 FanCard(粉丝卡片)  QrCode(动态链接二维码)  None(无)
+#   colorGenerator: 渐变色生成器配置 
 #   badgeEnable: 卡片顶部的标签 左边右边是否开启
 imageConfig:
   quality: 1000w
@@ -308,6 +320,11 @@ imageConfig:
   font: HarmonyOS_Sans_SC_Medium
   defaultColor: '#d3edfa'
   cardOrnament: FanCard
+  colorGenerator:
+    hueStep: 30
+    lockSB: true
+    saturation: 0.3
+    brightness: 1.0
   badgeEnable:
     left: true
     right: false

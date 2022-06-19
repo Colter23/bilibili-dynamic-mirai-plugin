@@ -2,6 +2,7 @@ package top.colter.mirai.plugin.bilibili.draw
 
 import org.jetbrains.skia.*
 import org.jetbrains.skia.svg.SVGDOM
+import top.colter.mirai.plugin.bilibili.BiliConfig
 import top.colter.mirai.plugin.bilibili.data.Theme
 import top.colter.mirai.plugin.bilibili.utils.loadResourceBytes
 import java.io.File
@@ -224,12 +225,15 @@ fun hsb2rgb(h: Float, s: Float, v: Float): IntArray {
 }
 
 fun generateLinearGradient(colors: List<Int>): IntArray {
+    val colorGenerator = BiliConfig.imageConfig.colorGenerator
     return if (colors.size == 1) {
         val hsb = rgb2hsb(Color.getR(colors[0]), Color.getG(colors[0]), Color.getB(colors[0]))
-        hsb[1] = 0.3f
-        hsb[2] = 1f
+        if (colorGenerator.lockSB){
+            hsb[1] = colorGenerator.saturation
+            hsb[2] = colorGenerator.brightness
+        }
         val linearLayerCount = 3
-        val linearLayerStep = 40
+        val linearLayerStep = colorGenerator.hueStep
         val llc = if (linearLayerCount % 2 == 0) linearLayerCount + 1 else linearLayerCount
         val ia = IntArray(llc)
         hsb[0] = (hsb[0] + linearLayerCount / 2 * linearLayerStep) % 360
@@ -244,8 +248,10 @@ fun generateLinearGradient(colors: List<Int>): IntArray {
         val ia = IntArray(llc)
         repeat(llc) {
             val hsb = rgb2hsb(Color.getR(colors[it]), Color.getG(colors[it]), Color.getB(colors[it]))
-            hsb[1] = 0.3f
-            hsb[2] = 1f
+            if (colorGenerator.lockSB){
+                hsb[1] = colorGenerator.saturation
+                hsb[2] = colorGenerator.brightness
+            }
             val c = hsb2rgb(hsb[0], hsb[1], hsb[2])
             ia[it] = Color.makeRGB(c[0], c[1], c[2])
         }
