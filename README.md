@@ -11,9 +11,9 @@
 v3使用skiko绘图, 更加美观。同时增加稳定性与可配置性  
 v3还有很多问题没解决(但还是摸了好长时间才摸出来 后面写的时候已经放弃思考了)  
 目前v3还是测试版, 可能会出现很多问题(请酌情使用)  
-[v2版本](https://github.com/Colter23/bilibili-dynamic-mirai-plugin/tree/v2)
+[v2版本](https://github.com/Colter23/bilibili-dynamic-mirai-plugin/tree/v2)  
 
-如果你再使用v3版中有什么问题可统一前往 [V3问题/建议反馈]() 进行反馈
+如果你再使用v3版中有什么问题可统一前往 [V3问题/建议反馈]() 进行反馈  
 
 ## 数据迁移
 v2与v3的数据结构不一样  
@@ -45,13 +45,12 @@ v3数据文件名 `BiliData.yml`
 开启自动关注后，bot 会生成一个新分组(分组名可以在配置中设置)，由 bot 新关注的人会被分到这个分组内，之前就关注过的不会移动    
 如果你想让 bot 关注就保存在默认分组中，请在配置中替换 `followGroup` 后面的值为两个双引号 `""`
 
-## 开始使用
 
-### 下载
+## 下载
 下载插件本体: [releases](https://github.com/Colter23/bilibili-dynamic-mirai-plugin/releases)    
 插件命令依赖 [chat-command](https://github.com/project-mirai/chat-command) 请确保有此插件
 
-### 指令
+## 指令
 
 | 指令                                              | 描述                                    |
 |-------------------------------------------------|---------------------------------------|
@@ -83,7 +82,7 @@ v3数据文件名 `BiliData.yml`
 /bili t d ForwardMsg            #为当前群/好友动态推送模板设置为ForwardMsg
 ```
 
-#### 动态过滤指令
+### 动态过滤指令
 两种过滤器:
 - 类型过滤器: 通过动态类型进行过滤 可选类型 `动态` `转发动态` `视频` `音乐` `专栏` `直播`
 - 内容正则过滤器: 对动态进行正则匹配过滤
@@ -131,14 +130,14 @@ v3数据文件名 `BiliData.yml`
 ```
 
 
-### 配置
+## 配置
 配置文件位于 `mirai 根目录/config/top.colter.bilibili-dynamic-mirai-plugin/`  
 基础配置文件 `BiliConfig.yml`  
 图片分辨率配置 `ImageQuality.yml`   
 图片主题配置 `ImageTheme.yml`  
 分辨率与主题配置已经内置了多套数据，如果你不会改就不要改了
 
-#### BiliConfig.yml
+### BiliConfig.yml
 | 配置项               | 取值                                      | 说明   |
 |-------------------|-----------------------------------------|------|
 | `enableConfig`    | [EnableConfig](#EnableConfig)           | 功能开关 |
@@ -179,14 +178,14 @@ v3数据文件名 `BiliData.yml`
 | `pushInterval` | 单位毫秒                       | QQ中连续发送消息的间隔           |
 
 #### ImageConfig
-| 配置项            | 取值                                                 | 说明                                         |
-|----------------|----------------------------------------------------|--------------------------------------------|
-| `quality`      | `800w` / `1000w` / `1200w` / `1500w` (图片宽度)        | 图片质量(分辨率)                                  |
-| `theme`        | `v3` (新版绘图主题) / `v2` (旧版绘图主题)                      | 绘图主题 (其实都差不多)                              |
-| `font`         | 字体名                                                | 绘图字体                                       |
-| `defaultColor` | HEX颜色值 (#d3edfa;#fde8ed)                           | 默认绘图主题色 支持多个值自定义渐变 中间用分号`;`号分隔 单个值会自动生成渐变色 |
-| `cardOrnament` | `FanCard` (粉丝卡片) / `QrCode` (动态链接二维码) / `None` (无) | 卡片装饰                                       |
-| `badgeEnable`  | `true` / `false`                                   | 卡片头                                        |
+| 配置项            | 取值                                                        | 说明                                         |
+|----------------|-----------------------------------------------------------|--------------------------------------------|
+| `quality`      | `800w` / `1000w` / `1200w` / `1500w` (图片宽度)               | 图片质量(分辨率)                                  |
+| `theme`        | `v3` (新版绘图主题) / `v3RainbowOutline` (彩虹边框) / `v2` (旧版绘图主题) | 绘图主题 (目前两套其实都差不多，鸡肋功能)                     |
+| `font`         | 字体名 / 字体文件名(不用加后缀)                                        | 绘图字体 目前仅支持单字体 字体放到插件数据路径下 `font` 文件夹中      |
+| `defaultColor` | HEX颜色值 (#d3edfa;#fde8ed)                                  | 默认绘图主题色 支持多个值自定义渐变 中间用分号`;`号分隔 单个值会自动生成渐变色 |
+| `cardOrnament` | `FanCard` (粉丝卡片) / `QrCode` (动态链接二维码) / `None` (无)        | 卡片装饰                                       |
+| `badgeEnable`  | `true` / `false`                                          | 卡片顶部的标签                                    |
 
 #### TemplateConfig
 | 配置项                  | 取值                        | 说明       |
@@ -199,7 +198,7 @@ v3数据文件名 `BiliData.yml`
 | `footer`             | [转发卡片/页脚配置项](#转发卡片/页脚配置项) | 绘制图片页脚模板 |
 
 
-#### 动态模板配置项:
+##### 动态模板配置项:
 `{draw}`: 绘制的动态图  
 `{name}`: 名称  
 `{uid}`: 用户ID
@@ -215,7 +214,7 @@ v3数据文件名 `BiliData.yml`
 
 栗子: {draw}{>>}作者：{name}\nUID：{uid}\n时间：{time}\n类型：{type}\n链接：{link}\r{content}\r{images}{<<}
 
-#### 直播模板配置项:
+##### 直播模板配置项:
 `{draw}`: 绘制的直播图  
 `{name}`: 名称  
 `{uid}`: 用户ID
@@ -230,7 +229,7 @@ v3数据文件名 `BiliData.yml`
 
 注: 直播模板不支持 ({>>}{<<}) 转发消息
 
-#### 转发卡片/页脚配置项
+##### 转发卡片/页脚配置项
 `{name}`: 名称  
 `{uid}`: 用户ID
 `{did}`: 动态ID
@@ -250,81 +249,90 @@ v3数据文件名 `BiliData.yml`
 | `proxy` | 代理服务器 | 代理列表 |
 
 #### TranslateConfig
-| 配置项     | 取值                      | 说明                                   |
-|---------|-------------------------|--------------------------------------|
-| `baidu` | `APP_ID` `SECURITY_KEY` | 百度翻译密钥配置 https://api.fanyi.baidu.com |
+| 配置项       | 取值                      | 说明                                   |
+|-----------|-------------------------|--------------------------------------|
+| `cutLine` | 例如: `\n\n〓〓〓 翻译 〓〓〓\n`  | 正文与翻译的分割线                            |
+| `baidu`   | `APP_ID` `SECURITY_KEY` | 百度翻译密钥配置 https://api.fanyi.baidu.com |
 
-下面是一个配置文件模板
-
+#### `BiliConfig.yml` 配置文件模板
 <details>
 <summary>点击展开</summary>
 
 ```yml
-# 具体的配置文件描述请前往下方链接查看
-help: 'https://github.com/Colter23/bilibili-dynamic-mirai-plugin'
-
-# Debug模式
-debugMode: false
 
 # 功能开关:
-enableConfig: 
-  enable: true
+#   drawEnable: 绘图开关
+#   translateEnable: 翻译开关
+#   proxyEnable: 代理开关
+#   cacheClearEnable: 缓存清理开关
+enableConfig:
+  drawEnable: true
   translateEnable: false
-  proxyEnable: true
+  proxyEnable: false
   cacheClearEnable: true
-
+  
 # 账号配置:
-# cookie: BiliBili的cookie, 可使用 /bili login 自动获取
-# autoFollow: 添加订阅时是否允许 bot 自动关注未关注的用户
-# followGroup: Bot 关注时保存的分组(最长16字符)
-accountConfig: 
+#   cookie: BiliBili的cookie, 可使用 /bili login 自动获取
+#   autoFollow: 添加订阅时是否允许 bot 自动关注未关注的用户
+#   followGroup: Bot 关注时保存的分组(最长16字符)
+accountConfig:
   cookie: SESSDATA=xxxx; bili_jct=xxxx;
   autoFollow: true
   followGroup: Bot关注
-
+  
 # 检测配置:
-# interval: 动态检测间隔(推荐 15-30) 单位秒
-# liveInterval: 直播检测间隔(与动态检测独立) 单位秒
-# lowSpeed: 低频检测时间段与倍率(例: 3-8x2 三点到八点检测间隔为正常间隔的2倍) 24小时制
-checkConfig: 
+#   interval: 动态检测间隔(推荐 15-30) 单位秒
+#   liveInterval: 直播检测间隔(与动态检测独立) 单位秒
+#   lowSpeed: 低频检测时间段与倍率(例: 3-8x2 三点到八点检测间隔为正常间隔的2倍) 24小时制
+checkConfig:
   interval: 15
   liveInterval: 20
   lowSpeed: '0-0x2'
+  
+# 推送配置:
+#   pushInterval: QQ中连续发送消息的间隔 单位毫秒
+pushConfig:
+  pushInterval: 100
 
 # 图片配置:
-# quality: 图片质量(分辨率), 内置 800w: 800px, 1000w: 1000px, 1200w: 1200px, 1500w: 1500px(图片宽度)
-# theme: 绘图主题, 内置 v3: 新版绘图主题, v2: 旧版绘图主题
-imageConfig: 
+# 当 ImageQuality.yml / ImageTheme.yml 中的 customOverload 开启后下面对应的配置将不再生效
+#   quality: 图片质量(分辨率), 内置 800w: 800px, 1000w: 1000px, 1200w: 1200px, 1500w: 1500px(图片宽度)
+#   theme: 绘图主题, 内置 v3: 新版绘图主题, v2: 旧版绘图主题
+#   font: 绘图字体 字体名或字体文件名(不用加后缀) 目前仅支持单字体 字体放到插件数据路径下 `font` 文件夹中
+#   defaultColor: 默认绘图主题色 支持多个值自定义渐变 中间用分号`;`号分隔 单个值会自动生成渐变色
+#   cardOrnament: 卡片装饰 FanCard(粉丝卡片)  QrCode(动态链接二维码)  None(无)
+#   badgeEnable: 卡片顶部的标签 左边右边是否开启
+imageConfig:
   quality: 1000w
   theme: v3
-  font: 'HarmonyOS Sans SC'
-  fontSizeMultiple: 1.0
+  font: HarmonyOS_Sans_SC_Medium
+  defaultColor: '#d3edfa'
   cardOrnament: FanCard
-  badgeEnable: 
+  badgeEnable:
     left: true
     right: false
 
 # 模板配置:
-# defaultDynamicPush: 默认使用的推送模板, 填写下方动态模板名
-# dynamicPush: 动态推送模板
-# livePush: 直播推送模板
-# forwardCard: 转发卡片模板
-# footer: 图片页脚
-templateConfig: 
+#   defaultDynamicPush: 默认使用的推送模板, 填写下方动态模板名
+#   dynamicPush: 动态推送模板
+#   livePush: 直播推送模板
+#   forwardCard: 转发卡片模板
+#   footer: 图片页脚
+templateConfig:
   defaultDynamicPush: OneMsg
   defaultLivePush: OneMsg
-  dynamicPush: 
+  dynamicPush:
     DrawOnly: '{draw}'
     TextOnly: "{name}@{type}\n{link}\n{content}\n{images}"
     OneMsg: "{draw}\n{name}@{type}\n{link}"
     TwoMsg: "{draw}\r{name}@{uid}@{type}\n{time}\n{link}"
     ForwardMsg: "{draw}{>>}作者：{name}\nUID：{uid}\n时间：{time}\n类型：{type}\n链接：{link}\r{content}\r{images}{<<}"
-  livePush: 
+  livePush:
     DrawOnly: '{draw}'
     TextOnly: "{name}@直播\n{link}\n标题: {title}"
     OneMsg: "{draw}\n{name}@直播\n{link}"
     TwoMsg: "{draw}\r{name}@{uid}@直播\n{title}\n{time}\n{link}"
-  forwardCard: 
+  forwardCard:
     title: '{name} {type} 详情'
     summary: 'ID: {did}'
     brief: '[{name} {type}]'
@@ -332,17 +340,17 @@ templateConfig:
   footer: '{type}ID: {id}'
 
 # 缓存配置:
-# expires: 图片过期时长 单位天
-# 为 0 时表示不清理此类图片
-# 当图片在指定时间内未被再次使用,就会被删除
-# 可选类型:
-# DRAW: 由插件绘制的图片
-# IMAGES: 动态图和封面等
-# EMOJI: B站的Emoji
-# USER: 用户头像,头像挂件,粉丝卡片套装等
-# OTHER: 其他图片
-cacheConfig: 
-  expires: 
+#   expires: 图片过期时长 单位天
+#   为 0 时表示不清理此类图片
+#   当图片在指定时间内未被再次使用,就会被删除
+#   可选类型:
+#     DRAW: 由插件绘制的图片
+#     IMAGES: 动态图和封面等
+#     EMOJI: B站的Emoji
+#     USER: 用户头像,头像挂件,粉丝卡片套装等
+#     OTHER: 其他图片
+cacheConfig:
+  expires:
     DRAW: 7
     IMAGES: 7
     EMOJI: 7
@@ -350,34 +358,370 @@ cacheConfig:
     OTHER: 7
 
 # 代理配置:
-# proxy: 代理列表
-proxyConfig: 
+#   proxy: 代理列表
+proxyConfig:
   proxy: []
 
 # 翻译配置:
-# 百度翻译 API 密钥
-# https://api.fanyi.baidu.com/
-translateConfig: 
-  baidu: 
+#   cutLine: 正文与翻译的分割线
+#   baidu: 百度翻译 API 密钥 https://api.fanyi.baidu.com
+translateConfig:
+  cutLine: "\n\n〓〓〓 翻译 〓〓〓\n"
+  baidu:
     APP_ID: ''
     SECURITY_KEY: ''
+
+```
+</details>
+
+### ImageQuality.yml
+
+| 配置项              | 取值                  | 说明                          |
+|------------------|---------------------|-----------------------------|
+| `customOverload` | `true` / `false`    | 是否启用自定义数据 启用后配置文件中的分辨率配置将失效 |
+| `customQuality`  | [Quality](#Quality) | 自定义数据 默认数据为1000px宽度下的数据     |
+
+#### Quality
+
+| 配置项                    | 取值       | 说明                 |
+|------------------------|----------|--------------------|
+| `imageWidth`           | 整数       | 绘制图片宽度             |
+| `cardMargin`           | 整数       | 内容卡片外边距            |
+| `cardPadding`          | 整数       | 内容卡片内边距            |
+| `cardArc`              | 小数       | 内容卡片圆角             |
+| ----------------       | -------- | -------------      |
+| `nameFontSize`         | 小数       | 名字字体大小             |
+| `titleFontSize`        | 小数       | 标题字体大小  (视频/专栏等标题) |
+| `subTitleFontSize`     | 小数       | 副标题字体大小 (名字下方的时间)  |
+| `descFontSize`         | 小数       | 简介字体大小   (视频/专栏简介) |
+| `contentFontSize`      | 小数       | 动态内容字体大小           |
+| ----------------       | -------- | -------------      |
+| `cardOutlineWidth`     | 小数       | 卡片边框大小             |
+| `drawOutlineWidth`     | 小数       | 动态中的图片边框大小         |
+| ----------------       | -------- | -------------      |
+| `faceSize`             | 小数       | 用户头像大小             |
+| `noPendantFaceInflate` | 小数       | 没有头像框时头像放大的尺寸      |
+| `pendantSize`          | 小数       | 头像框大小              |
+| `verifyIconSize`       | 小数       | 身份认证角标大小           |
+| `ornamentHeight`       | 小数       | 卡片装饰高度 (粉丝卡片/二维码)  |
+| ----------------       | -------- | -------------      |
+| `badgeHeight`          | 整数       | 卡片顶部标签高度           |
+| `badgePadding`         | 整数       | 卡片顶部标签内边距          |
+| `badgeArc`             | 小数       | 卡片顶部标签圆角           |
+| ----------------       | -------- | -------------      |
+| `lineSpace`            | 整数       | 动态文字行间距            |
+| `drawSpace`            | 整数       | 动态图片间距             |
+| `contentSpace`         | 整数       | 动态内容间距             |
+| ----------------       | -------- | -------------      |
+| `smallCardHeight`      | 整数       | 小号卡片高度 (小号视频/直播卡片) |
+| `additionalCardHeight` | 整数       | 附加卡片高度 (直播/视频预约)   |
+
+#### 内置分辨率数据参考 
+<details>
+<summary>点击展开</summary>
+
+```yml
+
+800w:
+  imageWidth: 800,
+  cardMargin: 20,
+  cardPadding: 20,
+  cardArc: 10.0,
+  
+  nameFontSize: 30.0,
+  titleFontSize: 26.0,
+  subTitleFontSize: 22.0,
+  descFontSize: 20.0,
+  contentFontSize: 26.0,
+  
+  cardOutlineWidth: 2.0,
+  drawOutlineWidth: 2.0,
+  
+  faceSize: 64.0,
+  noPendantFaceInflate: 5.0,
+  pendantSize: 112.0,
+  verifyIconSize: 20.0,
+  ornamentHeight: 90.0,
+  
+  badgeHeight: 36,
+  badgePadding: 5,
+  badgeArc: 5.0,
+  
+  lineSpace: 8,
+  drawSpace: 10,
+  contentSpace: 10,
+  
+  smallCardHeight: 160,
+  additionalCardHeight: 90
+  
+1000w:
+  imageWidth: 1000,
+  cardMargin: 30,
+  cardPadding: 30,
+  cardArc: 15.0,
+
+  nameFontSize: 36.0,
+  titleFontSize: 32.0,
+  subTitleFontSize: 28.0,
+  descFontSize: 26.0,
+  contentFontSize: 32.0,
+
+  cardOutlineWidth: 3.0,
+  drawOutlineWidth: 3.0,
+
+  faceSize: 80.0,
+  noPendantFaceInflate: 10.0,
+  pendantSize: 140.0,
+  verifyIconSize: 30.0,
+  ornamentHeight: 115.0,
+
+  badgeHeight: 45,
+  badgePadding: 8,
+  badgeArc: 8.0,
+
+  lineSpace: 11,
+  drawSpace: 15,
+  contentSpace: 12,
+
+  smallCardHeight: 200,
+  additionalCardHeight: 130
+
+1200w:
+  imageWidth: 1200,
+  cardMargin: 40,
+  cardPadding: 40,
+  cardArc: 20.0,
+
+  nameFontSize: 42.0,
+  titleFontSize: 38.0,
+  subTitleFontSize: 34.0,
+  descFontSize: 32.0,
+  contentFontSize: 38.0,
+
+  cardOutlineWidth: 4.0,
+  drawOutlineWidth: 4.0,
+
+  faceSize: 95.0,
+  noPendantFaceInflate: 13.0,
+  pendantSize: 170.0,
+  verifyIconSize: 40.0,
+  ornamentHeight: 140.0,
+
+  badgeHeight: 55,
+  badgePadding: 11,
+  badgeArc: 11.0,
+
+  lineSpace: 14,
+  drawSpace: 20,
+  contentSpace: 17,
+
+  smallCardHeight: 240,
+  additionalCardHeight: 160
+  
+1500w:
+  imageWidth: 1500,
+  cardMargin: 50,
+  cardPadding: 50,
+  cardArc: 30.0,
+
+  nameFontSize: 51.0,
+  titleFontSize: 46.0,
+  subTitleFontSize: 43.0,
+  descFontSize: 40.0,
+  contentFontSize: 47.0,
+
+  cardOutlineWidth: 6.0,
+  drawOutlineWidth: 6.0,
+
+  faceSize: 100.0,
+  noPendantFaceInflate: 18.0,
+  pendantSize: 190.0,
+  verifyIconSize: 50.0,
+  ornamentHeight: 150.0,
+
+  badgeHeight: 72,
+  badgePadding: 15,
+  badgeArc: 16.0,
+
+  lineSpace: 20,
+  drawSpace: 25,
+  contentSpace: 20,
+
+  smallCardHeight: 300,
+  additionalCardHeight: 205
 
 ```
 
 </details>
 
-### 手动获取 Cookie
+### ImageTheme.yml
+
+| 配置项              | 取值               | 说明                         |
+|------------------|------------------|----------------------------|
+| `customOverload` | `true` / `false` | 是否启用自定义数据 启用后配置文件中的主题配置将失效 |
+| `customTheme`    | [Theme](#Theme)  | 自定义数据 默认数据为v3主题数据          |
+
+
+#### Theme
+
+| 配置项                   | 取值                           | 说明                        |
+|-----------------------|------------------------------|---------------------------|
+| `cardBgColorHex`      | HEX颜色值 (#FB7299 / #A0FFFFFF) | 内容卡片背景色                   |
+| ----------------      | --------                     | -------------             |
+| `cardOutlineColorHex` | HEX颜色值 (#FB7299 / #A0FFFFFF) | 内容卡片边框颜色                  |
+| `faceOutlineColorHex` | HEX颜色值 (#FB7299 / #A0FFFFFF) | 头像边框颜色                    |
+| `drawOutlineColorHex` | HEX颜色值 (#FB7299 / #A0FFFFFF) | 动态图片边框颜色                  |
+| ----------------      | --------                     | -------------             |
+| `nameColorHex`        | HEX颜色值 (#FB7299 / #A0FFFFFF) | 名字字体颜色                    |
+| `titleColorHex`       | HEX颜色值 (#FB7299 / #A0FFFFFF) | 标题字体颜色  (视频/专栏等标题)        |
+| `subTitleColorHex`    | HEX颜色值 (#FB7299 / #A0FFFFFF) | 副标题字体颜色 (名字下方的时间)         |
+| `descColorHex`        | HEX颜色值 (#FB7299 / #A0FFFFFF) | 简介字体颜色   (视频/专栏简介)        |
+| `contentColorHex`     | HEX颜色值 (#FB7299 / #A0FFFFFF) | 动态内容字体颜色                  |
+| `linkColorHex`        | HEX颜色值 (#FB7299 / #A0FFFFFF) | 连接字体颜色                    |
+| ----------------      | --------                     | -------------             |
+| `cardShadow`          | [Shadow](#Shadow)            | 内容卡片阴影                    |
+| `smallCardShadow`     | [Shadow](#Shadow)            | 小号卡片阴影 (视频/专栏等标题)         |
+| ----------------      | --------                     | -------------             |
+| `mainLeftBadge`       | [BadgeColor](#BadgeColor)    | 左主标签配色 (最外层的卡片为主标签)       |
+| `mainRightBadge`      | [BadgeColor](#BadgeColor)    | 右主标签配色                    |
+| `subLeftBadge`        | [BadgeColor](#BadgeColor)    | 左副标签配色  (内层的视频/专栏等卡片为副标签) |
+| `subRightBadge`       | [BadgeColor](#BadgeColor)    | 右副标签配色                    |
+
+##### Shadow
+| 配置项              | 取值                           | 说明           |
+|------------------|------------------------------|--------------|
+| `shadowColorHex` | HEX颜色值 (#FB7299 / #A0FFFFFF) | 阴影颜色         |
+| `offsetX`        | 小数                           | 阴影横向偏移 (右为正) |
+| `offsetY`        | 小数                           | 阴影横向偏移 (下为正) |
+| `blur`           | 小数                           | 阴影模糊         |
+| `spread`         | 小数                           | 阴影扩展         |
+
+
+##### BadgeColor
+| 配置项            | 取值                           | 说明   |
+|----------------|------------------------------|------|
+| `fontColorHex` | HEX颜色值 (#FB7299 / #A0FFFFFF) | 字体颜色 |
+| `bgColorHex`   | HEX颜色值 (#FB7299 / #A0FFFFFF) | 背景颜色 |
+
+
+#### 内置主题数据参考:
 <details>
 <summary>点击展开</summary>
 
-浏览器打开 [BiliBili](https://www.bilibili.com/) 并登陆  
-注：登陆后最好不要退出登陆
+```yml
 
-按`F12`，打开`开发者工具`，找到`Network 网络`并点击  
-按`F5`刷新页面，按下图复制 Cookie   
-<img src="docs/img/cookie.png" width="500">
+v3: 
+  cardBgColorHex: '#A0FFFFFF'
+  cardOutlineColorHex: '#FFFFFF'
+  faceOutlineColorHex: '#A0FFFFFF'
+  drawOutlineColorHex: '#FFFFFF'
+  nameColorHex: '#FB7299'
+  titleColorHex: '#313131'
+  subTitleColorHex: '#9C9C9C'
+  descColorHex: '#666666'
+  contentColorHex: '#222222'
+  linkColorHex: '#178BCF'
+  cardShadow: 
+    shadowColorHex: '#46000000'
+    offsetX: 6.0
+    offsetY: 6.0
+    blur: 25.0
+    spread: 0.0
+  smallCardShadow: 
+    shadowColorHex: '#1E000000'
+    offsetX: 5.0
+    offsetY: 5.0
+    blur: 15.0
+    spread: 0.0
+  mainLeftBadge: 
+    fontColorHex: '#00CBFF'
+    bgColorHex: '#78FFFFFF'
+  mainRightBadge: 
+    fontColorHex: '#FFFFFF'
+    bgColorHex: '#48C7F0'
+  subLeftBadge: 
+    fontColorHex: '#FFFFFF'
+    bgColorHex: '#FB7299'
+  subRightBadge: 
+    fontColorHex: '#FFFFFF'
+    bgColorHex: '#48C7F0'
+
+v3RainbowOutline:
+  cardBgColorHex: '#A0FFFFFF'
+  cardOutlineColorHex: '#ff0000;#ff00ff;#0000ff;#00ffff;#00ff00;#ffff00;#ff0000'
+  faceOutlineColorHex: '#A0FFFFFF'
+  drawOutlineColorHex: '#FFFFFF'
+  nameColorHex: '#FB7299'
+  titleColorHex: '#313131'
+  subTitleColorHex: '#9C9C9C'
+  descColorHex: '#666666'
+  contentColorHex: '#222222'
+  linkColorHex: '#178BCF'
+  cardShadow:
+    shadowColorHex: '#46000000'
+    offsetX: 6.0
+    offsetY: 6.0
+    blur: 25.0
+    spread: 0.0
+  smallCardShadow:
+    shadowColorHex: '#1E000000'
+    offsetX: 5.0
+    offsetY: 5.0
+    blur: 15.0
+    spread: 0.0
+  mainLeftBadge:
+    fontColorHex: '#00CBFF'
+    bgColorHex: '#78FFFFFF'
+  mainRightBadge:
+    fontColorHex: '#FFFFFF'
+    bgColorHex: '#48C7F0'
+  subLeftBadge:
+    fontColorHex: '#FFFFFF'
+    bgColorHex: '#FB7299'
+  subRightBadge:
+    fontColorHex: '#FFFFFF'
+    bgColorHex: '#48C7F0'
+    
+v2:
+  cardBgColorHex: '#C8FFFFFF'
+  cardOutlineColorHex: '#FFFFFF'
+  faceOutlineColorHex: '#A0FFFFFF'
+  drawOutlineColorHex: '#FFFFFF'
+  nameColorHex: '#FB7299'
+  titleColorHex: '#313131'
+  subTitleColorHex: '#9C9C9C'
+  descColorHex: '#666666'
+  contentColorHex: '#222222'
+  linkColorHex: '#178BCF'
+  cardShadow:
+    shadowColorHex: '#00000000'
+    offsetX: 0.0
+    offsetY: 0.0
+    blur: 0.0
+    spread: 0.0
+  smallCardShadow:
+    shadowColorHex: '#0000000'
+    offsetX: 0.0
+    offsetY: 0.0
+    blur: 0.0
+    spread: 0.0
+  mainLeftBadge:
+    fontColorHex: '#00CBFF'
+    bgColorHex: '#78FFFFFF'
+  mainRightBadge:
+    fontColorHex: '#FFFFFF'
+    bgColorHex: '#48C7F0'
+  subLeftBadge:
+    fontColorHex: '#FFFFFF'
+    bgColorHex: '#FB7299'
+  subRightBadge:
+    fontColorHex: '#FFFFFF'
+    bgColorHex: '#48C7F0'
+
+```
 
 </details>
+
 
 ## 使用帮助
 ### 权限    
@@ -412,7 +756,19 @@ translateConfig:
 
 通过对群设置权限来控制是否开启直播@全体    
 `/perm add g123456789 top.colter.bilibili-dynamic-mirai-plugin:live.atall`
-  
+
+### 手动获取 Cookie
+<details>
+<summary>点击展开</summary>
+
+浏览器打开 [BiliBili](https://www.bilibili.com/) 并登陆  
+注：登陆后最好不要退出登陆
+
+按`F12`，打开`开发者工具`，找到`Network 网络`并点击  
+按`F5`刷新页面，按下图复制 Cookie   
+<img src="docs/img/cookie.png" width="500">
+
+</details>
 
 ## 图片缓存
 所有的图片都会缓存在 `data/top.colter.bilibili-dynamic-mirai-plugin/cache` 下

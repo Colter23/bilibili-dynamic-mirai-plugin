@@ -15,8 +15,6 @@ object BiliData : AutoSavePluginData("BiliData") {
     @ValueDescription("动态过滤")
     val filter: MutableMap<String, MutableMap<Long, DynamicFilter>> by value()
 
-    val filter1: MutableMap<String, MutableMap<Long, MutableMap<FilterMode, MutableList<DynamicFilter1>>>> by value()
-
     // key: template name
     @ValueDescription("动态推送模板")
     val dynamicPushTemplate: MutableMap<String, MutableSet<Long>> by value()
@@ -37,17 +35,10 @@ data class SubData(
 )
 
 @Serializable
-data class DynamicFilter1(
-    var type: FilterType,
-    val list: MutableList<String> = mutableListOf()
-)
-
-@Serializable
 enum class FilterType{
     TYPE,
     REGULAR
 }
-
 
 @Serializable
 data class DynamicFilter(

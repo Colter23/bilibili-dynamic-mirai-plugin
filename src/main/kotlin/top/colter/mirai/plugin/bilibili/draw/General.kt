@@ -3,6 +3,7 @@ package top.colter.mirai.plugin.bilibili.draw
 import org.jetbrains.skia.*
 import org.jetbrains.skia.svg.SVGDOM
 import top.colter.mirai.plugin.bilibili.data.Theme
+import top.colter.mirai.plugin.bilibili.utils.loadResourceBytes
 import java.io.File
 import java.util.*
 
@@ -52,6 +53,9 @@ fun Canvas.drawImageRRect(image: Image, srcRect: Rect, rRect: RRect, paint: Pain
 
 fun Canvas.drawImageRRect(image: Image, rRect: RRect, paint: Paint? = null) =
     drawImageRRect(image, Rect(0f, 0f, image.width.toFloat(), image.height.toFloat()), rRect, paint)
+
+fun loadSVG(path: String) =
+    SVGDOM(Data.makeFromBytes(loadResourceBytes(path)))
 
 /**
  * 渲染svg图片
