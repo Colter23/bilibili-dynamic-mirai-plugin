@@ -17,30 +17,39 @@ suspend fun ModuleDynamic.Major.makeGeneral(isForward: Boolean = false): Image? 
         "MAJOR_TYPE_ARCHIVE" -> {
             if (isForward) archive!!.drawSmall() else archive!!.drawGeneral()
         }
+
         "MAJOR_TYPE_DRAW" -> {
             draw!!.drawGeneral()
         }
+
         "MAJOR_TYPE_ARTICLE" -> {
             article!!.drawGeneral()
         }
+
         "MAJOR_TYPE_MUSIC" -> {
             music!!.drawGeneral()
         }
+
         "MAJOR_TYPE_LIVE" -> {
             live!!.drawGeneral()
         }
+
         "MAJOR_TYPE_LIVE_RCMD" -> {
             drawInfoText("暂时无法绘制类型为 [$type] 的动态类型")
         }
+
         "MAJOR_TYPE_PGC" -> {
             drawInfoText("暂时无法绘制类型为 [$type] 的动态类型")
         }
+
         "MAJOR_TYPE_COMMON" -> {
             common!!.drawGeneral()
         }
+
         "MAJOR_TYPE_NONE" -> {
             drawInfoText("源动态被删除")
         }
+
         else -> {
             drawInfoText("无法绘制类型为 [$type] 的动态类型, 请把动态链接反馈给开发者")
         }
@@ -49,14 +58,22 @@ suspend fun ModuleDynamic.Major.makeGeneral(isForward: Boolean = false): Image? 
 
 fun drawInfoText(text: String): Image {
     val lineCount = if (TextLine.make(text, font).width / cardContentRect.width > 1) 2 else 1
-    return Surface.makeRasterN32Premul(cardRect.width.toInt(), (quality.contentFontSize+quality.cardPadding).toInt()*lineCount).apply {
+    return Surface.makeRasterN32Premul(
+        cardRect.width.toInt(),
+        (quality.contentFontSize + quality.cardPadding).toInt() * lineCount
+    ).apply {
         canvas.apply {
             val paragraphStyle = ParagraphStyle().apply {
                 alignment = Alignment.LEFT
                 textStyle = contentTextStyle
             }
-            val contentParagraph = ParagraphBuilder(paragraphStyle, FontUtils.fonts).addText(text).build().layout(cardContentRect.width)
-            contentParagraph.paint(this, quality.cardPadding.toFloat(), quality.contentFontSize+quality.cardPadding/2)
+            val contentParagraph =
+                ParagraphBuilder(paragraphStyle, FontUtils.fonts).addText(text).build().layout(cardContentRect.width)
+            contentParagraph.paint(
+                this,
+                quality.cardPadding.toFloat(),
+                quality.contentFontSize + quality.cardPadding / 2
+            )
             //val textLine = TextLine.make(text, font)
             //drawTextLine(textLine, quality.cardPadding.toFloat(), quality.contentFontSize+quality.cardPadding/2, generalPaint)
         }
@@ -123,16 +140,19 @@ suspend fun ModuleDynamic.Major.Common.drawGeneral(): Image {
             x += imgRect.width + quality.cardPadding
 
             val titleParagraph =
-                ParagraphBuilder(paragraphStyle, FontUtils.fonts).addText(title).build().layout(cardContentRect.width - x)
+                ParagraphBuilder(paragraphStyle, FontUtils.fonts).addText(title).build()
+                    .layout(cardContentRect.width - x)
             paragraphStyle.apply {
                 textStyle = descTextStyle.apply {
                     fontSize = quality.subTitleFontSize * 0.8f
                 }
             }
             val desc1Paragraph =
-                ParagraphBuilder(paragraphStyle, FontUtils.fonts).addText(desc).build().layout(cardContentRect.width - x)
-            val desc2Paragraph = if (label.isNotBlank()) ParagraphBuilder(paragraphStyle, FontUtils.fonts).addText(label).build()
-                .layout(cardContentRect.width - x) else null
+                ParagraphBuilder(paragraphStyle, FontUtils.fonts).addText(desc).build()
+                    .layout(cardContentRect.width - x)
+            val desc2Paragraph =
+                if (label.isNotBlank()) ParagraphBuilder(paragraphStyle, FontUtils.fonts).addText(label).build()
+                    .layout(cardContentRect.width - x) else null
 
             val top = (commonCardRect.height - (titleParagraph.height * 3)) / 2
 
@@ -169,7 +189,8 @@ suspend fun ModuleDynamic.Major.Archive.drawGeneral(): Image {
     }
 
     val descParagraph =
-        ParagraphBuilder(paragraphStyle, FontUtils.fonts).addText(desc.replace("\n", " ")).build().layout(paragraphWidth)
+        ParagraphBuilder(paragraphStyle, FontUtils.fonts).addText(desc.replace("\n", " ")).build()
+            .layout(paragraphWidth)
 
     val videoCoverHeight = cardContentRect.width * 0.625f  // 封面比例 16:10
     val videoCardHeight = videoCoverHeight + titleParagraph.height + descParagraph.height + quality.cardPadding
@@ -206,7 +227,8 @@ suspend fun ModuleDynamic.Major.Archive.drawGeneral(): Image {
 
             // 徽章
             if (BiliConfig.imageConfig.badgeEnable.left) {
-                drawBadge(badge.text, font, theme.subLeftBadge.fontColor, theme.subLeftBadge.bgColor, videoCardRect,
+                drawBadge(
+                    badge.text, font, theme.subLeftBadge.fontColor, theme.subLeftBadge.bgColor, videoCardRect,
                     Position.TOP_LEFT
                 )
             } else {
@@ -220,7 +242,7 @@ suspend fun ModuleDynamic.Major.Archive.drawGeneral(): Image {
                     Paint().apply { color = Color.makeRGB(badge.bgColor) }
                 )
             }
-            if (BiliConfig.imageConfig.badgeEnable.right){
+            if (BiliConfig.imageConfig.badgeEnable.right) {
                 drawBadge(
                     "av$aid  |  $bvid",
                     font,
@@ -288,7 +310,14 @@ suspend fun ModuleDynamic.Major.Archive.drawSmall(): Image {
     return drawSmallCard(title, desc, cover, badge.text, "av$aid  |  $bvid", durationText)
 }
 
-suspend fun drawSmallCard(title: String, desc: String, cover: String, lbadge: String, rbadge: String, duration: String?): Image {
+suspend fun drawSmallCard(
+    title: String,
+    desc: String,
+    cover: String,
+    lbadge: String,
+    rbadge: String,
+    duration: String?
+): Image {
     val paragraphStyle = ParagraphStyle().apply {
         maxLinesCount = 2
         ellipsis = "..."
@@ -370,7 +399,7 @@ suspend fun drawSmallCard(title: String, desc: String, cover: String, lbadge: St
                 y + titleParagraph.height
             )
 
-            if (duration != null){
+            if (duration != null) {
                 val durationTextLine = TextLine.make(duration, font.makeWithSize(quality.subTitleFontSize))
                 drawLabelCard(
                     durationTextLine,
@@ -408,6 +437,7 @@ suspend fun ModuleDynamic.Major.Draw.drawGeneral(): Image {
                 drawHeight
             }
         }
+
         2, 4 -> {
             drawItemWidth = (cardContentRect.width - quality.drawSpace) / 2
             drawItemHeight = drawItemWidth
@@ -416,6 +446,7 @@ suspend fun ModuleDynamic.Major.Draw.drawGeneral(): Image {
             }
             drawItemNum = 2
         }
+
         3, in 5..9 -> {
             drawItemWidth = (cardContentRect.width - quality.drawSpace * 2) / 3
             drawItemHeight = drawItemWidth
@@ -539,7 +570,8 @@ suspend fun ModuleDynamic.Major.Article.drawGeneral(): Image {
 
             // 徽章
             if (BiliConfig.imageConfig.badgeEnable.left) {
-                drawBadge("专栏", font, theme.subLeftBadge.fontColor, theme.subLeftBadge.bgColor, articleCardRect,
+                drawBadge(
+                    "专栏", font, theme.subLeftBadge.fontColor, theme.subLeftBadge.bgColor, articleCardRect,
                     Position.TOP_LEFT
                 )
             } else {
@@ -552,7 +584,7 @@ suspend fun ModuleDynamic.Major.Article.drawGeneral(): Image {
                     Paint().apply { color = Color.makeRGB(251, 114, 153) }
                 )
             }
-            if (BiliConfig.imageConfig.badgeEnable.right){
+            if (BiliConfig.imageConfig.badgeEnable.right) {
                 drawBadge(
                     "cv$id",
                     font,
@@ -621,11 +653,12 @@ suspend fun ModuleDynamic.Major.Music.drawGeneral(): Image {
 
             // 徽章
             if (BiliConfig.imageConfig.badgeEnable.left) {
-                drawBadge("音乐", font, theme.subLeftBadge.fontColor, theme.subLeftBadge.bgColor, musicCardRect,
+                drawBadge(
+                    "音乐", font, theme.subLeftBadge.fontColor, theme.subLeftBadge.bgColor, musicCardRect,
                     Position.TOP_LEFT
                 )
             }
-            if (BiliConfig.imageConfig.badgeEnable.right){
+            if (BiliConfig.imageConfig.badgeEnable.right) {
                 drawBadge(
                     "au$id",
                     font,

@@ -135,7 +135,7 @@ v3数据文件名 `BiliData.yml`
 基础配置文件 `BiliConfig.yml`  
 图片分辨率配置 `ImageQuality.yml`   
 图片主题配置 `ImageTheme.yml`  
-分辨率与主题配置已经内置了多套数据，如果你不会改就不要改了
+分辨率与主题配置已经内置了多套数据
 
 ### BiliConfig.yml
 | 配置项               | 取值                                      | 说明   |

@@ -58,9 +58,8 @@ val DynamicItem.formatTime: String
 val Long.formatTime: String
     get() = formatTime()
 
-fun Long.formatTime(template: String = "yyyy年MM月dd日 HH:mm:ss"): String
-    = DateTimeFormatter.ofPattern(template)
-        .format(LocalDateTime.ofEpochSecond(this, 0, OffsetDateTime.now().offset))
+fun Long.formatTime(template: String = "yyyy年MM月dd日 HH:mm:ss"): String = DateTimeFormatter.ofPattern(template)
+    .format(LocalDateTime.ofEpochSecond(this, 0, OffsetDateTime.now().offset))
 
 val DynamicItem.link: String
     get() = when (type) {
@@ -68,6 +67,7 @@ val DynamicItem.link: String
         DYNAMIC_TYPE_DRAW,
         DYNAMIC_TYPE_FORWARD,
         DYNAMIC_TYPE_COMMON_SQUARE -> "https://t.bilibili.com/$idStr"
+
         DYNAMIC_TYPE_ARTICLE -> "https://www.bilibili.com/read/cv${modules.moduleDynamic.major?.article?.id}"
         DYNAMIC_TYPE_AV -> "https://www.bilibili.com/video/${modules.moduleDynamic.major?.archive?.bvid}"
         DYNAMIC_TYPE_MUSIC -> "https://www.bilibili.com/audio/au${modules.moduleDynamic.major?.music?.id}"

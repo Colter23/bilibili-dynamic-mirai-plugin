@@ -24,7 +24,7 @@ object LiveMessageTasker : BiliTasker() {
         messageChannel.send(liveInfo.buildMessage(liveDetail.contact))
     }
 
-    suspend fun LiveInfo.buildMessage(contact: String? = null): LiveMessage{
+    suspend fun LiveInfo.buildMessage(contact: String? = null): LiveMessage {
         return LiveMessage(
             roomId,
             uid,
@@ -40,9 +40,9 @@ object LiveMessageTasker : BiliTasker() {
         )
     }
 
-    suspend fun LiveInfo.makeLive(): String?{
+    suspend fun LiveInfo.makeLive(): String? {
         return if (BiliConfig.enableConfig.drawEnable) {
-            val color = BiliData.dynamic[uid]?.color?:BiliConfig.imageConfig.defaultColor
+            val color = BiliData.dynamic[uid]?.color ?: BiliConfig.imageConfig.defaultColor
             val colors = color.split(";", "；").map { Color.makeRGB(it.trim()) }
             makeDrawLive(colors)
         } else null

@@ -12,38 +12,47 @@ object BiliConfig : AutoSavePluginConfig("BiliConfig") {
     @ValueDescription("具体的配置文件描述请前往下方链接查看")
     val help: String by value("https://github.com/Colter23/bilibili-dynamic-mirai-plugin#BiliConfig.yml")
 
-    @ValueDescription("""
+    @ValueDescription(
+        """
         功能开关:
           drawEnable: 绘图开关
           translateEnable: 翻译开关
           proxyEnable: 代理开关
           cacheClearEnable: 缓存清理开关
-    """)
+    """
+    )
     val enableConfig: EnableConfig by value()
 
-    @ValueDescription("""
+    @ValueDescription(
+        """
         账号配置:
           cookie: BiliBili的cookie, 可使用 /bili login 自动获取
           autoFollow: 添加订阅时是否允许 bot 自动关注未关注的用户
           followGroup: Bot 关注时保存的分组(最长16字符)
-    """)
+    """
+    )
     val accountConfig: BiliAccountConfig by value()
 
-    @ValueDescription("""
+    @ValueDescription(
+        """
         检测配置:
           interval: 动态检测间隔(推荐 15-30) 单位秒
           liveInterval: 直播检测间隔(与动态检测独立) 单位秒
           lowSpeed: 低频检测时间段与倍率(例: 3-8x2 三点到八点检测间隔为正常间隔的2倍) 24小时制
-    """)
+    """
+    )
     val checkConfig: CheckConfig by value()
 
-    @ValueDescription("""
+    @ValueDescription(
+        """
         推送配置:
           pushInterval: QQ中连续发送消息的间隔 单位毫秒
-    """)
+    """
+    )
     val pushConfig: PushConfig by value()
 
-    @ValueDescription("""
+    @ValueDescription(
+        """
         图片配置:
         当 ImageQuality.yml / ImageTheme.yml 中的 customOverload 开启后下面对应的配置将不再生效 
           quality: 图片质量(分辨率), 内置 800w: 800px, 1000w: 1000px, 1200w: 1200px, 1500w: 1500px(图片宽度)
@@ -52,20 +61,24 @@ object BiliConfig : AutoSavePluginConfig("BiliConfig") {
           defaultColor: 默认绘图主题色 支持多个值自定义渐变 中间用分号`;`号分隔 单个值会自动生成渐变色
           cardOrnament: 卡片装饰 FanCard(粉丝卡片)  QrCode(动态链接二维码)  None(无)
           badgeEnable: 卡片顶部的标签 左边右边是否开启
-    """)
+    """
+    )
     val imageConfig: ImageConfig by value()
 
-    @ValueDescription("""
+    @ValueDescription(
+        """
         模板配置:
           defaultDynamicPush: 默认使用的推送模板, 填写下方动态模板名
           dynamicPush: 动态推送模板
           livePush: 直播推送模板
           forwardCard: 转发卡片模板
           footer: 图片页脚
-    """)
+    """
+    )
     val templateConfig: TemplateConfig by value()
 
-    @ValueDescription("""
+    @ValueDescription(
+        """
         缓存配置:
           expires: 图片过期时长 单位天
           为 0 时表示不清理此类图片
@@ -76,20 +89,25 @@ object BiliConfig : AutoSavePluginConfig("BiliConfig") {
             EMOJI: B站的Emoji
             USER: 用户头像,头像挂件,粉丝卡片套装等
             OTHER: 其他图片
-    """)
+    """
+    )
     val cacheConfig: CacheConfig by value()
 
-    @ValueDescription("""
+    @ValueDescription(
+        """
         代理配置:
           proxy: 代理列表
-    """)
+    """
+    )
     val proxyConfig: ProxyConfig by value()
 
-    @ValueDescription("""
+    @ValueDescription(
+        """
         翻译配置:
           cutLine: 正文与翻译的分割线
           baidu: 百度翻译 API 密钥 https://api.fanyi.baidu.com
-    """)
+    """
+    )
     val translateConfig: TranslateConfig by value()
 
 }
@@ -106,7 +124,7 @@ data class EnableConfig(
 data class TranslateConfig(
     val cutLine: String = "\n\n〓〓〓 翻译 〓〓〓\n",
     var baidu: BaiduTranslateConfig = BaiduTranslateConfig()
-){
+) {
     @Serializable
     data class BaiduTranslateConfig(
         var APP_ID: String = "",
@@ -122,12 +140,13 @@ data class ImageConfig(
     var defaultColor: String = "#d3edfa",
     var cardOrnament: String = "FanCard",
     val badgeEnable: BadgeEnable = BadgeEnable(),
-){
+) {
+
     @Serializable
     data class BadgeEnable(
         var left: Boolean = true,
         var right: Boolean = false,
-    ){
+    ) {
         val enable: Boolean get() = left || right
     }
 }

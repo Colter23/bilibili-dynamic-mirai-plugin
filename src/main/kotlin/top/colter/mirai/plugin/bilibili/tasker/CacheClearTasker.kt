@@ -6,20 +6,20 @@ import java.nio.file.Path
 import kotlin.io.path.forEachDirectoryEntry
 import kotlin.io.path.isDirectory
 
-object CacheClearTasker: BiliTasker() {
+object CacheClearTasker : BiliTasker() {
     override var interval: Int = 60 * 60 * 24
 
     private val expires by BiliConfig.cacheConfig::expires
 
     override suspend fun main() {
         for (e in expires) {
-            if (e.value > 0){
+            if (e.value > 0) {
                 e.key.cachePath().clearExpireFile(e.value)
             }
         }
     }
 
-    private fun Path.clearExpireFile(expire: Int){
+    private fun Path.clearExpireFile(expire: Int) {
         forEachDirectoryEntry {
             if (it.isDirectory()) {
                 it.clearExpireFile(expire)

@@ -24,7 +24,7 @@ abstract class BiliTasker(
 
     abstract var interval: Int
 
-    protected open fun init(){}
+    protected open fun init() {}
 
     protected abstract suspend fun main()
 

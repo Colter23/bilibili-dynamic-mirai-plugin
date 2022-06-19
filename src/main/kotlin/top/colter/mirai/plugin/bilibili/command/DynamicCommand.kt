@@ -26,9 +26,9 @@ object DynamicCommand : CompositeCommand(
     )
 
     @SubCommand("add", "添加")
-    suspend fun CommandSender.add(uid: Long, contact: Contact = Contact()) =
+    suspend fun CommandSender.add(uid: Long, contact: Contact = Contact()) = sendMessage(
         BiliDataTasker.addSubscribe(uid, contact.delegate)
-
+    )
 
 
     @SubCommand("del", "删除")
@@ -46,32 +46,33 @@ object DynamicCommand : CompositeCommand(
         BiliDataTasker.list(contact.delegate)
     )
 
-    @SubCommand("listAll", "la" , "全部订阅列表")
+    @SubCommand("listAll", "la", "全部订阅列表")
     suspend fun CommandSender.listAll() = sendMessage(
         BiliDataTasker.listAll()
     )
 
-    @SubCommand("listUser", "lu" , "用户列表")
+    @SubCommand("listUser", "lu", "用户列表")
     suspend fun CommandSender.listUser() = sendMessage(
         BiliDataTasker.listUser()
     )
 
     @SubCommand("filterMode", "fm", "过滤模式")
-    suspend fun CommandSender.filterMode(type: String, mode: String, uid: Long = 0L, contact: Contact = Contact())= sendMessage(
-        BiliDataTasker.addFilter(
-            if (type=="t") FilterType.TYPE else FilterType.REGULAR,
-            if (mode=="w") FilterMode.WHITE_LIST else FilterMode.BLACK_LIST,
-            type, uid, contact.delegate
+    suspend fun CommandSender.filterMode(type: String, mode: String, uid: Long = 0L, contact: Contact = Contact()) =
+        sendMessage(
+            BiliDataTasker.addFilter(
+                if (type == "t") FilterType.TYPE else FilterType.REGULAR,
+                if (mode == "w") FilterMode.WHITE_LIST else FilterMode.BLACK_LIST,
+                type, uid, contact.delegate
+            )
         )
-    )
 
     @SubCommand("filterType", "ft", "类型过滤")
-    suspend fun CommandSender.filterType(type: String, uid: Long = 0L, contact: Contact = Contact())= sendMessage(
+    suspend fun CommandSender.filterType(type: String, uid: Long = 0L, contact: Contact = Contact()) = sendMessage(
         BiliDataTasker.addFilter(FilterType.TYPE, null, type, uid, contact.delegate)
     )
 
     @SubCommand("filterReg", "fr", "正则过滤")
-    suspend fun CommandSender.filterReg(reg: String, uid: Long = 0L, contact: Contact = Contact())= sendMessage(
+    suspend fun CommandSender.filterReg(reg: String, uid: Long = 0L, contact: Contact = Contact()) = sendMessage(
         BiliDataTasker.addFilter(FilterType.REGULAR, null, reg, uid, contact.delegate)
     )
 
@@ -105,6 +106,7 @@ object DynamicCommand : CompositeCommand(
     suspend fun CommandSenderOnMessage<*>.config(uid: Long = 0L, contact: Contact = Contact()) {
         BiliDataTasker.config(fromEvent, uid)
     }
+
     @SubCommand("search", "s", "搜索")
     suspend fun CommandSenderOnMessage<*>.search(did: String) {
         val subject = Contact()

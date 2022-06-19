@@ -21,7 +21,7 @@ suspend fun LiveInfo.drawLive(): Image {
     val avatar = drawAvatar()
     val cover = getOrDownloadImage(cover, CacheType.IMAGES)
 
-    val height = (avatar.height+ quality.contentSpace + cover.height * cardRect.width / cover.width).toInt()
+    val height = (avatar.height + quality.contentSpace + cover.height * cardRect.width / cover.width).toInt()
 
     return Surface.makeRasterN32Premul(
         (cardRect.width + margin).toInt(),
@@ -52,8 +52,8 @@ suspend fun LiveInfo.drawLive(): Image {
                     svg.makeImage(quality.contentFontSize, quality.contentFontSize)
                 )
             }
-            if (BiliConfig.imageConfig.badgeEnable.right){
-                drawBadge(roomId.toString(), font, Color.WHITE, Color.makeRGB(72, 199, 240) , rrect, Position.TOP_RIGHT)
+            if (BiliConfig.imageConfig.badgeEnable.right) {
+                drawBadge(roomId.toString(), font, Color.WHITE, Color.makeRGB(72, 199, 240), rrect, Position.TOP_RIGHT)
             }
 
             var top = quality.cardMargin + quality.badgeHeight.toFloat()
@@ -61,7 +61,13 @@ suspend fun LiveInfo.drawLive(): Image {
             drawScaleWidthImage(avatar, cardRect.width, quality.cardMargin.toFloat(), top)
             top += avatar.height + quality.contentSpace
 
-            val dst = RRect.makeComplexXYWH(quality.cardMargin.toFloat(), top, cardRect.width, cardRect.width * cover.height / cover.width, cardBadgeArc)
+            val dst = RRect.makeComplexXYWH(
+                quality.cardMargin.toFloat(),
+                top,
+                cardRect.width,
+                cardRect.width * cover.height / cover.width,
+                cardBadgeArc
+            )
             drawImageRRect(cover, dst)
 
         }
@@ -77,10 +83,12 @@ suspend fun LiveInfo.drawAvatar(): Image {
             drawAvatar(face, null, null, quality.faceSize, quality.verifyIconSize)
 
             val textLineTitle = TextLine.make(title, font.makeWithSize(quality.nameFontSize))
-            val textLineTime = TextLine.make("$uname   ${liveTime.formatTime}", font.makeWithSize(quality.subTitleFontSize))
+            val textLineTime =
+                TextLine.make("$uname   ${liveTime.formatTime}", font.makeWithSize(quality.subTitleFontSize))
 
             var x = quality.faceSize + quality.cardPadding * 3f
-            var y = ((quality.faceSize - (quality.nameFontSize + textLineTime.height)) / 2) + quality.nameFontSize + (quality.cardPadding * 1.2f)
+            var y =
+                ((quality.faceSize - (quality.nameFontSize + textLineTime.height)) / 2) + quality.nameFontSize + (quality.cardPadding * 1.2f)
 
             drawTextLine(textLineTitle, x, y, Paint().apply { color = theme.titleColor })
 

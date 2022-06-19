@@ -16,13 +16,13 @@ import top.colter.mirai.plugin.bilibili.utils.FontUtils.matchFamily
 val logger by BiliBiliDynamic::logger
 
 val quality: Quality by lazy {
-    var quality : Quality?
-    if (BiliImageQuality.customOverload){
+    var quality: Quality?
+    if (BiliImageQuality.customOverload) {
         quality = BiliImageQuality.customQuality
         logger.warning("图片分辨率配置已重载")
-    }else {
+    } else {
         quality = BiliImageQuality.quality[imageConfig.quality]
-        if (quality == null){
+        if (quality == null) {
             logger.error("未找到 ${imageConfig.quality} 的图片分辨率配置")
             quality = BiliImageQuality.quality.firstNotNullOf { it.value }
         }
@@ -34,12 +34,12 @@ val quality: Quality by lazy {
 
 val theme: Theme by lazy {
     var theme: Theme?
-    if (BiliImageTheme.customOverload){
+    if (BiliImageTheme.customOverload) {
         theme = BiliImageTheme.customTheme
         logger.warning("图片主题配置已重载")
-    }else {
+    } else {
         theme = BiliImageTheme.theme[imageConfig.theme]
-        if (theme == null){
+        if (theme == null) {
             logger.error("未找到 ${imageConfig.theme} 的图片主题配置")
             theme = BiliImageTheme.theme.firstNotNullOf { it.value }
         }
@@ -59,7 +59,7 @@ val mainTypeface: Typeface by lazy {
     val mainFont = imageConfig.font.split(";").first().split(".").first()
     try {
         matchFamily(mainFont).matchStyle(FontStyle.NORMAL)!!
-    }catch (e: Exception){
+    } catch (e: Exception) {
         logger.error("加载主字体 $mainFont 失败")
         matchFamily("思源黑体").matchStyle(FontStyle.NORMAL)!!
     }
@@ -117,7 +117,7 @@ suspend fun DynamicItem.drawDynamic(themeColor: Int, isForward: Boolean = false)
 
     val orig = orig?.drawDynamic(themeColor, type == DYNAMIC_TYPE_FORWARD)
 
-    var imgList = modules.makeGeneral(formatTime, link,themeColor, isForward)
+    var imgList = modules.makeGeneral(formatTime, link, themeColor, isForward)
 
     // 调整附加卡片顺序
     if (orig != null) {
@@ -201,7 +201,12 @@ suspend fun DynamicItem.drawDynamic(themeColor: Int, isForward: Boolean = false)
     }.makeImageSnapshot()
 }
 
-suspend fun DynamicItem.Modules.makeGeneral(time: String, link: String, themeColor: Int, isForward: Boolean = false): List<Image> {
+suspend fun DynamicItem.Modules.makeGeneral(
+    time: String,
+    link: String,
+    themeColor: Int,
+    isForward: Boolean = false
+): List<Image> {
     return mutableListOf<Image>().apply {
         add(if (isForward) moduleAuthor.drawForward(time) else moduleAuthor.drawGeneral(time, link, themeColor))
         moduleDispute?.drawGeneral()?.let { add(it) }
@@ -224,8 +229,8 @@ fun Canvas.drawCard(rrect: RRect, bgColor: Int = theme.cardBgColor) {
         strokeWidth = quality.cardOutlineWidth
         isAntiAlias = true
         shader = Shader.makeSweepGradient(
-            rrect.left+rrect.width/2,
-            rrect.top+rrect.height/2,
+            rrect.left + rrect.width / 2,
+            rrect.top + rrect.height / 2,
             theme.cardOutlineColors
         )
     })
@@ -336,18 +341,22 @@ fun Canvas.drawBadge(
             cardRect.left, cardRect.top - quality.badgeHeight, badgeWidth,
             quality.badgeHeight.toFloat(), quality.badgeArc, quality.badgeArc, 0f, 0f
         )
+
         TOP_RIGHT -> RRect.makeXYWH(
             cardRect.right - badgeWidth, cardRect.top - quality.badgeHeight, badgeWidth,
             quality.badgeHeight.toFloat(), quality.badgeArc, quality.badgeArc, 0f, 0f
         )
+
         BOTTOM_LEFT -> RRect.makeXYWH(
             cardRect.left, cardRect.bottom + quality.badgeHeight, badgeWidth,
             quality.badgeHeight.toFloat(), 0f, 0f, quality.badgeArc, quality.badgeArc
         )
+
         BOTTOM_RIGHT -> RRect.makeXYWH(
             cardRect.right - badgeWidth, cardRect.bottom + quality.badgeHeight, badgeWidth,
             quality.badgeHeight.toFloat(), 0f, 0f, quality.badgeArc, quality.badgeArc
         )
+
         else -> throw Exception("Bad Badge Position!")
     }
 

@@ -24,7 +24,7 @@ object DynamicCheckTasker : BiliTasker() {
 
     private val client = BiliClient()
 
-    private var lsl = listOf(0,0)
+    private var lsl = listOf(0, 0)
     private var isLowSpeed = false
 
     private val banType = listOf(
@@ -37,7 +37,7 @@ object DynamicCheckTasker : BiliTasker() {
 
     override fun init() {
         runCatching {
-            lsl = BiliConfig.checkConfig.lowSpeed.split("-","x").map { it.toInt() }
+            lsl = BiliConfig.checkConfig.lowSpeed.split("-", "x").map { it.toInt() }
             isLowSpeed = lsl[0] != lsl[1]
         }.onFailure {
             logger.error("低频检测参数错误 ${it.message}")
@@ -71,15 +71,15 @@ object DynamicCheckTasker : BiliTasker() {
         interval = calcTime(interval)
     }
 
-    private fun calcTime(time: Int): Int{
-        return if (isLowSpeed){
+    private fun calcTime(time: Int): Int {
+        return if (isLowSpeed) {
             val hour = LocalTime.now().hour
-            return if (lsl[0] > lsl[1]){
+            return if (lsl[0] > lsl[1]) {
                 if (lsl[0] <= hour || hour <= lsl[1]) time * lsl[2] else time
-            }else{
+            } else {
                 if (lsl[0] <= hour && hour <= lsl[1]) time * lsl[2] else time
             }
-        }else time
+        } else time
     }
 
 }

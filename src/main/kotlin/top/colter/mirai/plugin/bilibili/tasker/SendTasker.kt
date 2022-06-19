@@ -41,7 +41,7 @@ object SendTasker : BiliTasker() {
         val biliMessage = BiliBiliDynamic.messageChannel.receive()
 
         val contactIdList = if (biliMessage.contact == null) {
-            when(biliMessage){
+            when (biliMessage) {
                 is DynamicMessage -> getDynamicContactList(biliMessage.uid, biliMessage.content, biliMessage.type)
                 is LiveMessage -> getLiveContactList(biliMessage.uid)
             }
@@ -50,7 +50,7 @@ object SendTasker : BiliTasker() {
         }
 
 
-        if (contactIdList != null) {
+        if (!contactIdList.isNullOrEmpty()) {
             val contactList = mutableListOf<Contact>()
             contactIdList.forEach {
                 val c = findContact(it)
@@ -61,17 +61,17 @@ object SendTasker : BiliTasker() {
 
             val templateMap: MutableMap<String, MutableSet<Contact>> = mutableMapOf()
 
-            val pushTemplates = when(biliMessage){
+            val pushTemplates = when (biliMessage) {
                 is DynamicMessage -> templateConfig.dynamicPush
                 is LiveMessage -> templateConfig.livePush
             }
 
-            val push = when(biliMessage){
+            val push = when (biliMessage) {
                 is DynamicMessage -> BiliData.dynamicPushTemplate
                 is LiveMessage -> BiliData.livePushTemplate
             }
 
-            val defaultTemplate = when(biliMessage){
+            val defaultTemplate = when (biliMessage) {
                 is DynamicMessage -> templateConfig.defaultDynamicPush
                 is LiveMessage -> templateConfig.defaultLivePush
             }
@@ -99,7 +99,7 @@ object SendTasker : BiliTasker() {
 
             val templateMsgMap: MutableMap<String, List<Message>> = mutableMapOf()
             templateMap.forEach {
-                templateMsgMap[it.key] = when(biliMessage) {
+                templateMsgMap[it.key] = when (biliMessage) {
                     is DynamicMessage -> biliMessage.buildMessage(pushTemplates[it.key]!!, contactList.first())
                     is LiveMessage -> biliMessage.buildMessage(pushTemplates[it.key]!!, contactList.first())
                 }
@@ -108,19 +108,19 @@ object SendTasker : BiliTasker() {
             for (temp in templateMap) {
                 temp.value.forEach {
                     templateMsgMap[temp.key]?.let { it1 ->
-                        if (it is Group){
-                            val gwp = when(biliMessage){
+                        if (it is Group) {
+                            val gwp = when (biliMessage) {
                                 is DynamicMessage -> if (biliMessage.type == DynamicType.DYNAMIC_TYPE_AV) BiliBiliDynamic.videoGwp else null
                                 is LiveMessage -> BiliBiliDynamic.liveGwp
                             }
-                            val hasPerm = it.permitteeId.getPermittedPermissions().any{ it.id == gwp }
-                            if (hasPerm){
+                            val hasPerm = it.permitteeId.getPermittedPermissions().any { it.id == gwp }
+                            if (hasPerm) {
                                 val last = it1.last().plus("\n").plus(AtAll)
                                 it.sendMessage(it1.dropLast(1).plus(last))
-                            }else{
+                            } else {
                                 it.sendMessage(it1)
                             }
-                        }else{
+                        } else {
                             it.sendMessage(it1)
                         }
                     }
@@ -138,14 +138,16 @@ object SendTasker : BiliTasker() {
     }
 
     fun DynamicType.toFilterType() =
-        when (this){
+        when (this) {
             DynamicType.DYNAMIC_TYPE_WORD,
             DynamicType.DYNAMIC_TYPE_DRAW,
             DynamicType.DYNAMIC_TYPE_COMMON_SQUARE,
             DynamicType.DYNAMIC_TYPE_NONE -> DynamicFilterType.DYNAMIC
+
             DynamicType.DYNAMIC_TYPE_FORWARD -> DynamicFilterType.FORWARD
             DynamicType.DYNAMIC_TYPE_AV,
             DynamicType.DYNAMIC_TYPE_PGC -> DynamicFilterType.VIDEO
+
             DynamicType.DYNAMIC_TYPE_MUSIC -> DynamicFilterType.MUSIC
             DynamicType.DYNAMIC_TYPE_ARTICLE -> DynamicFilterType.ARTICLE
             DynamicType.DYNAMIC_TYPE_LIVE,
@@ -153,42 +155,43 @@ object SendTasker : BiliTasker() {
         }
 
 
-    private suspend fun getDynamicContactList(uid: Long, content: String, type: DynamicType): MutableSet<String>? = mutex.withLock {
-        return try {
-            val all = dynamic[0] ?: return null
-            val list: MutableSet<String> = mutableSetOf()
-            list.addAll(all.contacts)
-            val subData = dynamic[uid] ?: return list
-            list.addAll(subData.contacts)
-            list.removeAll(subData.banList.keys)
-            list.filter {contact ->
-                if (filter.containsKey(contact) && filter[contact]!!.containsKey(uid)){
-                    val dynamicFilter = filter[contact]!![uid]!!
-                    val typeSelect = dynamicFilter.typeSelect
-                    if (typeSelect.list.isNotEmpty()){
-                        val b = typeSelect.list.contains(type.toFilterType())
-                        when (typeSelect.mode){
-                            FilterMode.WHITE_LIST -> if (!b) return@filter false
-                            FilterMode.BLACK_LIST -> if (b) return@filter false
-                        }
-                    }
-                    val regularSelect = dynamicFilter.regularSelect
-                    if (regularSelect.list.isNotEmpty()){
-                        regularSelect.list.forEach{
-                            val b = Regex(it).containsMatchIn(content)
-                            when (regularSelect.mode){
+    private suspend fun getDynamicContactList(uid: Long, content: String, type: DynamicType): MutableSet<String>? =
+        mutex.withLock {
+            return try {
+                val all = dynamic[0] ?: return null
+                val list: MutableSet<String> = mutableSetOf()
+                list.addAll(all.contacts)
+                val subData = dynamic[uid] ?: return list
+                list.addAll(subData.contacts)
+                list.removeAll(subData.banList.keys)
+                list.filter { contact ->
+                    if (filter.containsKey(contact) && filter[contact]!!.containsKey(uid)) {
+                        val dynamicFilter = filter[contact]!![uid]!!
+                        val typeSelect = dynamicFilter.typeSelect
+                        if (typeSelect.list.isNotEmpty()) {
+                            val b = typeSelect.list.contains(type.toFilterType())
+                            when (typeSelect.mode) {
                                 FilterMode.WHITE_LIST -> if (!b) return@filter false
                                 FilterMode.BLACK_LIST -> if (b) return@filter false
                             }
                         }
+                        val regularSelect = dynamicFilter.regularSelect
+                        if (regularSelect.list.isNotEmpty()) {
+                            regularSelect.list.forEach {
+                                val b = Regex(it).containsMatchIn(content)
+                                when (regularSelect.mode) {
+                                    FilterMode.WHITE_LIST -> if (!b) return@filter false
+                                    FilterMode.BLACK_LIST -> if (b) return@filter false
+                                }
+                            }
+                        }
                     }
-                }
-                true
-            }.toMutableSet()
-        } catch (e: Throwable) {
-            null
+                    true
+                }.toMutableSet()
+            } catch (e: Throwable) {
+                null
+            }
         }
-    }
 
     private suspend fun getLiveContactList(uid: Long): MutableSet<String>? = mutex.withLock {
         return try {
@@ -198,13 +201,13 @@ object SendTasker : BiliTasker() {
             val subData = dynamic[uid] ?: return list
             list.addAll(subData.contacts)
             list.removeAll(subData.banList.keys)
-            list.filter {contact ->
-                if (filter.containsKey(contact) && filter[contact]!!.containsKey(uid)){
+            list.filter { contact ->
+                if (filter.containsKey(contact) && filter[contact]!!.containsKey(uid)) {
                     val dynamicFilter = filter[contact]!![uid]!!
                     val typeSelect = dynamicFilter.typeSelect
-                    if (typeSelect.list.isNotEmpty()){
+                    if (typeSelect.list.isNotEmpty()) {
                         val b = typeSelect.list.contains(DynamicFilterType.LIVE)
-                        when (typeSelect.mode){
+                        when (typeSelect.mode) {
                             FilterMode.WHITE_LIST -> if (!b) return@filter false
                             FilterMode.BLACK_LIST -> if (b) return@filter false
                         }
@@ -218,7 +221,7 @@ object SendTasker : BiliTasker() {
     }
 
     suspend fun LiveMessage.buildMessage(template: String, contact: Contact): List<Message> {
-        return buildMsgList(template){
+        return buildMsgList(template) {
             buildLiveMsg(it, this, contact)
         }
     }
@@ -253,6 +256,7 @@ object SendTasker : BiliTasker() {
                         }
                     }
                 }
+
                 else -> {
                     "[不支持的类型: ${key.destructured.component1()}]"
                 }
@@ -277,7 +281,7 @@ object SendTasker : BiliTasker() {
 
         res.forEach { mr ->
             if (mr.range.first > index) {
-                msgList.addAll(buildMsgList(msgTemplate.substring(index, mr.range.first)){
+                msgList.addAll(buildMsgList(msgTemplate.substring(index, mr.range.first)) {
                     buildMsg(it, this, contact)
                 })
             }
@@ -303,7 +307,7 @@ object SendTasker : BiliTasker() {
                     }
                 }
             ) {
-                buildMsgList(mr.destructured.component1()){
+                buildMsgList(mr.destructured.component1()) {
                     buildMsg(it, this@buildMessage, contact)
                 }.forEach {
                     contact.bot named this@buildMessage.uname at this@buildMessage.timestamp says it
@@ -313,7 +317,7 @@ object SendTasker : BiliTasker() {
         }
 
         if (index < msgTemplate.length) {
-            msgList.addAll(buildMsgList(msgTemplate.substring(index, msgTemplate.length)){
+            msgList.addAll(buildMsgList(msgTemplate.substring(index, msgTemplate.length)) {
                 buildMsg(it, this, contact)
             })
         }
@@ -361,6 +365,7 @@ object SendTasker : BiliTasker() {
                         }
                     }
                 }
+
                 "draw" -> {
                     if (dm.drawPath == null) {
                         "[绘制动态失败]"
@@ -375,6 +380,7 @@ object SendTasker : BiliTasker() {
                         }
                     }
                 }
+
                 else -> {
                     "[不支持的类型: ${key.destructured.component1()}]"
                 }

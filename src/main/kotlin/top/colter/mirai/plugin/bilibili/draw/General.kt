@@ -133,6 +133,7 @@ fun Color.makeRGB(hex: String): Int {
                 Integer.valueOf(hex.substring(5), 16)
             )
         }
+
         9 -> {
             makeARGB(
                 Integer.valueOf(hex.substring(1, 3), 16),
@@ -141,6 +142,7 @@ fun Color.makeRGB(hex: String): Int {
                 Integer.valueOf(hex.substring(7), 16)
             )
         }
+
         else -> {
             WHITE
         }
@@ -185,31 +187,37 @@ fun hsb2rgb(h: Float, s: Float, v: Float): IntArray {
             g = t
             b = p
         }
+
         1 -> {
             r = q
             g = v
             b = p
         }
+
         2 -> {
             r = p
             g = v
             b = t
         }
+
         3 -> {
             r = p
             g = q
             b = v
         }
+
         4 -> {
             r = t
             g = p
             b = v
         }
+
         5 -> {
             r = v
             g = p
             b = q
         }
+
         else -> {}
     }
     return intArrayOf((r * 255.0).toInt(), (g * 255.0).toInt(), (b * 255.0).toInt())

@@ -35,7 +35,7 @@ data class SubData(
 )
 
 @Serializable
-enum class FilterType{
+enum class FilterType {
     TYPE,
     REGULAR
 }
@@ -59,13 +59,13 @@ data class RegularFilter(
 )
 
 @Serializable
-enum class FilterMode(val value: String){
+enum class FilterMode(val value: String) {
     WHITE_LIST("白名单"),
     BLACK_LIST("黑名单")
 }
 
 @Serializable
-enum class DynamicFilterType(val value: String){
+enum class DynamicFilterType(val value: String) {
     DYNAMIC("动态"),
     FORWARD("转发动态"),
     VIDEO("视频"),

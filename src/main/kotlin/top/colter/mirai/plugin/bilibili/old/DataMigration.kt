@@ -4,19 +4,19 @@ import top.colter.mirai.plugin.bilibili.*
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic.reload
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic.save
 
-fun migration(){
+fun migration() {
     migrationData()
     migrationConfig()
 }
 
-fun migrationData(){
-    if (BiliBiliDynamic.dataFolder.resolve("BiliSubscribeData.yml").exists()){
+fun migrationData() {
+    if (BiliBiliDynamic.dataFolder.resolve("BiliSubscribeData.yml").exists()) {
         BiliSubscribeData.reload()
-        if (!BiliSubscribeData.migrated){
+        if (!BiliSubscribeData.migrated) {
             BiliBiliDynamic.logger.info("开始转移旧版数据...")
 
             BiliSubscribeData.dynamic.forEach { (t, u) ->
-                if (!BiliData.dynamic.containsKey(t) || t == 0L){
+                if (!BiliData.dynamic.containsKey(t) || t == 0L) {
                     BiliData.dynamic[t] = SubData(
                         u.name,
                         if (u.color == "#d3edfa") null else u.color,
@@ -26,10 +26,10 @@ fun migrationData(){
                         u.banList
                     )
                     u.contacts.forEach { (c, l) ->
-                        if (l != "11"){
-                            when (l[0]){
+                        if (l != "11") {
+                            when (l[0]) {
                                 '0' -> {
-                                    if (!BiliData.filter.containsKey(c)){
+                                    if (!BiliData.filter.containsKey(c)) {
                                         BiliData.filter[c] = mutableMapOf()
                                     }
                                     BiliData.filter[c]!![t] = DynamicFilter(
@@ -45,8 +45,9 @@ fun migrationData(){
                                         )
                                     )
                                 }
+
                                 '2' -> {
-                                    if (!BiliData.filter.containsKey(c)){
+                                    if (!BiliData.filter.containsKey(c)) {
                                         BiliData.filter[c] = mutableMapOf()
                                     }
                                     BiliData.filter[c]!![t] = DynamicFilter(
@@ -57,27 +58,28 @@ fun migrationData(){
                                     )
                                 }
                             }
-                            when (l[1]){
+                            when (l[1]) {
                                 '0' -> {
-                                    if (!BiliData.filter.containsKey(c)){
+                                    if (!BiliData.filter.containsKey(c)) {
                                         BiliData.filter[c] = mutableMapOf()
                                     }
-                                    if (!BiliData.filter[c]!!.containsKey(t)){
+                                    if (!BiliData.filter[c]!!.containsKey(t)) {
                                         BiliData.filter[c]!![t] = DynamicFilter()
                                     }
                                     if (BiliData.filter[c]!![t]!!.typeSelect.mode == FilterMode.BLACK_LIST) {
                                         BiliData.filter[c]!![t]!!.typeSelect.list.add(DynamicFilterType.LIVE)
                                     }
                                 }
+
                                 '1' -> {
-                                    if (BiliData.filter[c]?.get(t)?.typeSelect?.mode == FilterMode.WHITE_LIST){
+                                    if (BiliData.filter[c]?.get(t)?.typeSelect?.mode == FilterMode.WHITE_LIST) {
                                         BiliData.filter[c]?.get(t)?.typeSelect?.list?.add(DynamicFilterType.LIVE)
                                     }
                                 }
                             }
                         }
                     }
-                }else {
+                } else {
                     BiliBiliDynamic.logger.warning("新旧数据冲突! $t")
                 }
             }
@@ -89,10 +91,10 @@ fun migrationData(){
     }
 }
 
-fun migrationConfig(){
-    if (BiliBiliDynamic.configFolder.resolve("BiliPluginConfig.yml").exists()){
+fun migrationConfig() {
+    if (BiliBiliDynamic.configFolder.resolve("BiliPluginConfig.yml").exists()) {
         BiliPluginConfig.reload()
-        if (!BiliPluginConfig.migrated){
+        if (!BiliPluginConfig.migrated) {
             BiliBiliDynamic.logger.info("开始转移旧版配置...")
 
             //BiliConfig.admin = BiliPluginConfig.admin
@@ -108,8 +110,8 @@ fun migrationConfig(){
             BiliConfig.templateConfig.footer = BiliPluginConfig.footerTemplate
             if (BiliPluginConfig.qrCode) BiliConfig.imageConfig.cardOrnament = "QrCode"
             BiliConfig.enableConfig.translateEnable = BiliPluginConfig.baiduTranslate["enable"].toBoolean()
-            BiliConfig.translateConfig.baidu.APP_ID = BiliPluginConfig.baiduTranslate["APP_ID"]?:""
-            BiliConfig.translateConfig.baidu.SECURITY_KEY = BiliPluginConfig.baiduTranslate["SECURITY_KEY"]?:""
+            BiliConfig.translateConfig.baidu.APP_ID = BiliPluginConfig.baiduTranslate["APP_ID"] ?: ""
+            BiliConfig.translateConfig.baidu.SECURITY_KEY = BiliPluginConfig.baiduTranslate["SECURITY_KEY"] ?: ""
 
             BiliConfig.save()
             BiliPluginConfig.migrated = true
@@ -119,6 +121,6 @@ fun migrationConfig(){
     }
 }
 
-fun migrationImage(){
+fun migrationImage() {
 
 }

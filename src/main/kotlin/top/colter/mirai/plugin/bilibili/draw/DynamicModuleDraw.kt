@@ -36,6 +36,7 @@ suspend fun ModuleDynamic.Additional.makeGeneral(): Image? {
                 common.desc2
             )
         }
+
         "ADDITIONAL_TYPE_RESERVE" -> {
             drawAdditionalCard(
                 when (reserve!!.stype) {
@@ -50,6 +51,7 @@ suspend fun ModuleDynamic.Additional.makeGeneral(): Image? {
                 reserve.desc3?.text
             )
         }
+
         "ADDITIONAL_TYPE_VOTE" -> {
             drawAdditionalCard(
                 "投票",
@@ -59,6 +61,7 @@ suspend fun ModuleDynamic.Additional.makeGeneral(): Image? {
                 null
             )
         }
+
         "ADDITIONAL_TYPE_UGC" -> {
             drawAdditionalCard(
                 ugc!!.headText,
@@ -68,6 +71,7 @@ suspend fun ModuleDynamic.Additional.makeGeneral(): Image? {
                 null
             )
         }
+
         "ADDITIONAL_TYPE_GOODS" -> {
             drawAdditionalCard(
                 goods!!.headText,
@@ -77,6 +81,7 @@ suspend fun ModuleDynamic.Additional.makeGeneral(): Image? {
                 null
             )
         }
+
         else -> {
             logger.warning("未知类型附加卡片 $type")
             null
@@ -146,14 +151,16 @@ suspend fun drawAdditionalCard(
             x += quality.cardPadding
 
             val titleParagraph =
-                ParagraphBuilder(paragraphStyle, FontUtils.fonts).addText(title).build().layout(cardContentRect.width - x)
+                ParagraphBuilder(paragraphStyle, FontUtils.fonts).addText(title).build()
+                    .layout(cardContentRect.width - x)
             paragraphStyle.apply {
                 textStyle = descTextStyle.apply {
                     fontSize = quality.subTitleFontSize * 0.8f
                 }
             }
             val desc1Paragraph =
-                ParagraphBuilder(paragraphStyle, FontUtils.fonts).addText(desc1).build().layout(cardContentRect.width - x)
+                ParagraphBuilder(paragraphStyle, FontUtils.fonts).addText(desc1).build()
+                    .layout(cardContentRect.width - x)
             val desc2Paragraph = desc2?.let {
                 ParagraphBuilder(paragraphStyle, FontUtils.fonts).addText(it).build().layout(cardContentRect.width - x)
             }
@@ -250,7 +257,9 @@ suspend fun ModuleDynamic.Desc.drawGeneral(): Image {
 
     val tra = trans(text)
 
-    val textParagraph = ParagraphBuilder(paragraphStyle, FontUtils.fonts).addText("$text${traCutLineNode.text}$tra").build().layout(cardContentRect.width)
+    val textParagraph =
+        ParagraphBuilder(paragraphStyle, FontUtils.fonts).addText("$text${traCutLineNode.text}$tra").build()
+            .layout(cardContentRect.width)
 
     val textCardHeight = (quality.contentFontSize + quality.lineSpace * 2) * (textParagraph.lineNumber + 2)
 
@@ -266,12 +275,13 @@ suspend fun ModuleDynamic.Desc.drawGeneral(): Image {
 
     return Surface.makeRasterN32Premul(cardRect.width.toInt(), textCardHeight.toInt()).apply {
         canvas.apply {
-            val nodes = if (tra != null){
+            val nodes = if (tra != null) {
                 richTextNodes.plus(traCutLineNode).plus(
                     ModuleDynamic.Desc.RichTextNode(
-                    "RICH_TEXT_NODE_TYPE_TEXT", tra, tra
-                ))
-            }else {
+                        "RICH_TEXT_NODE_TYPE_TEXT", tra, tra
+                    )
+                )
+            } else {
                 richTextNodes
             }
             nodes.forEach {
@@ -281,6 +291,7 @@ suspend fun ModuleDynamic.Desc.drawGeneral(): Image {
                         x = point.x
                         y = point.y
                     }
+
                     "RICH_TEXT_NODE_TYPE_EMOJI" -> {
                         val img = getOrDownloadImage(it.emoji!!.iconUrl, CacheType.EMOJI)
 
@@ -302,6 +313,7 @@ suspend fun ModuleDynamic.Desc.drawGeneral(): Image {
                         )
                         x += emojiSize
                     }
+
                     "RICH_TEXT_NODE_TYPE_WEB",
                     "RICH_TEXT_NODE_TYPE_VOTE",
                     "RICH_TEXT_NODE_TYPE_LOTTERY",
@@ -319,6 +331,7 @@ suspend fun ModuleDynamic.Desc.drawGeneral(): Image {
                         x = point.x
                         y = point.y
                     }
+
                     else -> {
                         val point = drawTextArea(it.text, textCardRect, x, y, font, linkPaint)
                         x = point.x
@@ -380,6 +393,7 @@ fun Canvas.drawTextArea(text: String, rect: Rect, textX: Float, textY: Float, fo
                     }
                 }
             }
+
             is RichText.Emoji -> {
                 val tl = TextLine.make(it.value, font)
                 if (x + tl.width > rect.right) {
@@ -489,6 +503,7 @@ suspend fun Canvas.drawOrnament(decorate: ModuleAuthor.Decorate?, link: String, 
                 }
             }
         }
+
         "QrCode" -> {
             val qrCodeImg = qrCode(link, quality.ornamentHeight.toInt(), qrCodeColor)
             val y = ((quality.faceSize - quality.ornamentHeight) / 2) + quality.cardPadding

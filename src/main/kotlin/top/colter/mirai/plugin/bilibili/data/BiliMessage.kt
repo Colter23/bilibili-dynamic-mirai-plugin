@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 
 @Serializable
-sealed interface BiliMessage{
+sealed interface BiliMessage {
     val uid: Long
     val uname: String
     val time: String
@@ -26,7 +26,7 @@ data class DynamicMessage(
     val links: List<Link>?,
     override val drawPath: String? = null,
     override val contact: String? = null
-):BiliMessage {
+) : BiliMessage {
     @Serializable
     data class Link(
         val tag: String,
@@ -47,4 +47,4 @@ data class LiveMessage(
     val link: String,
     override val drawPath: String? = null,
     override val contact: String? = null
-):BiliMessage
+) : BiliMessage
