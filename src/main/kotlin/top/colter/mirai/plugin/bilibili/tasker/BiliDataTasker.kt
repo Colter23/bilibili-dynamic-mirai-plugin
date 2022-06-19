@@ -41,7 +41,7 @@ object BiliDataTasker {
     private val filter by BiliData::filter
 
     suspend fun listenAll(subject: String) = mutex.withLock {
-        dynamic.forEach { (uid, sub) ->
+        dynamic.forEach { (_, sub) ->
             if (subject in sub.contacts) {
                 sub.contacts.remove(subject)
             }
@@ -261,7 +261,7 @@ object BiliDataTasker {
     suspend fun listUser() = mutex.withLock {
         buildString {
             val user = mutableSetOf<String>()
-            dynamic.forEach { (uid, sub) ->
+            dynamic.forEach { (_, sub) ->
                 user.addAll(sub.contacts)
             }
             val group = StringBuilder()
