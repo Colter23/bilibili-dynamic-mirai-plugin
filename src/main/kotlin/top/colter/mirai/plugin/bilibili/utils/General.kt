@@ -56,7 +56,7 @@ val DynamicItem.uid: Long
     get() = modules.moduleAuthor.mid
 
 val DynamicItem.time: Long
-    get() = (idStr.toLong() shr 32) + 1498838400L
+    get() = (did.toLong() shr 32) + 1498838400L
 
 val DynamicItem.formatTime: String
     get() = time.formatTime

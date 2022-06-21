@@ -47,7 +47,7 @@ suspend fun ModuleDynamic.Major.makeGeneral(isForward: Boolean = false): Image? 
         }
 
         "MAJOR_TYPE_NONE" -> {
-            drawInfoText("源动态被删除")
+            drawInfoText(none?.tips!!)
         }
 
         else -> {
@@ -60,7 +60,7 @@ fun drawInfoText(text: String): Image {
     val lineCount = if (TextLine.make(text, font).width / cardContentRect.width > 1) 2 else 1
     return Surface.makeRasterN32Premul(
         cardRect.width.toInt(),
-        (quality.contentFontSize + quality.cardPadding).toInt() * lineCount
+        quality.contentFontSize.toInt() * lineCount + quality.badgeHeight + quality.cardPadding
     ).apply {
         canvas.apply {
             val paragraphStyle = ParagraphStyle().apply {

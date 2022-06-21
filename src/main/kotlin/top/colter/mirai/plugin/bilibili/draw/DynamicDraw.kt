@@ -117,7 +117,7 @@ suspend fun DynamicItem.drawDynamic(themeColor: Int, isForward: Boolean = false)
 
     val orig = orig?.drawDynamic(themeColor, type == DYNAMIC_TYPE_FORWARD)
 
-    var imgList = modules.makeGeneral(formatTime, link, themeColor, isForward)
+    var imgList = modules.makeGeneral(formatTime, link, type, themeColor, isForward)
 
     // 调整附加卡片顺序
     if (orig != null) {
@@ -181,7 +181,7 @@ suspend fun DynamicItem.drawDynamic(themeColor: Int, isForward: Boolean = false)
                 )
             }
             if (imageConfig.badgeEnable.right) {
-                drawBadge(idStr, font, theme.mainRightBadge.fontColor, theme.mainRightBadge.bgColor, rrect, TOP_RIGHT)
+                drawBadge(did, font, theme.mainRightBadge.fontColor, theme.mainRightBadge.bgColor, rrect, TOP_RIGHT)
             }
 
             var top = quality.cardMargin + quality.badgeHeight.toFloat()
@@ -204,11 +204,13 @@ suspend fun DynamicItem.drawDynamic(themeColor: Int, isForward: Boolean = false)
 suspend fun DynamicItem.Modules.makeGeneral(
     time: String,
     link: String,
+    type: DynamicType,
     themeColor: Int,
     isForward: Boolean = false
 ): List<Image> {
     return mutableListOf<Image>().apply {
-        add(if (isForward) moduleAuthor.drawForward(time) else moduleAuthor.drawGeneral(time, link, themeColor))
+        if (type != DYNAMIC_TYPE_NONE)
+            add(if (isForward) moduleAuthor.drawForward(time) else moduleAuthor.drawGeneral(time, link, themeColor))
         moduleDispute?.drawGeneral()?.let { add(it) }
         addAll(moduleDynamic.makeGeneral(isForward))
     }
@@ -356,8 +358,6 @@ fun Canvas.drawBadge(
             cardRect.right - badgeWidth, cardRect.bottom + quality.badgeHeight, badgeWidth,
             quality.badgeHeight.toFloat(), 0f, 0f, quality.badgeArc, quality.badgeArc
         )
-
-        else -> throw Exception("Bad Badge Position!")
     }
 
     drawCard(rrect, bgColor)

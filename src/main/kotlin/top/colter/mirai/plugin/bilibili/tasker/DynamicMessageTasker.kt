@@ -30,7 +30,7 @@ object DynamicMessageTasker : BiliTasker() {
 
     suspend fun DynamicItem.buildMessage(contact: String? = null): DynamicMessage {
         return DynamicMessage(
-            idStr,
+            did,
             modules.moduleAuthor.mid,
             modules.moduleAuthor.name,
             type,
@@ -82,9 +82,8 @@ object DynamicMessageTasker : BiliTasker() {
             DYNAMIC_TYPE_LIVE_RCMD -> {
                 modules.moduleDynamic.major?.liveRcmd?.content!!
             }
-
-            else -> {
-                ""
+            DYNAMIC_TYPE_NONE -> {
+                modules.moduleDynamic.major?.none?.tips!!
             }
         }
 
@@ -142,14 +141,15 @@ object DynamicMessageTasker : BiliTasker() {
         return when (type) {
             DYNAMIC_TYPE_FORWARD -> {
                 listOf(
-                    DynamicMessage.Link("动态", DYNAMIC_LINK(idStr)),
-                    DynamicMessage.Link("原动态", DYNAMIC_LINK(orig!!.idStr)),
+                    DynamicMessage.Link("动态", DYNAMIC_LINK(did)),
+                    DynamicMessage.Link("原动态", DYNAMIC_LINK(orig!!.did)),
                 )
             }
-
+            DYNAMIC_TYPE_NONE,
+            DYNAMIC_TYPE_WORD,
             DYNAMIC_TYPE_DRAW -> {
                 listOf(
-                    DynamicMessage.Link("动态", DYNAMIC_LINK(idStr))
+                    DynamicMessage.Link("动态", DYNAMIC_LINK(did))
                 )
             }
 
@@ -159,7 +159,7 @@ object DynamicMessageTasker : BiliTasker() {
                         DYNAMIC_TYPE_ARTICLE.text,
                         ARTICLE_LINK(this.modules.moduleDynamic.major?.article?.id!!)
                     ),
-                    DynamicMessage.Link("动态", DYNAMIC_LINK(idStr))
+                    DynamicMessage.Link("动态", DYNAMIC_LINK(did))
                 )
             }
 
@@ -169,7 +169,7 @@ object DynamicMessageTasker : BiliTasker() {
                         DYNAMIC_TYPE_AV.text,
                         VIDEO_LINK(this.modules.moduleDynamic.major?.archive?.aid)
                     ),
-                    DynamicMessage.Link("动态", DYNAMIC_LINK(idStr))
+                    DynamicMessage.Link("动态", DYNAMIC_LINK(did))
                 )
             }
 
@@ -179,20 +179,20 @@ object DynamicMessageTasker : BiliTasker() {
                         DYNAMIC_TYPE_MUSIC.text,
                         MUSIC_LINK(this.modules.moduleDynamic.major?.music?.id!!)
                     ),
-                    DynamicMessage.Link("动态", DYNAMIC_LINK(idStr))
+                    DynamicMessage.Link("动态", DYNAMIC_LINK(did))
                 )
             }
 
             DYNAMIC_TYPE_PGC -> {
                 listOf(
                     DynamicMessage.Link(DYNAMIC_TYPE_PGC.text, PGC_LINK(this.modules.moduleDynamic.major?.pgc?.epid!!)),
-                    DynamicMessage.Link("动态", DYNAMIC_LINK(idStr))
+                    DynamicMessage.Link("动态", DYNAMIC_LINK(did))
                 )
             }
 
             DYNAMIC_TYPE_COMMON_SQUARE -> {
                 listOf(
-                    DynamicMessage.Link("动态", DYNAMIC_LINK(idStr))
+                    DynamicMessage.Link("动态", DYNAMIC_LINK(did))
                 )
             }
 
@@ -202,17 +202,14 @@ object DynamicMessageTasker : BiliTasker() {
                         DYNAMIC_TYPE_LIVE.text,
                         LIVE_LINK(this.modules.moduleDynamic.major?.live?.id!!)
                     ),
-                    DynamicMessage.Link("动态", DYNAMIC_LINK(idStr))
+                    DynamicMessage.Link("动态", DYNAMIC_LINK(did))
                 )
             }
 
             DYNAMIC_TYPE_LIVE_RCMD -> {
-                listOf(DynamicMessage.Link(DYNAMIC_TYPE_LIVE_RCMD.text, DYNAMIC_LINK(idStr)))
+                listOf(DynamicMessage.Link(DYNAMIC_TYPE_LIVE_RCMD.text, DYNAMIC_LINK(did)))
             }
 
-            else -> {
-                listOf()
-            }
         }
 
     }

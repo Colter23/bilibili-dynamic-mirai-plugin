@@ -78,7 +78,7 @@ data class DynamicItem(
     val type: DynamicType,
 
     @SerialName("id_str")
-    val idStr: String,
+    val idStr: String?,
     @SerialName("visible")
     val visible: Boolean = true,
     @SerialName("basic")
@@ -88,6 +88,9 @@ data class DynamicItem(
     @SerialName("orig")
     val orig: DynamicItem? = null,
 ) {
+
+    val did: String  get() = idStr?:"0"
+
     /**
      * 基本
      */

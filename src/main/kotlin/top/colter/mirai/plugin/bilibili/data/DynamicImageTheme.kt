@@ -23,7 +23,7 @@ object BiliImageTheme : ReadOnlyPluginConfig("ImageTheme") {
     val theme: Map<String, Theme>
         get() = mapOf(
             "v3" to Theme(
-                "#C8FFFFFF",
+                "#B4FFFFFF",
                 "#FFFFFF",
                 "#A0FFFFFF",
                 "#FFFFFF",
@@ -35,13 +35,13 @@ object BiliImageTheme : ReadOnlyPluginConfig("ImageTheme") {
                 "#178BCF",
                 Theme.Shadow("#46000000", 6f, 6f, 25f, 0f),
                 Theme.Shadow("#1E000000", 5f, 5f, 15f, 0f),
-                Theme.BadgeColor("#00CBFF", "#A0FFFFFF"),
+                Theme.BadgeColor("#00CBFF", "#B4FFFFFF"),
                 Theme.BadgeColor("#FFFFFF", "#48C7F0"),
                 Theme.BadgeColor("#FFFFFF", "#FB7299"),
                 Theme.BadgeColor("#FFFFFF", "#48C7F0"),
             ),
             "v3RainbowOutline" to Theme(
-                "#A0FFFFFF",
+                "#B4FFFFFF",
                 "#ff0000;#ff00ff;#0000ff;#00ffff;#00ff00;#ffff00;#ff0000",
                 "#A0FFFFFF",
                 "#FFFFFF",
@@ -53,7 +53,7 @@ object BiliImageTheme : ReadOnlyPluginConfig("ImageTheme") {
                 "#178BCF",
                 Theme.Shadow("#46000000", 6f, 6f, 25f, 0f),
                 Theme.Shadow("#1E000000", 5f, 5f, 15f, 0f),
-                Theme.BadgeColor("#00CBFF", "#78FFFFFF"),
+                Theme.BadgeColor("#00CBFF", "#B4FFFFFF"),
                 Theme.BadgeColor("#FFFFFF", "#48C7F0"),
                 Theme.BadgeColor("#FFFFFF", "#FB7299"),
                 Theme.BadgeColor("#FFFFFF", "#48C7F0"),
@@ -71,7 +71,7 @@ object BiliImageTheme : ReadOnlyPluginConfig("ImageTheme") {
                 "#178BCF",
                 Theme.Shadow("#00000000", 0f, 0f, 0f, 0f),
                 Theme.Shadow("#00000000", 0f, 0f, 0f, 0f),
-                Theme.BadgeColor("#00CBFF", "#78FFFFFF"),
+                Theme.BadgeColor("#00CBFF", "#C8FFFFFF"),
                 Theme.BadgeColor("#FFFFFF", "#48C7F0"),
                 Theme.BadgeColor("#FFFFFF", "#FB7299"),
                 Theme.BadgeColor("#FFFFFF", "#48C7F0"),
