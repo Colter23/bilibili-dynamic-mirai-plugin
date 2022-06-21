@@ -1,6 +1,7 @@
 package top.colter.mirai.plugin.bilibili.utils
 
 import io.ktor.client.request.*
+import io.ktor.client.utils.*
 import kotlinx.coroutines.channels.Channel
 import net.mamoe.mirai.Bot
 import net.mamoe.mirai.contact.Contact
@@ -44,6 +45,11 @@ fun <T> Collection<T>.plusOrNull(element: T?): List<T> {
     } else {
         this as List
     }
+}
+
+fun HttpRequestBuilder.bodyParameter(key: String, value: Any){
+    headers.append("Content-Type", "application/x-www-form-urlencoded")
+    body = if (body is EmptyContent) "$key=$value" else "$body&$key=$value"
 }
 
 val DynamicItem.uid: Long

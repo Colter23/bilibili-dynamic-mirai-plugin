@@ -38,8 +38,8 @@ abstract class BiliTasker(
                     try {
                         main()
                     } catch (e: Throwable) {
-                        BiliBiliDynamic.logger.error(e)
-                        delay(interval * 1000L)
+                        BiliBiliDynamic.logger.error(e.message)
+                        delay(100000L)
                     }
                     delay(interval * 1000L)
                 }

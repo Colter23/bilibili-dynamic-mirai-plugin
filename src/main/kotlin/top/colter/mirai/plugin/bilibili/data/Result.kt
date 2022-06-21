@@ -19,7 +19,7 @@ data class BiliResult(
 @Serializable
 data class LoginResult(
     @SerialName("code")
-    val code: Int,
+    val code: Int? = null,
     @SerialName("message")
     val message: String? = null,
     @SerialName("ts")
@@ -27,13 +27,13 @@ data class LoginResult(
     @SerialName("status")
     val status: Boolean? = null,
     @SerialName("data")
-    val data: LoginData? = null
-) {
-    @Serializable
-    data class LoginData(
-        @SerialName("url")
-        val url: String,
-        @SerialName("oauthKey")
-        val oauthKey: String? = null
-    )
-}
+    val data: JsonElement? = null
+)
+
+@Serializable
+data class LoginData(
+    @SerialName("url")
+    val url: String,
+    @SerialName("oauthKey")
+    val oauthKey: String? = null
+)

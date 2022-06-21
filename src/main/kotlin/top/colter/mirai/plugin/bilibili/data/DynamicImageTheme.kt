@@ -23,7 +23,7 @@ object BiliImageTheme : ReadOnlyPluginConfig("ImageTheme") {
     val theme: Map<String, Theme>
         get() = mapOf(
             "v3" to Theme(
-                "#A0FFFFFF",
+                "#C8FFFFFF",
                 "#FFFFFF",
                 "#A0FFFFFF",
                 "#FFFFFF",
@@ -35,7 +35,7 @@ object BiliImageTheme : ReadOnlyPluginConfig("ImageTheme") {
                 "#178BCF",
                 Theme.Shadow("#46000000", 6f, 6f, 25f, 0f),
                 Theme.Shadow("#1E000000", 5f, 5f, 15f, 0f),
-                Theme.BadgeColor("#00CBFF", "#78FFFFFF"),
+                Theme.BadgeColor("#00CBFF", "#A0FFFFFF"),
                 Theme.BadgeColor("#FFFFFF", "#48C7F0"),
                 Theme.BadgeColor("#FFFFFF", "#FB7299"),
                 Theme.BadgeColor("#FFFFFF", "#48C7F0"),

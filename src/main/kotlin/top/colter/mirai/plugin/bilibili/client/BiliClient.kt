@@ -4,6 +4,8 @@ import io.ktor.client.*
 import io.ktor.client.engine.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.features.*
+import io.ktor.client.features.json.*
+import io.ktor.client.features.json.serializer.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.utils.io.core.*
@@ -15,6 +17,8 @@ import top.colter.mirai.plugin.bilibili.BiliConfig.enableConfig
 import top.colter.mirai.plugin.bilibili.BiliConfig.proxyConfig
 import top.colter.mirai.plugin.bilibili.utils.decode
 import top.colter.mirai.plugin.bilibili.utils.isNotBlank
+import top.colter.mirai.plugin.bilibili.utils.json
+import java.io.IOException
 
 open class BiliClient : Closeable {
     override fun close() = clients.forEach { it.close() }
@@ -34,8 +38,6 @@ open class BiliClient : Closeable {
 
     val clients = MutableList(3) { client() }
 
-    //var cookie: BiliCookie? = BiliBiliDynamic.cookie
-
     protected fun client() = HttpClient(OkHttp) {
         defaultRequest {
             header(HttpHeaders.Origin, "https://t.bilibili.com")
@@ -46,7 +48,11 @@ open class BiliClient : Closeable {
             connectTimeoutMillis = 10_000L
             requestTimeoutMillis = 10_000L
         }
+        Json {
+            serializer = KotlinxSerializer(json)
+        }
         BrowserUserAgent()
+
     }
 
     suspend inline fun <reified T> get(url: String, crossinline block: HttpRequestBuilder.() -> Unit = {}): T =
@@ -78,7 +84,7 @@ open class BiliClient : Closeable {
                 }
                 return@supervisorScope block(client)
             } catch (throwable: Throwable) {
-                if (isActive) {
+                if (isActive && (throwable is IOException || throwable is HttpRequestTimeoutException)) {
                     clientIndex = (clientIndex + 1) % clients.size
                 } else {
                     throw throwable

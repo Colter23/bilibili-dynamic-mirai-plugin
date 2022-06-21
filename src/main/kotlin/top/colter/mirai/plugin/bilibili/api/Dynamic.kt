@@ -6,7 +6,6 @@ import top.colter.mirai.plugin.bilibili.data.BiliResult
 import top.colter.mirai.plugin.bilibili.data.DynamicDetail
 import top.colter.mirai.plugin.bilibili.data.DynamicItem
 import top.colter.mirai.plugin.bilibili.data.DynamicList
-import top.colter.mirai.plugin.bilibili.tasker.logger
 import top.colter.mirai.plugin.bilibili.utils.decode
 
 internal suspend inline fun <reified T> BiliClient.getData(
@@ -16,8 +15,7 @@ internal suspend inline fun <reified T> BiliClient.getData(
     val res = get<BiliResult>(url, block)
 
     return if (res.code != 0 || res.data == null) {
-        logger.error("URL:${url} ${res.message}")
-        null
+        throw Exception("URL: $url ${res.message}")
     } else {
         res.data.decode()
     }

@@ -148,7 +148,7 @@ data class ImageConfig(
     data class ColorGenerator(
         val hueStep: Int = 30,
         val lockSB: Boolean = true,
-        val saturation: Float = 0.3f,
+        val saturation: Float = 0.2f,
         val brightness: Float = 1f,
     )
 

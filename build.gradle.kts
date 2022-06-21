@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "top.colter"
-version = "3.0.0-M1"
+version = "3.0.0-M2"
 
 repositories {
     mavenLocal()
@@ -19,6 +19,19 @@ repositories {
 
 dependencies{
     implementation("com.google.zxing:javase:3.4.1")
+
+    implementation("io.ktor:ktor-client-serialization:1.6.7") {
+        exclude(group = "org.jetbrains.kotlin")
+        exclude(group = "org.jetbrains.kotlinx")
+        exclude(group = "org.slf4j")
+        exclude(group = "io.ktor", module = "ktor-client-core")
+    }
+    implementation("io.ktor:ktor-client-encoding:1.6.7") {
+        exclude(group = "org.jetbrains.kotlin")
+        exclude(group = "org.jetbrains.kotlinx")
+        exclude(group = "org.slf4j")
+        exclude(group = "io.ktor", module = "ktor-client-core")
+    }
 
     val skikoVersion = "0.7.20"
     //api("org.jetbrains.skiko:skiko-awt:0.7.20")

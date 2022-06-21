@@ -6,6 +6,8 @@ import top.colter.mirai.plugin.bilibili.api.followGroup
 import top.colter.mirai.plugin.bilibili.api.userInfo
 import top.colter.mirai.plugin.bilibili.utils.FontUtils.loadTypeface
 import top.colter.mirai.plugin.bilibili.utils.biliClient
+import kotlin.io.path.createDirectory
+import kotlin.io.path.exists
 import kotlin.io.path.forEachDirectoryEntry
 import kotlin.io.path.name
 
@@ -18,11 +20,11 @@ suspend fun initData() {
 suspend fun checkCookie() {
     BiliBiliDynamic.cookie.parse(accountConfig.cookie)
 
-    runCatching {
+    try {
         BiliBiliDynamic.mid = biliClient.userInfo()?.mid!!
         BiliBiliDynamic.logger.info("BiliBili UID: ${BiliBiliDynamic.mid}")
-    }.onFailure {
-        BiliBiliDynamic.logger.error(it.message)
+    }catch (e: Exception) {
+        BiliBiliDynamic.logger.error(e.message)
         BiliBiliDynamic.logger.error("如未登录，请bot管理员在聊天环境内发送 /bili login 进行登录")
         return
     }
@@ -36,18 +38,24 @@ suspend fun initTagid() {
                 return
             }
         }
-
-        val res = biliClient.createGroup(accountConfig.followGroup)
-        if (res == null) {
-            BiliBiliDynamic.logger.error("创建分组失败")
-            return
+        try {
+            val res = biliClient.createGroup(accountConfig.followGroup) ?: throw Exception()
+            BiliBiliDynamic.tagid = res.tagId
+        }catch (e: Exception){
+            BiliBiliDynamic.logger.error("创建分组失败 ${e.message}")
         }
-        BiliBiliDynamic.tagid = res.tagId
+
     }
 }
 
 fun loadFonts() {
-    BiliBiliDynamic.dataFolderPath.resolve("font").forEachDirectoryEntry {
-        loadTypeface(it.toString(), it.name.split(".").first())
+    BiliBiliDynamic.dataFolderPath.resolve("font").apply {
+        if (exists()){
+            forEachDirectoryEntry {
+                loadTypeface(it.toString(), it.name.split(".").first())
+            }
+        }else {
+            createDirectory()
+        }
     }
 }

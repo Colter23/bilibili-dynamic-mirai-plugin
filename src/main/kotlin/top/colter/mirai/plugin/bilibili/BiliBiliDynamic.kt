@@ -21,7 +21,7 @@ object BiliBiliDynamic : KotlinPlugin(
     JvmPluginDescription(
         id = "top.colter.bilibili-dynamic-mirai-plugin",
         name = "BiliBili Dynamic",
-        version = "3.0.0-M1",
+        version = "3.0.0-M2",
     ) {
         author("Colter")
     }

@@ -1,6 +1,7 @@
 package top.colter.mirai.plugin.bilibili.tasker
 
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeout
@@ -21,8 +22,10 @@ import top.colter.mirai.plugin.bilibili.api.*
 import top.colter.mirai.plugin.bilibili.client.BiliClient
 import top.colter.mirai.plugin.bilibili.data.DynamicMessage
 import top.colter.mirai.plugin.bilibili.data.DynamicType
+import top.colter.mirai.plugin.bilibili.data.LoginData
 import top.colter.mirai.plugin.bilibili.draw.loginQrCode
 import top.colter.mirai.plugin.bilibili.tasker.SendTasker.buildMessage
+import top.colter.mirai.plugin.bilibili.utils.decode
 import top.colter.mirai.plugin.bilibili.utils.delegate
 import top.colter.mirai.plugin.bilibili.utils.findContact
 import java.net.URI
@@ -284,7 +287,7 @@ object BiliDataTasker {
     }
 
     suspend fun login(contact: Contact) {
-        val loginData = client.getLoginUrl().data!!
+        val loginData = client.getLoginUrl().data!!.decode<LoginData>()
 
         val image = loginQrCode(loginData.url)
         image.encodeToData()!!.bytes.toExternalResource().toAutoCloseable().sendAsImageTo(contact)
@@ -292,11 +295,11 @@ object BiliDataTasker {
 
         runCatching {
             withTimeout(180000) {
-                while (true) {
+                while (isActive) {
+                    delay(3000)
                     val loginInfo = client.loginInfo(loginData.oauthKey!!)
-
                     if (loginInfo.status == true) {
-                        val url = loginInfo.data!!.url
+                        val url = loginInfo.data!!.decode<LoginData>().url
                         val querys = URI(url).query.split("&")
                         val cookie = buildString {
                             querys.forEach {
@@ -311,7 +314,6 @@ object BiliDataTasker {
                         contact.sendMessage("登录成功!")
                         break
                     }
-                    delay(3000)
                 }
             }
         }.onFailure {

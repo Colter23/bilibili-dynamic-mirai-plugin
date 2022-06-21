@@ -61,7 +61,7 @@ val mainTypeface: Typeface by lazy {
         matchFamily(mainFont).matchStyle(FontStyle.NORMAL)!!
     } catch (e: Exception) {
         logger.error("加载主字体 $mainFont 失败")
-        matchFamily("思源黑体").matchStyle(FontStyle.NORMAL)!!
+        matchFamily("Source Han Sans").matchStyle(FontStyle.NORMAL)!!
     }
 }
 
