@@ -77,12 +77,12 @@ object DynamicCommand : CompositeCommand(
     )
 
     @SubCommand("filterList", "fl", "过滤列表")
-    suspend fun CommandSender.filterList(uid: Long, contact: Contact = Contact()) = sendMessage(
+    suspend fun CommandSender.filterList(uid: Long = 0L, contact: Contact = Contact()) = sendMessage(
         BiliDataTasker.listFilter(uid, contact.delegate)
     )
 
     @SubCommand("filterDel", "fd", "过滤删除")
-    suspend fun CommandSender.filterDel(index: String, uid: Long, contact: Contact = Contact()) = sendMessage(
+    suspend fun CommandSender.filterDel(index: String, uid: Long = 0L, contact: Contact = Contact()) = sendMessage(
         BiliDataTasker.delFilter(index, uid, contact.delegate)
     )
 

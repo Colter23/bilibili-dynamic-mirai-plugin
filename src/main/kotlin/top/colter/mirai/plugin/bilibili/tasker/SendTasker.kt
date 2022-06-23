@@ -2,6 +2,7 @@ package top.colter.mirai.plugin.bilibili.tasker
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withTimeout
 import net.mamoe.mirai.console.permission.PermissionService.Companion.getPermittedPermissions
 import net.mamoe.mirai.console.permission.PermitteeId.Companion.permitteeId
 import net.mamoe.mirai.contact.Contact
@@ -37,7 +38,7 @@ object SendTasker : BiliTasker() {
 
     private val tagRegex = """\{([a-z]+)}""".toRegex()
 
-    override suspend fun main() {
+    override suspend fun main() = withTimeout(300000) {
         val biliMessage = BiliBiliDynamic.messageChannel.receive()
 
         val contactIdList = if (biliMessage.contact == null) {

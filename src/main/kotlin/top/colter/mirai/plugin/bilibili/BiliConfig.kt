@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 import net.mamoe.mirai.console.data.AutoSavePluginConfig
 import net.mamoe.mirai.console.data.ValueDescription
 import net.mamoe.mirai.console.data.value
+import org.jetbrains.skia.paragraph.Alignment
 import top.colter.mirai.plugin.bilibili.utils.CacheType
 
 
@@ -205,15 +206,23 @@ data class TemplateConfig(
         "TwoMsg" to "{draw}\r{name}@{uid}@直播\n{title}\n{time}\n{link}",
     ),
     val forwardCard: ForwardDisplay = ForwardDisplay(),
-    var footer: String = ""
+    var footer: FooterConfig = FooterConfig(),
+
+)
+
+@Serializable
+data class FooterConfig(
+    var dynamicFooter: String = "",
+    var liveFooter: String = "",
+    var footerAlign: Alignment = Alignment.LEFT
 )
 
 @Serializable
 data class ForwardDisplay(
     val title: String = "{name} {type} 详情",
+    val preview: String = "时间: {time}\n{content}",
     val summary: String = "ID: {did}",
-    val brief: String = "[{name} {type}]",
-    val preview: String = "时间: {time}\n{content}"
+    val brief: String = "[{name} {type}]"
 )
 
 @Serializable

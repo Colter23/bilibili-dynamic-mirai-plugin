@@ -8,7 +8,7 @@
 [![Release](https://img.shields.io/github/v/release/Colter23/bilibili-dynamic-mirai-plugin)](https://github.com/Colter23/bilibili-dynamic-mirai-plugin/releases)
 
 ## V3版本
-v3使用skiko绘图, 更加美观。同时增加稳定性与可配置性  
+v3完全重构, 使用skiko绘图, 更加美观。同时增加稳定性与可配置性  
 v3还有很多问题没解决(但还是摸了好长时间才摸出来 后面写的时候已经放弃思考了)  
 目前v3还是测试版, 可能会出现很多问题(请酌情使用)  
 [v2版本](https://github.com/Colter23/bilibili-dynamic-mirai-plugin/tree/v2)  
@@ -175,9 +175,9 @@ v3数据文件名 `BiliData.yml`
 | `lowSpeed`     | 例: 3-8x2 三点到八点检测间隔为正常间隔的2倍 | 低频检测时间段与倍率  |
 
 #### PushConfig
-| 配置项            | 取值                         | 说明               |
-|----------------|----------------------------|------------------|
-| `pushInterval` | 单位毫秒                       | QQ中连续发送消息的间隔           |
+| 配置项            | 取值   | 说明           |
+|----------------|------|--------------|
+| `pushInterval` | 单位毫秒 | QQ中连续发送消息的间隔 |
 
 #### ImageConfig
 | 配置项              | 取值                                                        | 说明                                         |
@@ -199,17 +199,31 @@ v3数据文件名 `BiliData.yml`
 | `brightness` | `0.0` ~ `1.0`    | 锁定的亮度             |
 
 #### TemplateConfig
-| 配置项                  | 取值                        | 说明       |
-|----------------------|---------------------------|----------|
-| `defaultDynamicPush` | 下方动态推送模板名                 | 默认动态推送模板 |
-| `defaultLivePush`    | 下方直播推送模板名                 | 默认直播推送模板 |
-| `dynamicPush`        | [动态模板配置项](#动态模板配置项)       | 动态推送模板   |
-| `livePush`           | [直播模板配置项](#直播模板配置项)       | 默认绘图主题色  |
-| `forwardCard`        | [转发卡片/页脚配置项](#转发卡片/页脚配置项) | QQ转发卡片外观 |
-| `footer`             | [转发卡片/页脚配置项](#转发卡片/页脚配置项) | 绘制图片页脚模板 |
+| 配置项                  | 取值                                | 说明       |
+|----------------------|-----------------------------------|----------|
+| `defaultDynamicPush` | 下方动态推送模板名                         | 默认动态推送模板 |
+| `defaultLivePush`    | 下方直播推送模板名                         | 默认直播推送模板 |
+| `dynamicPush`        | [动态模板配置项](#动态模板配置项)               | 动态推送模板   |
+| `livePush`           | [直播模板配置项](#直播模板配置项)               | 默认绘图主题色  |
+| `forwardCard`        | [ForwardDisplay](#ForwardDisplay) | QQ转发卡片外观 |
+| `footer`             | [FooterConfig](#FooterConfig)     | 绘制图片页脚模板 |
 
+##### ForwardDisplay
+| 配置项       | 取值                  | 说明                     |
+|-----------|---------------------|------------------------|
+| `title`   | [转发卡片配置项](#转发卡片配置项) | 转发卡片标题                 |
+| `preview` | [转发卡片配置项](#转发卡片配置项) | 中间的预览，最多4行行之间用 `\n` 隔开 |
+| `summary` | [转发卡片配置项](#转发卡片配置项) | 转发卡片最下边的总结             |
+| `brief`   | [转发卡片配置项](#转发卡片配置项) | 从群外看显示的文字              |
 
-##### 动态模板配置项:
+##### FooterConfig
+| 配置项             | 取值                          | 说明   |
+|-----------------|-----------------------------|------|
+| `dynamicFooter` | [页脚配置项](#页脚配置项)             | 动态页脚 |
+| `liveFooter`    | [页脚配置项](#页脚配置项)             | 直播页脚 |
+| `footerAlign`   | `LEFT` / `CENTER` / `RIGHT` | 对其方式 |
+
+##### 动态模板配置项
 `{draw}`: 绘制的动态图  
 `{name}`: 名称  
 `{uid}`: 用户ID
@@ -225,7 +239,7 @@ v3数据文件名 `BiliData.yml`
 
 栗子: {draw}{>>}作者：{name}\nUID：{uid}\n时间：{time}\n类型：{type}\n链接：{link}\r{content}\r{images}{<<}
 
-##### 直播模板配置项:
+##### 直播模板配置项
 `{draw}`: 绘制的直播图  
 `{name}`: 名称  
 `{uid}`: 用户ID
@@ -240,13 +254,21 @@ v3数据文件名 `BiliData.yml`
 
 注: 直播模板不支持 ({>>}{<<}) 转发消息
 
-##### 转发卡片/页脚配置项
+##### 转发卡片配置项
 `{name}`: 名称  
 `{uid}`: 用户ID
 `{did}`: 动态ID
 `{type}`: 动态类型  
 `{time}`: 时间
 `{content}`: 动态内容
+`{link}`: 链接
+
+##### 页脚配置项
+`{name}`: 名称  
+`{uid}`: 用户ID
+`{id}`: 动态/直播ID
+`{type}`: 类型  
+`{time}`: 时间
 
 
 #### CacheConfig
@@ -354,7 +376,10 @@ templateConfig:
     summary: 'ID: {did}'
     brief: '[{name} {type}]'
     preview: "时间: {time}\n{content}"
-  footer: '{type}ID: {id}'
+  footer:
+    dynamicFooter: @Colter
+    liveFooter: @Colter
+    footerAlign: CENTER
 
 # 缓存配置:
 #   expires: 图片过期时长 单位天
@@ -412,6 +437,7 @@ translateConfig:
 | `subTitleFontSize`     | 小数       | 副标题字体大小 (名字下方的时间)  |
 | `descFontSize`         | 小数       | 简介字体大小   (视频/专栏简介) |
 | `contentFontSize`      | 小数       | 动态内容字体大小           |
+| `footerFontSize`       | 小数       | 页脚字体大小             |
 | ----------------       | -------- | -------------      |
 | `cardOutlineWidth`     | 小数       | 卡片边框大小             |
 | `drawOutlineWidth`     | 小数       | 动态中的图片边框大小         |
@@ -440,131 +466,135 @@ translateConfig:
 ```yml
 
 800w:
-  imageWidth: 800,
-  cardMargin: 20,
-  cardPadding: 20,
-  cardArc: 10.0,
+  imageWidth: 800
+  cardMargin: 20
+  cardPadding: 20
+  cardArc: 10.0
   
-  nameFontSize: 30.0,
-  titleFontSize: 26.0,
-  subTitleFontSize: 22.0,
-  descFontSize: 20.0,
-  contentFontSize: 26.0,
+  nameFontSize: 30.0
+  titleFontSize: 26.0
+  subTitleFontSize: 22.0
+  descFontSize: 20.0
+  contentFontSize: 26.0
+  footerFontSize: 22.0
   
-  cardOutlineWidth: 2.0,
-  drawOutlineWidth: 2.0,
+  cardOutlineWidth: 2.0
+  drawOutlineWidth: 2.0
+
+  faceSize: 64.0
+  noPendantFaceInflate: 5.0
+  pendantSize: 112.0
+  verifyIconSize: 20.0
+  ornamentHeight: 90.0
   
-  faceSize: 64.0,
-  noPendantFaceInflate: 5.0,
-  pendantSize: 112.0,
-  verifyIconSize: 20.0,
-  ornamentHeight: 90.0,
+  badgeHeight: 36
+  badgePadding: 5
+  badgeArc: 5.0
   
-  badgeHeight: 36,
-  badgePadding: 5,
-  badgeArc: 5.0,
+  lineSpace: 8
+  drawSpace: 10
+  contentSpace: 10
   
-  lineSpace: 8,
-  drawSpace: 10,
-  contentSpace: 10,
-  
-  smallCardHeight: 160,
+  smallCardHeight: 160
   additionalCardHeight: 90
   
 1000w:
-  imageWidth: 1000,
-  cardMargin: 30,
-  cardPadding: 30,
-  cardArc: 15.0,
+  imageWidth: 1000
+  cardMargin: 30
+  cardPadding: 30
+  cardArc: 15.0
 
-  nameFontSize: 36.0,
-  titleFontSize: 32.0,
-  subTitleFontSize: 28.0,
-  descFontSize: 26.0,
-  contentFontSize: 32.0,
+  nameFontSize: 36.0
+  titleFontSize: 32.0
+  subTitleFontSize: 28.0
+  descFontSize: 26.0
+  contentFontSize: 32.0
+  footerFontSize: 28.0
 
-  cardOutlineWidth: 3.0,
-  drawOutlineWidth: 3.0,
+  cardOutlineWidth: 3.0
+  drawOutlineWidth: 3.0
 
-  faceSize: 80.0,
-  noPendantFaceInflate: 10.0,
-  pendantSize: 140.0,
-  verifyIconSize: 30.0,
-  ornamentHeight: 115.0,
+  faceSize: 80.0
+  noPendantFaceInflate: 10.0
+  pendantSize: 140.0
+  verifyIconSize: 30.0
+  ornamentHeight: 115.0
 
-  badgeHeight: 45,
-  badgePadding: 8,
-  badgeArc: 8.0,
+  badgeHeight: 45
+  badgePadding: 8
+  badgeArc: 8.0
 
-  lineSpace: 11,
-  drawSpace: 15,
-  contentSpace: 12,
+  lineSpace: 11
+  drawSpace: 15
+  contentSpace: 12
 
-  smallCardHeight: 200,
+  smallCardHeight: 200
   additionalCardHeight: 130
 
 1200w:
-  imageWidth: 1200,
-  cardMargin: 40,
-  cardPadding: 40,
-  cardArc: 20.0,
+  imageWidth: 1200
+  cardMargin: 40
+  cardPadding: 40
+  cardArc: 20.0
 
-  nameFontSize: 42.0,
-  titleFontSize: 38.0,
-  subTitleFontSize: 34.0,
-  descFontSize: 32.0,
-  contentFontSize: 38.0,
+  nameFontSize: 42.0
+  titleFontSize: 38.0
+  subTitleFontSize: 34.0
+  descFontSize: 32.0
+  contentFontSize: 38.0
+  footerFontSize: 34.0
 
-  cardOutlineWidth: 4.0,
-  drawOutlineWidth: 4.0,
+  cardOutlineWidth: 4.0
+  drawOutlineWidth: 4.0
+  
+  faceSize: 95.0
+  noPendantFaceInflate: 13.0
+  pendantSize: 170.0
+  verifyIconSize: 40.0
+  ornamentHeight: 140.0
 
-  faceSize: 95.0,
-  noPendantFaceInflate: 13.0,
-  pendantSize: 170.0,
-  verifyIconSize: 40.0,
-  ornamentHeight: 140.0,
+  badgeHeight: 55
+  badgePadding: 11
+  badgeArc: 11.0
 
-  badgeHeight: 55,
-  badgePadding: 11,
-  badgeArc: 11.0,
+  lineSpace: 14
+  drawSpace: 20
+  contentSpace: 17
 
-  lineSpace: 14,
-  drawSpace: 20,
-  contentSpace: 17,
-
-  smallCardHeight: 240,
+  smallCardHeight: 240
   additionalCardHeight: 160
   
 1500w:
-  imageWidth: 1500,
-  cardMargin: 50,
-  cardPadding: 50,
-  cardArc: 30.0,
+  imageWidth: 1500
+  cardMargin: 50
+  cardPadding: 50
+  cardArc: 30.0
 
-  nameFontSize: 51.0,
-  titleFontSize: 46.0,
-  subTitleFontSize: 43.0,
-  descFontSize: 40.0,
-  contentFontSize: 47.0,
+  nameFontSize: 51.0
+  titleFontSize: 46.0
+  subTitleFontSize: 43.0
+  descFontSize: 40.0
+  contentFontSize: 47.0
+  footerFontSize: 43.0
 
-  cardOutlineWidth: 6.0,
-  drawOutlineWidth: 6.0,
+  cardOutlineWidth: 6.0
+  drawOutlineWidth: 6.0
 
-  faceSize: 100.0,
-  noPendantFaceInflate: 18.0,
-  pendantSize: 190.0,
-  verifyIconSize: 50.0,
-  ornamentHeight: 150.0,
+  faceSize: 100.0
+  noPendantFaceInflate: 18.0
+  pendantSize: 190.0
+  verifyIconSize: 50.0
+  ornamentHeight: 150.0
 
-  badgeHeight: 72,
-  badgePadding: 15,
-  badgeArc: 16.0,
+  badgeHeight: 72
+  badgePadding: 15
+  badgeArc: 16.0
 
-  lineSpace: 20,
-  drawSpace: 25,
-  contentSpace: 20,
+  lineSpace: 20
+  drawSpace: 25
+  contentSpace: 20
 
-  smallCardHeight: 300,
+  smallCardHeight: 300
   additionalCardHeight: 205
 
 ```
@@ -595,6 +625,7 @@ translateConfig:
 | `descColorHex`        | HEX颜色值 (#FB7299 / #A0FFFFFF) | 简介字体颜色   (视频/专栏简介)        |
 | `contentColorHex`     | HEX颜色值 (#FB7299 / #A0FFFFFF) | 动态内容字体颜色                  |
 | `linkColorHex`        | HEX颜色值 (#FB7299 / #A0FFFFFF) | 连接字体颜色                    |
+| `footerColorHex`      | HEX颜色值 (#FB7299 / #A0FFFFFF) | 页脚字体颜色                    |
 | ----------------      | --------                     | -------------             |
 | `cardShadow`          | [Shadow](#Shadow)            | 内容卡片阴影                    |
 | `smallCardShadow`     | [Shadow](#Shadow)            | 小号卡片阴影 (视频/专栏等标题)         |
@@ -638,6 +669,7 @@ v3:
   descColorHex: '#666666'
   contentColorHex: '#222222'
   linkColorHex: '#178BCF'
+  footerColorHex: '#9C9C9C'
   cardShadow: 
     shadowColorHex: '#46000000'
     offsetX: 6.0
@@ -674,6 +706,7 @@ v3RainbowOutline:
   descColorHex: '#666666'
   contentColorHex: '#222222'
   linkColorHex: '#178BCF'
+  footerColorHex: '#9C9C9C'
   cardShadow:
     shadowColorHex: '#46000000'
     offsetX: 6.0
@@ -710,6 +743,7 @@ v2:
   descColorHex: '#666666'
   contentColorHex: '#222222'
   linkColorHex: '#178BCF'
+  footerColorHex: '#9C9C9C'
   cardShadow:
     shadowColorHex: '#00000000'
     offsetX: 0.0

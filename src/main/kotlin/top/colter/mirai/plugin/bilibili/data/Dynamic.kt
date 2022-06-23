@@ -818,7 +818,7 @@ data class ModuleDynamic(
          * @param title 标题
          * @param cover 封面
          * @param desc 描述
-         * @param disablePreview
+         * //@param disablePreview
          * @param durationText 视频长度
          * @param jumpUrl 跳转链接
          * @param stat 视频统计
@@ -838,8 +838,8 @@ data class ModuleDynamic(
             val cover: String,
             @SerialName("desc")
             val desc: String,
-            @SerialName("disable_preview")
-            val disablePreview: Boolean,
+            //@SerialName("disable_preview")
+            //val disablePreview: Boolean,
             @SerialName("duration_text")
             val durationText: String,
             @SerialName("jump_url")

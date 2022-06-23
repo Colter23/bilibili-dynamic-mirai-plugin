@@ -1,5 +1,6 @@
 package top.colter.mirai.plugin.bilibili.tasker
 
+import kotlinx.coroutines.withTimeout
 import org.jetbrains.skia.Color
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
 import top.colter.mirai.plugin.bilibili.BiliConfig
@@ -21,7 +22,7 @@ object DynamicMessageTasker : BiliTasker() {
 
     private val dynamic by BiliData::dynamic
 
-    override suspend fun main() {
+    override suspend fun main() = withTimeout(180000) {
         val dynamicDetail = dynamicChannel.receive()
         val dynamicItem = dynamicDetail.item
         logger.debug(dynamicItem.idStr)

@@ -63,7 +63,7 @@ object BiliBiliDynamic : KotlinPlugin(
             LiveMessageTasker.start()
             SendTasker.start()
             ListenerTasker.start()
-            CacheClearTasker.start()
+            if (BiliConfig.enableConfig.cacheClearEnable) CacheClearTasker.start()
         }
 
     }

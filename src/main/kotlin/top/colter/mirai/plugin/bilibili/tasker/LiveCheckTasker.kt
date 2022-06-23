@@ -1,5 +1,6 @@
 package top.colter.mirai.plugin.bilibili.tasker
 
+import kotlinx.coroutines.withTimeout
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
 import top.colter.mirai.plugin.bilibili.BiliConfig
 import top.colter.mirai.plugin.bilibili.BiliData
@@ -20,7 +21,7 @@ object LiveCheckTasker : BiliTasker() {
 
     private var lastLive: Long = Instant.now().epochSecond
 
-    override suspend fun main() {
+    override suspend fun main() = withTimeout(180000) {
         logger.debug("Check Live...")
         val liveList = client.getLive()
 

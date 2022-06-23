@@ -1,5 +1,6 @@
 package top.colter.mirai.plugin.bilibili.tasker
 
+import kotlinx.coroutines.withTimeout
 import org.jetbrains.skia.Color
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
 import top.colter.mirai.plugin.bilibili.BiliConfig
@@ -17,7 +18,7 @@ object LiveMessageTasker : BiliTasker() {
     private val liveChannel by BiliBiliDynamic::liveChannel
     private val messageChannel by BiliBiliDynamic::messageChannel
 
-    override suspend fun main() {
+    override suspend fun main() = withTimeout(180000) {
         val liveDetail = liveChannel.receive()
         val liveInfo = liveDetail.item
         logger.debug("直播: ${liveInfo.uname}@${liveInfo.uid}@${liveInfo.title}")

@@ -39,7 +39,7 @@ abstract class BiliTasker(
                         main()
                     } catch (e: Throwable) {
                         BiliBiliDynamic.logger.error(e.message)
-                        delay(100000L)
+                        delay(120000L)
                     }
                     delay(interval * 1000L)
                 }

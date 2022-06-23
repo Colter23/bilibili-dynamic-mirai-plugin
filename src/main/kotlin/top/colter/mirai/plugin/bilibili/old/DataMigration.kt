@@ -107,7 +107,8 @@ fun migrationConfig() {
             BiliConfig.imageConfig.font = BiliPluginConfig.font.split(";").first().split(".").first()
             //BiliConfig.templateConfig.dynamicPush["OldCustom"] = BiliPluginConfig.pushTemplate
             //BiliConfig.templateConfig.livePush["OldCustom"] = BiliPluginConfig.livePushTemplate
-            BiliConfig.templateConfig.footer = BiliPluginConfig.footerTemplate
+            BiliConfig.templateConfig.footer.dynamicFooter = BiliPluginConfig.footerTemplate
+            BiliConfig.templateConfig.footer.liveFooter = BiliPluginConfig.footerTemplate
             if (BiliPluginConfig.qrCode) BiliConfig.imageConfig.cardOrnament = "QrCode"
             BiliConfig.enableConfig.translateEnable = BiliPluginConfig.baiduTranslate["enable"].toBoolean()
             BiliConfig.translateConfig.baidu.APP_ID = BiliPluginConfig.baiduTranslate["APP_ID"] ?: ""

@@ -1,6 +1,7 @@
 package top.colter.mirai.plugin.bilibili.draw
 
 import org.jetbrains.skia.*
+import org.jetbrains.skia.paragraph.ParagraphBuilder
 import org.jetbrains.skia.svg.SVGDOM
 import top.colter.mirai.plugin.bilibili.BiliConfig
 import top.colter.mirai.plugin.bilibili.data.LiveInfo
@@ -23,9 +24,20 @@ suspend fun LiveInfo.drawLive(): Image {
 
     val height = (avatar.height + quality.contentSpace + cover.height * cardRect.width / cover.width).toInt()
 
+    val footerTemplate = BiliConfig.templateConfig.footer.liveFooter
+    val footerParagraph = if (footerTemplate.isNotBlank()){
+        val footer = footerTemplate
+            .replace("{name}", uname)
+            .replace("{uid}", uid.toString())
+            .replace("{id}", roomId.toString())
+            .replace("{time}", liveTime.formatTime)
+            .replace("{type}", "直播")
+        ParagraphBuilder(footerParagraphStyle, FontUtils.fonts).addText(footer).build().layout(cardRect.width)
+    }else null
+
     return Surface.makeRasterN32Premul(
         (cardRect.width + margin).toInt(),
-        height + quality.badgeHeight + margin
+        height + quality.badgeHeight + margin + (footerParagraph?.height?.toInt() ?: 0)
     ).apply {
         canvas.apply {
 
@@ -69,6 +81,8 @@ suspend fun LiveInfo.drawLive(): Image {
                 cardBadgeArc
             )
             drawImageRRect(cover, dst)
+
+            footerParagraph?.paint(this, cardRect.left, rrect.bottom + quality.cardMargin / 2)
 
         }
     }.makeImageSnapshot()

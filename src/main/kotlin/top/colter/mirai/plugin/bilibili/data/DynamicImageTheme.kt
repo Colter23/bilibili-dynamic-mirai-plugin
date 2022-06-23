@@ -33,6 +33,7 @@ object BiliImageTheme : ReadOnlyPluginConfig("ImageTheme") {
                 "#666666",
                 "#222222",
                 "#178BCF",
+                "#9C9C9C",
                 Theme.Shadow("#46000000", 6f, 6f, 25f, 0f),
                 Theme.Shadow("#1E000000", 5f, 5f, 15f, 0f),
                 Theme.BadgeColor("#00CBFF", "#B4FFFFFF"),
@@ -51,6 +52,7 @@ object BiliImageTheme : ReadOnlyPluginConfig("ImageTheme") {
                 "#666666",
                 "#222222",
                 "#178BCF",
+                "#9C9C9C",
                 Theme.Shadow("#46000000", 6f, 6f, 25f, 0f),
                 Theme.Shadow("#1E000000", 5f, 5f, 15f, 0f),
                 Theme.BadgeColor("#00CBFF", "#B4FFFFFF"),
@@ -69,6 +71,7 @@ object BiliImageTheme : ReadOnlyPluginConfig("ImageTheme") {
                 "#666666",
                 "#222222",
                 "#178BCF",
+                "#9C9C9C",
                 Theme.Shadow("#00000000", 0f, 0f, 0f, 0f),
                 Theme.Shadow("#00000000", 0f, 0f, 0f, 0f),
                 Theme.BadgeColor("#00CBFF", "#C8FFFFFF"),
@@ -93,6 +96,7 @@ data class Theme(
     val descColorHex: String,
     val contentColorHex: String,
     val linkColorHex: String,
+    val footerColorHex: String,
 
     val cardShadow: Shadow,
     val smallCardShadow: Shadow,
@@ -138,5 +142,6 @@ data class Theme(
     val descColor: Int get() = Color.makeRGB(descColorHex)
     val contentColor: Int get() = Color.makeRGB(contentColorHex)
     val linkColor: Int get() = Color.makeRGB(linkColorHex)
+    val footerColor: Int get() = Color.makeRGB(footerColorHex)
 
 }

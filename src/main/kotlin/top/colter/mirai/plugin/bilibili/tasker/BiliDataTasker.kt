@@ -405,7 +405,7 @@ object BiliDataTasker {
 
         subject.sendMessage(buildString {
             append("配置: ")
-            appendLine(if (uid == 0L) "群全局" else user.name)
+            appendLine(if (uid == 0L) "全局" else user.name)
             appendLine()
             appendLine("当前可配置项:")
             var i = 1

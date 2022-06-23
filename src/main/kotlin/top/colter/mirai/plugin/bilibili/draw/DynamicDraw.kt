@@ -1,8 +1,11 @@
 package top.colter.mirai.plugin.bilibili.draw
 
 import org.jetbrains.skia.*
+import org.jetbrains.skia.paragraph.ParagraphBuilder
+import org.jetbrains.skia.paragraph.ParagraphStyle
 import org.jetbrains.skia.paragraph.TextStyle
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
+import top.colter.mirai.plugin.bilibili.BiliConfig
 import top.colter.mirai.plugin.bilibili.BiliConfig.imageConfig
 import top.colter.mirai.plugin.bilibili.data.*
 import top.colter.mirai.plugin.bilibili.data.DynamicType.DYNAMIC_TYPE_FORWARD
@@ -88,6 +91,18 @@ val contentTextStyle = TextStyle().apply {
     color = theme.contentColor
     typeface = mainTypeface
 }
+val footerTextStyle = TextStyle().apply {
+    fontSize = quality.footerFontSize
+    color = theme.footerColor
+    typeface = mainTypeface
+}
+
+val footerParagraphStyle = ParagraphStyle().apply {
+    maxLinesCount = 2
+    ellipsis = "..."
+    alignment = BiliConfig.templateConfig.footer.footerAlign
+    textStyle = footerTextStyle
+}
 
 val cardBadgeArc: FloatArray by lazy {
     val left = if (imageConfig.badgeEnable.left) 0f else quality.cardArc
@@ -144,11 +159,22 @@ suspend fun DynamicItem.drawDynamic(themeColor: Int, isForward: Boolean = false)
         height += quality.contentSpace * 2
     }
 
+    val footerTemplate = BiliConfig.templateConfig.footer.dynamicFooter
+    val footerParagraph = if (footerTemplate.isNotBlank()){
+        val footer = footerTemplate
+            .replace("{name}", modules.moduleAuthor.name)
+            .replace("{uid}", modules.moduleAuthor.mid.toString())
+            .replace("{id}", did)
+            .replace("{time}", formatTime)
+            .replace("{type}", type.text)
+        ParagraphBuilder(footerParagraphStyle, FontUtils.fonts).addText(footer).build().layout(cardRect.width)
+    }else null
+
     val margin = if (isForward) quality.cardPadding * 2 else quality.cardMargin * 2
 
     return Surface.makeRasterN32Premul(
         (cardRect.width + margin).toInt(),
-        height + quality.badgeHeight + margin
+        height + quality.badgeHeight + margin + (footerParagraph?.height?.toInt() ?: 0)
     ).apply {
         canvas.apply {
 
@@ -196,6 +222,8 @@ suspend fun DynamicItem.drawDynamic(themeColor: Int, isForward: Boolean = false)
                     img.height + quality.contentSpace
                 }
             }
+
+            footerParagraph?.paint(this, cardRect.left, rrect.bottom + quality.cardMargin / 2)
 
         }
     }.makeImageSnapshot()

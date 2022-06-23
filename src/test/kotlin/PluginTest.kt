@@ -432,7 +432,6 @@ internal class PluginTest {
                                 "【杂谈】她好像知道自己很可爱",
                                 "https://i2.hdslb.com/bfs/archive/f1d0fb9dbee0066997546a1951f90aeccc95808c.jpg",
                                 "20220329－－封面：早乙女aku 翻译：土間うまる 时轴：予之笑颜 校对：剪辑也很可爱 剪辑：Canizza 压制：伊落校对：剪辑也很可爱 剪辑：Canizza 压制：伊落校对：剪辑也很可爱 剪辑：Canizza 压制：伊落",
-                                false,
                                 "04:02",
                                 "",
                                 ModuleDynamic.Major.Stat(

@@ -29,6 +29,7 @@ object BiliImageQuality : ReadOnlyPluginConfig("ImageQuality") {
                 subTitleFontSize = 22f,
                 descFontSize = 20f,
                 contentFontSize = 26f,
+                footerFontSize = 22f,
 
                 cardOutlineWidth = 2f,
                 drawOutlineWidth = 2f,
@@ -61,6 +62,7 @@ object BiliImageQuality : ReadOnlyPluginConfig("ImageQuality") {
                 subTitleFontSize = 28f,
                 descFontSize = 26f,
                 contentFontSize = 32f,
+                footerFontSize = 28f,
 
                 cardOutlineWidth = 3f,
                 drawOutlineWidth = 3f,
@@ -93,6 +95,7 @@ object BiliImageQuality : ReadOnlyPluginConfig("ImageQuality") {
                 subTitleFontSize = 34f,
                 descFontSize = 32f,
                 contentFontSize = 38f,
+                footerFontSize = 34f,
 
                 cardOutlineWidth = 4f,
                 drawOutlineWidth = 4f,
@@ -125,6 +128,7 @@ object BiliImageQuality : ReadOnlyPluginConfig("ImageQuality") {
                 subTitleFontSize = 43f,
                 descFontSize = 40f,
                 contentFontSize = 47f,
+                footerFontSize = 43f,
 
                 cardOutlineWidth = 6f,
                 drawOutlineWidth = 6f,
@@ -162,6 +166,7 @@ data class Quality(
     val subTitleFontSize: Float,
     val descFontSize: Float,
     val contentFontSize: Float,
+    val footerFontSize: Float,
 
     val cardOutlineWidth: Float,
     val drawOutlineWidth: Float,
