@@ -22,11 +22,13 @@ object DynamicMessageTasker : BiliTasker() {
 
     private val dynamic by BiliData::dynamic
 
-    override suspend fun main() = withTimeout(180000) {
+    override suspend fun main() {
         val dynamicDetail = dynamicChannel.receive()
-        val dynamicItem = dynamicDetail.item
-        logger.debug(dynamicItem.idStr)
-        messageChannel.send(dynamicItem.buildMessage(dynamicDetail.contact))
+        withTimeout(180002) {
+            val dynamicItem = dynamicDetail.item
+            logger.debug(dynamicItem.idStr)
+            messageChannel.send(dynamicItem.buildMessage(dynamicDetail.contact))
+        }
     }
 
     suspend fun DynamicItem.buildMessage(contact: String? = null): DynamicMessage {

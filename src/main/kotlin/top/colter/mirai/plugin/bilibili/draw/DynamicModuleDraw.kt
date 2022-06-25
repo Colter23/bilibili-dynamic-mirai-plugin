@@ -438,7 +438,7 @@ suspend fun ModuleAuthor.drawForward(time: String): Image {
 suspend fun ModuleAuthor.drawGeneral(time: String, link: String, themeColor: Int): Image {
     return Surface.makeRasterN32Premul(
         quality.imageWidth - quality.cardMargin * 2,
-        (quality.faceSize + quality.cardPadding * 2f).toInt()
+        quality.pendantSize.toInt()
     ).apply surface@{
         canvas.apply {
             drawAvatar(face, pendant?.image, officialVerify?.type, quality.faceSize, quality.verifyIconSize)
@@ -446,23 +446,23 @@ suspend fun ModuleAuthor.drawGeneral(time: String, link: String, themeColor: Int
             val textLineName = TextLine.make(name, font.makeWithSize(quality.nameFontSize))
             val textLineTime = TextLine.make(time, font.makeWithSize(quality.subTitleFontSize))
 
-            val x = quality.faceSize + quality.cardPadding * 3f
-            var y =
-                ((quality.faceSize - (quality.nameFontSize + textLineTime.height)) / 2) + quality.nameFontSize + (quality.cardPadding * 1.2f)
+            val x = quality.faceSize + quality.cardPadding * 3.2f
+            val space = (quality.pendantSize - quality.nameFontSize - quality.subTitleFontSize) / 3
+            var y = quality.nameFontSize + space * 1.25f
 
             drawTextLine(textLineName, x, y, Paint().apply { color = theme.nameColor })
 
-            y += textLineTime.height
+            y += quality.subTitleFontSize + space * 0.5f
             drawTextLine(textLineTime, x, y, Paint().apply { color = theme.subTitleColor })
 
-            drawOrnament(decorate, link, themeColor)
+            drawOrnament(BiliConfig.imageConfig.cardOrnament, decorate, link, themeColor, null)
         }
     }.makeImageSnapshot()
 }
 
-suspend fun Canvas.drawOrnament(decorate: ModuleAuthor.Decorate?, link: String, qrCodeColor: Int) {
+suspend fun Canvas.drawOrnament(cardOrnament: String, decorate: ModuleAuthor.Decorate?, link: String?, qrCodeColor: Int?, label: String?) {
 
-    when (BiliConfig.imageConfig.cardOrnament) {
+    when (cardOrnament) {
         "FanCard" -> {
             if (decorate != null) {
                 val fanImg = getOrDownloadImage(decorate.cardUrl, CacheType.USER)
@@ -505,7 +505,7 @@ suspend fun Canvas.drawOrnament(decorate: ModuleAuthor.Decorate?, link: String, 
         }
 
         "QrCode" -> {
-            val qrCodeImg = qrCode(link, quality.ornamentHeight.toInt(), qrCodeColor)
+            val qrCodeImg = qrCode(link!!, quality.ornamentHeight.toInt(), qrCodeColor!!)
             val y = ((quality.faceSize - quality.ornamentHeight) / 2) + quality.cardPadding
             val tarFRect = Rect.makeXYWH(
                 cardContentRect.right - quality.ornamentHeight - 20f,
@@ -521,6 +521,22 @@ suspend fun Canvas.drawOrnament(decorate: ModuleAuthor.Decorate?, link: String, 
                 FilterMipmap(FilterMode.LINEAR, MipmapMode.NEAREST),
                 Paint(),
                 true
+            )
+        }
+
+        "Label" -> {
+            val labelTextLine = TextLine.make(label, font.makeWithSize(quality.subTitleFontSize))
+            val y = ((quality.faceSize - quality.ornamentHeight) / 2) + quality.cardPadding
+            drawLabelCard(
+                labelTextLine,
+                cardContentRect.right - labelTextLine.width - quality.badgePadding * 4,
+                y,
+                Paint().apply {
+                    color = theme.subLeftBadge.fontColor
+                },
+                Paint().apply {
+                    color = theme.subLeftBadge.bgColor
+                }
             )
         }
     }

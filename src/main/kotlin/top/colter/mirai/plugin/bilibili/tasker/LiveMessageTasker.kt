@@ -18,11 +18,13 @@ object LiveMessageTasker : BiliTasker() {
     private val liveChannel by BiliBiliDynamic::liveChannel
     private val messageChannel by BiliBiliDynamic::messageChannel
 
-    override suspend fun main() = withTimeout(180000) {
+    override suspend fun main() {
         val liveDetail = liveChannel.receive()
-        val liveInfo = liveDetail.item
-        logger.debug("直播: ${liveInfo.uname}@${liveInfo.uid}@${liveInfo.title}")
-        messageChannel.send(liveInfo.buildMessage(liveDetail.contact))
+        withTimeout(180004) {
+            val liveInfo = liveDetail.item
+            logger.debug("直播: ${liveInfo.uname}@${liveInfo.uid}@${liveInfo.title}")
+            messageChannel.send(liveInfo.buildMessage(liveDetail.contact))
+        }
     }
 
     suspend fun LiveInfo.buildMessage(contact: String? = null): LiveMessage {

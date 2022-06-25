@@ -21,7 +21,7 @@ object LiveCheckTasker : BiliTasker() {
 
     private var lastLive: Long = Instant.now().epochSecond
 
-    override suspend fun main() = withTimeout(180000) {
+    override suspend fun main() = withTimeout(180003) {
         logger.debug("Check Live...")
         val liveList = client.getLive()
 

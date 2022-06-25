@@ -15,6 +15,8 @@ v3还有很多问题没解决(但还是摸了好长时间才摸出来 后面写�
 
 如果你再使用v3版中有什么问题可统一前往 [V3问题/建议反馈](https://github.com/Colter23/bilibili-dynamic-mirai-plugin/issues/66) 进行反馈  
 
+建了个QQ群，有问题可即时反馈 [734922374](https://jq.qq.com/?_wv=1027&k=NuSQdKTQ)
+
 ## 数据迁移
 v2与v3的数据结构不一样  
 但不用担心 当你第一次运行v3版插件会自动进行数据迁移  

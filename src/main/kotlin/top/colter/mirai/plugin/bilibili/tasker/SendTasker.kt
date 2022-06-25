@@ -38,96 +38,97 @@ object SendTasker : BiliTasker() {
 
     private val tagRegex = """\{([a-z]+)}""".toRegex()
 
-    override suspend fun main() = withTimeout(300000) {
+    override suspend fun main() {
         val biliMessage = BiliBiliDynamic.messageChannel.receive()
 
-        val contactIdList = if (biliMessage.contact == null) {
-            when (biliMessage) {
-                is DynamicMessage -> getDynamicContactList(biliMessage.uid, biliMessage.content, biliMessage.type)
-                is LiveMessage -> getLiveContactList(biliMessage.uid)
-            }
-        } else {
-            listOf(biliMessage.contact!!)
-        }
-
-
-        if (!contactIdList.isNullOrEmpty()) {
-            val contactList = mutableListOf<Contact>()
-            contactIdList.forEach {
-                val c = findContact(it)
-                if (c != null) {
-                    contactList.add(c)
+        withTimeout(300005) {
+            val contactIdList = if (biliMessage.contact == null) {
+                when (biliMessage) {
+                    is DynamicMessage -> getDynamicContactList(biliMessage.uid, biliMessage.content, biliMessage.type)
+                    is LiveMessage -> getLiveContactList(biliMessage.uid)
                 }
+            } else {
+                listOf(biliMessage.contact!!)
             }
 
-            val templateMap: MutableMap<String, MutableSet<Contact>> = mutableMapOf()
-
-            val pushTemplates = when (biliMessage) {
-                is DynamicMessage -> templateConfig.dynamicPush
-                is LiveMessage -> templateConfig.livePush
-            }
-
-            val push = when (biliMessage) {
-                is DynamicMessage -> BiliData.dynamicPushTemplate
-                is LiveMessage -> BiliData.livePushTemplate
-            }
-
-            val defaultTemplate = when (biliMessage) {
-                is DynamicMessage -> templateConfig.defaultDynamicPush
-                is LiveMessage -> templateConfig.defaultLivePush
-            }
-
-            if (push.isEmpty()) {
-                if (templateMap[defaultTemplate] == null) templateMap[defaultTemplate] =
-                    mutableSetOf()
-                contactList.forEach {
-                    templateMap[defaultTemplate]!!.add(it)
+            if (!contactIdList.isNullOrEmpty()) {
+                val contactList = mutableListOf<Contact>()
+                contactIdList.forEach {
+                    val c = findContact(it)
+                    if (c != null) {
+                        contactList.add(c)
+                    }
                 }
-            }
 
-            push.forEach { (t, u) ->
-                contactList.forEach {
-                    if (u.contains(it.id)) {
-                        if (templateMap[t] == null) templateMap[t] = mutableSetOf()
-                        templateMap[t]!!.add(it)
-                    } else {
-                        if (templateMap[defaultTemplate] == null) templateMap[defaultTemplate] =
-                            mutableSetOf()
+                val templateMap: MutableMap<String, MutableSet<Contact>> = mutableMapOf()
+
+                val pushTemplates = when (biliMessage) {
+                    is DynamicMessage -> templateConfig.dynamicPush
+                    is LiveMessage -> templateConfig.livePush
+                }
+
+                val push = when (biliMessage) {
+                    is DynamicMessage -> BiliData.dynamicPushTemplate
+                    is LiveMessage -> BiliData.livePushTemplate
+                }
+
+                val defaultTemplate = when (biliMessage) {
+                    is DynamicMessage -> templateConfig.defaultDynamicPush
+                    is LiveMessage -> templateConfig.defaultLivePush
+                }
+
+                if (push.isEmpty()) {
+                    if (templateMap[defaultTemplate] == null) templateMap[defaultTemplate] =
+                        mutableSetOf()
+                    contactList.forEach {
                         templateMap[defaultTemplate]!!.add(it)
                     }
                 }
-            }
 
-            val templateMsgMap: MutableMap<String, List<Message>> = mutableMapOf()
-            templateMap.forEach {
-                templateMsgMap[it.key] = when (biliMessage) {
-                    is DynamicMessage -> biliMessage.buildMessage(pushTemplates[it.key]!!, contactList.first())
-                    is LiveMessage -> biliMessage.buildMessage(pushTemplates[it.key]!!, contactList.first())
-                }
-            }
-
-            for (temp in templateMap) {
-                temp.value.forEach {
-                    templateMsgMap[temp.key]?.let { it1 ->
-                        if (it is Group) {
-                            val gwp = when (biliMessage) {
-                                is DynamicMessage -> if (biliMessage.type == DynamicType.DYNAMIC_TYPE_AV) BiliBiliDynamic.videoGwp else null
-                                is LiveMessage -> BiliBiliDynamic.liveGwp
-                            }
-                            val hasPerm = it.permitteeId.getPermittedPermissions().any { it.id == gwp }
-                            if (hasPerm) {
-                                val last = it1.last().plus("\n").plus(AtAll)
-                                it.sendMessage(it1.dropLast(1).plus(last))
-                            } else {
-                                it.sendMessage(it1)
-                            }
+                push.forEach { (t, u) ->
+                    contactList.forEach {
+                        if (u.contains(it.id)) {
+                            if (templateMap[t] == null) templateMap[t] = mutableSetOf()
+                            templateMap[t]!!.add(it)
                         } else {
-                            it.sendMessage(it1)
+                            if (templateMap[defaultTemplate] == null) templateMap[defaultTemplate] =
+                                mutableSetOf()
+                            templateMap[defaultTemplate]!!.add(it)
                         }
                     }
                 }
-            }
 
+                val templateMsgMap: MutableMap<String, List<Message>> = mutableMapOf()
+                templateMap.forEach {
+                    templateMsgMap[it.key] = when (biliMessage) {
+                        is DynamicMessage -> biliMessage.buildMessage(pushTemplates[it.key]!!, contactList.first())
+                        is LiveMessage -> biliMessage.buildMessage(pushTemplates[it.key]!!, contactList.first())
+                    }
+                }
+
+                for (temp in templateMap) {
+                    temp.value.forEach {
+                        templateMsgMap[temp.key]?.let { it1 ->
+                            if (it is Group) {
+                                val gwp = when (biliMessage) {
+                                    is DynamicMessage -> if (biliMessage.type == DynamicType.DYNAMIC_TYPE_AV) BiliBiliDynamic.videoGwp else null
+                                    is LiveMessage -> BiliBiliDynamic.liveGwp
+                                }
+                                val hasPerm = it.permitteeId.getPermittedPermissions().any { it.id == gwp }
+                                if (hasPerm) {
+                                    val last = it1.last().plus("\n").plus(AtAll)
+                                    it.sendMessage(it1.dropLast(1).plus(last))
+                                } else {
+                                    it.sendMessage(it1)
+                                }
+                            } else {
+                                it.sendMessage(it1)
+                            }
+                        }
+                    }
+                }
+
+            }
         }
     }
 

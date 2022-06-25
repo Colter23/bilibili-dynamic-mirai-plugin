@@ -98,18 +98,18 @@ suspend fun LiveInfo.drawAvatar(): Image {
 
             val textLineTitle = TextLine.make(title, font.makeWithSize(quality.nameFontSize))
             val textLineTime =
-                TextLine.make("$uname   ${liveTime.formatTime}", font.makeWithSize(quality.subTitleFontSize))
+                TextLine.make("$uname  ${liveTime.formatTime}", font.makeWithSize(quality.subTitleFontSize))
 
-            var x = quality.faceSize + quality.cardPadding * 3f
-            var y =
-                ((quality.faceSize - (quality.nameFontSize + textLineTime.height)) / 2) + quality.nameFontSize + (quality.cardPadding * 1.2f)
+            val x = quality.faceSize + quality.cardPadding * 3f
+            val space = (quality.pendantSize - quality.nameFontSize - quality.subTitleFontSize) / 3
+            var y = quality.nameFontSize + space * 1.25f
 
             drawTextLine(textLineTitle, x, y, Paint().apply { color = theme.titleColor })
 
-            y += textLineTime.height
+            y += quality.subTitleFontSize + space * 0.5f
             drawTextLine(textLineTime, x, y, Paint().apply { color = theme.subTitleColor })
 
-            //drawOrnament(decorate, link)
+            //drawOrnament(if (BiliConfig.imageConfig.cardOrnament=="QrCode") "QrCode" else "Label", null, link, "")
         }
     }.makeImageSnapshot()
 }

@@ -160,7 +160,7 @@ suspend fun DynamicItem.drawDynamic(themeColor: Int, isForward: Boolean = false)
     }
 
     val footerTemplate = BiliConfig.templateConfig.footer.dynamicFooter
-    val footerParagraph = if (footerTemplate.isNotBlank()){
+    val footerParagraph = if (footerTemplate.isNotBlank() && !isForward){
         val footer = footerTemplate
             .replace("{name}", modules.moduleAuthor.name)
             .replace("{uid}", modules.moduleAuthor.mid.toString())

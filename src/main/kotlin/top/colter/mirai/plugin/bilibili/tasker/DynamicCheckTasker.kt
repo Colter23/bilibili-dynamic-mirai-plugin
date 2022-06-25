@@ -45,7 +45,7 @@ object DynamicCheckTasker : BiliTasker() {
         }
     }
 
-    override suspend fun main() = withTimeout(180000) {
+    override suspend fun main() = withTimeout(180001) {
         logger.debug("Check Dynamic...")
         val dynamicList = client.getNewDynamic()
         if (dynamicList != null) {

@@ -39,7 +39,7 @@ suspend fun ModuleDynamic.Major.makeGeneral(isForward: Boolean = false): Image? 
         }
 
         "MAJOR_TYPE_PGC" -> {
-            drawInfoText("暂时无法绘制类型为 [$type] 的动态类型")
+            pgc!!.drawSmall()
         }
 
         "MAJOR_TYPE_COMMON" -> {
@@ -192,7 +192,9 @@ suspend fun ModuleDynamic.Major.Archive.drawGeneral(): Image {
         ParagraphBuilder(paragraphStyle, FontUtils.fonts).addText(desc.replace("\n", " ")).build()
             .layout(paragraphWidth)
 
-    val videoCoverHeight = cardContentRect.width * 0.625f  // 封面比例 16:10
+    val coverImg = getOrDownloadImage(cover, CacheType.IMAGES)
+
+    val videoCoverHeight = cardContentRect.width * coverImg.height / coverImg.width
     val videoCardHeight = videoCoverHeight + titleParagraph.height + descParagraph.height + quality.cardPadding
 
     val videoCardRect = RRect.makeComplexXYWH(
@@ -215,7 +217,6 @@ suspend fun ModuleDynamic.Major.Archive.drawGeneral(): Image {
             drawRectShadowAntiAlias(videoCardRect.inflate(1f), theme.smallCardShadow)
 
             // 封面
-            val coverImg = getOrDownloadImage(cover, CacheType.IMAGES)
             val coverRRect = RRect.makeComplexXYWH(
                 videoCardRect.left,
                 videoCardRect.top,
@@ -310,6 +311,10 @@ suspend fun ModuleDynamic.Major.Archive.drawSmall(): Image {
     return drawSmallCard(title, desc, cover, badge.text, "av$aid  |  $bvid", durationText)
 }
 
+suspend fun ModuleDynamic.Major.Pgc.drawSmall(): Image {
+    return drawSmallCard(title, "播放: ${stat.play}  弹幕: ${stat.danmaku}", cover, badge.text, "ep$epid", null)
+}
+
 suspend fun drawSmallCard(
     title: String,
     desc: String,
@@ -386,7 +391,8 @@ suspend fun drawSmallCard(
             ).inflate(-1f) as RRect
             drawImageRRect(coverImg, coverRRect)
 
-            val y = videoCardRect.top + (videoCardRect.height - titleParagraph.height - descParagraph.height) / 2
+            val space = (videoCardRect.height - titleParagraph.height - descParagraph.height) / 3
+            val y = videoCardRect.top + space
             titleParagraph.paint(
                 this,
                 quality.cardPadding * 1.5f + coverWidth,
@@ -396,7 +402,7 @@ suspend fun drawSmallCard(
             descParagraph.paint(
                 this,
                 quality.cardPadding * 1.5f + coverWidth,
-                y + titleParagraph.height
+                y + titleParagraph.height + space
             )
 
             if (duration != null) {
@@ -680,16 +686,21 @@ suspend fun ModuleDynamic.Major.Music.drawGeneral(): Image {
             ).inflate(-1f) as RRect
             drawImageRRect(coverImg, coverRRect)
 
+            val space = (musicCardHeight - titleParagraph.height - descParagraph.height) / 3
+            val y = musicCardRect.top + space
+
             titleParagraph.paint(
                 this,
                 musicCardHeight + quality.cardMargin * 2,
-                (quality.badgeHeight + quality.cardMargin * 2).toFloat()
+                y
+                //(quality.badgeHeight + quality.cardMargin * 2).toFloat()
             )
 
             descParagraph.paint(
                 this,
                 musicCardHeight + quality.cardMargin * 2,
-                quality.badgeHeight + quality.cardMargin * 2 + titleParagraph.height
+                y + space + titleParagraph.height
+                //quality.badgeHeight + quality.cardMargin * 2 + titleParagraph.height
             )
 
         }
