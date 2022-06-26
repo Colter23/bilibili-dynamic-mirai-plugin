@@ -46,7 +46,9 @@ enum class DynamicType(val text: String) {
     DYNAMIC_TYPE_LIVE_RCMD("直播"),
     DYNAMIC_TYPE_PGC("番剧"),
     DYNAMIC_TYPE_COMMON_SQUARE("动态"),
-    DYNAMIC_TYPE_NONE("动态被删除")
+    DYNAMIC_TYPE_COMMON_VERTICAL("动态"),
+    DYNAMIC_TYPE_NONE("动态被删除"),
+    DYNAMIC_TYPE_UNKNOWN("未知的动态"),
 }
 
 
@@ -75,7 +77,7 @@ data class DynamicItem(
      * DYNAMIC_TYPE_NONE           动态被删除
      */
     @SerialName("type")
-    val type: DynamicType,
+    val typeStr: String,
 
     @SerialName("id_str")
     val idStr: String?,
@@ -88,6 +90,24 @@ data class DynamicItem(
     @SerialName("orig")
     val orig: DynamicItem? = null,
 ) {
+
+    val type: DynamicType get() =
+        when (typeStr){
+            "DYNAMIC_TYPE_WORD" -> DynamicType.DYNAMIC_TYPE_WORD
+            "DYNAMIC_TYPE_DRAW" -> DynamicType.DYNAMIC_TYPE_DRAW
+            "DYNAMIC_TYPE_ARTICLE" -> DynamicType.DYNAMIC_TYPE_ARTICLE
+            "DYNAMIC_TYPE_FORWARD" -> DynamicType.DYNAMIC_TYPE_FORWARD
+            "DYNAMIC_TYPE_AV" -> DynamicType.DYNAMIC_TYPE_AV
+            "DYNAMIC_TYPE_MUSIC" -> DynamicType.DYNAMIC_TYPE_MUSIC
+            "DYNAMIC_TYPE_LIVE" -> DynamicType.DYNAMIC_TYPE_LIVE
+            "DYNAMIC_TYPE_LIVE_RCMD" -> DynamicType.DYNAMIC_TYPE_LIVE_RCMD
+            "DYNAMIC_TYPE_PGC" -> DynamicType.DYNAMIC_TYPE_PGC
+            "DYNAMIC_TYPE_COMMON_SQUARE" -> DynamicType.DYNAMIC_TYPE_COMMON_SQUARE
+            "DYNAMIC_TYPE_COMMON_VERTICAL" -> DynamicType.DYNAMIC_TYPE_COMMON_VERTICAL
+            "DYNAMIC_TYPE_NONE" -> DynamicType.DYNAMIC_TYPE_NONE
+            else -> DynamicType.DYNAMIC_TYPE_UNKNOWN
+        }
+
 
     val did: String  get() = idStr?:"0"
 

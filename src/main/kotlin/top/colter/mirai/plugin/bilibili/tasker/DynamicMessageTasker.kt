@@ -74,6 +74,7 @@ object DynamicMessageTasker : BiliTasker() {
                 modules.moduleDynamic.major?.pgc?.title!!
             }
 
+            DYNAMIC_TYPE_COMMON_VERTICAL,
             DYNAMIC_TYPE_COMMON_SQUARE -> {
                 modules.moduleDynamic.major?.common?.title!!
             }
@@ -88,6 +89,7 @@ object DynamicMessageTasker : BiliTasker() {
             DYNAMIC_TYPE_NONE -> {
                 modules.moduleDynamic.major?.none?.tips!!
             }
+            DYNAMIC_TYPE_UNKNOWN -> "未知的动态类型: $typeStr"
         }
 
     }
@@ -150,7 +152,10 @@ object DynamicMessageTasker : BiliTasker() {
             }
             DYNAMIC_TYPE_NONE,
             DYNAMIC_TYPE_WORD,
-            DYNAMIC_TYPE_DRAW -> {
+            DYNAMIC_TYPE_DRAW,
+            DYNAMIC_TYPE_COMMON_VERTICAL,
+            DYNAMIC_TYPE_COMMON_SQUARE,
+            DYNAMIC_TYPE_UNKNOWN -> {
                 listOf(
                     DynamicMessage.Link("动态", DYNAMIC_LINK(did))
                 )
@@ -189,12 +194,6 @@ object DynamicMessageTasker : BiliTasker() {
             DYNAMIC_TYPE_PGC -> {
                 listOf(
                     DynamicMessage.Link(DYNAMIC_TYPE_PGC.text, PGC_LINK(this.modules.moduleDynamic.major?.pgc?.epid!!)),
-                    DynamicMessage.Link("动态", DYNAMIC_LINK(did))
-                )
-            }
-
-            DYNAMIC_TYPE_COMMON_SQUARE -> {
-                listOf(
                     DynamicMessage.Link("动态", DYNAMIC_LINK(did))
                 )
             }

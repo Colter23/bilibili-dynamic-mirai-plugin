@@ -7,7 +7,6 @@ import org.jetbrains.skia.*
 import org.junit.Test
 import top.colter.mirai.plugin.bilibili.client.BiliClient
 import top.colter.mirai.plugin.bilibili.data.DynamicItem
-import top.colter.mirai.plugin.bilibili.data.DynamicType
 import top.colter.mirai.plugin.bilibili.data.ModuleAuthor
 import top.colter.mirai.plugin.bilibili.data.ModuleDynamic
 import top.colter.mirai.plugin.bilibili.draw.*
@@ -131,7 +130,7 @@ internal class PluginTest {
     fun drawDynamicTest(): Unit = runBlocking {
         val dynamic = DynamicItem(
 //            "DYNAMIC_TYPE_WORD",
-            DynamicType.DYNAMIC_TYPE_FORWARD,
+            "DYNAMIC_TYPE_FORWARD",
             "652271005324017683",
             true,
             null,
@@ -286,7 +285,7 @@ internal class PluginTest {
             ),
             orig = DynamicItem(
 //            "DYNAMIC_TYPE_WORD",
-                DynamicType.DYNAMIC_TYPE_WORD,
+                "DYNAMIC_TYPE_WORD",
                 "652271005324017683",
                 true,
                 null,

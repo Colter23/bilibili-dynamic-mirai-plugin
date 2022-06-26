@@ -72,7 +72,9 @@ val DynamicItem.link: String
         DYNAMIC_TYPE_WORD,
         DYNAMIC_TYPE_DRAW,
         DYNAMIC_TYPE_FORWARD,
-        DYNAMIC_TYPE_COMMON_SQUARE -> "https://t.bilibili.com/$idStr"
+        DYNAMIC_TYPE_COMMON_SQUARE,
+        DYNAMIC_TYPE_COMMON_VERTICAL,
+        DYNAMIC_TYPE_UNKNOWN -> "https://t.bilibili.com/$idStr"
 
         DYNAMIC_TYPE_ARTICLE -> "https://www.bilibili.com/read/cv${modules.moduleDynamic.major?.article?.id}"
         DYNAMIC_TYPE_AV -> "https://www.bilibili.com/video/${modules.moduleDynamic.major?.archive?.bvid}"

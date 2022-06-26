@@ -144,6 +144,8 @@ object SendTasker : BiliTasker() {
             DynamicType.DYNAMIC_TYPE_WORD,
             DynamicType.DYNAMIC_TYPE_DRAW,
             DynamicType.DYNAMIC_TYPE_COMMON_SQUARE,
+            DynamicType.DYNAMIC_TYPE_COMMON_VERTICAL,
+            DynamicType.DYNAMIC_TYPE_UNKNOWN,
             DynamicType.DYNAMIC_TYPE_NONE -> DynamicFilterType.DYNAMIC
 
             DynamicType.DYNAMIC_TYPE_FORWARD -> DynamicFilterType.FORWARD

@@ -4,7 +4,9 @@ import org.jetbrains.skia.*
 import org.jetbrains.skia.paragraph.ParagraphBuilder
 import org.jetbrains.skia.svg.SVGDOM
 import top.colter.mirai.plugin.bilibili.BiliConfig
+import top.colter.mirai.plugin.bilibili.BiliData
 import top.colter.mirai.plugin.bilibili.data.LiveInfo
+import top.colter.mirai.plugin.bilibili.tasker.DynamicMessageTasker
 import top.colter.mirai.plugin.bilibili.utils.*
 
 
@@ -109,7 +111,9 @@ suspend fun LiveInfo.drawAvatar(): Image {
             y += quality.subTitleFontSize + space * 0.5f
             drawTextLine(textLineTime, x, y, Paint().apply { color = theme.subTitleColor })
 
-            //drawOrnament(if (BiliConfig.imageConfig.cardOrnament=="QrCode") "QrCode" else "Label", null, link, "")
+            val color = BiliData.dynamic[uid]?.color ?: BiliConfig.imageConfig.defaultColor
+            val colors = color.split(";", "；").map { Color.makeRGB(it.trim()) }.first()
+            drawOrnament(if (BiliConfig.imageConfig.cardOrnament=="QrCode") "QrCode" else "Label", null, "https://live.bilibili.com/$roomId", colors, area)
         }
     }.makeImageSnapshot()
 }
