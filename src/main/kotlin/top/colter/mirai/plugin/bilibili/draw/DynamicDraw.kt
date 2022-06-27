@@ -61,11 +61,34 @@ val cardContentRect: Rect by lazy {
 val mainTypeface: Typeface by lazy {
     val mainFont = imageConfig.font.split(";").first().split(".").first()
     try {
-        matchFamily(mainFont).matchStyle(FontStyle.NORMAL)!!
+        if (mainFont.isBlank()){
+            logger.warning("配置文件未配置字体, 尝试加载 font 目录下的字体")
+            val f = FontUtils.defaultFont
+            if (f == null){
+                throw Exception()
+            }else {
+                logger.info("成功加载 ${f.familyName} 字体")
+                return@lazy f
+            }
+        }else {
+            matchFamily(mainFont).matchStyle(FontStyle.NORMAL)!!
+        }
     } catch (e: Exception) {
-        logger.error("加载主字体 $mainFont 失败")
-        matchFamily("Source Han Sans").matchStyle(FontStyle.NORMAL)!!
+        logger.warning("加载主字体 $mainFont 失败, 尝试加载默认字体")
+        loadSysDefaultFont()
     }
+}
+
+fun loadSysDefaultFont(): Typeface {
+    val defaultList = listOf("HarmonyOS Sans SC", "Source Han Sans", "SimHei", "sans-serif")
+    defaultList.forEach {
+        try {
+            val f = matchFamily(it).matchStyle(FontStyle.NORMAL)!!
+            logger.info("加载默认字体 $it 成功")
+            return f
+        } catch (_: Exception) { }
+    }
+    throw Exception("无法加载默认字体, 请自行配置字体或准备字体文件")
 }
 
 val font: Font by lazy {

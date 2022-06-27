@@ -566,9 +566,8 @@ suspend fun ModuleDynamic.Major.Article.drawGeneral(): Image {
                 clipRRect(coverRRect, true)
                 covers.forEach {
                     val img = getOrDownloadImage(it, CacheType.IMAGES)
-                    val src = Rect.makeXYWH(0f, 0f, img.width.toFloat(), img.height.toFloat())
-                    val tar = Rect.makeXYWH(imgX, articleCardRect.top, imgW, articleCoverHeight)
-                    drawImageRect(img, src, tar, Paint())
+                    val tar = RRect.makeXYWH(imgX, articleCardRect.top, imgW, articleCoverHeight, 0f)
+                    drawImageClip(img, tar, Paint())
                     imgX += articleCardRect.width / 3 + 2
                 }
                 restore()

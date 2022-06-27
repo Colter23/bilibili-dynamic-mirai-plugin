@@ -13,6 +13,7 @@ import top.colter.mirai.plugin.bilibili.utils.FontUtils
 import top.colter.mirai.plugin.bilibili.utils.formatTime
 import top.colter.mirai.plugin.bilibili.utils.getOrDownloadImage
 import top.colter.mirai.plugin.bilibili.utils.translate.trans
+import kotlin.math.abs
 import kotlin.math.ceil
 
 
@@ -455,14 +456,14 @@ suspend fun ModuleAuthor.drawGeneral(time: String, link: String, themeColor: Int
             y += quality.subTitleFontSize + space * 0.5f
             drawTextLine(textLineTime, x, y, Paint().apply { color = theme.subTitleColor })
 
-            drawOrnament(BiliConfig.imageConfig.cardOrnament, decorate, link, themeColor, null)
+            drawOrnament(decorate, link, themeColor)
         }
     }.makeImageSnapshot()
 }
 
-suspend fun Canvas.drawOrnament(cardOrnament: String, decorate: ModuleAuthor.Decorate?, link: String?, qrCodeColor: Int?, label: String?) {
+suspend fun Canvas.drawOrnament(decorate: ModuleAuthor.Decorate?, link: String?, qrCodeColor: Int?) {
 
-    when (cardOrnament) {
+    when (BiliConfig.imageConfig.cardOrnament) {
         "FanCard" -> {
             if (decorate != null) {
                 val fanImg = getOrDownloadImage(decorate.cardUrl, CacheType.USER)
@@ -475,10 +476,10 @@ suspend fun Canvas.drawOrnament(cardOrnament: String, decorate: ModuleAuthor.Dec
 
                 val cardWidth = fanImg.width * cardHeight / fanImg.height
 
-                val y = ((quality.faceSize - cardHeight) / 2) + quality.cardPadding
+                val y = ((quality.faceSize - cardHeight + quality.contentSpace) / 2)
                 val tarFRect = Rect.makeXYWH(
-                    cardContentRect.right - cardWidth - 20f,
-                    y,
+                    cardContentRect.right - cardWidth - abs(y),
+                    y + quality.cardPadding,
                     cardWidth,
                     cardHeight
                 )
@@ -506,12 +507,12 @@ suspend fun Canvas.drawOrnament(cardOrnament: String, decorate: ModuleAuthor.Dec
 
         "QrCode" -> {
             val qrCodeImg = qrCode(link!!, quality.ornamentHeight.toInt(), qrCodeColor!!)
-            val y = ((quality.faceSize - quality.ornamentHeight) / 2) + quality.cardPadding
+            val y = ((quality.faceSize - qrCodeImg.height + quality.contentSpace) / 2)
             val tarFRect = Rect.makeXYWH(
-                cardContentRect.right - quality.ornamentHeight - 20f,
-                y,
-                quality.ornamentHeight,
-                quality.ornamentHeight
+                cardContentRect.right - qrCodeImg.width - abs(y),
+                y + quality.cardPadding,
+                qrCodeImg.width.toFloat(),
+                qrCodeImg.height.toFloat()
             )
             val srcFRect = Rect(0f, 0f, qrCodeImg.width.toFloat(), qrCodeImg.height.toFloat())
             drawImageRect(
@@ -521,22 +522,6 @@ suspend fun Canvas.drawOrnament(cardOrnament: String, decorate: ModuleAuthor.Dec
                 FilterMipmap(FilterMode.LINEAR, MipmapMode.NEAREST),
                 Paint(),
                 true
-            )
-        }
-
-        "Label" -> {
-            val labelTextLine = TextLine.make(label, font.makeWithSize(quality.subTitleFontSize))
-            val y = ((quality.faceSize - quality.ornamentHeight) / 2) + quality.cardPadding
-            drawLabelCard(
-                labelTextLine,
-                cardContentRect.right - labelTextLine.width - quality.badgePadding * 4,
-                y,
-                Paint().apply {
-                    color = theme.subLeftBadge.fontColor
-                },
-                Paint().apply {
-                    color = theme.subLeftBadge.bgColor
-                }
             )
         }
     }

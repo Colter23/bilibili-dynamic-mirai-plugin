@@ -9,7 +9,9 @@ import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
 import top.colter.mirai.plugin.bilibili.FilterMode
 import top.colter.mirai.plugin.bilibili.FilterType
 import top.colter.mirai.plugin.bilibili.api.getDynamicDetail
+import top.colter.mirai.plugin.bilibili.api.getLive
 import top.colter.mirai.plugin.bilibili.data.DynamicDetail
+import top.colter.mirai.plugin.bilibili.data.LiveDetail
 import top.colter.mirai.plugin.bilibili.tasker.BiliDataTasker
 import top.colter.mirai.plugin.bilibili.utils.biliClient
 import top.colter.mirai.plugin.bilibili.utils.delegate
@@ -113,6 +115,14 @@ object DynamicCommand : CompositeCommand(
         val detail = biliClient.getDynamicDetail(did)
         if (detail != null) subject.sendMessage("请稍等") else subject.sendMessage("未找到动态")
         detail?.let { d -> BiliBiliDynamic.dynamicChannel.send(DynamicDetail(d, subject.delegate)) }
+    }
+
+    @SubCommand("live", "直播")
+    suspend fun CommandSenderOnMessage<*>.live() {
+        val subject = Contact()
+        val detail = biliClient.getLive(1, 1)
+        if (detail != null) subject.sendMessage("请稍等") else subject.sendMessage("当前没有人在直播")
+        detail?.let { d -> BiliBiliDynamic.liveChannel.send(LiveDetail(d.rooms.first(), subject.delegate)) }
     }
 
 }

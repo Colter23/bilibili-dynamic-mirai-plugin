@@ -21,15 +21,17 @@ import top.colter.mirai.plugin.bilibili.BiliConfig.accountConfig
 import top.colter.mirai.plugin.bilibili.api.*
 import top.colter.mirai.plugin.bilibili.client.BiliClient
 import top.colter.mirai.plugin.bilibili.data.DynamicMessage
-import top.colter.mirai.plugin.bilibili.data.DynamicType
+import top.colter.mirai.plugin.bilibili.data.LiveMessage
 import top.colter.mirai.plugin.bilibili.data.LoginData
 import top.colter.mirai.plugin.bilibili.draw.loginQrCode
+import top.colter.mirai.plugin.bilibili.tasker.DynamicMessageTasker.buildMessage
+import top.colter.mirai.plugin.bilibili.tasker.LiveMessageTasker.buildMessage
 import top.colter.mirai.plugin.bilibili.tasker.SendTasker.buildMessage
+import top.colter.mirai.plugin.bilibili.utils.biliClient
 import top.colter.mirai.plugin.bilibili.utils.decode
 import top.colter.mirai.plugin.bilibili.utils.delegate
 import top.colter.mirai.plugin.bilibili.utils.findContact
 import java.net.URI
-import java.time.Instant
 
 internal val logger by BiliBiliDynamic::logger
 
@@ -333,17 +335,11 @@ object BiliDataTasker {
         }
 
         // https://t.bilibili.com/385190177693666264
-        val dynamic = DynamicMessage(
-            "100000000000114514",
-            114514,
-            "哼啊啊啊",
-            DynamicType.DYNAMIC_TYPE_WORD,
-            "2114年5月14日 11:45:14",
-            Instant.now().epochSecond.toInt(),
-            "测试内容测试内容测试内容",
-            null,
-            listOf(DynamicMessage.Link("", "https://t.bilibili.com/100000000000114514"))
-        )
+        val dynamic = if (type == "d"){
+            biliClient.getDynamicDetail("385190177693666264")?.buildMessage()!!
+        }else {
+            biliClient.getLive(1,1)?.rooms?.first()?.buildMessage()!!
+        }
 
         subject.sendMessage(buildForwardMessage(subject) {
             var pt = 0
@@ -352,8 +348,17 @@ object BiliDataTasker {
             for (t in template) {
                 subject.bot named dynamic.uname at dynamic.timestamp + pt says t.key
                 subject.bot named dynamic.uname at dynamic.timestamp + pt says buildForwardMessage(subject) {
-                    dynamic.buildMessage(t.value, subject).forEach {
-                        subject.bot named dynamic.uname at dynamic.timestamp + pt says it
+                    when (dynamic) {
+                        is DynamicMessage -> {
+                            dynamic.buildMessage(t.value, subject).forEach {
+                                subject.bot named dynamic.uname at dynamic.timestamp + pt says it
+                            }
+                        }
+                        is LiveMessage -> {
+                            dynamic.buildMessage(t.value, subject).forEach {
+                                subject.bot named dynamic.uname at dynamic.timestamp + pt says it
+                            }
+                        }
                     }
                 }
                 pt += 86400

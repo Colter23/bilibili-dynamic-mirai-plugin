@@ -1230,7 +1230,17 @@ data class ModuleFold(
     @SerialName("statement")
     val statement: String,
     @SerialName("users")
-    val users: List<String>,
+    val users: List<BaseUser>,
+)
+
+@Serializable
+data class BaseUser(
+    @SerialName("mid")
+    val mid: Long,
+    @SerialName("name")
+    val name: String,
+    @SerialName("face")
+    val face: String,
 )
 
 /**

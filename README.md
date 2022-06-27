@@ -182,15 +182,15 @@ v3数据文件名 `BiliData.yml`
 | `pushInterval` | 单位毫秒 | QQ中连续发送消息的间隔 |
 
 #### ImageConfig
-| 配置项              | 取值                                                        | 说明                                         |
-|------------------|-----------------------------------------------------------|--------------------------------------------|
-| `quality`        | `800w` / `1000w` / `1200w` / `1500w` (图片宽度)               | 图片质量(分辨率)                                  |
-| `theme`          | `v3` (新版绘图主题) / `v3RainbowOutline` (彩虹边框) / `v2` (旧版绘图主题) | 绘图主题 (目前两套其实都差不多，鸡肋功能)                     |
-| `font`           | 字体名 / 字体文件名(不用加后缀)                                        | 绘图字体 目前仅支持单字体 字体放到插件数据路径下 `font` 文件夹中      |
-| `defaultColor`   | HEX颜色值 (#d3edfa;#fde8ed)                                  | 默认绘图主题色 支持多个值自定义渐变 中间用分号`;`号分隔 单个值会自动生成渐变色 |
-| `cardOrnament`   | `FanCard` (粉丝卡片) / `QrCode` (动态链接二维码) / `None` (无)        | 卡片装饰                                       |
-| `colorGenerator` | [ColorGenerator](#ColorGenerator)                         | 渐变色生成器配置 (用于图片背景) 仅当主题色为单个值时会自动生成          |
-| `badgeEnable`    | `true` / `false`                                          | 卡片顶部的标签                                    |
+| 配置项              | 取值                                                        | 说明                                                 |
+|------------------|-----------------------------------------------------------|----------------------------------------------------|
+| `quality`        | `800w` / `1000w` / `1200w` / `1500w` (图片宽度)               | 图片质量(分辨率)                                          |
+| `theme`          | `v3` (新版绘图主题) / `v3RainbowOutline` (彩虹边框) / `v2` (旧版绘图主题) | 绘图主题 (目前两套其实都差不多，鸡肋功能)                             |
+| `font`           | 字体名 / 字体文件名(不用加后缀)                                        | 绘图字体 目前仅支持单字体 字体放到插件数据路径下 `font` 文件夹中 -> [字体](#字体) |
+| `defaultColor`   | HEX颜色值 (#d3edfa;#fde8ed)                                  | 默认绘图主题色 支持多个值自定义渐变 中间用分号`;`号分隔 单个值会自动生成渐变色         |
+| `cardOrnament`   | `FanCard` (粉丝卡片) / `QrCode` (动态链接二维码) / `None` (无)        | 卡片装饰                                               |
+| `colorGenerator` | [ColorGenerator](#ColorGenerator)                         | 渐变色生成器配置 (用于图片背景) 仅当主题色为单个值时会自动生成                  |
+| `badgeEnable`    | `true` / `false`                                          | 卡片顶部的标签                                            |
 
 ##### ColorGenerator
 | 配置项          | 取值               | 说明                |
@@ -809,6 +809,13 @@ v2:
 
 通过对群设置权限来控制是否开启直播@全体    
 `/perm add g123456789 top.colter.bilibili-dynamic-mirai-plugin:live.atall`
+
+### 字体
+
+[HarmonyOS Sans](https://developer.harmonyos.com/cn/docs/design/des-resources/general-0000001157315901)
+
+选择下载 52.2MB 的字体压缩包文件, 请使用压缩包内 `HarmonyOS_Sans_SC` 目录下的字体, 此目录下的字体为简体中文   
+里面不同文件代表不同的粗细, 建议使用 `Medium` 
 
 ### 手动获取 Cookie
 <details>

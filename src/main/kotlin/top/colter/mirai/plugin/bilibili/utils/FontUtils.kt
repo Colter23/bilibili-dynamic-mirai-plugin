@@ -10,6 +10,8 @@ object FontUtils {
     private val fontProvider = TypefaceFontProvider()
     val fonts = FontCollection().setDefaultFontManager(fontMgr).setDynamicFontManager(fontProvider)
 
+    var defaultFont: Typeface? = null
+
     fun registerTypeface(typeface: Typeface?, alias: String? = null) =
         fontProvider.registerTypeface(typeface, alias)
 
@@ -24,6 +26,7 @@ object FontUtils {
 
     fun loadTypeface(path: String, alias: String? = null, index: Int = 0): Typeface {
         val face = Typeface.makeFromFile(path, index)
+        if (defaultFont == null) defaultFont = face
         registerTypeface(face, alias)
         logger.info("加载字体 ${face.familyName} 成功")
         return face

@@ -117,7 +117,7 @@ object SendTasker : BiliTasker() {
                                 val hasPerm = it.permitteeId.getPermittedPermissions().any { it.id == gwp }
                                 if (hasPerm) {
                                     val last = it1.last().plus("\n").plus(AtAll)
-                                    it.sendMessage(it1.dropLast(1).plus(last))
+                                    it.sendMessage(it1.dropLast(1).plusElement(last))
                                 } else {
                                     it.sendMessage(it1)
                                 }

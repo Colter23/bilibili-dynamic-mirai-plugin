@@ -21,7 +21,7 @@ object ListenerTasker : BiliTasker() {
             //if (l != null) {
             //    val detail = biliClient.getLive(1, 1)
             //    if (detail != null) it.subject.sendMessage("绘图中，请稍等")
-            //    detail?.let { d -> liveChannel.send(LiveDetail(d.rooms.first(), it.subject.delegate)) }
+            //    detail?.let { d -> BiliBiliDynamic.liveChannel.send(LiveDetail(d.rooms.first(), it.subject.delegate)) }
             //}
         }
     }
