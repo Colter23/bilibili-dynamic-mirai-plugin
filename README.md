@@ -784,6 +784,7 @@ v2:
 |--------|-------------------------------------------------------|
 | 基础权限ID | top.colter.bilibili-dynamic-mirai-plugin:*            |
 | 动态指令ID | top.colter.bilibili-dynamic-mirai-plugin:command.bili |
+| 跨通讯录控制 | top.colter.bilibili-dynamic-mirai-plugin:crossContact |
 
 如果你不会给权限可以点击下面展开查看简略教程
 <details>
