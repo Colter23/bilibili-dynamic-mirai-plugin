@@ -64,7 +64,7 @@ fun qrCode(url: String, width: Int, color: Int): Image {
     val cc = c[0] + c[1] + c[2]
     val ccc = if (cc > 382) {
         val hsb = rgb2hsb(c[0], c[1], c[2])
-        hsb[1] = hsb[1] + 0.25f
+        hsb[1] = if (hsb[1] + 0.25f > 1f) 1f else hsb[1] + 0.25f
         val rgb = hsb2rgb(hsb[0], hsb[1], hsb[2])
         Color.makeRGB(rgb[0], rgb[1], rgb[2])
     } else {
