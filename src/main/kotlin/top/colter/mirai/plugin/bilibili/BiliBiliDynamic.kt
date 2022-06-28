@@ -38,12 +38,14 @@ object BiliBiliDynamic : KotlinPlugin(
 
     val liveGwp = PermissionId(BiliBiliDynamic.description.id, "live.atall")
     val videoGwp = PermissionId(BiliBiliDynamic.description.id, "video.atall")
+    val crossContact = PermissionId(BiliBiliDynamic.description.id, "crossContact")
 
     override fun onEnable() {
         logger.info { "BiliBili Dynamic Plugin loaded" }
 
         PermissionService.INSTANCE.register(liveGwp, "直播At全体")
         PermissionService.INSTANCE.register(videoGwp, "视频At全体")
+        PermissionService.INSTANCE.register(crossContact, "跨聊天语境控制")
 
         DynamicCommand.register()
 
