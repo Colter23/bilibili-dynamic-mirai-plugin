@@ -16,6 +16,7 @@ import java.time.LocalTime
 object DynamicCheckTasker : BiliTasker() {
 
     override var interval: Int = BiliConfig.checkConfig.interval
+    private val intervalTime: Int = BiliConfig.checkConfig.interval
 
     private val dynamicChannel by BiliBiliDynamic::dynamicChannel
 
@@ -69,7 +70,7 @@ object DynamicCheckTasker : BiliTasker() {
             if (dynamics.isNotEmpty()) lastDynamic = dynamics.last().time
             dynamicChannel.sendAll(dynamics.map { DynamicDetail(it) })
         }
-        interval = calcTime(interval)
+        interval = calcTime(intervalTime)
     }
 
     private fun calcTime(time: Int): Int {

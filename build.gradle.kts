@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "top.colter"
-version = "3.0.0-M4"
+version = "3.0.0-M4.1"
 
 repositories {
     mavenLocal()
@@ -33,7 +33,7 @@ dependencies{
         exclude(group = "io.ktor", module = "ktor-client-core")
     }
 
-    val skikoVersion = "0.7.20"
+    val skikoVersion = "0.7.12"
     //api("org.jetbrains.skiko:skiko-awt:0.7.20")
     //临时
     implementation("org.jetbrains.skiko:skiko-awt-runtime-linux-x64:$skikoVersion")

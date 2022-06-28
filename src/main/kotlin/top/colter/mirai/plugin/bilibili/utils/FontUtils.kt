@@ -8,12 +8,15 @@ object FontUtils {
 
     private val fontMgr = FontMgr.default
     private val fontProvider = TypefaceFontProvider()
-    val fonts = FontCollection().setDefaultFontManager(fontMgr).setDynamicFontManager(fontProvider)
+    val fonts = FontCollection().setDynamicFontManager(fontProvider).setDefaultFontManager(fontMgr)
 
     var defaultFont: Typeface? = null
 
-    fun registerTypeface(typeface: Typeface?, alias: String? = null) =
-        fontProvider.registerTypeface(typeface, alias)
+    private fun registerTypeface(typeface: Typeface?, alias: String? = null) {
+        fontProvider.registerTypeface(typeface)
+        if (alias!=null) fontProvider.registerTypeface(typeface, alias)
+    }
+
 
     fun matchFamily(familyName: String): FontStyleSet {
         val fa = fontProvider.matchFamily(familyName)

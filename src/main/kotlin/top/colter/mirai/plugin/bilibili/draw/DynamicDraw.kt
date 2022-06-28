@@ -99,32 +99,45 @@ val fansCardFont: Font by lazy {
     Font(loadTypeface(Data.makeFromBytes(loadResourceBytes("font/FansCard.ttf"))), quality.subTitleFontSize)
 }
 
-val titleTextStyle = TextStyle().apply {
-    fontSize = quality.titleFontSize
-    color = theme.titleColor
-    typeface = mainTypeface
-}
-val descTextStyle = TextStyle().apply {
-    fontSize = quality.descFontSize
-    color = theme.descColor
-    typeface = mainTypeface
-}
-val contentTextStyle = TextStyle().apply {
-    fontSize = quality.contentFontSize
-    color = theme.contentColor
-    typeface = mainTypeface
-}
-val footerTextStyle = TextStyle().apply {
-    fontSize = quality.footerFontSize
-    color = theme.footerColor
-    typeface = mainTypeface
+val titleTextStyle by lazy {
+    TextStyle().apply {
+        fontSize = quality.titleFontSize
+        color = theme.titleColor
+        fontFamilies = arrayOf(mainTypeface.familyName)
+    }
 }
 
-val footerParagraphStyle = ParagraphStyle().apply {
-    maxLinesCount = 2
-    ellipsis = "..."
-    alignment = BiliConfig.templateConfig.footer.footerAlign
-    textStyle = footerTextStyle
+val descTextStyle by lazy {
+    TextStyle().apply {
+        fontSize = quality.descFontSize
+        color = theme.descColor
+        fontFamilies = arrayOf(mainTypeface.familyName)
+    }
+}
+
+val contentTextStyle by lazy {
+    TextStyle().apply {
+        fontSize = quality.contentFontSize
+        color = theme.contentColor
+        fontFamilies = arrayOf(mainTypeface.familyName)
+    }
+}
+
+val footerTextStyle by lazy {
+    TextStyle().apply {
+        fontSize = quality.footerFontSize
+        color = theme.footerColor
+        fontFamilies = arrayOf(mainTypeface.familyName)
+    }
+}
+
+val footerParagraphStyle by lazy {
+    ParagraphStyle().apply {
+        maxLinesCount = 2
+        ellipsis = "..."
+        alignment = BiliConfig.templateConfig.footer.footerAlign
+        textStyle = footerTextStyle
+    }
 }
 
 val cardBadgeArc: FloatArray by lazy {
