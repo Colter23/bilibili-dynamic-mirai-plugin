@@ -10,8 +10,8 @@ import top.colter.mirai.plugin.bilibili.data.LiveDetail
 import top.colter.mirai.plugin.bilibili.utils.sendAll
 import java.time.Instant
 
-object LiveCheckTasker : BiliTasker() {
-    override var interval: Int = BiliConfig.checkConfig.liveInterval
+object LiveCheckTasker : BiliCheckTasker() {
+    override var interval by BiliConfig.checkConfig::liveInterval
 
     private val liveChannel by BiliBiliDynamic::liveChannel
 

@@ -158,6 +158,7 @@ v3数据文件名 `BiliData.yml`
 | 配置项                | 取值               | 说明     |
 |--------------------|------------------|--------|
 | `drawEnable`       | `true` / `false` | 绘图开关   |
+| `lowSpeedEnable`   | `true` / `false` | 低频检测开关 |
 | `translateEnable`  | `true` / `false` | 翻译开关   |
 | `proxyEnable`      | `true` / `false` | 代理开关   |
 | `cacheClearEnable` | `true` / `false` | 缓存清理开关 |
@@ -297,11 +298,13 @@ v3数据文件名 `BiliData.yml`
 
 # 功能开关:
 #   drawEnable: 绘图开关
+#   lowSpeedEnable: 低频检测开关
 #   translateEnable: 翻译开关
 #   proxyEnable: 代理开关
 #   cacheClearEnable: 缓存清理开关
 enableConfig:
   drawEnable: true
+  lowSpeedEnable: false
   translateEnable: false
   proxyEnable: false
   cacheClearEnable: true

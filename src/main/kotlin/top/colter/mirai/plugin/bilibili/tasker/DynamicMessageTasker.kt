@@ -49,100 +49,38 @@ object DynamicMessageTasker : BiliTasker() {
 
     fun DynamicItem.textContent(): String {
         return when (type) {
-            DYNAMIC_TYPE_FORWARD -> {
-                "${modules.moduleDynamic.desc?.text}\n\n 转发动态:\n${orig?.textContent()}"
-            }
-
+            DYNAMIC_TYPE_FORWARD -> "${modules.moduleDynamic.desc?.text}\n\n 转发动态:\n${orig?.textContent()}"
             DYNAMIC_TYPE_WORD,
-            DYNAMIC_TYPE_DRAW -> {
-                modules.moduleDynamic.desc?.text ?: ""
-            }
-
-            DYNAMIC_TYPE_ARTICLE -> {
-                modules.moduleDynamic.major?.article?.title!!
-            }
-
-            DYNAMIC_TYPE_AV -> {
-                modules.moduleDynamic.major?.archive?.title!!
-            }
-
-            DYNAMIC_TYPE_MUSIC -> {
-                modules.moduleDynamic.major?.music?.title!!
-            }
-
-            DYNAMIC_TYPE_PGC -> {
-                modules.moduleDynamic.major?.pgc?.title!!
-            }
-
+            DYNAMIC_TYPE_DRAW -> modules.moduleDynamic.desc?.text ?: ""
+            DYNAMIC_TYPE_ARTICLE -> modules.moduleDynamic.major?.article?.title!!
+            DYNAMIC_TYPE_AV -> modules.moduleDynamic.major?.archive?.title!!
+            DYNAMIC_TYPE_MUSIC -> modules.moduleDynamic.major?.music?.title!!
+            DYNAMIC_TYPE_PGC -> modules.moduleDynamic.major?.pgc?.title!!
             DYNAMIC_TYPE_COMMON_VERTICAL,
-            DYNAMIC_TYPE_COMMON_SQUARE -> {
-                modules.moduleDynamic.major?.common?.title!!
-            }
-
-            DYNAMIC_TYPE_LIVE -> {
-                modules.moduleDynamic.major?.live?.title!!
-            }
-
-            DYNAMIC_TYPE_LIVE_RCMD -> {
-                modules.moduleDynamic.major?.liveRcmd?.content!!
-            }
-            DYNAMIC_TYPE_NONE -> {
-                modules.moduleDynamic.major?.none?.tips!!
-            }
+            DYNAMIC_TYPE_COMMON_SQUARE -> modules.moduleDynamic.major?.common?.title!!
+            DYNAMIC_TYPE_LIVE -> modules.moduleDynamic.major?.live?.title!!
+            DYNAMIC_TYPE_LIVE_RCMD -> modules.moduleDynamic.major?.liveRcmd?.liveInfo?.livePlayInfo?.title!!
+            DYNAMIC_TYPE_NONE -> modules.moduleDynamic.major?.none?.tips!!
             DYNAMIC_TYPE_UNKNOWN -> "未知的动态类型: $typeStr"
         }
-
     }
 
     fun DynamicItem.dynamicImages(): List<String>? {
-
         return when (type) {
-            DYNAMIC_TYPE_FORWARD -> {
-                orig?.dynamicImages()!!
-            }
-
-            DYNAMIC_TYPE_DRAW -> {
-                modules.moduleDynamic.major?.draw?.items?.map { it.src }
-            }
-
-            DYNAMIC_TYPE_ARTICLE -> {
-                modules.moduleDynamic.major?.article?.covers
-            }
-
-            DYNAMIC_TYPE_AV -> {
-                listOf(modules.moduleDynamic.major?.archive?.cover!!)
-            }
-
-            DYNAMIC_TYPE_MUSIC -> {
-                listOf(modules.moduleDynamic.major?.music?.cover!!)
-            }
-
-            DYNAMIC_TYPE_PGC -> {
-                listOf(modules.moduleDynamic.major?.pgc?.cover!!)
-            }
-
-            DYNAMIC_TYPE_COMMON_SQUARE -> {
-                listOf(modules.moduleDynamic.major?.common?.cover!!)
-            }
-
-            DYNAMIC_TYPE_LIVE -> {
-                listOf(modules.moduleDynamic.major?.live?.cover!!)
-            }
-
-            DYNAMIC_TYPE_LIVE_RCMD -> {
-                modules.moduleDynamic.major?.liveRcmd
-                listOf()
-            }
-
-            else -> {
-                listOf()
-            }
+            DYNAMIC_TYPE_FORWARD -> orig?.dynamicImages()!!
+            DYNAMIC_TYPE_DRAW -> modules.moduleDynamic.major?.draw?.items?.map { it.src }
+            DYNAMIC_TYPE_ARTICLE -> modules.moduleDynamic.major?.article?.covers
+            DYNAMIC_TYPE_AV -> listOf(modules.moduleDynamic.major?.archive?.cover!!)
+            DYNAMIC_TYPE_MUSIC -> listOf(modules.moduleDynamic.major?.music?.cover!!)
+            DYNAMIC_TYPE_PGC -> listOf(modules.moduleDynamic.major?.pgc?.cover!!)
+            DYNAMIC_TYPE_COMMON_SQUARE -> listOf(modules.moduleDynamic.major?.common?.cover!!)
+            DYNAMIC_TYPE_LIVE -> listOf(modules.moduleDynamic.major?.live?.cover!!)
+            DYNAMIC_TYPE_LIVE_RCMD -> listOf(modules.moduleDynamic.major?.liveRcmd?.liveInfo?.livePlayInfo?.cover!!)
+            else -> listOf()
         }
-
     }
 
     fun DynamicItem.dynamicLinks(): List<DynamicMessage.Link> {
-
         return when (type) {
             DYNAMIC_TYPE_FORWARD -> {
                 listOf(
@@ -150,6 +88,7 @@ object DynamicMessageTasker : BiliTasker() {
                     DynamicMessage.Link("原动态", DYNAMIC_LINK(orig!!.did)),
                 )
             }
+
             DYNAMIC_TYPE_NONE,
             DYNAMIC_TYPE_WORD,
             DYNAMIC_TYPE_DRAW,
@@ -209,9 +148,14 @@ object DynamicMessageTasker : BiliTasker() {
             }
 
             DYNAMIC_TYPE_LIVE_RCMD -> {
-                listOf(DynamicMessage.Link(DYNAMIC_TYPE_LIVE_RCMD.text, DYNAMIC_LINK(did)))
+                listOf(
+                    DynamicMessage.Link(
+                        DYNAMIC_TYPE_LIVE_RCMD.text,
+                        LIVE_LINK(this.modules.moduleDynamic.major?.liveRcmd?.liveInfo?.livePlayInfo?.roomId!!)
+                    ),
+                    DynamicMessage.Link("动态", DYNAMIC_LINK(did))
+                )
             }
-
         }
 
     }

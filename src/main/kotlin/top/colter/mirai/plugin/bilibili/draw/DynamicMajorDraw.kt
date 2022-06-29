@@ -14,45 +14,16 @@ import kotlin.math.ceil
 
 suspend fun ModuleDynamic.Major.makeGeneral(isForward: Boolean = false): Image? {
     return when (type) {
-        "MAJOR_TYPE_ARCHIVE" -> {
-            if (isForward) archive!!.drawSmall() else archive!!.drawGeneral()
-        }
-
-        "MAJOR_TYPE_DRAW" -> {
-            draw!!.drawGeneral()
-        }
-
-        "MAJOR_TYPE_ARTICLE" -> {
-            article!!.drawGeneral()
-        }
-
-        "MAJOR_TYPE_MUSIC" -> {
-            music!!.drawGeneral()
-        }
-
-        "MAJOR_TYPE_LIVE" -> {
-            live!!.drawGeneral()
-        }
-
-        "MAJOR_TYPE_LIVE_RCMD" -> {
-            drawInfoText("暂时无法绘制类型为 [$type] 的动态类型")
-        }
-
-        "MAJOR_TYPE_PGC" -> {
-            pgc!!.drawSmall()
-        }
-
-        "MAJOR_TYPE_COMMON" -> {
-            common!!.drawGeneral()
-        }
-
-        "MAJOR_TYPE_NONE" -> {
-            drawInfoText(none?.tips!!)
-        }
-
-        else -> {
-            drawInfoText("无法绘制类型为 [$type] 的动态类型, 请把动态链接反馈给开发者")
-        }
+        "MAJOR_TYPE_ARCHIVE" -> if (isForward) archive!!.drawSmall() else archive!!.drawGeneral()
+        "MAJOR_TYPE_DRAW" -> draw!!.drawGeneral()
+        "MAJOR_TYPE_ARTICLE" -> article!!.drawGeneral()
+        "MAJOR_TYPE_MUSIC" -> music!!.drawGeneral()
+        "MAJOR_TYPE_LIVE" -> live!!.drawGeneral()
+        "MAJOR_TYPE_LIVE_RCMD" -> liveRcmd!!.drawGeneral()
+        "MAJOR_TYPE_PGC" -> pgc!!.drawSmall()
+        "MAJOR_TYPE_COMMON" -> common!!.drawGeneral()
+        "MAJOR_TYPE_NONE" -> drawInfoText(none?.tips!!)
+        else -> drawInfoText("无法绘制类型为 [$type] 的动态类型, 请把动态链接反馈给开发者")
     }
 }
 
@@ -305,6 +276,11 @@ suspend fun ModuleDynamic.Major.Archive.drawGeneral(): Image {
 
 suspend fun ModuleDynamic.Major.Live.drawGeneral(): Image {
     return drawSmallCard(title, "$descFirst $descSecond", cover, badge.text, "$id", null)
+}
+
+suspend fun ModuleDynamic.Major.LiveRcmd.drawGeneral(): Image {
+    val info = liveInfo.livePlayInfo
+    return drawSmallCard(info.title, "${info.parentAreaName} · ${info.areaName}", info.cover, "直播", "${info.roomId}", null)
 }
 
 suspend fun ModuleDynamic.Major.Archive.drawSmall(): Image {

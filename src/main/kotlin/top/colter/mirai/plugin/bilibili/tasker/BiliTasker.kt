@@ -26,17 +26,23 @@ abstract class BiliTasker(
 
     protected open fun init() {}
 
+    protected open fun before() {}
     protected abstract suspend fun main()
+    protected open fun after() {}
 
     override fun start(): Boolean {
         job = launch(coroutineContext) {
             init()
             if (interval == -1) {
+                before()
                 main()
+                after()
             } else {
                 while (isActive) {
                     try {
+                        before()
                         main()
+                        after()
                     } catch (e: Throwable) {
                         BiliBiliDynamic.logger.error(e.message)
                         delay(120000L)

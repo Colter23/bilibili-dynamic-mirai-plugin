@@ -11,12 +11,10 @@ import top.colter.mirai.plugin.bilibili.data.DynamicType
 import top.colter.mirai.plugin.bilibili.utils.sendAll
 import top.colter.mirai.plugin.bilibili.utils.time
 import java.time.Instant
-import java.time.LocalTime
 
-object DynamicCheckTasker : BiliTasker() {
+object DynamicCheckTasker : BiliCheckTasker() {
 
-    override var interval: Int = BiliConfig.checkConfig.interval
-    private val intervalTime: Int = BiliConfig.checkConfig.interval
+    override var interval by BiliConfig.checkConfig::interval
 
     private val dynamicChannel by BiliBiliDynamic::dynamicChannel
 
@@ -26,9 +24,6 @@ object DynamicCheckTasker : BiliTasker() {
 
     private val client = BiliClient()
 
-    private var lsl = listOf(0, 0)
-    private var isLowSpeed = false
-
     private val banType = listOf(
         DynamicType.DYNAMIC_TYPE_LIVE,
         DynamicType.DYNAMIC_TYPE_LIVE_RCMD,
@@ -36,15 +31,6 @@ object DynamicCheckTasker : BiliTasker() {
     )
 
     private var lastDynamic: Long = Instant.now().epochSecond
-
-    override fun init() {
-        runCatching {
-            lsl = BiliConfig.checkConfig.lowSpeed.split("-", "x").map { it.toInt() }
-            isLowSpeed = lsl[0] != lsl[1]
-        }.onFailure {
-            logger.error("低频检测参数错误 ${it.message}")
-        }
-    }
 
     override suspend fun main() = withTimeout(180001) {
         logger.debug("Check Dynamic...")
@@ -70,18 +56,6 @@ object DynamicCheckTasker : BiliTasker() {
             if (dynamics.isNotEmpty()) lastDynamic = dynamics.last().time
             dynamicChannel.sendAll(dynamics.map { DynamicDetail(it) })
         }
-        interval = calcTime(intervalTime)
-    }
-
-    private fun calcTime(time: Int): Int {
-        return if (isLowSpeed) {
-            val hour = LocalTime.now().hour
-            return if (lsl[0] > lsl[1]) {
-                if (lsl[0] <= hour || hour <= lsl[1]) time * lsl[2] else time
-            } else {
-                if (lsl[0] <= hour && hour <= lsl[1]) time * lsl[2] else time
-            }
-        } else time
     }
 
 }

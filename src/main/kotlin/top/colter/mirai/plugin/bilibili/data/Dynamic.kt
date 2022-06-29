@@ -2,6 +2,7 @@ package top.colter.mirai.plugin.bilibili.data
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import top.colter.mirai.plugin.bilibili.utils.decode
 
 
 /**
@@ -689,7 +690,7 @@ data class ModuleDynamic(
                 @SerialName("text")
                 val text: String,
                 @SerialName("icon_url")
-                val iconUrl: String,
+                val iconUrl: String?,
                 @SerialName("disable")
                 val disable: Int? = null,
                 @SerialName("toast")
@@ -1048,7 +1049,81 @@ data class ModuleDynamic(
             val content: String,
             @SerialName("reserve_type")
             val reserveType: Int,
-        )
+        ){
+            val liveInfo: LiveRcmdContent get() = content.decode()
+
+            @Serializable
+            data class LiveRcmdContent(
+                @SerialName("type")
+                val type: Int,
+                @SerialName("live_play_info")
+                val livePlayInfo: LivePlayInfo,
+                //@SerialName("live_record_info")
+                //val liveRecordInfo: LiveRecordInfo?,
+            ){
+                @Serializable
+                data class LivePlayInfo(
+                    @SerialName("uid")
+                    val uid: Long,
+                    @SerialName("room_id")
+                    val roomId: Long,
+                    @SerialName("live_id")
+                    val liveId: String,
+                    @SerialName("live_status")
+                    val liveStatus: Int,
+                    @SerialName("title")
+                    val title: String,
+                    @SerialName("cover")
+                    val cover: String,
+                    @SerialName("parent_area_name")
+                    val parentAreaName: String,
+                    @SerialName("parent_area_id")
+                    val parentAreaId: Int,
+                    @SerialName("area_name")
+                    val areaName: String,
+                    @SerialName("area_id")
+                    val areaId: Int,
+                    @SerialName("link")
+                    val link: String,
+                    @SerialName("room_type")
+                    val room_type: Int,
+                    @SerialName("live_screen_type")
+                    val liveScreenType: Int,
+                    @SerialName("live_start_time")
+                    val liveStartTime: Long,
+                    @SerialName("play_type")
+                    val playType: Int,
+                    @SerialName("online")
+                    val online: Int,
+                    @SerialName("room_paid_type")
+                    val roomPaidType: Int,
+                    @SerialName("watched_show")
+                    val watchedShow: WatchedShow,
+                    //@SerialName("pendants")
+                    //val pendants: Pendants,
+
+                ){
+                    @Serializable
+                    data class WatchedShow(
+                        @SerialName("num")
+                        val num: Int,
+                        @SerialName("text_small")
+                        val textSmall: String,
+                        @SerialName("text_large")
+                        val textLarge: String,
+                        @SerialName("icon")
+                        val icon: String,
+                        @SerialName("icon_location")
+                        val iconLocation: String,
+                        @SerialName("icon_web")
+                        val iconWeb: String,
+                        @SerialName("switch")
+                        val switch: Boolean,
+                    )
+                }
+            }
+        }
+
 
         /**
          * 番剧/电影
