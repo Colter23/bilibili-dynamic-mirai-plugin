@@ -25,3 +25,6 @@ const val CREATE_GROUP = "https://api.bilibili.com/x/relation/tag/create"
 const val DEL_FOLLOW_GROUP = "https://api.bilibili.com/x/relation/tag/del"
 const val ADD_USER = "https://api.bilibili.com/x/relation/tags/addUsers"
 
+// Twemoji CDN
+const val TWEMOJI = "https://twemoji.maxcdn.com/v/14.0.2/72x72"
+

@@ -5,6 +5,7 @@ import org.jetbrains.skia.paragraph.Alignment
 import org.jetbrains.skia.paragraph.ParagraphBuilder
 import org.jetbrains.skia.paragraph.ParagraphStyle
 import top.colter.mirai.plugin.bilibili.BiliConfig
+import top.colter.mirai.plugin.bilibili.api.twemoji
 import top.colter.mirai.plugin.bilibili.data.ModuleAuthor
 import top.colter.mirai.plugin.bilibili.data.ModuleDispute
 import top.colter.mirai.plugin.bilibili.data.ModuleDynamic
@@ -13,6 +14,7 @@ import top.colter.mirai.plugin.bilibili.utils.FontUtils
 import top.colter.mirai.plugin.bilibili.utils.formatTime
 import top.colter.mirai.plugin.bilibili.utils.getOrDownloadImage
 import top.colter.mirai.plugin.bilibili.utils.translate.trans
+import java.util.stream.Collectors
 import kotlin.math.abs
 import kotlin.math.ceil
 
@@ -182,7 +184,7 @@ suspend fun drawAdditionalCard(
     }.makeImageSnapshot()
 }
 
-fun ModuleDispute.drawGeneral(): Image {
+suspend fun ModuleDispute.drawGeneral(): Image {
     val lineCount = if (TextLine.make(title, font).width / cardContentRect.width > 1) 2 else 1
     val textCardHeight = (quality.contentFontSize + quality.lineSpace * 2) * lineCount
 
@@ -213,7 +215,7 @@ fun ModuleDispute.drawGeneral(): Image {
     }.makeImageSnapshot()
 }
 
-fun ModuleDynamic.Topic.drawGeneral(): Image {
+suspend fun ModuleDynamic.Topic.drawGeneral(): Image {
 
     val lineCount = if (TextLine.make(name, font).width / cardContentRect.width > 1) 2 else 1
     val textCardHeight = (quality.contentFontSize + quality.lineSpace * 2) * lineCount
@@ -288,7 +290,8 @@ suspend fun ModuleDynamic.Desc.drawGeneral(): Image {
             nodes.forEach {
                 when (it.type) {
                     "RICH_TEXT_NODE_TYPE_TEXT" -> {
-                        val point = drawTextArea(it.text, textCardRect, x, y, font, generalPaint)
+                        val text = it.text.replace("\r\n", "\n").replace("\r", "\n")
+                        val point = drawTextArea(text, textCardRect, x, y, font, generalPaint)
                         x = point.x
                         y = point.y
                     }
@@ -356,7 +359,7 @@ sealed class RichText(
     ) : RichText(value)
 }
 
-fun Canvas.drawTextArea(text: String, rect: Rect, textX: Float, textY: Float, font: Font, paint: Paint): Point {
+suspend fun Canvas.drawTextArea(text: String, rect: Rect, textX: Float, textY: Float, font: Font, paint: Paint): Point {
     var x = textX
     var y = textY
 
@@ -375,10 +378,10 @@ fun Canvas.drawTextArea(text: String, rect: Rect, textX: Float, textY: Float, fo
         textNode.add(RichText.Text(text.substring(index, text.length)))
     }
 
-    textNode.forEach {
-        when (it) {
+    for (node in textNode){
+        when (node) {
             is RichText.Text -> {
-                for (point in it.value.codePoints()) {
+                for (point in node.value.codePoints()) {
                     val c = String(intArrayOf(point), 0, intArrayOf(point).size)
                     if (c == "\n") {
                         x = rect.left
@@ -396,13 +399,41 @@ fun Canvas.drawTextArea(text: String, rect: Rect, textX: Float, textY: Float, fo
             }
 
             is RichText.Emoji -> {
-                val tl = TextLine.make(it.value, font)
-                if (x + tl.width > rect.right) {
+                val emoji = node.value.codePoints().mapToObj { it.toString(16) }.collect(Collectors.joining("-"))
+                val emojiSize = TextLine.make("🙂", font).height
+
+                var emojiImg: Image? = null
+                try {
+                    emojiImg = getOrDownloadImage(twemoji(emoji), CacheType.EMOJI)
+                }catch (_: Exception){ }
+                try {
+                    val e = emoji.split("-")
+                    val et = if (e.last() == "fe0f") {
+                        e.dropLast(1)
+                    }else {
+                        e.plus("fe0f")
+                    }.joinToString("-")
+                    emojiImg = getOrDownloadImage(twemoji(et), CacheType.EMOJI)
+                }catch (_: Exception){ }
+
+                if (x + emojiSize > rect.right) {
                     x = rect.left
-                    y += tl.height + quality.lineSpace
+                    y += emojiSize + quality.lineSpace
                 }
-                drawTextLine(tl, x, y, paint)
-                x += tl.width
+                if (emojiImg != null) {
+                    val srcRect = Rect.makeXYWH(0f, 0f, emojiImg.width.toFloat(), emojiImg.height.toFloat())
+                    val tarRect = Rect.makeXYWH(x, y - emojiSize * 0.8f, emojiSize * 0.9f, emojiSize * 0.9f)
+                    drawImageRect(
+                        emojiImg,
+                        srcRect,
+                        tarRect,
+                        FilterMipmap(FilterMode.LINEAR, MipmapMode.NEAREST),
+                        null,
+                        true
+                    )
+                }
+                //drawTextLine(tl, x, y, paint)
+                x += emojiSize
             }
         }
     }

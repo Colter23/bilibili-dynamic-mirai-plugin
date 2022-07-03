@@ -70,8 +70,9 @@ internal class PluginTest {
     fun emojiTest(): Unit = runBlocking {
 
 
-        val text = "AAAAA👩🏻‍⚕️👩🏻‍🏫👩🏻‍⚕️👩🏻‍🏫AAvv"
-
+        //val text = "AAAAA👩🏻‍⚕️👩🏻‍🏫👩🏻‍⚕️👩🏻‍🏫AAvv"
+        //val text = "\uD83D\uDE05\uD83E\uDD21\uD83E\uDD16\uD83E\uDDA2\uD83D\uDC11\uD83C\uDF8B\uD83C\uDF34\uD83E\uDD69\uD83E\uDD5C\uD83D\uDC40\uD83E\uDD1E\uD83D\uDC98\uD83C\uDF81\uD83C\uDF83\uD83D\uDE8C\uD83D\uDEB2\uD83D\uDE94\uD83D\uDD73\uD83D\uDD73\uD83D\uDC2D\uD83D\uDD73\uD83D\uDD73\uD83D\uDC48\uD83D\uDC49\uD83D\uDC46\uD83D\uDC47\uD83E\uDD75"
+        val text = "🤡"
 
         val textNode = mutableListOf<RichText>()
         var index = 0
@@ -571,12 +572,15 @@ internal class PluginTest {
     @Test
     fun charTest(): Unit = runBlocking {
 
-        val text = "\uD80C\uDC9A\uD80C\uDE16\uD80C\uDDCB\uD80C\uDC9D\uD80C\uDF9B\uD80C\uDDF9"
+        //val text = "\uD80C\uDC9A\uD80C\uDE16\uD80C\uDDCB\uD80C\uDC9D\uD80C\uDF9B\uD80C\uDDF9"
+        //val text = "\uD83D\uDE05\uD83E\uDD21\uD83E\uDD16\uD83E\uDDA2\uD83D\uDC11\uD83C\uDF8B\uD83C\uDF34"
+        val text = "\uD83D\uDE36\u200D\uD83C\uDF2B️" //
         //val text = "啊这"
         println(text)
 
         for (c in text.codePoints()) {
             println(String(intArrayOf(c), 0, intArrayOf(c).size))
+            println(c.toString(16))
         }
 
     }

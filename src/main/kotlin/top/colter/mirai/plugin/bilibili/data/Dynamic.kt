@@ -561,7 +561,7 @@ data class ModuleDynamic(
             @SerialName("status")
             val status: Int?,
             @SerialName("join_num")
-            val joinNum: Int,
+            val joinNum: Int?,
             @SerialName("end_time")
             val endTime: Long,
             @SerialName("choice_cnt")

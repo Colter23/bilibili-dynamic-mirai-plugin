@@ -75,12 +75,12 @@ suspend fun LiveInfo.drawLive(): Image {
             drawScaleWidthImage(avatar, cardRect.width, quality.cardMargin.toFloat(), top)
             top += avatar.height + quality.contentSpace
 
-            val dst = RRect.makeComplexXYWH(
+            val dst = RRect.makeXYWH(
                 quality.cardMargin.toFloat(),
                 top,
                 cardRect.width,
                 cardRect.width * cover.height / cover.width,
-                cardBadgeArc
+                quality.cardArc
             )
             drawImageRRect(cover, dst)
 
