@@ -1,5 +1,6 @@
 package top.colter
 
+import io.ktor.client.call.*
 import io.ktor.client.request.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.serializer
@@ -34,7 +35,7 @@ internal class PluginTest {
         val client = BiliClient()
 
         println(client.useHttpClient {
-            it.get<String>("http://passport.bilibili.com/qrcode/getLoginUrl")
+            it.get("http://passport.bilibili.com/qrcode/getLoginUrl").body<String>()
         })
 
 //        json.parseToJsonElement()

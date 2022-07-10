@@ -17,6 +17,7 @@ import top.colter.mirai.plugin.bilibili.data.LiveDetail
 import top.colter.mirai.plugin.bilibili.tasker.BiliDataTasker
 import top.colter.mirai.plugin.bilibili.utils.biliClient
 import top.colter.mirai.plugin.bilibili.utils.delegate
+import top.colter.mirai.plugin.bilibili.utils.findLocalIdOrName
 
 object DynamicCommand : CompositeCommand(
     owner = BiliBiliDynamic,
@@ -138,6 +139,21 @@ object DynamicCommand : CompositeCommand(
         val detail = biliClient.getLive(1, 1)
         if (detail != null) subject.sendMessage("请稍等") else subject.sendMessage("当前没有人在直播")
         detail?.let { d -> BiliBiliDynamic.liveChannel.send(LiveDetail(d.rooms.first(), subject.delegate)) }
+    }
+
+    @SubCommand("new", "最新动态")
+    suspend fun CommandSenderOnMessage<*>.new(user: String, count: Int = 1) {
+        val subject = Contact()
+        val u = findLocalIdOrName(user)
+        val us = buildString {
+            u.forEach {
+                appendLine("${it.first} : ${it.second}")
+            }
+        }
+        subject.sendMessage(us)
+        //val detail = biliClient.getDynamicDetail(did)
+        //if (detail != null) subject.sendMessage("请稍等") else subject.sendMessage("未找到动态")
+        //detail?.let { d -> BiliBiliDynamic.dynamicChannel.send(DynamicDetail(d, subject.delegate)) }
     }
 
 }

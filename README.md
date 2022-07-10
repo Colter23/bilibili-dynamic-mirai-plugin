@@ -847,6 +847,7 @@ v2:
 [B站: Colter_null](https://space.bilibili.com/32868931) 如果 GitHub 或论坛太长时间没回复可以去 B 站私信  
 
 ## 感谢
-cssxsh: [bilibili-helper](https://github.com/cssxsh/bilibili-helper)
+cssxsh: [bilibili-helper](https://github.com/cssxsh/bilibili-helper)    
+Twitter Emoji: [Twemoji](https://github.com/twitter/twemoji)    
 
 

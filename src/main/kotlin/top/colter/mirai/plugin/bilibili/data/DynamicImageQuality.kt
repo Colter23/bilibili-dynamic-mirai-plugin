@@ -71,7 +71,7 @@ object BiliImageQuality : ReadOnlyPluginConfig("ImageQuality") {
                 noPendantFaceInflate = 10f,
                 pendantSize = 140f,
                 verifyIconSize = 30f,
-                ornamentHeight = 115f,
+                ornamentHeight = 125f,
 
                 badgeHeight = 45,
                 badgePadding = 8,

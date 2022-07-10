@@ -165,6 +165,8 @@ data class DynamicItem(
         val moduleMore: ModuleMore? = null,
         @SerialName("module_stat")
         val moduleStat: ModuleStat? = null,
+        @SerialName("module_tag")
+        val moduleTag: ModuleTag? = null,
     )
 }
 
@@ -1400,3 +1402,13 @@ data class ModuleStat(
         val status: Boolean? = null,
     )
 }
+
+/**
+ * 动态标签
+ * @param text 标签 (置顶)
+ */
+@Serializable
+data class ModuleTag(
+    @SerialName("text")
+    val text: String,
+)

@@ -1,5 +1,5 @@
 plugins {
-    val kotlinVersion = "1.6.21"
+    val kotlinVersion = "1.7.0"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.serialization") version kotlinVersion
 
@@ -7,17 +7,14 @@ plugins {
 }
 
 group = "top.colter"
-version = "3.0.0-BETA1.1"
+version = "3.0.0-BETA1.3"
 
 repositories {
     mavenLocal()
-    maven("https://maven.aliyun.com/repository/public")
     mavenCentral()
 }
 
 dependencies{
-    implementation("com.google.zxing:javase:3.4.1")
-
     implementation("io.ktor:ktor-client-okhttp:2.0.3") {
         exclude(group = "org.jetbrains.kotlin")
         exclude(group = "org.jetbrains.kotlinx")
@@ -44,9 +41,10 @@ dependencies{
         exclude(group = "org.slf4j")
     }
 
+    implementation("com.google.zxing:javase:3.5.0")
     compileOnly("xyz.cssxsh.mirai:mirai-skia-plugin:1.1.3")
 
-    testImplementation(kotlin("test", "1.6.21"))
+    testImplementation(kotlin("test", "1.7.0"))
     testImplementation("org.jetbrains.skiko:skiko-awt-runtime-windows-x64:0.7.20")
     testImplementation("org.jetbrains.skiko:skiko-awt-runtime-linux-x64:0.7.20")
     testImplementation("org.jetbrains.skiko:skiko-awt-runtime-linux-arm64:0.7.20")

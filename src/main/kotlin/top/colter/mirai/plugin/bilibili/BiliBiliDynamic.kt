@@ -23,7 +23,7 @@ object BiliBiliDynamic : KotlinPlugin(
     JvmPluginDescription(
         id = "top.colter.bilibili-dynamic-mirai-plugin",
         name = "BiliBili Dynamic",
-        version = "3.0.0-BETA1.1",
+        version = "3.0.0-BETA1.3",
     ) {
         author("Colter")
         dependsOn("xyz.cssxsh.mirai.plugin.mirai-skia-plugin", ">= 1.1.0")

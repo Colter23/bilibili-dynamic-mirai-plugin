@@ -399,51 +399,50 @@ object BiliDataTasker {
         val delegate = event.subject.delegate
         val sender = event.sender
 
-        if (!(dynamic.containsKey(uid) && dynamic[uid]!!.contacts.contains(delegate))) {
+        if (uid != 0L && !((dynamic.containsKey(uid) && dynamic[uid]!!.contacts.contains(delegate)))) {
             subject.sendMessage("没有订阅这个人哦 [$uid]")
             return
         }
 
-        val user = dynamic[uid]!!
+        val user = if (uid != 0L) dynamic[uid] else null
 
         val configMap = mutableMapOf<String, String>()
 
         subject.sendMessage(buildString {
             append("配置: ")
-            appendLine(if (uid == 0L) "全局" else user.name)
+            appendLine(if (uid == 0L) "全局" else user?.name)
             appendLine()
             appendLine("当前可配置项:")
             var i = 1
-            if (user.color == null) {
+            if (user?.color == null) {
                 configMap[i.toString()] = "COLOR"
                 appendLine("  ${i++}: 主题色")
             }
             if (uid == 0L) {
                 configMap[i.toString()] = "PUSH"
                 appendLine("  $i: 推送模板")
-                appendLine("    $i.1: 动态推送模板")
-                appendLine("    $i.2: 直播推送模板")
+                appendLine("      $i.1: 动态推送模板")
+                appendLine("      $i.2: 直播推送模板")
                 i++
             }
             configMap[i.toString()] = "FILTER"
             appendLine("  $i: 过滤器")
+            appendLine("      $i.1: 添加类型过滤器")
+            appendLine("      $i.2: 添加正则过滤器")
+            appendLine("      $i.3: 切换过滤模式")
+            appendLine("      $i.4: 过滤器列表")
+            appendLine("      $i.5: 删除过滤器")
             appendLine()
             append("请输入编号, 2分钟未回复自动退出")
         })
 
         val selectConfig = event.selectMessages {
             configMap.forEach { (t, u) ->
-                t { u }
+                startsWith(t) { u }
             }
             defaultReply { "没有这个选项哦" }
             timeout(120_000)
         }
-
-        //val selectConfig = event.selectMessages {
-        //    startsWith("")
-        //    default { message.content }
-        //    timeout(60_000)
-        //}
 
         when (selectConfig) {
             "COLOR" -> {

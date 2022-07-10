@@ -12,6 +12,7 @@ import net.mamoe.mirai.utils.MiraiLogger
 import org.jetbrains.skia.Image
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic.dataFolderPath
+import top.colter.mirai.plugin.bilibili.BiliData
 import top.colter.mirai.plugin.bilibili.client.BiliClient
 import top.colter.mirai.plugin.bilibili.data.DynamicItem
 import top.colter.mirai.plugin.bilibili.data.DynamicType.*
@@ -22,6 +23,8 @@ import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.io.path.*
+import kotlin.math.max
+import kotlin.math.min
 
 
 internal val logger by lazy {
@@ -57,7 +60,7 @@ fun <T> Collection<T>.plusOrNull(element: T?): List<T> {
 
 fun HttpRequestBuilder.bodyParameter(key: String, value: Any){
     headers.append("Content-Type", "application/x-www-form-urlencoded")
-    setBody(body = if (body is EmptyContent) "$key=$value" else "$body&$key=$value")
+    setBody(if (body is EmptyContent) "$key=$value" else "$body&$key=$value")
 }
 
 val DynamicItem.uid: Long
@@ -209,3 +212,61 @@ fun findContact(del: String): Contact? {
  * @author cssxsh
  */
 val Contact.delegate get() = (if (this is Group) id * -1 else id).toString()
+
+
+fun findLocalIdOrName(target: String): List<Pair<Long, Double>>{
+    return try {
+        listOf(Pair(target.toLong(), 1.0))
+    }catch (e: NumberFormatException){
+        val list = BiliData.dynamic.map { Pair(it.key ,it.value.name) }
+        fuzzySearch(list, target)
+    }
+}
+
+fun fuzzySearch(
+    list: List<Pair<Long, String>>,
+    target: String,
+    minRate: Double = 0.2,
+    matchRate: Double = 0.6,
+    disambiguationRate: Double = 0.1,
+): List<Pair<Long, Double>>{
+    val candidates = list
+        .associateWith { it.second.fuzzyMatchWith(target) }
+        .filter { it.value >= minRate }
+        .toList()
+        .map { Pair(it.first.first, it.second) }
+        .sortedByDescending { it.second }
+
+    val bestMatches = candidates.filter { it.second >= matchRate }
+
+    return when {
+        bestMatches.isEmpty() -> candidates
+        bestMatches.size == 1 -> listOf(bestMatches.single().first to 1.0)
+        else -> {
+            if (bestMatches.first().second - bestMatches.last().second <= disambiguationRate) {
+                // resolution ambiguity
+                candidates
+            } else {
+                listOf(bestMatches.first().first to 1.0)
+            }
+        }
+    }
+}
+
+internal fun String.fuzzyMatchWith(target: String): Double {
+    if (this == target) {
+        return 1.0
+    }
+    var match = 0
+    for (i in 0..(max(this.lastIndex, target.lastIndex))) {
+        val t = target.getOrNull(match) ?: break
+        if (t == this.getOrNull(i)) {
+            match++
+        }
+    }
+
+    val longerLength = max(this.length, target.length)
+    val shorterLength = min(this.length, target.length)
+
+    return match.toDouble() / (longerLength + (shorterLength - match))
+}

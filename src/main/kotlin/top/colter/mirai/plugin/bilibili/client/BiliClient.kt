@@ -36,7 +36,6 @@ open class BiliClient : Closeable {
         null
     }
 
-
     val clients = MutableList(3) { client() }
 
     protected fun client() = HttpClient(OkHttp) {
@@ -54,23 +53,22 @@ open class BiliClient : Closeable {
             json(json = json)
         }
         BrowserUserAgent()
-
     }
 
     suspend inline fun <reified T> get(url: String, crossinline block: HttpRequestBuilder.() -> Unit = {}): T =
-        useHttpClient {
+        useHttpClient<String> {
             it.get(url) {
                 header(HttpHeaders.Cookie, BiliBiliDynamic.cookie.toString())
                 block()
-            }.body<String>()
+            }.body()
         }.decode()
 
     suspend inline fun <reified T> post(url: String, crossinline block: HttpRequestBuilder.() -> Unit = {}): T =
-        useHttpClient {
+        useHttpClient<String> {
             it.post(url) {
                 header(HttpHeaders.Cookie, BiliBiliDynamic.cookie.toString())
                 block()
-            }.body<String>()
+            }.body()
         }.decode()
 
     private var clientIndex = 0
