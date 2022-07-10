@@ -47,4 +47,9 @@ dependencies{
     compileOnly("xyz.cssxsh.mirai:mirai-skia-plugin:1.1.3")
 
     testImplementation(kotlin("test", "1.6.21"))
+    testImplementation("org.jetbrains.skiko:skiko-awt-runtime-windows-x64:0.7.20")
+    testImplementation("org.jetbrains.skiko:skiko-awt-runtime-linux-x64:0.7.20")
+    testImplementation("org.jetbrains.skiko:skiko-awt-runtime-linux-arm64:0.7.20")
+    testImplementation("org.jetbrains.skiko:skiko-awt-runtime-macos-x64:0.7.20")
+    testImplementation("org.jetbrains.skiko:skiko-awt-runtime-macos-arm64:0.7.20")
 }
