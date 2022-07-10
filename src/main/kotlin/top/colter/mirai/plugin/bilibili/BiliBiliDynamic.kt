@@ -2,15 +2,17 @@ package top.colter.mirai.plugin.bilibili
 
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
-import net.mamoe.mirai.Bot
+import net.mamoe.mirai.console.MiraiConsole
 import net.mamoe.mirai.console.command.CommandManager.INSTANCE.register
 import net.mamoe.mirai.console.command.CommandManager.INSTANCE.unregister
+import net.mamoe.mirai.console.extension.PluginComponentStorage
 import net.mamoe.mirai.console.permission.PermissionId
 import net.mamoe.mirai.console.permission.PermissionService
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescription
 import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
-import net.mamoe.mirai.event.events.BotOnlineEvent
-import net.mamoe.mirai.event.globalEventChannel
+import net.mamoe.mirai.console.plugin.name
+import net.mamoe.mirai.console.plugin.version
+import net.mamoe.mirai.console.util.SemVersion
 import net.mamoe.mirai.utils.info
 import top.colter.mirai.plugin.bilibili.command.DynamicCommand
 import top.colter.mirai.plugin.bilibili.data.*
@@ -24,6 +26,7 @@ object BiliBiliDynamic : KotlinPlugin(
         version = "3.0.0-BETA1.1",
     ) {
         author("Colter")
+        dependsOn("xyz.cssxsh.mirai.plugin.mirai-skia-plugin", ">= 1.1.0")
     }
 ) {
 
@@ -40,7 +43,27 @@ object BiliBiliDynamic : KotlinPlugin(
     val videoGwp = PermissionId(BiliBiliDynamic.description.id, "video.atall")
     val crossContact = PermissionId(BiliBiliDynamic.description.id, "crossContact")
 
+    override fun PluginComponentStorage.onLoad() {
+        /**
+         * run after auto login
+         * @author cssxsh
+         */
+        runAfterStartup {
+            DynamicCheckTasker.start()
+            LiveCheckTasker.start()
+            DynamicMessageTasker.start()
+            LiveMessageTasker.start()
+            SendTasker.start()
+            ListenerTasker.start()
+            if (BiliConfig.enableConfig.cacheClearEnable) CacheClearTasker.start()
+        }
+    }
+
     override fun onEnable() {
+        // XXX: mirai console version check
+        check(SemVersion.parseRangeRequirement(">= 2.12.0-RC").test(MiraiConsole.version)) {
+            "$name $version 需要 Mirai-Console 版本 >= 2.12.0，目前版本是 ${MiraiConsole.version}"
+        }
         logger.info { "BiliBili Dynamic Plugin loaded" }
 
         PermissionService.INSTANCE.register(liveGwp, "直播At全体")
@@ -57,17 +80,6 @@ object BiliBiliDynamic : KotlinPlugin(
         migration()
 
         launch { initData() }
-
-        waitOnline {
-            DynamicCheckTasker.start()
-            LiveCheckTasker.start()
-            DynamicMessageTasker.start()
-            LiveMessageTasker.start()
-            SendTasker.start()
-            ListenerTasker.start()
-            if (BiliConfig.enableConfig.cacheClearEnable) CacheClearTasker.start()
-        }
-
     }
 
     override fun onDisable() {
@@ -79,16 +91,5 @@ object BiliBiliDynamic : KotlinPlugin(
 
         BiliData.save()
         BiliConfig.save()
-    }
-
-    /**
-     * author cssxsh
-     */
-    private fun waitOnline(block: () -> Unit) {
-        if (Bot.instances.none { it.isOnline }) {
-            globalEventChannel().subscribeOnce<BotOnlineEvent> { block() }
-        } else {
-            block()
-        }
     }
 }
