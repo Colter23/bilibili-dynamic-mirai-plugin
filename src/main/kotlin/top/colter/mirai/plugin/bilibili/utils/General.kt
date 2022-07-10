@@ -1,5 +1,6 @@
 package top.colter.mirai.plugin.bilibili.utils
 
+import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.utils.*
 import kotlinx.coroutines.channels.Channel
@@ -7,6 +8,7 @@ import net.mamoe.mirai.Bot
 import net.mamoe.mirai.contact.Contact
 import net.mamoe.mirai.contact.Group
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
+import net.mamoe.mirai.utils.MiraiLogger
 import org.jetbrains.skia.Image
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic.dataFolderPath
@@ -22,7 +24,13 @@ import java.time.format.DateTimeFormatter
 import kotlin.io.path.*
 
 
-internal val logger by BiliBiliDynamic::logger
+internal val logger by lazy {
+    try {
+       BiliBiliDynamic.logger
+    } catch (_: Throwable) {
+        MiraiLogger.Factory.create(BiliClient::class)
+    }
+}
 
 val biliClient = BiliClient()
 
@@ -49,7 +57,7 @@ fun <T> Collection<T>.plusOrNull(element: T?): List<T> {
 
 fun HttpRequestBuilder.bodyParameter(key: String, value: Any){
     headers.append("Content-Type", "application/x-www-form-urlencoded")
-    body = if (body is EmptyContent) "$key=$value" else "$body&$key=$value"
+    setBody(body = if (body is EmptyContent) "$key=$value" else "$body&$key=$value")
 }
 
 val DynamicItem.uid: Long
@@ -154,7 +162,7 @@ suspend fun getOrDownload(url: String, cacheType: CacheType = CacheType.UNKNOWN)
         filePath.readBytes()
     } else {
         biliClient.useHttpClient {
-            it.get<ByteArray>(url).apply {
+            it.get(url).body<ByteArray>().apply {
                 filePath.writeBytes(this)
             }
         }

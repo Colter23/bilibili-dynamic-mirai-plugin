@@ -1,5 +1,6 @@
 package top.colter.mirai.plugin.bilibili.api
 
+import io.ktor.client.call.*
 import io.ktor.client.request.*
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
 import top.colter.mirai.plugin.bilibili.client.BiliClient
@@ -12,7 +13,7 @@ suspend fun BiliClient.loginInfo(oauthKey: String): LoginResult {
     return useHttpClient {
         it.post(LOGIN_INFO) {
             bodyParameter("oauthKey", oauthKey)
-        }
+        }.body()
     }
 }
 

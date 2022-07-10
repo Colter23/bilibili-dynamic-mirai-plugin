@@ -1,13 +1,14 @@
 package top.colter.mirai.plugin.bilibili.client
 
 import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.engine.*
 import io.ktor.client.engine.okhttp.*
-import io.ktor.client.features.*
-import io.ktor.client.features.json.*
-import io.ktor.client.features.json.serializer.*
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
 import io.ktor.utils.io.core.*
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.isActive
@@ -48,27 +49,28 @@ open class BiliClient : Closeable {
             connectTimeoutMillis = 10_000L
             requestTimeoutMillis = 10_000L
         }
-        Json {
-            serializer = KotlinxSerializer(json)
+        expectSuccess = true
+        install(ContentNegotiation) {
+            json(json = json)
         }
         BrowserUserAgent()
 
     }
 
     suspend inline fun <reified T> get(url: String, crossinline block: HttpRequestBuilder.() -> Unit = {}): T =
-        useHttpClient<String> {
+        useHttpClient {
             it.get(url) {
                 header(HttpHeaders.Cookie, BiliBiliDynamic.cookie.toString())
                 block()
-            }
+            }.body<String>()
         }.decode()
 
     suspend inline fun <reified T> post(url: String, crossinline block: HttpRequestBuilder.() -> Unit = {}): T =
-        useHttpClient<String> {
+        useHttpClient {
             it.post(url) {
                 header(HttpHeaders.Cookie, BiliBiliDynamic.cookie.toString())
                 block()
-            }
+            }.body<String>()
         }.decode()
 
     private var clientIndex = 0
