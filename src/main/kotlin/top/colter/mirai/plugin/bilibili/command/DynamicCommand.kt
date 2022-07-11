@@ -56,12 +56,16 @@ object DynamicCommand : CompositeCommand(
 
     @SubCommand("listAll", "la", "全部订阅列表")
     suspend fun CommandSender.listAll() {
-        if (BiliConfig.admin == Contact().id) sendMessage(BiliDataTasker.listAll()) else sendMessage("仅bot管理员可获取")
+        if (BiliConfig.admin == Contact().id || BiliConfig.admin == user?.id)
+            sendMessage(BiliDataTasker.listAll())
+        else sendMessage("仅bot管理员可获取")
     }
 
     @SubCommand("listUser", "lu", "用户列表")
     suspend fun CommandSender.listUser() {
-        if (BiliConfig.admin == Contact().id) sendMessage(BiliDataTasker.listUser()) else sendMessage("仅bot管理员可获取")
+        if (BiliConfig.admin == Contact().id || BiliConfig.admin == user?.id)
+            sendMessage(BiliDataTasker.listUser())
+        else sendMessage("仅bot管理员可获取")
     }
 
     @SubCommand("filterMode", "fm", "过滤模式")
@@ -115,7 +119,9 @@ object DynamicCommand : CompositeCommand(
     @SubCommand("login", "登录")
     suspend fun CommandSender.login() {
         val subject = Contact()
-        if (BiliConfig.admin == subject.id) BiliDataTasker.login(subject) else sendMessage("仅bot管理员可进行登录")
+        if (BiliConfig.admin == subject.id || BiliConfig.admin == user?.id)
+            BiliDataTasker.login(subject)
+        else sendMessage("仅bot管理员可进行登录")
     }
 
     @SubCommand("config", "配置")
