@@ -1,6 +1,8 @@
 package top.colter
 
+import io.ktor.client.*
 import io.ktor.client.call.*
+import io.ktor.client.engine.okhttp.*
 import io.ktor.client.request.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.serializer
@@ -30,9 +32,9 @@ internal class PluginTest {
 
     @Test
     fun httpTest(): Unit = runBlocking {
-//        val client = HttpClient()
-//        client.get<HttpResponse>("aa")
-//        BiliLogin().getLoginQrCode()
+        val client = HttpClient(OkHttp)
+        val c = client.get("https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/all?timezone_offset=-480&type=all&page=1").body<String>()
+        println(c)
     }
 
     @Test

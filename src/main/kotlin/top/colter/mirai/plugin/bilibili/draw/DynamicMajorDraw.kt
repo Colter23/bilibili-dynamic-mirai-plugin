@@ -160,7 +160,7 @@ suspend fun ModuleDynamic.Major.Archive.drawGeneral(): Image {
     }
 
     val descParagraph =
-        ParagraphBuilder(paragraphStyle, FontUtils.fonts).addText(desc.replace("\n", " ")).build()
+        ParagraphBuilder(paragraphStyle, FontUtils.fonts).addText(desc.replace("\r\n", " ").replace("\n", " ")).build()
             .layout(paragraphWidth)
 
     val coverImg = getOrDownloadImage(cover, CacheType.IMAGES)

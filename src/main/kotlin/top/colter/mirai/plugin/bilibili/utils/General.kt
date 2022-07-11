@@ -13,6 +13,7 @@ import org.jetbrains.skia.Image
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic.dataFolderPath
 import top.colter.mirai.plugin.bilibili.BiliData
+import top.colter.mirai.plugin.bilibili.api.searchUser
 import top.colter.mirai.plugin.bilibili.client.BiliClient
 import top.colter.mirai.plugin.bilibili.data.DynamicItem
 import top.colter.mirai.plugin.bilibili.data.DynamicType.*
@@ -218,6 +219,16 @@ fun findLocalIdOrName(target: String): List<Pair<Long, Double>>{
     return try {
         listOf(Pair(target.toLong(), 1.0))
     }catch (e: NumberFormatException){
+        val list = BiliData.dynamic.map { Pair(it.key ,it.value.name) }
+        fuzzySearch(list, target)
+    }
+}
+
+suspend fun findRemoteIdOrName(target: String): List<Pair<Long, Double>>{
+    return try {
+        listOf(Pair(target.toLong(), 1.0))
+    }catch (e: NumberFormatException){
+        val users = biliClient.searchUser(target)
         val list = BiliData.dynamic.map { Pair(it.key ,it.value.name) }
         fuzzySearch(list, target)
     }

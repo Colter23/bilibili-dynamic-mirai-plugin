@@ -12,6 +12,9 @@ const val DYNAMIC_DETAIL = "https://api.bilibili.com/x/polymer/web-dynamic/v1/de
 // Live
 const val LIVE_LIST = "https://api.live.bilibili.com/xlive/web-ucenter/v1/xfetter/GetWebList"
 
+// Search
+const val SEARCH = "https://api.bilibili.com/x/web-interface/search/type"
+
 // User
 const val USER_INFO = "https://api.bilibili.com/x/space/acc/info"
 const val USER_ID = "https://api.bilibili.com/x/web-interface/nav"

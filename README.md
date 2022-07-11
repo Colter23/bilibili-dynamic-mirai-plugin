@@ -51,26 +51,28 @@ v3数据文件名 `BiliData.yml`
 
 
 ## 下载
+前置插件: [mirai-skia-plugin](https://github.com/cssxsh/mirai-skia-plugin)  
 下载插件本体: [releases](https://github.com/Colter23/bilibili-dynamic-mirai-plugin/releases)    
-插件命令依赖 [chat-command](https://github.com/project-mirai/chat-command) 请确保有此插件
+插件命令依赖 [chat-command](https://github.com/project-mirai/chat-command)  
 
 ## 指令
 
-| 指令                                              | 描述                                    |
-|-------------------------------------------------|---------------------------------------|
-| `/bili <login / 登录>`                            | 扫码登录                                  |
-| `/bili <add / 添加> <uid> [群/Q号]`                 | 为目标 [群/Q号] 添加一个订阅                     |
-| `/bili <list / 列表> [群/Q号]`                      | 查询目标 [群/Q号] 的订阅列表                     |
-| `/bili <del / 删除> <uid> [群/Q号]`                 | 为目标 [群/Q号] 删除一个订阅                     |
-| `/bili <delAll / 删除全部订阅> [群/Q号]`                | 将目标 [群/Q号] 的全部订阅删除                    |
-| `/bili <color / 颜色> <uid> <HEX颜色>`              | 为目标 UID 设置图片推送主题色                     |
-| `/bili <list / 列表> [群/Q号]`                      | 查询目标 [群/Q号] 的订阅列表                     |
-| `/bili <listAll / la / 全部订阅列表>`                 | 查询全部订阅列表                              |
-| `/bili <listUser / lu / 用户列表>`                  | 查询用户列表                                |
-| `/bili <templateList / tl / 模板列表>`              | 查看推送模板推送效果                            |
-| `/bili <template / t / 模板> <模板类型> <模板名> [群/Q号]` | 设置模板 <br/>模板类型: `d`(动态模板)  `l`(直播模板)  |
-| `/bili <config / 配置> [uid] [群/Q号]`              | 交互式配置(还没做完)                           |
-| `/bili <search / s / 搜索> <动态ID>`                | 通过ID搜索一个动态                            |
+| 指令                                              | 描述                                   |
+|-------------------------------------------------|--------------------------------------|
+| `/bili <login / 登录>`                            | 扫码登录 (需在配置文件中配置管理员)                  |
+| `/bili <add / 添加> <uid> [群/Q号]`                 | 为目标 [群/Q号] 添加一个订阅                    |
+| `/bili <list / 列表> [群/Q号]`                      | 查询目标 [群/Q号] 的订阅列表                    |
+| `/bili <del / 删除> <uid> [群/Q号]`                 | 为目标 [群/Q号] 删除一个订阅                    |
+| `/bili <delAll / 删除全部订阅> [群/Q号]`                | 将目标 [群/Q号] 的全部订阅删除                   |
+| `/bili <color / 颜色> <uid> <HEX颜色>`              | 为目标 UID 设置图片推送主题色                    |
+| `/bili <list / 列表> [群/Q号]`                      | 查询目标 [群/Q号] 的订阅列表                    |
+| `/bili <listAll / la / 全部订阅列表>`                 | 查询全部订阅列表 (需在配置文件中配置管理员)              |
+| `/bili <listUser / lu / 用户列表>`                  | 查询用户列表  (需在配置文件中配置管理员)               |
+| `/bili <templateList / tl / 模板列表>`              | 查看推送模板推送效果                           |
+| `/bili <template / t / 模板> <模板类型> <模板名> [群/Q号]` | 设置模板 <br/>模板类型: `d`(动态模板)  `l`(直播模板) |
+| `/bili <config / 配置> [uid] [群/Q号]`              | 交互式配置(还没做完)                          |
+| `/bili <search / s / 搜索> <动态ID>`                | 通过ID搜索一个动态                           |
+| `/bili <new / 最新动态> <uid / 用户名> [数量]`           | 获取用户最新动态 (支持用户名模糊搜索)                 |
 ```
 # 说明
 扫码登录请在配置文件中填写管理员账号    
@@ -142,17 +144,18 @@ v3数据文件名 `BiliData.yml`
 分辨率与主题配置已经内置了多套数据
 
 ### BiliConfig.yml
-| 配置项               | 取值                                      | 说明   |
-|-------------------|-----------------------------------------|------|
-| `enableConfig`    | [EnableConfig](#EnableConfig)           | 功能开关 |
-| `accountConfig`   | [BiliAccountConfig](#BiliAccountConfig) | 账号配置 |
-| `checkConfig`     | [CheckConfig](#CheckConfig)             | 检测配置 |
-| `pushConfig`      | [PushConfig](#PushConfig)               | 推送配置 |
-| `imageConfig`     | [ImageConfig](#ImageConfig)             | 绘图配置 |
-| `templateConfig`  | [TemplateConfig](#TemplateConfig)       | 模板配置 |
-| `cacheConfig`     | [CacheConfig](#CacheConfig)             | 缓存配置 |
-| `proxyConfig`     | [ProxyConfig](#ProxyConfig)             | 代理配置 |
-| `translateConfig` | [TranslateConfig](#TranslateConfig)     | 翻译配置 |
+| 配置项               | 取值                                       | 说明   |
+|-------------------|------------------------------------------|------|
+| `admin`           | QQ号 / 群号                                 | 管理员  |
+| `enableConfig`    | [EnableConfig](#EnableConfig)            | 功能开关 |
+| `accountConfig`   | [BiliAccountConfig](#BiliAccountConfig)  | 账号配置 |
+| `checkConfig`     | [CheckConfig](#CheckConfig)              | 检测配置 |
+| `pushConfig`      | [PushConfig](#PushConfig)                | 推送配置 |
+| `imageConfig`     | [ImageConfig](#ImageConfig)              | 绘图配置 |
+| `templateConfig`  | [TemplateConfig](#TemplateConfig)        | 模板配置 |
+| `cacheConfig`     | [CacheConfig](#CacheConfig)              | 缓存配置 |
+| `proxyConfig`     | [ProxyConfig](#ProxyConfig)              | 代理配置 |
+| `translateConfig` | [TranslateConfig](#TranslateConfig)      | 翻译配置 |
 
 #### EnableConfig
 | 配置项                | 取值               | 说明     |

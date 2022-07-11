@@ -60,3 +60,22 @@ suspend fun BiliClient.groupAddUser(uid: Long, tagid: Int): BiliResult {
         bodyParameter("csrf", BiliBiliDynamic.cookie.biliJct)
     }
 }
+
+suspend fun BiliClient.searchUser(
+    keyword: String,
+    order: String = "",
+    orderSort:Int = 0,
+    userType: Int = 0,
+    page: Int = 1,
+    pageSize: Int = 20
+): BiliSearch? {
+    return getData(SEARCH) {
+        parameter("page", page)
+        parameter("page_size", pageSize)
+        parameter("search_type", "bili_user") // bili_user  video  media_bangumi  media_ft  live  article  topic
+        parameter("keyword", keyword)
+        parameter("order", order) // 空  fans  level
+        parameter("order_sort", orderSort) // 0: 由高到低  1: 由低到高
+        parameter("user_type", userType) // 0: 全部用户  1: UP主用户  2: 普通用户  3: 认证用户
+    }
+}

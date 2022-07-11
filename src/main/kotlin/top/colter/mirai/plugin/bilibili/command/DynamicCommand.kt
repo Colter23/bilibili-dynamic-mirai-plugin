@@ -6,12 +6,11 @@ import net.mamoe.mirai.console.command.CompositeCommand
 import net.mamoe.mirai.console.command.descriptor.CommandArgumentParserException
 import net.mamoe.mirai.console.permission.PermissionService.Companion.hasPermission
 import net.mamoe.mirai.contact.Contact
-import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
+import top.colter.mirai.plugin.bilibili.*
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic.crossContact
-import top.colter.mirai.plugin.bilibili.FilterMode
-import top.colter.mirai.plugin.bilibili.FilterType
 import top.colter.mirai.plugin.bilibili.api.getDynamicDetail
 import top.colter.mirai.plugin.bilibili.api.getLive
+import top.colter.mirai.plugin.bilibili.api.getUserNewDynamic
 import top.colter.mirai.plugin.bilibili.data.DynamicDetail
 import top.colter.mirai.plugin.bilibili.data.LiveDetail
 import top.colter.mirai.plugin.bilibili.tasker.BiliDataTasker
@@ -56,14 +55,14 @@ object DynamicCommand : CompositeCommand(
     }
 
     @SubCommand("listAll", "la", "全部订阅列表")
-    suspend fun CommandSender.listAll() = sendMessage(
-        BiliDataTasker.listAll()
-    )
+    suspend fun CommandSender.listAll() {
+        if (BiliConfig.admin == Contact().id) sendMessage(BiliDataTasker.listAll()) else sendMessage("仅bot管理员可获取")
+    }
 
     @SubCommand("listUser", "lu", "用户列表")
-    suspend fun CommandSender.listUser() = sendMessage(
-        BiliDataTasker.listUser()
-    )
+    suspend fun CommandSender.listUser() {
+        if (BiliConfig.admin == Contact().id) sendMessage(BiliDataTasker.listUser()) else sendMessage("仅bot管理员可获取")
+    }
 
     @SubCommand("filterMode", "fm", "过滤模式")
     suspend fun CommandSender.filterMode(type: String, mode: String, uid: Long = 0L, contact: Contact = Contact()) {
@@ -76,7 +75,6 @@ object DynamicCommand : CompositeCommand(
             )
         )
     }
-
 
     @SubCommand("filterType", "ft", "类型过滤")
     suspend fun CommandSender.filterType(type: String, uid: Long = 0L, contact: Contact = Contact()) {
@@ -116,7 +114,8 @@ object DynamicCommand : CompositeCommand(
 
     @SubCommand("login", "登录")
     suspend fun CommandSender.login() {
-        BiliDataTasker.login(Contact())
+        val subject = Contact()
+        if (BiliConfig.admin == subject.id) BiliDataTasker.login(subject) else sendMessage("仅bot管理员可进行登录")
     }
 
     @SubCommand("config", "配置")
@@ -145,15 +144,23 @@ object DynamicCommand : CompositeCommand(
     suspend fun CommandSenderOnMessage<*>.new(user: String, count: Int = 1) {
         val subject = Contact()
         val u = findLocalIdOrName(user)
-        val us = buildString {
-            u.forEach {
-                appendLine("${it.first} : ${it.second}")
+        if (u.isEmpty()) {
+            subject.sendMessage("未匹配到用户哦")
+        }else if (u.size == 1) {
+            val list = biliClient.getUserNewDynamic(u.first().first)?.items?.subList(0, count)
+            if (list != null && list.isNotEmpty()) subject.sendMessage("请稍等") else subject.sendMessage("未找到动态")
+            list?.forEach {
+                BiliBiliDynamic.dynamicChannel.send(DynamicDetail(it, subject.delegate))
             }
+        }else {
+            val us = buildString {
+                appendLine("有多个匹配项：")
+                u.forEach {
+                    appendLine("${BiliData.dynamic[it.first]?.name}: ${it.second}")
+                }
+            }
+            subject.sendMessage(us)
         }
-        subject.sendMessage(us)
-        //val detail = biliClient.getDynamicDetail(did)
-        //if (detail != null) subject.sendMessage("请稍等") else subject.sendMessage("未找到动态")
-        //detail?.let { d -> BiliBiliDynamic.dynamicChannel.send(DynamicDetail(d, subject.delegate)) }
     }
 
 }

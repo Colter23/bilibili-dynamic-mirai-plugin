@@ -5,14 +5,13 @@ import io.ktor.client.call.*
 import io.ktor.client.engine.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.plugins.*
-import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import io.ktor.serialization.kotlinx.json.*
 import io.ktor.utils.io.core.*
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.supervisorScope
+import kotlinx.serialization.json.Json
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
 import top.colter.mirai.plugin.bilibili.BiliConfig.enableConfig
 import top.colter.mirai.plugin.bilibili.BiliConfig.proxyConfig
@@ -49,8 +48,8 @@ open class BiliClient : Closeable {
             requestTimeoutMillis = 10_000L
         }
         expectSuccess = true
-        install(ContentNegotiation) {
-            json(json = json)
+        Json {
+            json
         }
         BrowserUserAgent()
     }
