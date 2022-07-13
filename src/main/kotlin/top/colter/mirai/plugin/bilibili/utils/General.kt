@@ -4,14 +4,17 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.utils.*
 import kotlinx.coroutines.channels.Channel
+import kotlinx.serialization.Serializable
 import net.mamoe.mirai.Bot
 import net.mamoe.mirai.contact.Contact
+import net.mamoe.mirai.contact.Friend
 import net.mamoe.mirai.contact.Group
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
 import net.mamoe.mirai.utils.MiraiLogger
 import org.jetbrains.skia.Image
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic.dataFolderPath
+import top.colter.mirai.plugin.bilibili.BiliConfig
 import top.colter.mirai.plugin.bilibili.BiliData
 import top.colter.mirai.plugin.bilibili.api.searchUser
 import top.colter.mirai.plugin.bilibili.client.BiliClient
@@ -208,6 +211,26 @@ fun findContact(del: String): Contact? {
     return null
 }
 
+fun findContactAll(delegate: Long): Contact? {
+    for (bot in Bot.instances) {
+        for (friend in bot.friends) {
+            if (friend.id == delegate) return friend
+        }
+        for (group in bot.groups) {
+            if (group.id == delegate) return group
+        }
+        for (stranger in bot.strangers) {
+            if (stranger.id == delegate) return stranger
+        }
+        for (group in bot.groups) {
+            for (member in group.members) {
+                if (member.id == delegate) return member
+            }
+        }
+    }
+    return null
+}
+
 /**
  * 通过正负号区分群和用户
  * @author cssxsh
@@ -281,3 +304,33 @@ internal fun String.fuzzyMatchWith(target: String): Double {
 
     return match.toDouble() / (longerLength + (shorterLength - match))
 }
+
+val Contact.name: String
+    get() = when (this) {
+        is Friend -> nick
+        is Group -> name
+        else -> id.toString()
+    }
+
+@Serializable
+data class ActionMessage(
+    val operator: String,
+    val target: String,
+    val action: String,
+    val message: String,
+)
+
+suspend fun actionNotify(subject: Long?, message: ActionMessage) {
+    if (BiliConfig.enableConfig.notifyEnable && subject != BiliConfig.admin){
+        actionNotify(buildString {
+            appendLine("操作人: ${message.operator}")
+            appendLine("目标: ${message.target}")
+            appendLine("操作: ${message.action}")
+            appendLine("消息: ${message.message}")
+        })
+    }
+}
+suspend fun actionNotify(message: String) {
+    findContactAll(BiliConfig.admin)?.sendMessage(message)
+}
+

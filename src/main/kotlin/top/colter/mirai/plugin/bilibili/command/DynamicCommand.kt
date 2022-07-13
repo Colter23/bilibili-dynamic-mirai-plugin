@@ -14,9 +14,7 @@ import top.colter.mirai.plugin.bilibili.api.getUserNewDynamic
 import top.colter.mirai.plugin.bilibili.data.DynamicDetail
 import top.colter.mirai.plugin.bilibili.data.LiveDetail
 import top.colter.mirai.plugin.bilibili.tasker.BiliDataTasker
-import top.colter.mirai.plugin.bilibili.utils.biliClient
-import top.colter.mirai.plugin.bilibili.utils.delegate
-import top.colter.mirai.plugin.bilibili.utils.findLocalIdOrName
+import top.colter.mirai.plugin.bilibili.utils.*
 
 object DynamicCommand : CompositeCommand(
     owner = BiliBiliDynamic,
@@ -25,27 +23,34 @@ object DynamicCommand : CompositeCommand(
 ) {
 
     @SubCommand("color", "颜色")
-    suspend fun CommandSender.color(uid: Long, color: String) = sendMessage(
-        BiliDataTasker.setColor(uid, color)
-    )
+    suspend fun CommandSender.color(uid: Long, color: String) {
+        val msg = BiliDataTasker.setColor(uid, color)
+        sendMessage(msg)
+        actionNotify(this.subject?.id, ActionMessage(name, uid.toString(), "修改主题色", msg))
+    }
 
     @SubCommand("add", "添加")
     suspend fun CommandSender.add(uid: Long, contact: Contact = Contact()) {
         if(!hasPermission(crossContact) && contact.delegate != Contact().delegate) return
-        sendMessage(BiliDataTasker.addSubscribe(uid, contact.delegate))
+        val msg = BiliDataTasker.addSubscribe(uid, contact.delegate)
+        sendMessage(msg)
+        actionNotify(this.subject?.id, ActionMessage(name, contact.name, "订阅", msg))
     }
-
 
     @SubCommand("del", "删除")
     suspend fun CommandSender.del(uid: Long, contact: Contact = Contact()) {
         if(!hasPermission(crossContact) && contact.delegate != Contact().delegate) return
-        sendMessage(BiliDataTasker.removeSubscribe(uid, contact.delegate).let { "对 ${it?.name} 取消订阅成功!" })
+        val msg = BiliDataTasker.removeSubscribe(uid, contact.delegate).let { "对 ${it?.name} 取消订阅成功!" }
+        sendMessage(msg)
+        actionNotify(this.subject?.id, ActionMessage(name, contact.name, "取消订阅", msg))
     }
 
     @SubCommand("delAll", "删除全部订阅")
     suspend fun CommandSender.delAll(contact: Contact = Contact()) {
         if(!hasPermission(crossContact) && contact.delegate != Contact().delegate) return
-        sendMessage(BiliDataTasker.removeAllSubscribe(contact.delegate).let { "删除订阅成功! 共删除 $it 个订阅" })
+        val msg = BiliDataTasker.removeAllSubscribe(contact.delegate).let { "删除订阅成功! 共删除 $it 个订阅" }
+        sendMessage(msg)
+        actionNotify(this.subject?.id, ActionMessage(name, contact.name, "取消全部订阅", msg))
     }
 
     @SubCommand("list", "列表")

@@ -27,10 +27,7 @@ import top.colter.mirai.plugin.bilibili.draw.loginQrCode
 import top.colter.mirai.plugin.bilibili.tasker.DynamicMessageTasker.buildMessage
 import top.colter.mirai.plugin.bilibili.tasker.LiveMessageTasker.buildMessage
 import top.colter.mirai.plugin.bilibili.tasker.SendTasker.buildMessage
-import top.colter.mirai.plugin.bilibili.utils.biliClient
-import top.colter.mirai.plugin.bilibili.utils.decode
-import top.colter.mirai.plugin.bilibili.utils.delegate
-import top.colter.mirai.plugin.bilibili.utils.findContact
+import top.colter.mirai.plugin.bilibili.utils.*
 import java.net.URI
 
 internal val logger by BiliBiliDynamic::logger
@@ -79,6 +76,7 @@ object BiliDataTasker {
                         logger.error("移动分组失败: ${res1.message}")
                     }
                 }
+                actionNotify("通知: 账号关注 $uid")
             }
         } else if (attr == 128) {
             return "此账号已被拉黑"

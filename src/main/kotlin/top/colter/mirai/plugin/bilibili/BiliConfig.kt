@@ -20,6 +20,7 @@ object BiliConfig : AutoSavePluginConfig("BiliConfig") {
         """
         功能开关:
           drawEnable: 绘图开关
+          notifyEnable: 操作通知开关
           lowSpeedEnable: 低频检测开关
           translateEnable: 翻译开关
           proxyEnable: 代理开关
@@ -121,6 +122,7 @@ object BiliConfig : AutoSavePluginConfig("BiliConfig") {
 @Serializable
 data class EnableConfig(
     val drawEnable: Boolean = true,
+    val notifyEnable: Boolean = true,
     val lowSpeedEnable: Boolean = true,
     var translateEnable: Boolean = false,
     val proxyEnable: Boolean = false,

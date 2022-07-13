@@ -157,10 +157,13 @@ v3数据文件名 `BiliData.yml`
 | `proxyConfig`     | [ProxyConfig](#ProxyConfig)              | 代理配置 |
 | `translateConfig` | [TranslateConfig](#TranslateConfig)      | 翻译配置 |
 
+---------------------
+
 #### EnableConfig
 | 配置项                | 取值               | 说明     |
 |--------------------|------------------|--------|
 | `drawEnable`       | `true` / `false` | 绘图开关   |
+| `notifyEnable`     | `true` / `false` | 操作通知开关 |
 | `lowSpeedEnable`   | `true` / `false` | 低频检测开关 |
 | `translateEnable`  | `true` / `false` | 翻译开关   |
 | `proxyEnable`      | `true` / `false` | 代理开关   |
