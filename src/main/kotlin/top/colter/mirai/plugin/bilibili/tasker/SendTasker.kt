@@ -32,6 +32,7 @@ object SendTasker : BiliTasker() {
 
     private val filter by BiliData::filter
 
+    private val messageInterval = BiliConfig.pushConfig.messageInterval
     private val pushInterval = BiliConfig.pushConfig.pushInterval
 
     private val forwardRegex = """\{>>}(.*?)\{<<}""".toRegex()
@@ -127,7 +128,6 @@ object SendTasker : BiliTasker() {
                         }
                     }
                 }
-
             }
         }
     }
@@ -135,8 +135,9 @@ object SendTasker : BiliTasker() {
     private suspend fun Contact.sendMessage(messages: List<Message>) {
         messages.forEach {
             sendMessage(it)
-            delay(pushInterval)
+            delay(messageInterval)
         }
+        delay(pushInterval)
     }
 
     fun DynamicType.toFilterType() =
@@ -169,7 +170,7 @@ object SendTasker : BiliTasker() {
                 list.addAll(subData.contacts)
                 list.removeAll(subData.banList.keys)
                 list.filter { contact ->
-                    if (filter.containsKey(contact) && filter[contact]!!.containsKey(uid)) {
+                    if (filter.containsKey(contact) && (filter[contact]!!.containsKey(uid) || filter[contact]!!.containsKey(0L))) {
                         val dynamicFilter = filter[contact]!![uid]!!
                         val typeSelect = dynamicFilter.typeSelect
                         if (typeSelect.list.isNotEmpty()) {
@@ -206,7 +207,7 @@ object SendTasker : BiliTasker() {
             list.addAll(subData.contacts)
             list.removeAll(subData.banList.keys)
             list.filter { contact ->
-                if (filter.containsKey(contact) && filter[contact]!!.containsKey(uid)) {
+                if (filter.containsKey(contact) && (filter[contact]!!.containsKey(uid) || filter[contact]!!.containsKey(0L))) {
                     val dynamicFilter = filter[contact]!![uid]!!
                     val typeSelect = dynamicFilter.typeSelect
                     if (typeSelect.list.isNotEmpty()) {

@@ -80,7 +80,7 @@ object DynamicCommand : CompositeCommand(
             BiliDataTasker.addFilter(
                 if (type == "t") FilterType.TYPE else FilterType.REGULAR,
                 if (mode == "w") FilterMode.WHITE_LIST else FilterMode.BLACK_LIST,
-                type, uid, contact.delegate
+                null, uid, contact.delegate
             )
         )
     }
@@ -132,7 +132,7 @@ object DynamicCommand : CompositeCommand(
     @SubCommand("config", "配置")
     suspend fun CommandSenderOnMessage<*>.config(uid: Long = 0L, contact: Contact = Contact()) {
         if(!hasPermission(crossContact) && contact.delegate != Contact().delegate) return
-        BiliDataTasker.config(fromEvent, uid)
+        BiliDataTasker.config(fromEvent, uid, contact)
     }
 
     @SubCommand("search", "s", "搜索")

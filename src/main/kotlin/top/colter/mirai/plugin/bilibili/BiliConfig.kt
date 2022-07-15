@@ -52,7 +52,8 @@ object BiliConfig : AutoSavePluginConfig("BiliConfig") {
     @ValueDescription(
         """
         推送配置:
-          pushInterval: QQ中连续发送消息的间隔 单位毫秒
+          messageInterval: QQ中同一个群中连续发送多个消息的间隔 单位毫秒
+          pushInterval: QQ中连续发送多个群之间的间隔 单位毫秒
     """
     )
     val pushConfig: PushConfig by value()
@@ -192,7 +193,8 @@ data class CheckConfig(
 
 @Serializable
 data class PushConfig(
-    val pushInterval: Long = 100,
+    val messageInterval: Long = 100,
+    val pushInterval: Long = 500,
 )
 
 @Serializable

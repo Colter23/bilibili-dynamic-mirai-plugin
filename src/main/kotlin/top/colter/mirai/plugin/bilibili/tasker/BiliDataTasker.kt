@@ -8,11 +8,12 @@ import kotlinx.coroutines.withTimeout
 import net.mamoe.mirai.contact.Contact
 import net.mamoe.mirai.contact.Friend
 import net.mamoe.mirai.contact.Group
+import net.mamoe.mirai.event.MessageSelectBuilder
 import net.mamoe.mirai.event.events.MessageEvent
-import net.mamoe.mirai.event.selectMessages
 import net.mamoe.mirai.event.whileSelectMessages
 import net.mamoe.mirai.message.data.buildForwardMessage
 import net.mamoe.mirai.message.data.content
+import net.mamoe.mirai.message.nextMessage
 import net.mamoe.mirai.utils.ExternalResource.Companion.sendAsImageTo
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
 import top.colter.mirai.plugin.bilibili.*
@@ -159,28 +160,29 @@ object BiliDataTasker {
             return@withLock "还未订阅此人哦"
         }
         if (!(filter.containsKey(subject) && filter[subject]!!.containsKey(uid))) {
-            return@withLock "当前目标没有过滤器"
+            return@withLock "目标没有过滤器"
         }
 
         buildString {
-            appendLine("当前目标过滤器: ")
-            appendLine()
-
+            //appendLine("当前目标过滤器: ")
+            //appendLine()
             val typeSelect = filter[subject]!![uid]!!.typeSelect
             if (typeSelect.list.isNotEmpty()) {
-                appendLine("动态类型过滤器: ")
-                appendLine("模式: ${typeSelect.mode.value}")
+                append("动态类型过滤器: ")
+                appendLine(typeSelect.mode.value)
                 typeSelect.list.forEachIndexed { index, type ->
-                    appendLine(" t$index: ${type.value}")
+                    appendLine("  t$index: ${type.value}")
                 }
+                appendLine()
             }
             val regularSelect = filter[subject]!![uid]!!.regularSelect
             if (regularSelect.list.isNotEmpty()) {
-                appendLine("正则过滤器: ")
-                appendLine("模式: ${regularSelect.mode.value}")
+                append("正则过滤器: ")
+                appendLine(regularSelect.mode.value)
                 regularSelect.list.forEachIndexed { index, reg ->
-                    appendLine(" r$index: $reg")
+                    appendLine("  r$index: $reg")
                 }
+                appendLine()
             }
         }
     }
@@ -391,111 +393,316 @@ object BiliDataTasker {
         }
     }
 
-    suspend fun config(event: MessageEvent, uid: Long = 0L) {
+    suspend fun config(event: MessageEvent, uid: Long = 0L, contact: Contact) {
 
         val subject = event.subject
-        val delegate = event.subject.delegate
-        val sender = event.sender
-
-        if (uid != 0L && !((dynamic.containsKey(uid) && dynamic[uid]!!.contacts.contains(delegate)))) {
+        if (uid != 0L && !((dynamic.containsKey(uid) && dynamic[uid]!!.contacts.contains(contact.delegate)))) {
             subject.sendMessage("没有订阅这个人哦 [$uid]")
             return
         }
-
         val user = if (uid != 0L) dynamic[uid] else null
-
         val configMap = mutableMapOf<String, String>()
 
         subject.sendMessage(buildString {
-            append("配置: ")
+            appendLine("配置: ")
+            append("用户: ")
             appendLine(if (uid == 0L) "全局" else user?.name)
+            append("目标: ")
+            appendLine(if (subject.id == contact.id) "当前环境" else contact.name)
             appendLine()
             appendLine("当前可配置项:")
             var i = 1
-            if (user?.color == null) {
+            if (uid != 0L) {
                 configMap[i.toString()] = "COLOR"
-                appendLine("  ${i++}: 主题色")
+                appendLine("  ${i++}: 主题色 [${user?.color?:BiliConfig.imageConfig.defaultColor}]")
             }
             if (uid == 0L) {
+                val cdl = BiliData.dynamicPushTemplate.filter { it.value.contains(contact.id) }.map { it.key }
+                val currDynamic = if (cdl.isNotEmpty()) cdl.first() else BiliConfig.templateConfig.defaultDynamicPush
+                val cll = BiliData.livePushTemplate.filter { it.value.contains(contact.id) }.map { it.key }
+                val currLive = if (cll.isNotEmpty()) cll.first() else BiliConfig.templateConfig.defaultLivePush
                 configMap[i.toString()] = "PUSH"
                 appendLine("  $i: 推送模板")
-                appendLine("      $i.1: 动态推送模板")
-                appendLine("      $i.2: 直播推送模板")
+                appendLine("      $i.1: 动态推送模板 [$currDynamic]")
+                appendLine("      $i.2: 直播推送模板 [$currLive]")
                 i++
             }
+
+            val filter = BiliData.filter[contact.delegate]?.get(uid)
+            val mode = if (filter == null) "无过滤器" else
+                "类型: ${filter.typeSelect.mode.value} | 正则: ${filter.regularSelect.mode.value}"
+
             configMap[i.toString()] = "FILTER"
             appendLine("  $i: 过滤器")
-            appendLine("      $i.1: 添加类型过滤器")
-            appendLine("      $i.2: 添加正则过滤器")
-            appendLine("      $i.3: 切换过滤模式")
-            appendLine("      $i.4: 过滤器列表")
+            appendLine("      $i.1: 过滤器列表")
+            appendLine("      $i.2: 添加类型过滤器")
+            appendLine("      $i.3: 添加正则过滤器")
+            appendLine("      $i.4: 切换过滤模式 [$mode]")
             appendLine("      $i.5: 删除过滤器")
             appendLine()
-            append("请输入编号, 2分钟未回复自动退出")
+            append("[中括号]内为当前值\n请输入编号, 2分钟未回复自动退出\n或回复 退出 来主动退出")
         })
 
-        val selectConfig = event.selectMessages {
-            configMap.forEach { (t, u) ->
-                startsWith(t) { u }
-            }
-            defaultReply { "没有这个选项哦" }
-            timeout(120_000)
-        }
-
-        when (selectConfig) {
-            "COLOR" -> {
-                subject.sendMessage("请输入16进制颜色，例如: #d3edfa")
-
-                var count = 0
-                event.whileSelectMessages {
-                    "退出" {
-                        event.subject.sendMessage("已退出")
-                        false // 停止循环
+        while (true) {
+            //val selectConfig = event.selectMessages {
+            //    configMap.forEach { (t, u) ->
+            //        startsWith(t) {
+            //            selectContent = message.content
+            //            u
+            //        }
+            //    }
+            //    "退出" {
+            //        event.subject.sendMessage("已退出")
+            //        ""
+            //    }
+            //    defaultReply { "没有这个选项哦" }
+            //    timeout(120_000)
+            //}
+            //if (selectConfig == "") return
+            var cc = 0
+            var rres: String? = null
+            var selectContent = ""
+            var selectConfig = ""
+            event.whileSelectMessages {
+                "退出" {
+                    event.subject.sendMessage("已退出")
+                    false // 停止循环
+                }
+                configMap.forEach { (t, u) ->
+                    startsWith(t) {
+                        selectContent = message.content
+                        selectConfig = u
+                        rres = ""
+                        false
                     }
-                    default {
-                        val color = message.content
-                        if (color.first() != '#' || color.length != 7) {
-                            subject.sendMessage("格式错误，请输入16进制颜色，例如: #d3edfa")
-                        } else {
-                            subject.sendMessage(setColor(uid, color))
-                            count = 2
+                }
+                default {
+                    cc ++
+                    subject.sendMessage("没有这个选项哦${if(cc < 2) ", 请重新输入" else ", 超出重试次数, 退出"}")
+                    cc < 2
+                }
+                timeout(120_000) { false }
+            }
+            if (rres == null) return
+
+            when (selectConfig) {
+                "COLOR" -> {
+                    subject.sendMessage("请输入16进制颜色，例如: #d3edfa")
+                    var res: String? = null
+                    var count = 0
+                    event.whileSelectMessages {
+                        "退出" {
+                            event.subject.sendMessage("已退出")
+                            false // 停止循环
                         }
-                        count++
-                        count < 2
+                        default {
+                            val color = message.content
+                            if (color.first() != '#' || color.length != 7) {
+                                subject.sendMessage("格式错误，请输入16进制颜色，例如: #d3edfa")
+                            } else {
+                                subject.sendMessage(setColor(uid, color))
+                                count = 2
+                                res = ""
+                            }
+                            ++count < 2
+                        }
+                        timeout(120_000) { false }
                     }
-                    timeout(120_000) { false }
-                }
-            }
-
-            "PUSH" -> {
-                subject.sendMessage("请选择一个推送模板")
-
-                val template = BiliConfig.templateConfig.dynamicPush
-
-                listTemplate("d", subject)
-
-                val selectTemplate = event.selectMessages {
-                    template.forEach { (t, _) ->
-                        t { t }
-                    }
-                    defaultReply { "没有这个模板哦" }
-                    timeout(120_000)
+                    if (res == null) return
                 }
 
-                setTemplate("dynamic", selectTemplate, subject)
+                "PUSH" -> {
+                    val b = selectContent.split(".").last()
+                    val template = when (b) {
+                        "1" -> BiliConfig.templateConfig.dynamicPush
+                        "2" -> BiliConfig.templateConfig.livePush
+                        else -> {
+                            subject.sendMessage("没有这个选项哦")
+                            null
+                        }
+                    }
+                    if (template != null){
+                        subject.sendMessage("请选择一个推送模板, 回复模板名\n生成模板需要一定时间...")
+                        listTemplate(if (b == "1") "d" else "l", subject)
+                        //event.whileSelect {
+                        //    template.forEach { (t, _) ->
+                        //        t {
+                        //            selectTemplate = t
+                        //            false
+                        //        }
+                        //    }
+                        //}?: return
+                        var c = 0
+                        var res: String? = null
+                        var selectTemplate = ""
+                        event.whileSelectMessages {
+                            "退出" {
+                                event.subject.sendMessage("已退出")
+                                false // 停止循环
+                            }
+                            template.forEach { (t, _) ->
+                                t {
+                                    selectTemplate = t
+                                    res = ""
+                                    false
+                                }
+                            }
+                            default {
+                                c ++
+                                subject.sendMessage("没有这个选项哦${if(c < 2) ", 请重新输入" else ", 超出重试次数, 退出"}")
+                                c < 2
+                            }
+                            timeout(120_000) { false }
+                        }
+                        if (res == null) return
+                        subject.sendMessage(setTemplate(if (b == "1") "d" else "l", selectTemplate, subject))
+                    }
+                }
+
+                "FILTER" -> {
+                    val b = selectContent.split(".").last()
+                    val filter = BiliData.filter[contact.delegate]?.get(uid)
+                    when (b) {
+                        "1" -> subject.sendMessage(listFilter(uid, contact.delegate))
+                        "2" -> {
+                            val mode = filter?.typeSelect?.mode?.value ?: "黑名单"
+                            val type = DynamicFilterType.values().joinToString("\n    ") { it.value }
+                            subject.sendMessage("当前过滤器类型: $mode\n支持的类型: \n    $type\n请回复要过滤的类型")
+
+                            var c = 0
+                            var res: String? = null
+                            var selectType: String? = null
+                            event.whileSelectMessages {
+                                "退出" {
+                                    event.subject.sendMessage("已退出")
+                                    false // 停止循环
+                                }
+                                DynamicFilterType.values().forEach { t ->
+                                    t.value {
+                                        selectType = t.value
+                                        res = ""
+                                        false
+                                    }
+                                }
+                                default {
+                                    c ++
+                                    subject.sendMessage("没有这个选项哦${if(c < 2) ", 请重新输入" else ", 超出重试次数, 退出"}")
+                                    c < 2
+                                }
+                                timeout(120_000) { false }
+                            }
+                            if (res == null) return
+                            subject.sendMessage(addFilter(FilterType.TYPE, null, selectType, uid, contact.delegate))
+                        }
+                        "3" -> {
+                            try {
+                                val mode = filter?.regularSelect?.mode?.value ?: "黑名单"
+                                subject.sendMessage("当前过滤器类型: $mode\n请回复过滤文本或正则")
+                                val reg = event.nextMessage(120_000).content
+                                if (reg != "")
+                                    subject.sendMessage(addFilter(FilterType.REGULAR, null, reg, uid, contact.delegate))
+                            }catch (e: Exception){
+                                return
+                            }
+                        }
+                        "4" -> {
+                            val typeMode = filter?.typeSelect?.mode?.value ?: "黑名单"
+                            val regMode = filter?.regularSelect?.mode?.value ?: "黑名单"
+                            subject.sendMessage("类型过滤器: $typeMode\n类型过滤器: $regMode\n请选择要切换的过滤的类型\nt: 类型过滤器\nr: 类型过滤器")
+
+                            //event.whileSelect {
+                            //    "t" {
+                            //        selectType = FilterType.TYPE
+                            //        selectMode = filter?.typeSelect?.mode?: FilterMode.BLACK_LIST
+                            //        false
+                            //    }
+                            //    "r" {
+                            //        selectType = FilterType.REGULAR
+                            //        selectMode = filter?.regularSelect?.mode?: FilterMode.BLACK_LIST
+                            //        false
+                            //    }
+                            //}?: return
+                            var c = 0
+                            var res: String? = null
+                            var selectType: FilterType? = null
+                            var selectMode: FilterMode? = null
+                            event.whileSelectMessages {
+                                "退出" {
+                                    event.subject.sendMessage("已退出")
+                                    false // 停止循环
+                                }
+                                "t" {
+                                    selectType = FilterType.TYPE
+                                    selectMode = filter?.typeSelect?.mode?: FilterMode.BLACK_LIST
+                                    res = ""
+                                    false
+                                }
+                                "r" {
+                                    selectType = FilterType.REGULAR
+                                    selectMode = filter?.regularSelect?.mode?: FilterMode.BLACK_LIST
+                                    res = ""
+                                    false
+                                }
+                                default {
+                                    c ++
+                                    subject.sendMessage("没有这个选项哦${if(c < 2) ", 请重新输入" else ", 超出重试次数, 退出"}")
+                                    c < 2
+                                }
+                                timeout(120_000) { false }
+                            }
+                            if (res == null) return
+                            if (selectType != null) {
+                                selectMode = if (selectMode == FilterMode.BLACK_LIST) FilterMode.WHITE_LIST else FilterMode.BLACK_LIST
+                                subject.sendMessage(addFilter(selectType!!, selectMode, null, uid, contact.delegate))
+                            }
+                        }
+                        "5" -> {
+                            try {
+                                subject.sendMessage(listFilter(uid, contact.delegate))
+                                val reg = event.nextMessage(120_000).content
+                                subject.sendMessage(delFilter(reg, uid, contact.delegate))
+                            }catch (e: Exception){
+                                return
+                            }
+                        }
+                    }
+                }
             }
+            subject.sendMessage("配置结束\n输入上方编号以继续\n不回复或回复 退出 来退出")
+        }
+    }
 
-            "FILTER" -> {
-
-
+    suspend inline fun  <reified T : MessageEvent> T.whileSelect(
+        count: Int = 2,
+        timeout: Long = 120_000,
+        defaultReply: String = "没有这个选项哦",
+        crossinline selectBuilder: MessageSelectBuilder<T, Boolean>.() -> Unit
+    ): String? {
+        var c = 0
+        var res :String? = null
+        whileSelectMessages {
+            "退出" {
+                subject.sendMessage("已退出")
+                res = "退出"
+                false // 停止循环
+            }
+            apply(selectBuilder)
+            default {
+                c ++
+                subject.sendMessage("$defaultReply${if(c < count) ", 请重新输入" else ", 超出重试次数, 退出"}")
+                if (c >= count) res = "超次"
+                c < count
+            }
+            timeout(timeout) {
+                res = "超时"
+                false
             }
         }
-
-
+        return res
     }
 
     fun isFollow(uid: Long, subject: String) =
-        dynamic.containsKey(uid) && dynamic[uid]!!.contacts.contains(subject)
+        uid == 0L || (dynamic.containsKey(uid) && dynamic[uid]!!.contacts.contains(subject))
 
 
 }

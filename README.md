@@ -8,9 +8,8 @@
 [![Release](https://img.shields.io/github/v/release/Colter23/bilibili-dynamic-mirai-plugin)](https://github.com/Colter23/bilibili-dynamic-mirai-plugin/releases)
 
 ## V3版本
-v3完全重构, 使用skiko绘图, 更加美观。同时增加稳定性与可配置性  
-v3还有很多问题没解决(但还是摸了好长时间才摸出来 后面写的时候已经放弃思考了)  
-目前v3还是测试版, 可能会出现很多问题(请酌情使用)  
+v3需 `>= mirai 2.12.0`    
+v3完全重构, 使用 [skiko](https://github.com/JetBrains/skiko) 绘图, 更加美观。同时增加稳定性与可配置性    
 [v2版本](https://github.com/Colter23/bilibili-dynamic-mirai-plugin/tree/v2)  
 
 如果你再使用v3版中有什么问题可统一前往 [V3问题/建议反馈](https://github.com/Colter23/bilibili-dynamic-mirai-plugin/issues/66) 进行反馈  
@@ -61,8 +60,8 @@ v3数据文件名 `BiliData.yml`
 |-------------------------------------------------|--------------------------------------|
 | `/bili <login / 登录>`                            | 扫码登录 (需在配置文件中配置管理员)                  |
 | `/bili <add / 添加> <uid> [群/Q号]`                 | 为目标 [群/Q号] 添加一个订阅                    |
-| `/bili <list / 列表> [群/Q号]`                      | 查询目标 [群/Q号] 的订阅列表                    |
 | `/bili <del / 删除> <uid> [群/Q号]`                 | 为目标 [群/Q号] 删除一个订阅                    |
+| `/bili <config / 配置> [uid] [群/Q号]`              | 交互式配置 (可配置主题色 模板 过滤器)                |
 | `/bili <delAll / 删除全部订阅> [群/Q号]`                | 将目标 [群/Q号] 的全部订阅删除                   |
 | `/bili <color / 颜色> <uid> <HEX颜色>`              | 为目标 UID 设置图片推送主题色                    |
 | `/bili <list / 列表> [群/Q号]`                      | 查询目标 [群/Q号] 的订阅列表                    |
@@ -70,7 +69,6 @@ v3数据文件名 `BiliData.yml`
 | `/bili <listUser / lu / 用户列表>`                  | 查询用户列表  (需在配置文件中配置管理员)               |
 | `/bili <templateList / tl / 模板列表>`              | 查看推送模板推送效果                           |
 | `/bili <template / t / 模板> <模板类型> <模板名> [群/Q号]` | 设置模板 <br/>模板类型: `d`(动态模板)  `l`(直播模板) |
-| `/bili <config / 配置> [uid] [群/Q号]`              | 交互式配置(还没做完)                          |
 | `/bili <search / s / 搜索> <动态ID>`                | 通过ID搜索一个动态                           |
 | `/bili <new / 最新动态> <uid / 用户名> [数量]`           | 获取用户最新动态 (支持用户名模糊搜索)                 |
 ```
@@ -91,7 +89,8 @@ v3数据文件名 `BiliData.yml`
 ### 动态过滤指令
 两种过滤器:
 - 类型过滤器: 通过动态类型进行过滤 可选类型 `动态` `转发动态` `视频` `音乐` `专栏` `直播`
-- 内容正则过滤器: 对动态进行正则匹配过滤
+- 内容正则过滤器: 对动态进行正则匹配过滤    
+可同时添加两种过滤器，但两种过滤器是独立先后执行的   
 
 过滤器的两种模式:
 - `黑名单`：当动态匹配过滤器时**不**推送动态
@@ -184,9 +183,10 @@ v3数据文件名 `BiliData.yml`
 | `lowSpeed`     | 例: 3-8x2 三点到八点检测间隔为正常间隔的2倍 | 低频检测时间段与倍率  |
 
 #### PushConfig
-| 配置项            | 取值   | 说明           |
-|----------------|------|--------------|
-| `pushInterval` | 单位毫秒 | QQ中连续发送消息的间隔 |
+| 配置项               | 取值   | 说明                  |
+|-------------------|------|---------------------|
+| `messageInterval` | 单位毫秒 | QQ中同一个群中连续发送多个消息的间隔 |
+| `pushInterval`    | 单位毫秒 | QQ中连续发送多个群之间的间隔     |
 
 #### ImageConfig
 | 配置项              | 取值                                                        | 说明                                                 |
@@ -304,12 +304,14 @@ v3数据文件名 `BiliData.yml`
 
 # 功能开关:
 #   drawEnable: 绘图开关
+#   notifyEnable: 操作通知开关
 #   lowSpeedEnable: 低频检测开关
 #   translateEnable: 翻译开关
 #   proxyEnable: 代理开关
 #   cacheClearEnable: 缓存清理开关
 enableConfig:
   drawEnable: true
+  notifyEnable: true
   lowSpeedEnable: false
   translateEnable: false
   proxyEnable: false
@@ -334,9 +336,11 @@ checkConfig:
   lowSpeed: '0-0x2'
   
 # 推送配置:
-#   pushInterval: QQ中连续发送消息的间隔 单位毫秒
+#   messageInterval: QQ中同一个群中连续发送多个消息的间隔 单位毫秒
+#   pushInterval: QQ中连续发送多个群之间的间隔 单位毫秒
 pushConfig:
-  pushInterval: 100
+  messageInterval: 100
+  pushInterval: 500
 
 # 图片配置:
 # 当 ImageQuality.yml / ImageTheme.yml 中的 customOverload 开启后下面对应的配置将不再生效
