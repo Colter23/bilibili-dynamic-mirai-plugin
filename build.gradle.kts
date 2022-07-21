@@ -4,6 +4,7 @@ plugins {
     kotlin("plugin.serialization") version kotlinVersion
 
     id("net.mamoe.mirai-console") version "2.12.0"
+    id("net.mamoe.maven-central-publish") version "0.7.1"
 }
 
 group = "top.colter"
@@ -13,6 +14,15 @@ repositories {
     mavenLocal()
     mavenCentral()
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
+}
+
+mavenCentralPublish {
+    useCentralS01()
+    singleDevGithubProject("Colter23", "bilibili-dynamic-mirai-plugin")
+    licenseFromGitHubProject("AGPL-3.0", "master")
+    publication {
+        artifact(tasks.getByName("buildPlugin"))
+    }
 }
 
 dependencies{
