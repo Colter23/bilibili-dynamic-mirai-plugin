@@ -412,6 +412,10 @@ object BiliDataTasker {
             appendLine()
             appendLine("当前可配置项:")
             var i = 1
+            //if (uid != 0L && contact is Group){
+            //    configMap[i.toString()] = "ATALL"
+            //    appendLine("  ${i++}: @全体 [${user?.color?:BiliConfig.imageConfig.defaultColor}]")
+            //}
             if (uid != 0L) {
                 configMap[i.toString()] = "COLOR"
                 appendLine("  ${i++}: 主题色 [${user?.color?:BiliConfig.imageConfig.defaultColor}]")

@@ -33,12 +33,12 @@ dependencies{
     }
 
     implementation("com.google.zxing:javase:3.5.0")
-    compileOnly("xyz.cssxsh.mirai:mirai-skia-plugin:1.1.4")
+    compileOnly("xyz.cssxsh.mirai:mirai-skia-plugin:1.1.6")
 
     testImplementation(kotlin("test", "1.7.0"))
-    testImplementation("org.jetbrains.skiko:skiko-awt-runtime-windows-x64:0.7.23")
-    testImplementation("org.jetbrains.skiko:skiko-awt-runtime-linux-x64:0.7.23")
-    testImplementation("org.jetbrains.skiko:skiko-awt-runtime-linux-arm64:0.7.23")
-    testImplementation("org.jetbrains.skiko:skiko-awt-runtime-macos-x64:0.7.23")
-    testImplementation("org.jetbrains.skiko:skiko-awt-runtime-macos-arm64:0.7.23")
+    testImplementation("org.jetbrains.skiko:skiko-awt-runtime-windows-x64:0.7.26")
+    testImplementation("org.jetbrains.skiko:skiko-awt-runtime-linux-x64:0.7.26")
+    testImplementation("org.jetbrains.skiko:skiko-awt-runtime-linux-arm64:0.7.26")
+    testImplementation("org.jetbrains.skiko:skiko-awt-runtime-macos-x64:0.7.26")
+    testImplementation("org.jetbrains.skiko:skiko-awt-runtime-macos-arm64:0.7.26")
 }

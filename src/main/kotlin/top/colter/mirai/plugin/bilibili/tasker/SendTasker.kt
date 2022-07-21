@@ -116,7 +116,7 @@ object SendTasker : BiliTasker() {
                                     is LiveMessage -> BiliBiliDynamic.liveGwp
                                 }
                                 val hasPerm = it.permitteeId.getPermittedPermissions().any { it.id == gwp }
-                                if (hasPerm) {
+                                if (hasPerm && ((it as? Group)?.botPermission?.level ?: 0) > 0) {
                                     val last = it1.last().plus("\n").plus(AtAll)
                                     it.sendMessage(it1.dropLast(1).plusElement(last))
                                 } else {
