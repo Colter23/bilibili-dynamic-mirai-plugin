@@ -13,7 +13,7 @@ suspend fun BiliClient.loginInfo(oauthKey: String): LoginResult {
     return useHttpClient {
         it.post(LOGIN_INFO) {
             bodyParameter("oauthKey", oauthKey)
-        }.body()
+        }.body<String>().decode()
     }
 }
 

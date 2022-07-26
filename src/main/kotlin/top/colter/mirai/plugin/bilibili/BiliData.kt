@@ -22,6 +22,10 @@ object BiliData : AutoSavePluginData("BiliData") {
     // key: template name
     @ValueDescription("直播推送模板")
     val livePushTemplate: MutableMap<String, MutableSet<Long>> by value()
+
+    // key: contact
+    @ValueDescription("AtAll")
+    val atAll: MutableMap<Long, MutableMap<Long, MutableSet<AtAllType>>> by value()
 }
 
 @Serializable
@@ -68,6 +72,15 @@ enum class FilterMode(val value: String) {
 enum class DynamicFilterType(val value: String) {
     DYNAMIC("动态"),
     FORWARD("转发动态"),
+    VIDEO("视频"),
+    MUSIC("音乐"),
+    ARTICLE("专栏"),
+    LIVE("直播"),
+}
+
+enum class AtAllType(val value: String) {
+    ALL("全部"),
+    DYNAMIC("全部动态"),
     VIDEO("视频"),
     MUSIC("音乐"),
     ARTICLE("专栏"),

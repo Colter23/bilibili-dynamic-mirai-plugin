@@ -334,3 +334,18 @@ suspend fun actionNotify(message: String) {
     findContactAll(BiliConfig.admin)?.sendMessage(message)
 }
 
+inline fun matchUser(user: String, matchSuccess: (uid: Long) -> String?): String? {
+    val u = findLocalIdOrName(user)
+    return if (u.isEmpty()) {
+        "未匹配到用户哦"
+    }else if (u.size == 1) {
+        matchSuccess(u.first().first)
+    }else {
+        buildString {
+            appendLine("有多个匹配项：")
+            u.forEach {
+                appendLine("${BiliData.dynamic[it.first]?.name}: ${it.second}")
+            }
+        }
+    }
+}

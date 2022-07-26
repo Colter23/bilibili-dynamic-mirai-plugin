@@ -3,12 +3,13 @@ plugins {
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.serialization") version kotlinVersion
 
+
     id("net.mamoe.mirai-console") version "2.12.0"
     id("net.mamoe.maven-central-publish") version "0.7.1"
 }
 
 group = "top.colter"
-version = "3.0.0-BETA3"
+version = "3.0.0-BETA4"
 
 repositories {
     mavenLocal()
@@ -40,6 +41,10 @@ dependencies{
         exclude(group = "org.jetbrains.kotlin")
         exclude(group = "org.jetbrains.kotlinx")
         exclude(group = "org.slf4j")
+    }
+    api("org.jetbrains.skiko:skiko-awt:0.7.26") {
+        exclude(group = "org.jetbrains.kotlin")
+        exclude(group = "org.jetbrains.kotlinx")
     }
 
     implementation("com.google.zxing:javase:3.5.0")

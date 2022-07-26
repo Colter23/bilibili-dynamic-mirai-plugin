@@ -17,6 +17,7 @@ import net.mamoe.mirai.message.nextMessage
 import net.mamoe.mirai.utils.ExternalResource.Companion.sendAsImageTo
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
 import top.colter.mirai.plugin.bilibili.*
+import top.colter.mirai.plugin.bilibili.AtAllType.*
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic.save
 import top.colter.mirai.plugin.bilibili.BiliConfig.accountConfig
 import top.colter.mirai.plugin.bilibili.api.*
@@ -393,6 +394,67 @@ object BiliDataTasker {
         }
     }
 
+    private fun toAtAllType(type: String) =
+        when (type.lowercase()) {
+            "全部", "all", "a" -> ALL
+            "全部动态", "dynamic", "d" -> DYNAMIC
+            "直播", "live", "l" -> LIVE
+            "视频", "video", "v" -> VIDEO
+            "音乐", "music", "m" -> MUSIC
+            "专栏", "article" -> ARTICLE
+            else -> {
+                 null
+            }
+        }
+
+    fun addAtAll(type: String, uid: Long = 0L, contact: Contact): String {
+        val atAllType = toAtAllType(type)?: return "没有这个类型哦 [$type]"
+        if (contact !is Group) return "仅在群聊中有用哦"
+        if (contact.botPermission.level == 0) return "Bot不为管理员, 无法使用At全体"
+
+        val list = BiliData.atAll.getOrPut(contact.id) { mutableMapOf() }.getOrPut(uid) { mutableSetOf() }
+        if (list.isEmpty()) {
+            list.add(atAllType)
+            BiliData.atAll[contact.id]?.set(uid, list)
+        }else {
+            when (atAllType){
+                ALL -> {
+                    list.clear()
+                    list.add(atAllType)
+                }
+                DYNAMIC -> {
+                    list.removeAll(listOf(ALL, VIDEO, MUSIC, ARTICLE))
+                    list.add(atAllType)
+                }
+                LIVE -> {
+                    list.remove(ALL)
+                    list.add(atAllType)
+                }
+                else -> {
+                    list.remove(ALL)
+                    list.remove(DYNAMIC)
+                    list.add(atAllType)
+                }
+            }
+        }
+        return "添加成功"
+    }
+
+    fun delAtAll(type: String, uid: Long = 0L, contact: Contact): String {
+        val atAllType = toAtAllType(type)?: return "没有这个类型哦 [$type]"
+        return if (BiliData.atAll[contact.id]?.get(uid)?.remove(atAllType) == true) "删除成功" else "删除失败"
+    }
+
+    fun listAtAll(uid: Long = 0L, contact: Contact): String {
+        val list = BiliData.atAll[contact.id]?.get(uid)
+        if (list == null || list.isEmpty()) return "没有At全体项哦"
+        return buildString {
+            list.forEach {
+                appendLine(it.value)
+            }
+        }
+    }
+
     suspend fun config(event: MessageEvent, uid: Long = 0L, contact: Contact) {
 
         val subject = event.subject
@@ -412,10 +474,15 @@ object BiliDataTasker {
             appendLine()
             appendLine("当前可配置项:")
             var i = 1
-            //if (uid != 0L && contact is Group){
-            //    configMap[i.toString()] = "ATALL"
-            //    appendLine("  ${i++}: @全体 [${user?.color?:BiliConfig.imageConfig.defaultColor}]")
-            //}
+            if (contact is Group){
+                configMap[i.toString()] = "ATALL"
+                val aa = BiliData.atAll[contact.id]?.get(uid)?.isNotEmpty()
+                appendLine("  $i: At全体 [${aa?:false}]")
+                appendLine("      $i.1: 当前At全体项")
+                appendLine("      $i.2: 添加At全体")
+                appendLine("      $i.2: 删除At全体")
+                i++
+            }
             if (uid != 0L) {
                 configMap[i.toString()] = "COLOR"
                 appendLine("  ${i++}: 主题色 [${user?.color?:BiliConfig.imageConfig.defaultColor}]")
@@ -448,21 +515,6 @@ object BiliDataTasker {
         })
 
         while (true) {
-            //val selectConfig = event.selectMessages {
-            //    configMap.forEach { (t, u) ->
-            //        startsWith(t) {
-            //            selectContent = message.content
-            //            u
-            //        }
-            //    }
-            //    "退出" {
-            //        event.subject.sendMessage("已退出")
-            //        ""
-            //    }
-            //    defaultReply { "没有这个选项哦" }
-            //    timeout(120_000)
-            //}
-            //if (selectConfig == "") return
             var cc = 0
             var rres: String? = null
             var selectContent = ""
@@ -470,7 +522,7 @@ object BiliDataTasker {
             event.whileSelectMessages {
                 "退出" {
                     event.subject.sendMessage("已退出")
-                    false // 停止循环
+                    false
                 }
                 configMap.forEach { (t, u) ->
                     startsWith(t) {
@@ -490,6 +542,59 @@ object BiliDataTasker {
             if (rres == null) return
 
             when (selectConfig) {
+                "ATALL" -> {
+                    val b = selectContent.split(".").last()
+                    when (b) {
+                        "1" -> {
+                            subject.sendMessage(listAtAll(uid, contact))
+                        }
+                        "2" -> {
+                            subject.sendMessage(buildString {
+                                appendLine("请选择要At全体的内容: ")
+                                appendLine("  全部")
+                                appendLine("  ├─ 全部动态")
+                                appendLine("  │   ├─ 视频")
+                                appendLine("  │   ├─ 音乐")
+                                appendLine("  │   └─ 专栏")
+                                appendLine("  └─ 直播")
+                            })
+
+                            var c = 0
+                            var res: String? = null
+                            var selectType = ""
+                            event.whileSelectMessages {
+                                "退出" {
+                                    event.subject.sendMessage("已退出")
+                                    false // 停止循环
+                                }
+                                AtAllType.values().forEach { t ->
+                                    t.value {
+                                        selectType = t.value
+                                        res = ""
+                                        false
+                                    }
+                                }
+                                default {
+                                    c ++
+                                    subject.sendMessage("没有这个选项哦${if(c < 2) ", 请重新输入" else ", 超出重试次数, 退出"}")
+                                    c < 2
+                                }
+                                timeout(120_000) { false }
+                            }
+                            if (res == null) return
+
+                            subject.sendMessage(addAtAll(selectType, uid, contact))
+                        }
+                        "3" -> {
+                            val list = BiliData.atAll[contact.id]?.get(uid)
+                            if (list == null || list.isEmpty()) subject.sendMessage("没有At全体哦")
+                            subject.sendMessage("At全体项:\n"+listAtAll(uid, contact)+"\n请回复要删除的项")
+                            val type = event.nextMessage().content
+                            subject.sendMessage(delAtAll(type, uid, contact))
+                        }
+                    }
+                }
+
                 "COLOR" -> {
                     subject.sendMessage("请输入16进制颜色，例如: #d3edfa")
                     var res: String? = null
@@ -528,14 +633,6 @@ object BiliDataTasker {
                     if (template != null){
                         subject.sendMessage("请选择一个推送模板, 回复模板名\n生成模板需要一定时间...")
                         listTemplate(if (b == "1") "d" else "l", subject)
-                        //event.whileSelect {
-                        //    template.forEach { (t, _) ->
-                        //        t {
-                        //            selectTemplate = t
-                        //            false
-                        //        }
-                        //    }
-                        //}?: return
                         var c = 0
                         var res: String? = null
                         var selectTemplate = ""
@@ -614,18 +711,6 @@ object BiliDataTasker {
                             val regMode = filter?.regularSelect?.mode?.value ?: "黑名单"
                             subject.sendMessage("类型过滤器: $typeMode\n类型过滤器: $regMode\n请选择要切换的过滤的类型\nt: 类型过滤器\nr: 类型过滤器")
 
-                            //event.whileSelect {
-                            //    "t" {
-                            //        selectType = FilterType.TYPE
-                            //        selectMode = filter?.typeSelect?.mode?: FilterMode.BLACK_LIST
-                            //        false
-                            //    }
-                            //    "r" {
-                            //        selectType = FilterType.REGULAR
-                            //        selectMode = filter?.regularSelect?.mode?: FilterMode.BLACK_LIST
-                            //        false
-                            //    }
-                            //}?: return
                             var c = 0
                             var res: String? = null
                             var selectType: FilterType? = null
@@ -676,7 +761,7 @@ object BiliDataTasker {
         }
     }
 
-    suspend inline fun  <reified T : MessageEvent> T.whileSelect(
+    suspend inline fun <reified T : MessageEvent> T.whileSelect(
         count: Int = 2,
         timeout: Long = 120_000,
         defaultReply: String = "没有这个选项哦",
@@ -688,7 +773,7 @@ object BiliDataTasker {
             "退出" {
                 subject.sendMessage("已退出")
                 res = "退出"
-                false // 停止循环
+                false
             }
             apply(selectBuilder)
             default {

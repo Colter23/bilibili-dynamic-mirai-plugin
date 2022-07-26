@@ -6,8 +6,13 @@ import net.mamoe.mirai.console.command.CompositeCommand
 import net.mamoe.mirai.console.command.descriptor.CommandArgumentParserException
 import net.mamoe.mirai.console.permission.PermissionService.Companion.hasPermission
 import net.mamoe.mirai.contact.Contact
-import top.colter.mirai.plugin.bilibili.*
+import net.mamoe.mirai.utils.ExternalResource.Companion.sendAsImageTo
+import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
+import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic.crossContact
+import top.colter.mirai.plugin.bilibili.BiliConfig
+import top.colter.mirai.plugin.bilibili.FilterMode
+import top.colter.mirai.plugin.bilibili.FilterType
 import top.colter.mirai.plugin.bilibili.api.getDynamicDetail
 import top.colter.mirai.plugin.bilibili.api.getLive
 import top.colter.mirai.plugin.bilibili.api.getUserNewDynamic
@@ -22,16 +27,24 @@ object DynamicCommand : CompositeCommand(
     description = "动态指令"
 ) {
 
+    @SubCommand("h", "help", "帮助", "menu")
+    suspend fun CommandSender.help() {
+        loadResourceBytes("image/HELP.png").toExternalResource().toAutoCloseable().sendAsImageTo(Contact())
+    }
+
     @SubCommand("color", "颜色")
-    suspend fun CommandSender.color(uid: Long, color: String) {
-        val msg = BiliDataTasker.setColor(uid, color)
-        sendMessage(msg)
-        actionNotify(this.subject?.id, ActionMessage(name, uid.toString(), "修改主题色", msg))
+    suspend fun CommandSender.color(user: String, color: String) {
+        matchUser(user) {
+            BiliDataTasker.setColor(it, color)
+        }?.let {
+            sendMessage(it)
+            actionNotify(this.subject?.id, ActionMessage(name, user, "修改主题色", it))
+        }
     }
 
     @SubCommand("add", "添加", "订阅")
     suspend fun CommandSender.add(uid: Long, contact: Contact = Contact()) {
-        if(!hasPermission(crossContact) && contact.delegate != Contact().delegate) {
+        if (!hasPermission(crossContact) && contact.delegate != Contact().delegate) {
             sendMessage("权限不足, 无法为其他人添加订阅")
             return
         }
@@ -42,31 +55,21 @@ object DynamicCommand : CompositeCommand(
 
     @SubCommand("del", "删除")
     suspend fun CommandSender.del(user: String, contact: Contact = Contact()) {
-        if(!hasPermission(crossContact) && contact.delegate != Contact().delegate) {
+        if (!hasPermission(crossContact) && contact.delegate != Contact().delegate) {
             sendMessage("权限不足, 无法删除其他人的订阅")
             return
         }
-        val u = findLocalIdOrName(user)
-        if (u.isEmpty()) {
-            sendMessage("未匹配到用户哦")
-        }else if (u.size == 1) {
-            val msg = BiliDataTasker.removeSubscribe(u.first().first, contact.delegate).let { "对 ${it?.name} 取消订阅成功!" }
-            sendMessage(msg)
-            actionNotify(this.subject?.id, ActionMessage(name, contact.name, "取消订阅", msg))
-        }else {
-            val us = buildString {
-                appendLine("有多个匹配项：")
-                u.forEach {
-                    appendLine("${BiliData.dynamic[it.first]?.name}: ${it.second}")
-                }
-            }
-            sendMessage(us)
+        matchUser(user) {
+            BiliDataTasker.removeSubscribe(it, contact.delegate).let { it1 -> "对 ${it1?.name} 取消订阅成功!" }
+        }?.let {
+            sendMessage(it)
+            actionNotify(this.subject?.id, ActionMessage(name, contact.name, "取消订阅", it))
         }
     }
 
     @SubCommand("delAll", "删除全部订阅")
     suspend fun CommandSender.delAll(contact: Contact = Contact()) {
-        if(!hasPermission(crossContact) && contact.delegate != Contact().delegate) {
+        if (!hasPermission(crossContact) && contact.delegate != Contact().delegate) {
             sendMessage("权限不足, 无法删除其他人的订阅")
             return
         }
@@ -77,7 +80,7 @@ object DynamicCommand : CompositeCommand(
 
     @SubCommand("list", "列表")
     suspend fun CommandSender.list(contact: Contact = Contact()) {
-        if(!hasPermission(crossContact) && contact.delegate != Contact().delegate) {
+        if (!hasPermission(crossContact) && contact.delegate != Contact().delegate) {
             sendMessage("权限不足, 无法查看其他人的订阅")
             return
         }
@@ -100,7 +103,7 @@ object DynamicCommand : CompositeCommand(
 
     @SubCommand("filterMode", "fm", "过滤模式")
     suspend fun CommandSender.filterMode(type: String, mode: String, uid: Long = 0L, contact: Contact = Contact()) {
-        if(!hasPermission(crossContact) && contact.delegate != Contact().delegate) {
+        if (!hasPermission(crossContact) && contact.delegate != Contact().delegate) {
             sendMessage("权限不足, 无法修改其他人的过滤模式")
             return
         }
@@ -115,7 +118,7 @@ object DynamicCommand : CompositeCommand(
 
     @SubCommand("filterType", "ft", "类型过滤")
     suspend fun CommandSender.filterType(type: String, uid: Long = 0L, contact: Contact = Contact()) {
-        if(!hasPermission(crossContact) && contact.delegate != Contact().delegate) {
+        if (!hasPermission(crossContact) && contact.delegate != Contact().delegate) {
             sendMessage("权限不足, 无法为其他人添加过滤器")
             return
         }
@@ -124,7 +127,7 @@ object DynamicCommand : CompositeCommand(
 
     @SubCommand("filterReg", "fr", "正则过滤")
     suspend fun CommandSender.filterReg(reg: String, uid: Long = 0L, contact: Contact = Contact()) {
-        if(!hasPermission(crossContact) && contact.delegate != Contact().delegate) {
+        if (!hasPermission(crossContact) && contact.delegate != Contact().delegate) {
             sendMessage("权限不足, 无法为其他人添加过滤器")
             return
         }
@@ -133,7 +136,7 @@ object DynamicCommand : CompositeCommand(
 
     @SubCommand("filterList", "fl", "过滤列表")
     suspend fun CommandSender.filterList(uid: Long = 0L, contact: Contact = Contact()) {
-        if(!hasPermission(crossContact) && contact.delegate != Contact().delegate) {
+        if (!hasPermission(crossContact) && contact.delegate != Contact().delegate) {
             sendMessage("权限不足, 无法查看其他人的过滤器")
             return
         }
@@ -142,7 +145,7 @@ object DynamicCommand : CompositeCommand(
 
     @SubCommand("filterDel", "fd", "过滤删除")
     suspend fun CommandSender.filterDel(index: String, uid: Long = 0L, contact: Contact = Contact()) {
-        if(!hasPermission(crossContact) && contact.delegate != Contact().delegate) {
+        if (!hasPermission(crossContact) && contact.delegate != Contact().delegate) {
             sendMessage("权限不足, 无法删除其他人的过滤器")
             return
         }
@@ -157,7 +160,7 @@ object DynamicCommand : CompositeCommand(
 
     @SubCommand("template", "t", "模板")
     suspend fun CommandSender.template(type: String, template: String, contact: Contact = Contact()) {
-        if(!hasPermission(crossContact) && contact.delegate != Contact().delegate) {
+        if (!hasPermission(crossContact) && contact.delegate != Contact().delegate) {
             sendMessage("权限不足, 无法修改其他人的模板")
             return
         }
@@ -165,24 +168,67 @@ object DynamicCommand : CompositeCommand(
     }
 
     @SubCommand("login", "登录")
-    suspend fun CommandSender.login() {
+    suspend fun CommandSenderOnMessage<*>.login() {
         val subject = Contact()
         if (BiliConfig.admin == subject.id || BiliConfig.admin == user?.id)
             BiliDataTasker.login(subject)
         else sendMessage("仅bot管理员可进行登录")
     }
 
+    @SubCommand("atall", "aa", "at全体")
+    suspend fun CommandSender.atall(type: String = "a", user: String = "0", contact: Contact = Contact()) {
+        if (!hasPermission(crossContact) && contact.delegate != Contact().delegate) {
+            sendMessage("权限不足, 无法修改其他人的配置")
+            return
+        }
+        matchUser(user){
+            BiliDataTasker.addAtAll(type, it, contact)
+        }?.let { sendMessage(it) }
+    }
+
+    @SubCommand("delAtall", "daa", "取消at全体")
+    suspend fun CommandSender.delAtall(type: String = "a", user: String = "0", contact: Contact = Contact()) {
+        if (!hasPermission(crossContact) && contact.delegate != Contact().delegate) {
+            sendMessage("权限不足, 无法修改其他人的配置")
+            return
+        }
+        matchUser(user){
+            BiliDataTasker.delAtAll(type, it, contact)
+        }?.let { sendMessage(it) }
+    }
+
+    @SubCommand("listAtall", "laa", "at全体列表")
+    suspend fun CommandSender.listAtall(user: String = "0", contact: Contact = Contact()) {
+        if (!hasPermission(crossContact) && contact.delegate != Contact().delegate) {
+            sendMessage("权限不足, 无法查看其他人的配置")
+            return
+        }
+        matchUser(user){
+            BiliDataTasker.listAtAll(it, contact)
+        }?.let { sendMessage(it) }
+    }
+
     @SubCommand("config", "配置")
-    suspend fun CommandSenderOnMessage<*>.config(uid: Long = 0L, contact: Contact = Contact()) {
-        if(!hasPermission(crossContact) && contact.delegate != Contact().delegate) return
-        BiliDataTasker.config(fromEvent, uid, contact)
+    suspend fun CommandSenderOnMessage<*>.config(user: String = "0", contact: Contact = Contact()) {
+        if (!hasPermission(crossContact) && contact.delegate != Contact().delegate) {
+            sendMessage("权限不足, 无法修改其他人的配置")
+            return
+        }
+        if (user == "0") {
+            BiliDataTasker.config(fromEvent, 0, contact)
+        }else {
+            matchUser(user){
+                BiliDataTasker.config(fromEvent, it, contact)
+                null
+            }?.let { sendMessage(it) }
+        }
     }
 
     @SubCommand("search", "s", "搜索")
     suspend fun CommandSenderOnMessage<*>.search(did: String) {
         val subject = Contact()
         val detail = biliClient.getDynamicDetail(did)
-        if (detail != null) subject.sendMessage("请稍等") else subject.sendMessage("未找到动态")
+        if (detail != null) subject.sendMessage("少女祈祷中...") else subject.sendMessage("未找到动态")
         detail?.let { d -> BiliBiliDynamic.dynamicChannel.send(DynamicDetail(d, subject.delegate)) }
     }
 
@@ -190,30 +236,19 @@ object DynamicCommand : CompositeCommand(
     suspend fun CommandSenderOnMessage<*>.live() {
         val subject = Contact()
         val detail = biliClient.getLive(1, 1)
-        if (detail != null) subject.sendMessage("请稍等") else subject.sendMessage("当前没有人在直播")
+        if (detail != null) subject.sendMessage("少女祈祷中...") else subject.sendMessage("当前没有人在直播")
         detail?.let { d -> BiliBiliDynamic.liveChannel.send(LiveDetail(d.rooms.first(), subject.delegate)) }
     }
 
     @SubCommand("new", "最新动态")
     suspend fun CommandSenderOnMessage<*>.new(user: String, count: Int = 1) {
-        val u = findLocalIdOrName(user)
-        if (u.isEmpty()) {
-            sendMessage("未匹配到用户哦")
-        }else if (u.size == 1) {
-            val list = biliClient.getUserNewDynamic(u.first().first)?.items?.subList(0, count)
-            if (list != null && list.isNotEmpty()) sendMessage("请稍等") else sendMessage("未找到动态")
-            list?.forEach {
-                BiliBiliDynamic.dynamicChannel.send(DynamicDetail(it, Contact().delegate))
+        matchUser(user){
+            val list = biliClient.getUserNewDynamic(it)?.items?.subList(0, count)
+            list?.forEach { di ->
+                BiliBiliDynamic.dynamicChannel.send(DynamicDetail(di, Contact().delegate))
             }
-        }else {
-            val us = buildString {
-                appendLine("有多个匹配项：")
-                u.forEach {
-                    appendLine("${BiliData.dynamic[it.first]?.name}: ${it.second}")
-                }
-            }
-            sendMessage(us)
-        }
+            if (list != null && list.isNotEmpty()) "少女祈祷中..." else "未找到动态"
+        }?.let { sendMessage(it) }
     }
 
 }

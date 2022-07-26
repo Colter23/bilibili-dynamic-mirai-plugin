@@ -7,61 +7,47 @@
 ![Downloads](https://img.shields.io/github/downloads/Colter23/bilibili-dynamic-mirai-plugin/total)
 [![Release](https://img.shields.io/github/v/release/Colter23/bilibili-dynamic-mirai-plugin)](https://github.com/Colter23/bilibili-dynamic-mirai-plugin/releases)
 
+## 特性
+**无论多少订阅均可在最低 10s 内检测所有动态**  
+使用 [skiko](https://github.com/JetBrains/skiko) 绘图   
+动态过滤     
+扫码登录   
+可配置性高
+
 ## V3版本
 v3需 `>= mirai 2.12.0`    
 v3完全重构, 使用 [skiko](https://github.com/JetBrains/skiko) 绘图, 更加美观。同时增加稳定性与可配置性    
-[v2版本](https://github.com/Colter23/bilibili-dynamic-mirai-plugin/tree/v2)  
-
-如果你再使用v3版中有什么问题可统一前往 [V3问题/建议反馈](https://github.com/Colter23/bilibili-dynamic-mirai-plugin/issues/66) 进行反馈  
+[v2版本](https://github.com/Colter23/bilibili-dynamic-mirai-plugin/tree/v2)
 
 建了个QQ群，有问题可即时反馈 [734922374](https://jq.qq.com/?_wv=1027&k=NuSQdKTQ)
 
-## 数据迁移
-v2与v3的数据结构不一样  
-但不用担心 当你第一次运行v3版插件会自动进行数据迁移  
-v3配置文件名 `BiliConfig.yml`   
-v3数据文件名 `BiliData.yml`
+Vtuber 字幕组及粉丝群如需要使用可通过群联系我, 使用我搭建的bot实例
 
 ## V3样式预览
 <img src="docs/img/demo1.png" width="400" alt="样式1">    
 <img src="docs/img/demo2.png" width="400" alt="样式1">    
-<img src="docs/img/demo3.png" width="400" alt="样式1">    
+<img src="docs/img/demo3.png" width="400" alt="样式1">
 
-## 特性    
-**无论多少订阅均可在最低 10s 内检测所有动态**  
-[skiko](https://github.com/JetBrains/skiko) 绘图   
-动态过滤     
-扫码登录
+## 安装
+### 前置
+前置插件: [**mirai-skia-plugin**](https://github.com/cssxsh/mirai-skia-plugin)   
+插件命令依赖: [**chat-command**](https://github.com/project-mirai/chat-command)  
 
-### 基本原理
-通过检测 [动态](https://t.bilibili.com/) 界面，检测账号关注的所有最新动态，再挑选出 QQ 订阅的动态，这样一个检测周期就可以检测所有最新动态    
-因此，本插件需要一个 B 站账号来订阅用户。     
-**强烈推荐使用小号** 如果让bot用你经常使用的账号可能会出现长期多次异地访问造成风控 [无法添加关注](https://github.com/Colter23/bilibili-dynamic-mirai-plugin/issues/40)    
-(插件有扫码登陆和自动关注自动添加分组功能，详细见下文)
+### 手动下载jar包 (与下面二选一)   
+插件本体: [**releases**](https://github.com/Colter23/bilibili-dynamic-mirai-plugin/releases)
 
-### 关于自动关注
-如果账号没有关注过此人，bot 会自动关注并把他分到一个新分组中，方便管理    
-是否开启自动关注以及新分组的名称都可以在配置文件中进行配置    
-如果关闭自动关注，那么在 QQ 中订阅一个未关注的人时会提示 未关注
-
-### 关于分组(如果你不知道b站关注可以分组的话请忽略)
-开启自动关注后，bot 会生成一个新分组(分组名可以在配置中设置)，由 bot 新关注的人会被分到这个分组内，之前就关注过的不会移动    
-如果你想让 bot 关注就保存在默认分组中，请在配置中替换 `followGroup` 后面的值为两个双引号 `""`
-
-
-## 下载
-前置插件: [mirai-skia-plugin](https://github.com/cssxsh/mirai-skia-plugin)  
-下载插件本体: [releases](https://github.com/Colter23/bilibili-dynamic-mirai-plugin/releases)    
-插件命令依赖 [chat-command](https://github.com/project-mirai/chat-command)  
+### MCL 指令安装 (与上面二选一)
+`./mcl --update-package top.colter:bilibili-dynamic-mirai-plugin --channel maven --type plugin`
 
 ## 指令
 
-| 订阅相关                                  | 描述                   |
-|---------------------------------------|----------------------|
-| `/bili <login / 登录>`                  | 扫码登录 (需在配置文件中配置管理员)  |
-| `/bili <add / 添加 / 订阅> <uid> [群/Q号]`  | 为目标 [群/Q号] 添加一个订阅    |
-| `/bili <del / 删除> <uid / 用户名> [群/Q号]` | 为目标 [群/Q号] 删除一个订阅    |
-| `/bili <delAll / 删除全部订阅> [群/Q号]`      | 将目标 [群/Q号] 的全部订阅删除   |
+| 订阅相关                                  | 描述                  |
+|---------------------------------------|---------------------|
+| `/bili <h / help / menu / 帮助>`        | 帮助图片（未完成）           |
+| `/bili <login / 登录>`                  | 扫码登录 (需在配置文件中配置管理员) |
+| `/bili <add / 添加 / 订阅> <uid> [群/Q号]`  | 为目标 [群/Q号] 添加一个订阅   |
+| `/bili <del / 删除> <uid / 用户名> [群/Q号]` | 为目标 [群/Q号] 删除一个订阅   |
+| `/bili <delAll / 删除全部订阅> [群/Q号]`      | 将目标 [群/Q号] 的全部订阅删除  |
 
 | 订阅列表                            | 描述                      |
 |---------------------------------|-------------------------|
@@ -69,28 +55,30 @@ v3数据文件名 `BiliData.yml`
 | `/bili <listAll / la / 全部订阅列表>` | 查询全部订阅列表 (需在配置文件中配置管理员) |
 | `/bili <listUser / lu / 用户列表>`  | 查询用户列表  (需在配置文件中配置管理员)  |
 
-| 配置                                              | 描述                                   |
-|-------------------------------------------------|--------------------------------------|
-| `/bili <config / 配置> [uid] [群/Q号]`              | 交互式配置 (可配置主题色 模板 过滤器)                |
-| `/bili <color / 颜色> <uid> <HEX颜色>`              | 为目标 UID 设置图片推送主题色                    |
-| `/bili <templateList / tl / 模板列表>`              | 查看推送模板推送效果                           |
-| `/bili <template / t / 模板> <模板类型> <模板名> [群/Q号]` | 设置模板 <br/>模板类型: `d`(动态模板)  `l`(直播模板) |
+| 配置                                                        | 描述                                                                                                                                                                                            |
+|-----------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `/bili <config / 配置> [uid / 用户名] [群/Q号]`                  | 交互式配置 (可配置主题色 模板 过滤器)                                                                                                                                                                         |
+| `/bili <color / 颜色> <uid / 用户名> <HEX颜色>`                  | 为目标 UID 设置图片推送主题色                                                                                                                                                                             |
+| `/bili <templateList / tl / 模板列表>`                        | 查看推送模板推送效果                                                                                                                                                                                    |
+| `/bili <template / t / 模板> <模板类型> <模板名> [群/Q号]`           | 设置模板 <br/>模板类型: `d`(动态模板)  `l`(直播模板)                                                                                                                                                          |
+| `/bili <atall / aa / at全体> [类型] [uid / 用户名] [群/Q号]`       | 设置At全体  可加多个  类型: <br/> `全部 / all / a` : 动态与直播 <br/> `全部动态 / dynamic / d` : 全部动态 <br/> `直播 / live / l` : 直播 <br/> `视频 / video / v` : 视频 <br/> `音乐 / music / m` : 音乐 <br/> `专栏 / article` : 专栏 |
+| `/bili <delAtall / daa / 取消at全体> [类型] [uid / 用户名] [群/Q号]` | 取消一个At全体项                                                                                                                                                                                     |
+| `/bili <listAtall / laa / at全体列表> [uid / 用户名] [群/Q号]`     | 查看At全体项列表                                                                                                                                                                                     |
 
-| 搜索指令                                  | 描述                                   |
-|---------------------------------------|--------------------------------------|
-| `/bili <search / s / 搜索> <动态ID>`      | 通过ID搜索一个动态                           |
-| `/bili <new / 最新动态> <uid / 用户名> [数量]` | 获取用户最新动态 (支持用户名模糊搜索)                 |
+| 搜索指令                                  | 描述                     |
+|---------------------------------------|------------------------|
+| `/bili <search / s / 搜索> <动态ID>`      | 通过ID搜索一个动态             |
+| `/bili <new / 最新动态> <uid / 用户名> [数量]` | 获取用户最新动态 (支持用户名本地模糊搜索) |
 
 推荐使用 `config` 指令配置 模板 过滤器
 
-```
-# 说明
 扫码登录请在配置文件中填写管理员账号    
-<..> 尖括号为必填参数   [..] 中括号为可选参数    
-[群/Q号] 不填的话默认对话所在地
-<HEX颜色> 必须带#号 支持多个值自定义渐变 中间用分号‘;’分隔 例: #fde8ed;#fde8ed
-单个值会自动生成渐变色
+`<..>` 尖括号为必填参数   `[..]` 中括号为可选参数    
+`[群/Q号]` 不填的话默认对话所在地    
+`<HEX颜色>` 必须带#号 支持多个值自定义渐变 中间用分号‘;’分隔 例: #fde8ed;#fde8ed    
+单个值会自动生成渐变色    
 
+```
 # 栗子
 /bili add 487550002             #为当前群/好友添加 uid 为 487550002 的订阅
 /bili add 487550002 111111      #为 111111 群/好友添加订阅
@@ -99,6 +87,8 @@ v3数据文件名 `BiliData.yml`
 ```
 
 ### 动态过滤指令
+推荐使用 `/bili config` 交互式配置
+
 两种过滤器:
 - 类型过滤器: 通过动态类型进行过滤 可选类型 `动态` `转发动态` `视频` `音乐` `专栏` `直播`
 - 内容正则过滤器: 对动态进行正则匹配过滤    
@@ -145,6 +135,40 @@ v3数据文件名 `BiliData.yml`
 # uid 为 0 时，代表群/好友订阅的所有用户
 # 不填默认也为 0
 ```
+
+## 权限
+插件命令依赖 [chat-command](https://github.com/project-mirai/chat-command) 来正确处理聊天环境下的命令，请确保有此插件，否则插件可能无法正常工作
+
+| 权限名        | ID                                                    |
+|------------|-------------------------------------------------------|
+| 基础权限ID     | top.colter.bilibili-dynamic-mirai-plugin:*            |
+| 动态指令ID     | top.colter.bilibili-dynamic-mirai-plugin:command.bili |
+| **跨通讯录控制** | top.colter.bilibili-dynamic-mirai-plugin:crossContact |
+
+跨通讯录控制可以让你修改查看别人的配置
+
+如果你不会给权限可以点击下面展开查看简略教程
+<details>
+<summary>点击展开</summary>
+
+在控制台输入 `/perm add <许可人 ID> top.colter.bilibili-dynamic-mirai-plugin:command.bili`
+
+其中的 `许可人 ID` 如果你要让所有群所有人都可以用此插件就是 `*` 即 `/perm add * top.colter.bilibili-dynamic-mirai-plugin:command.bili`    
+具体的用户: `u123456789` 全部用户: `u*`    
+具体的群: `g123456789` 全部群: `g*`    
+更多的配置见 [被许可人 ID 字符串表示](https://github.com/mamoe/mirai-console/blob/master/docs/Permissions.md#%E5%AD%97%E7%AC%A6%E4%B8%B2%E8%A1%A8%E7%A4%BA)    
+[授予一个用户执行所有指令的权限](https://github.com/mamoe/mirai-console/blob/master/docs/BuiltInCommands.md#%E6%8E%88%E4%BA%88%E4%B8%80%E4%B8%AA%E7%94%A8%E6%88%B7%E6%89%A7%E8%A1%8C%E6%89%80%E6%9C%89%E6%8C%87%E4%BB%A4%E7%9A%84%E6%9D%83%E9%99%90)
+
+</details>
+
+#### ~~At全体权限~~
+**3.0.0-BETA4 后废弃**   
+废弃后仍可使用, 但不推荐, 推荐使用前面的指令进行配置
+
+| 权限名   | ID                                                     |
+|-------|--------------------------------------------------------|
+| 直播@全体 | `top.colter.bilibili-dynamic-mirai-plugin:live.atall`  |
+| 视频@全体 | `top.colter.bilibili-dynamic-mirai-plugin:video.atall` |
 
 
 ## 配置
@@ -195,10 +219,11 @@ v3数据文件名 `BiliData.yml`
 | `lowSpeed`     | 例: 3-8x2 三点到八点检测间隔为正常间隔的2倍 | 低频检测时间段与倍率  |
 
 #### PushConfig
-| 配置项               | 取值   | 说明                  |
-|-------------------|------|---------------------|
-| `messageInterval` | 单位毫秒 | QQ中同一个群中连续发送多个消息的间隔 |
-| `pushInterval`    | 单位毫秒 | QQ中连续发送多个群之间的间隔     |
+| 配置项               | 取值                                               | 说明                  |
+|-------------------|--------------------------------------------------|---------------------|
+| `messageInterval` | 单位毫秒                                             | QQ中同一个群中连续发送多个消息的间隔 |
+| `pushInterval`    | 单位毫秒                                             | QQ中连续发送多个群之间的间隔     |
+| `atAllPlus`       | `SINGLE_MESSAGE`: 单独的消息  `PLUS_END`: 追加到最后一条消息后面 | At全体拼接方式            |
 
 #### ImageConfig
 | 配置项              | 取值                                                        | 说明                                                 |
@@ -277,19 +302,19 @@ v3数据文件名 `BiliData.yml`
 
 ##### 转发卡片配置项
 `{name}`: 名称  
-`{uid}`: 用户ID
-`{did}`: 动态ID
+`{uid}`: 用户ID  
+`{did}`: 动态ID  
 `{type}`: 动态类型  
-`{time}`: 时间
-`{content}`: 动态内容
-`{link}`: 链接
+`{time}`: 时间  
+`{content}`: 动态内容  
+`{link}`: 链接  
 
 ##### 页脚配置项
 `{name}`: 名称  
-`{uid}`: 用户ID
-`{id}`: 动态/直播ID
-`{type}`: 类型  
-`{time}`: 时间
+`{uid}`: 用户ID  
+`{id}`: 动态/直播ID  
+`{type}`: 类型   
+`{time}`: 时间  
 
 
 #### CacheConfig
@@ -802,39 +827,20 @@ v2:
 
 
 ## 使用帮助
-### 权限    
-插件命令依赖 [chat-command](https://github.com/project-mirai/chat-command) 来正确处理聊天环境下的命令，请确保有此插件，否则插件可能无法正常工作    
+### 基本原理
+通过检测 [动态](https://t.bilibili.com/) 界面，检测账号关注的所有最新动态，再挑选出 QQ 订阅的动态，这样一个检测周期就可以检测所有最新动态    
+因此，本插件需要一个 B 站账号来订阅用户。     
+**强烈推荐使用小号** 如果让bot用你经常使用的账号可能会出现长期多次异地访问造成风控 [无法添加关注](https://github.com/Colter23/bilibili-dynamic-mirai-plugin/issues/40)    
+(插件有扫码登陆和自动关注自动添加分组功能，详细见下文)
 
-| 权限名    | ID                                                    |
-|--------|-------------------------------------------------------|
-| 基础权限ID | top.colter.bilibili-dynamic-mirai-plugin:*            |
-| 动态指令ID | top.colter.bilibili-dynamic-mirai-plugin:command.bili |
-| 跨通讯录控制 | top.colter.bilibili-dynamic-mirai-plugin:crossContact |
+### 关于自动关注
+如果账号没有关注过此人，bot 会自动关注并把他分到一个新分组中，方便管理    
+是否开启自动关注以及新分组的名称都可以在配置文件中进行配置    
+如果关闭自动关注，那么在 QQ 中订阅一个未关注的人时会提示 未关注
 
-如果你不会给权限可以点击下面展开查看简略教程
-<details>
-<summary>点击展开</summary>
-
-在控制台输入 `/perm add <许可人 ID> top.colter.bilibili-dynamic-mirai-plugin:*`
-
-其中的 `许可人 ID` 如果你要让所有群所有人都可以用此插件就是 `*` 即 `/perm add * top.colter.bilibili-dynamic-mirai-plugin:*`    
-具体的用户: `u123456789` 全部用户: `u*`    
-具体的群: `g123456789` 全部群: `g*`    
-更多的配置见 [被许可人 ID 字符串表示](https://github.com/mamoe/mirai-console/blob/master/docs/Permissions.md#%E5%AD%97%E7%AC%A6%E4%B8%B2%E8%A1%A8%E7%A4%BA)    
-[授予一个用户执行所有指令的权限](https://github.com/mamoe/mirai-console/blob/master/docs/BuiltInCommands.md#%E6%8E%88%E4%BA%88%E4%B8%80%E4%B8%AA%E7%94%A8%E6%88%B7%E6%89%A7%E8%A1%8C%E6%89%80%E6%9C%89%E6%8C%87%E4%BB%A4%E7%9A%84%E6%9D%83%E9%99%90)
-
-</details>
-
-#### At全体权限
-新版At全体暂时还没想好怎么搞
-
-| 权限名   | ID                                                     |
-|-------|--------------------------------------------------------|
-| 直播@全体 | `top.colter.bilibili-dynamic-mirai-plugin:live.atall`  |
-| 视频@全体 | `top.colter.bilibili-dynamic-mirai-plugin:video.atall` |
-
-通过对群设置权限来控制是否开启直播@全体    
-`/perm add g123456789 top.colter.bilibili-dynamic-mirai-plugin:live.atall`
+### 关于分组(如果你不知道b站关注可以分组的话请忽略)
+开启自动关注后，bot 会生成一个新分组(分组名可以在配置中设置)，由 bot 新关注的人会被分到这个分组内，之前就关注过的不会移动    
+如果你想让 bot 关注就保存在默认分组中，请在配置中替换 `followGroup` 后面的值为两个引号 `""`
 
 ### 字体
 
@@ -844,17 +850,26 @@ v2:
 里面不同文件代表不同的粗细, 建议使用 `Medium` 
 
 ### 手动获取 Cookie
-<details>
-<summary>点击展开</summary>
+推荐使用 `/bili login` 指令进行登录
 
+#### 通过开发者工具获取
+
+建议开启浏览器无痕模式   
 浏览器打开 [BiliBili](https://www.bilibili.com/) 并登陆  
-注：登陆后最好不要退出登陆
+注：**登陆后不要点退出登陆**
 
-按`F12`，打开`开发者工具`，找到`Network 网络`并点击  
+按`F12`，打开`开发者工具`，找到`Network / 网络`并点击  
 按`F5`刷新页面，按下图复制 Cookie   
 <img src="docs/img/cookie.png" width="500">
 
-</details>
+把复制的 cookie 粘贴到配置文件中对应的位置, **并使用双引号包裹**
+
+#### 通过 EditThisCookie 获取
+
+1. 在浏览器中安装 [EditThisCookie](https://www.editthiscookie.com/) 插件   
+2. 在b站打开EditThisCookie面板, 点击刷新按钮, 再点击导出按钮
+3. 在插件数据路径 `data/top.colter.bilibili-dynamic-mirai-plugin` 下新建 `cookies.json` 文件
+4. 把第二步中复制的数据粘贴到文件中
 
 ## 图片缓存
 所有的图片都会缓存在 `data/top.colter.bilibili-dynamic-mirai-plugin/cache` 下

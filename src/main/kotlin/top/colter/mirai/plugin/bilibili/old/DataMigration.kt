@@ -121,7 +121,3 @@ fun migrationConfig() {
         }
     }
 }
-
-fun migrationImage() {
-
-}

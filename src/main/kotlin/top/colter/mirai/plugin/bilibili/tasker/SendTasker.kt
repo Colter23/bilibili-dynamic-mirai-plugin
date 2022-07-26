@@ -27,10 +27,11 @@ object SendTasker : BiliTasker() {
     override var interval: Int = 0
 
     private val templateConfig by BiliConfig::templateConfig
+    private val atAllPlus = BiliConfig.pushConfig.atAllPlus
 
     private val dynamic by BiliData::dynamic
-
     private val filter by BiliData::filter
+    private val atAll by BiliData::atAll
 
     private val messageInterval = BiliConfig.pushConfig.messageInterval
     private val pushInterval = BiliConfig.pushConfig.pushInterval
@@ -110,15 +111,30 @@ object SendTasker : BiliTasker() {
                 for (temp in templateMap) {
                     temp.value.forEach {
                         templateMsgMap[temp.key]?.let { it1 ->
-                            if (it is Group) {
+                            val aa = atAll[it.id]?.get(biliMessage.uid) ?: atAll[it.id]?.get(0L)
+                            if (biliMessage.contact == null && it is Group && it.botPermission.level > 0) {
+                                var isAtAll = false
+                                if (aa != null && aa.isNotEmpty()) {
+                                    if (aa.contains(AtAllType.ALL)) isAtAll = true
+                                    else when (biliMessage) {
+                                        is DynamicMessage ->
+                                            if (aa.contains(AtAllType.DYNAMIC) || aa.contains(biliMessage.type.toAtAllType()))
+                                                isAtAll = true
+                                        is LiveMessage -> if (aa.contains(AtAllType.LIVE)) isAtAll = true
+                                    }
+                                }
                                 val gwp = when (biliMessage) {
                                     is DynamicMessage -> if (biliMessage.type == DynamicType.DYNAMIC_TYPE_AV) BiliBiliDynamic.videoGwp else null
                                     is LiveMessage -> BiliBiliDynamic.liveGwp
                                 }
                                 val hasPerm = it.permitteeId.getPermittedPermissions().any { it.id == gwp }
-                                if (hasPerm && ((it as? Group)?.botPermission?.level ?: 0) > 0) {
-                                    val last = it1.last().plus("\n").plus(AtAll)
-                                    it.sendMessage(it1.dropLast(1).plusElement(last))
+                                if (isAtAll || hasPerm) {
+                                    if (atAllPlus == "SINGLE_MESSAGE" || it1.last().content.contains("[转发消息]")) {
+                                        it.sendMessage(it1.plusElement(buildMessageChain { +AtAll }))
+                                    }else {
+                                        val last = it1.last().plus("\n").plus(AtAll)
+                                        it.sendMessage(it1.dropLast(1).plusElement(last))
+                                    }
                                 } else {
                                     it.sendMessage(it1)
                                 }
@@ -139,6 +155,14 @@ object SendTasker : BiliTasker() {
         }
         delay(pushInterval)
     }
+
+    fun DynamicType.toAtAllType() =
+        when (this) {
+            DynamicType.DYNAMIC_TYPE_AV -> AtAllType.VIDEO
+            DynamicType.DYNAMIC_TYPE_MUSIC -> AtAllType.MUSIC
+            DynamicType.DYNAMIC_TYPE_ARTICLE -> AtAllType.ARTICLE
+            else -> AtAllType.DYNAMIC
+        }
 
     fun DynamicType.toFilterType() =
         when (this) {
@@ -171,7 +195,7 @@ object SendTasker : BiliTasker() {
                 list.removeAll(subData.banList.keys)
                 list.filter { contact ->
                     if (filter.containsKey(contact) && (filter[contact]!!.containsKey(uid) || filter[contact]!!.containsKey(0L))) {
-                        val dynamicFilter = filter[contact]!![uid]!!
+                        val dynamicFilter = filter[contact]!![uid] ?: filter[contact]!![0L]!!
                         val typeSelect = dynamicFilter.typeSelect
                         if (typeSelect.list.isNotEmpty()) {
                             val b = typeSelect.list.contains(type.toFilterType())
@@ -194,6 +218,7 @@ object SendTasker : BiliTasker() {
                     true
                 }.toMutableSet()
             } catch (e: Throwable) {
+                logger.warning(e)
                 null
             }
         }
@@ -208,7 +233,7 @@ object SendTasker : BiliTasker() {
             list.removeAll(subData.banList.keys)
             list.filter { contact ->
                 if (filter.containsKey(contact) && (filter[contact]!!.containsKey(uid) || filter[contact]!!.containsKey(0L))) {
-                    val dynamicFilter = filter[contact]!![uid]!!
+                    val dynamicFilter = filter[contact]!![uid] ?: filter[contact]!![0L]!!
                     val typeSelect = dynamicFilter.typeSelect
                     if (typeSelect.list.isNotEmpty()) {
                         val b = typeSelect.list.contains(DynamicFilterType.LIVE)

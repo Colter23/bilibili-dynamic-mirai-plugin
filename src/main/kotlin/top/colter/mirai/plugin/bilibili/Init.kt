@@ -4,8 +4,11 @@ import top.colter.mirai.plugin.bilibili.BiliConfig.accountConfig
 import top.colter.mirai.plugin.bilibili.api.createGroup
 import top.colter.mirai.plugin.bilibili.api.followGroup
 import top.colter.mirai.plugin.bilibili.api.userInfo
+import top.colter.mirai.plugin.bilibili.data.EditThisCookie
+import top.colter.mirai.plugin.bilibili.data.toCookie
 import top.colter.mirai.plugin.bilibili.utils.FontUtils.loadTypeface
 import top.colter.mirai.plugin.bilibili.utils.biliClient
+import top.colter.mirai.plugin.bilibili.utils.decode
 import kotlin.io.path.createDirectory
 import kotlin.io.path.exists
 import kotlin.io.path.forEachDirectoryEntry
@@ -18,7 +21,20 @@ suspend fun initData() {
 }
 
 suspend fun checkCookie() {
-    BiliBiliDynamic.cookie.parse(accountConfig.cookie)
+    val cookieFile = BiliBiliDynamic.dataFolder.resolve("cookies.json")
+    if (cookieFile.exists()) {
+        try {
+            val cookie = cookieFile.readText().decode<List<EditThisCookie>>().toCookie()
+            if (!cookie.isEmpty()) {
+                BiliBiliDynamic.cookie = cookie
+            }else {
+                BiliBiliDynamic.logger.error("cookies.json 中缺少必要的值 [SESSDATA] [bili_jct]")
+            }
+        }catch (e: Exception) {
+            BiliBiliDynamic.logger.error("解析 cookies.json 失败")
+        }
+    }
+    if (BiliBiliDynamic.cookie.isEmpty()) BiliBiliDynamic.cookie.parse(accountConfig.cookie)
 
     try {
         BiliBiliDynamic.mid = biliClient.userInfo()?.mid!!
@@ -32,17 +48,17 @@ suspend fun checkCookie() {
 
 suspend fun initTagid() {
     if (accountConfig.autoFollow && accountConfig.followGroup.isNotEmpty()) {
-        biliClient.followGroup()?.forEach {
-            if (it.name == accountConfig.followGroup) {
-                BiliBiliDynamic.tagid = it.tagId
-                return
-            }
-        }
         try {
+            biliClient.followGroup()?.forEach {
+                if (it.name == accountConfig.followGroup) {
+                    BiliBiliDynamic.tagid = it.tagId
+                    return
+                }
+            }
             val res = biliClient.createGroup(accountConfig.followGroup) ?: throw Exception()
             BiliBiliDynamic.tagid = res.tagId
         }catch (e: Exception){
-            BiliBiliDynamic.logger.error("创建分组失败 ${e.message}")
+            BiliBiliDynamic.logger.error("初始化分组失败 ${e.message}")
         }
 
     }

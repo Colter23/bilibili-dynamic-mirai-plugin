@@ -54,6 +54,7 @@ object BiliConfig : AutoSavePluginConfig("BiliConfig") {
         推送配置:
           messageInterval: QQ中同一个群中连续发送多个消息的间隔 单位毫秒
           pushInterval: QQ中连续发送多个群之间的间隔 单位毫秒
+          atAllPlus: At全体拼接方式 SINGLE_MESSAGE: 单独的消息  PLUS_END: 追加到最后一条消息后面
     """
     )
     val pushConfig: PushConfig by value()
@@ -195,6 +196,7 @@ data class CheckConfig(
 data class PushConfig(
     val messageInterval: Long = 100,
     val pushInterval: Long = 500,
+    val atAllPlus: String = "PLUS_END", // SINGLE_MESSAGE PLUS_END
 )
 
 @Serializable
