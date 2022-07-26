@@ -14,7 +14,7 @@ object FontUtils {
 
     private fun registerTypeface(typeface: Typeface?, alias: String? = null) {
         fontProvider.registerTypeface(typeface)
-        if (alias!=null) fontProvider.registerTypeface(typeface, alias)
+        if (alias != null) fontProvider.registerTypeface(typeface, alias)
     }
 
 

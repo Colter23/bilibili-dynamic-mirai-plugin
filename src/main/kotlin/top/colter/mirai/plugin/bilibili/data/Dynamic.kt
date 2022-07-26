@@ -92,25 +92,26 @@ data class DynamicItem(
     val orig: DynamicItem? = null,
 ) {
 
-    val type: DynamicType get() =
-        when (typeStr){
-            "DYNAMIC_TYPE_WORD" -> DynamicType.DYNAMIC_TYPE_WORD
-            "DYNAMIC_TYPE_DRAW" -> DynamicType.DYNAMIC_TYPE_DRAW
-            "DYNAMIC_TYPE_ARTICLE" -> DynamicType.DYNAMIC_TYPE_ARTICLE
-            "DYNAMIC_TYPE_FORWARD" -> DynamicType.DYNAMIC_TYPE_FORWARD
-            "DYNAMIC_TYPE_AV" -> DynamicType.DYNAMIC_TYPE_AV
-            "DYNAMIC_TYPE_MUSIC" -> DynamicType.DYNAMIC_TYPE_MUSIC
-            "DYNAMIC_TYPE_LIVE" -> DynamicType.DYNAMIC_TYPE_LIVE
-            "DYNAMIC_TYPE_LIVE_RCMD" -> DynamicType.DYNAMIC_TYPE_LIVE_RCMD
-            "DYNAMIC_TYPE_PGC" -> DynamicType.DYNAMIC_TYPE_PGC
-            "DYNAMIC_TYPE_COMMON_SQUARE" -> DynamicType.DYNAMIC_TYPE_COMMON_SQUARE
-            "DYNAMIC_TYPE_COMMON_VERTICAL" -> DynamicType.DYNAMIC_TYPE_COMMON_VERTICAL
-            "DYNAMIC_TYPE_NONE" -> DynamicType.DYNAMIC_TYPE_NONE
-            else -> DynamicType.DYNAMIC_TYPE_UNKNOWN
-        }
+    val type: DynamicType
+        get() =
+            when (typeStr) {
+                "DYNAMIC_TYPE_WORD" -> DynamicType.DYNAMIC_TYPE_WORD
+                "DYNAMIC_TYPE_DRAW" -> DynamicType.DYNAMIC_TYPE_DRAW
+                "DYNAMIC_TYPE_ARTICLE" -> DynamicType.DYNAMIC_TYPE_ARTICLE
+                "DYNAMIC_TYPE_FORWARD" -> DynamicType.DYNAMIC_TYPE_FORWARD
+                "DYNAMIC_TYPE_AV" -> DynamicType.DYNAMIC_TYPE_AV
+                "DYNAMIC_TYPE_MUSIC" -> DynamicType.DYNAMIC_TYPE_MUSIC
+                "DYNAMIC_TYPE_LIVE" -> DynamicType.DYNAMIC_TYPE_LIVE
+                "DYNAMIC_TYPE_LIVE_RCMD" -> DynamicType.DYNAMIC_TYPE_LIVE_RCMD
+                "DYNAMIC_TYPE_PGC" -> DynamicType.DYNAMIC_TYPE_PGC
+                "DYNAMIC_TYPE_COMMON_SQUARE" -> DynamicType.DYNAMIC_TYPE_COMMON_SQUARE
+                "DYNAMIC_TYPE_COMMON_VERTICAL" -> DynamicType.DYNAMIC_TYPE_COMMON_VERTICAL
+                "DYNAMIC_TYPE_NONE" -> DynamicType.DYNAMIC_TYPE_NONE
+                else -> DynamicType.DYNAMIC_TYPE_UNKNOWN
+            }
 
 
-    val did: String  get() = idStr?:"0"
+    val did: String get() = idStr ?: "0"
 
     /**
      * 基本
@@ -1051,7 +1052,7 @@ data class ModuleDynamic(
             val content: String,
             @SerialName("reserve_type")
             val reserveType: Int,
-        ){
+        ) {
             val liveInfo: LiveRcmdContent get() = content.decode()
 
             @Serializable
@@ -1062,7 +1063,7 @@ data class ModuleDynamic(
                 val livePlayInfo: LivePlayInfo,
                 //@SerialName("live_record_info")
                 //val liveRecordInfo: LiveRecordInfo?,
-            ){
+            ) {
                 @Serializable
                 data class LivePlayInfo(
                     @SerialName("uid")
@@ -1104,7 +1105,7 @@ data class ModuleDynamic(
                     //@SerialName("pendants")
                     //val pendants: Pendants,
 
-                ){
+                ) {
                     @Serializable
                     data class WatchedShow(
                         @SerialName("num")

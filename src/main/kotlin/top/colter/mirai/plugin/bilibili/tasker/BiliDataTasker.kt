@@ -336,10 +336,10 @@ object BiliDataTasker {
         }
 
         // https://t.bilibili.com/385190177693666264
-        val dynamic = if (type == "d"){
+        val dynamic = if (type == "d") {
             biliClient.getDynamicDetail("385190177693666264")?.buildMessage()!!
-        }else {
-            biliClient.getLive(1,1)?.rooms?.first()?.buildMessage()!!
+        } else {
+            biliClient.getLive(1, 1)?.rooms?.first()?.buildMessage()!!
         }
 
         subject.sendMessage(buildForwardMessage(subject) {
@@ -403,12 +403,12 @@ object BiliDataTasker {
             "音乐", "music", "m" -> MUSIC
             "专栏", "article" -> ARTICLE
             else -> {
-                 null
+                null
             }
         }
 
     fun addAtAll(type: String, uid: Long = 0L, contact: Contact): String {
-        val atAllType = toAtAllType(type)?: return "没有这个类型哦 [$type]"
+        val atAllType = toAtAllType(type) ?: return "没有这个类型哦 [$type]"
         if (contact !is Group) return "仅在群聊中有用哦"
         if (contact.botPermission.level == 0) return "Bot不为管理员, 无法使用At全体"
 
@@ -416,8 +416,8 @@ object BiliDataTasker {
         if (list.isEmpty()) {
             list.add(atAllType)
             BiliData.atAll[contact.id]?.set(uid, list)
-        }else {
-            when (atAllType){
+        } else {
+            when (atAllType) {
                 ALL -> {
                     list.clear()
                     list.add(atAllType)
@@ -441,7 +441,7 @@ object BiliDataTasker {
     }
 
     fun delAtAll(type: String, uid: Long = 0L, contact: Contact): String {
-        val atAllType = toAtAllType(type)?: return "没有这个类型哦 [$type]"
+        val atAllType = toAtAllType(type) ?: return "没有这个类型哦 [$type]"
         return if (BiliData.atAll[contact.id]?.get(uid)?.remove(atAllType) == true) "删除成功" else "删除失败"
     }
 
@@ -474,10 +474,10 @@ object BiliDataTasker {
             appendLine()
             appendLine("当前可配置项:")
             var i = 1
-            if (contact is Group){
+            if (contact is Group) {
                 configMap[i.toString()] = "ATALL"
                 val aa = BiliData.atAll[contact.id]?.get(uid)?.isNotEmpty()
-                appendLine("  $i: At全体 [${aa?:false}]")
+                appendLine("  $i: At全体 [${aa ?: false}]")
                 appendLine("      $i.1: 当前At全体项")
                 appendLine("      $i.2: 添加At全体")
                 appendLine("      $i.2: 删除At全体")
@@ -485,7 +485,7 @@ object BiliDataTasker {
             }
             if (uid != 0L) {
                 configMap[i.toString()] = "COLOR"
-                appendLine("  ${i++}: 主题色 [${user?.color?:BiliConfig.imageConfig.defaultColor}]")
+                appendLine("  ${i++}: 主题色 [${user?.color ?: BiliConfig.imageConfig.defaultColor}]")
             }
             if (uid == 0L) {
                 val cdl = BiliData.dynamicPushTemplate.filter { it.value.contains(contact.id) }.map { it.key }
@@ -533,8 +533,8 @@ object BiliDataTasker {
                     }
                 }
                 default {
-                    cc ++
-                    subject.sendMessage("没有这个选项哦${if(cc < 2) ", 请重新输入" else ", 超出重试次数, 退出"}")
+                    cc++
+                    subject.sendMessage("没有这个选项哦${if (cc < 2) ", 请重新输入" else ", 超出重试次数, 退出"}")
                     cc < 2
                 }
                 timeout(120_000) { false }
@@ -575,8 +575,8 @@ object BiliDataTasker {
                                     }
                                 }
                                 default {
-                                    c ++
-                                    subject.sendMessage("没有这个选项哦${if(c < 2) ", 请重新输入" else ", 超出重试次数, 退出"}")
+                                    c++
+                                    subject.sendMessage("没有这个选项哦${if (c < 2) ", 请重新输入" else ", 超出重试次数, 退出"}")
                                     c < 2
                                 }
                                 timeout(120_000) { false }
@@ -588,7 +588,7 @@ object BiliDataTasker {
                         "3" -> {
                             val list = BiliData.atAll[contact.id]?.get(uid)
                             if (list == null || list.isEmpty()) subject.sendMessage("没有At全体哦")
-                            subject.sendMessage("At全体项:\n"+listAtAll(uid, contact)+"\n请回复要删除的项")
+                            subject.sendMessage("At全体项:\n" + listAtAll(uid, contact) + "\n请回复要删除的项")
                             val type = event.nextMessage().content
                             subject.sendMessage(delAtAll(type, uid, contact))
                         }
@@ -630,7 +630,7 @@ object BiliDataTasker {
                             null
                         }
                     }
-                    if (template != null){
+                    if (template != null) {
                         subject.sendMessage("请选择一个推送模板, 回复模板名\n生成模板需要一定时间...")
                         listTemplate(if (b == "1") "d" else "l", subject)
                         var c = 0
@@ -649,8 +649,8 @@ object BiliDataTasker {
                                 }
                             }
                             default {
-                                c ++
-                                subject.sendMessage("没有这个选项哦${if(c < 2) ", 请重新输入" else ", 超出重试次数, 退出"}")
+                                c++
+                                subject.sendMessage("没有这个选项哦${if (c < 2) ", 请重新输入" else ", 超出重试次数, 退出"}")
                                 c < 2
                             }
                             timeout(120_000) { false }
@@ -686,8 +686,8 @@ object BiliDataTasker {
                                     }
                                 }
                                 default {
-                                    c ++
-                                    subject.sendMessage("没有这个选项哦${if(c < 2) ", 请重新输入" else ", 超出重试次数, 退出"}")
+                                    c++
+                                    subject.sendMessage("没有这个选项哦${if (c < 2) ", 请重新输入" else ", 超出重试次数, 退出"}")
                                     c < 2
                                 }
                                 timeout(120_000) { false }
@@ -702,7 +702,7 @@ object BiliDataTasker {
                                 val reg = event.nextMessage(120_000).content
                                 if (reg != "")
                                     subject.sendMessage(addFilter(FilterType.REGULAR, null, reg, uid, contact.delegate))
-                            }catch (e: Exception){
+                            } catch (e: Exception) {
                                 return
                             }
                         }
@@ -722,26 +722,27 @@ object BiliDataTasker {
                                 }
                                 "t" {
                                     selectType = FilterType.TYPE
-                                    selectMode = filter?.typeSelect?.mode?: FilterMode.BLACK_LIST
+                                    selectMode = filter?.typeSelect?.mode ?: FilterMode.BLACK_LIST
                                     res = ""
                                     false
                                 }
                                 "r" {
                                     selectType = FilterType.REGULAR
-                                    selectMode = filter?.regularSelect?.mode?: FilterMode.BLACK_LIST
+                                    selectMode = filter?.regularSelect?.mode ?: FilterMode.BLACK_LIST
                                     res = ""
                                     false
                                 }
                                 default {
-                                    c ++
-                                    subject.sendMessage("没有这个选项哦${if(c < 2) ", 请重新输入" else ", 超出重试次数, 退出"}")
+                                    c++
+                                    subject.sendMessage("没有这个选项哦${if (c < 2) ", 请重新输入" else ", 超出重试次数, 退出"}")
                                     c < 2
                                 }
                                 timeout(120_000) { false }
                             }
                             if (res == null) return
                             if (selectType != null) {
-                                selectMode = if (selectMode == FilterMode.BLACK_LIST) FilterMode.WHITE_LIST else FilterMode.BLACK_LIST
+                                selectMode =
+                                    if (selectMode == FilterMode.BLACK_LIST) FilterMode.WHITE_LIST else FilterMode.BLACK_LIST
                                 subject.sendMessage(addFilter(selectType!!, selectMode, null, uid, contact.delegate))
                             }
                         }
@@ -750,7 +751,7 @@ object BiliDataTasker {
                                 subject.sendMessage(listFilter(uid, contact.delegate))
                                 val reg = event.nextMessage(120_000).content
                                 subject.sendMessage(delFilter(reg, uid, contact.delegate))
-                            }catch (e: Exception){
+                            } catch (e: Exception) {
                                 return
                             }
                         }
@@ -768,7 +769,7 @@ object BiliDataTasker {
         crossinline selectBuilder: MessageSelectBuilder<T, Boolean>.() -> Unit
     ): String? {
         var c = 0
-        var res :String? = null
+        var res: String? = null
         whileSelectMessages {
             "退出" {
                 subject.sendMessage("已退出")
@@ -777,8 +778,8 @@ object BiliDataTasker {
             }
             apply(selectBuilder)
             default {
-                c ++
-                subject.sendMessage("$defaultReply${if(c < count) ", 请重新输入" else ", 超出重试次数, 退出"}")
+                c++
+                subject.sendMessage("$defaultReply${if (c < count) ", 请重新输入" else ", 超出重试次数, 退出"}")
                 if (c >= count) res = "超次"
                 c < count
             }

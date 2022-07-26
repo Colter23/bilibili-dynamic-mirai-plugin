@@ -5,7 +5,7 @@ import java.time.LocalTime
 
 abstract class BiliCheckTasker(
     taskerName: String? = null
-): BiliTasker(taskerName) {
+) : BiliTasker(taskerName) {
 
     private val intervalTime: Int by lazy { interval }
 

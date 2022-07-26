@@ -375,9 +375,11 @@ checkConfig:
 # 推送配置:
 #   messageInterval: QQ中同一个群中连续发送多个消息的间隔 单位毫秒
 #   pushInterval: QQ中连续发送多个群之间的间隔 单位毫秒
+#   atAllPlus: At全体拼接方式 SINGLE_MESSAGE: 单独的消息  PLUS_END: 追加到最后一条消息后面
 pushConfig:
   messageInterval: 100
   pushInterval: 500
+  atAllPlus: PLUS_END
 
 # 图片配置:
 # 当 ImageQuality.yml / ImageTheme.yml 中的 customOverload 开启后下面对应的配置将不再生效

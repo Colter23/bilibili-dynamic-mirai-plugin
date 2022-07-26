@@ -228,7 +228,7 @@ fun generateLinearGradient(colors: List<Int>): IntArray {
     val colorGenerator = BiliConfig.imageConfig.colorGenerator
     return if (colors.size == 1) {
         val hsb = rgb2hsb(Color.getR(colors[0]), Color.getG(colors[0]), Color.getB(colors[0]))
-        if (colorGenerator.lockSB){
+        if (colorGenerator.lockSB) {
             hsb[1] = colorGenerator.saturation
             hsb[2] = colorGenerator.brightness
         }
@@ -248,7 +248,7 @@ fun generateLinearGradient(colors: List<Int>): IntArray {
         val ia = IntArray(llc)
         repeat(llc) {
             val hsb = rgb2hsb(Color.getR(colors[it]), Color.getG(colors[it]), Color.getB(colors[it]))
-            if (colorGenerator.lockSB){
+            if (colorGenerator.lockSB) {
                 hsb[1] = colorGenerator.saturation
                 hsb[2] = colorGenerator.brightness
             }

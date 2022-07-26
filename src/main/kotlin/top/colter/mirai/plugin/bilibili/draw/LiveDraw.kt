@@ -27,7 +27,7 @@ suspend fun LiveInfo.drawLive(): Image {
     val height = (avatar.height + quality.contentSpace + cover.height * cardRect.width / cover.width).toInt()
 
     val footerTemplate = BiliConfig.templateConfig.footer.liveFooter
-    val footerParagraph = if (footerTemplate.isNotBlank()){
+    val footerParagraph = if (footerTemplate.isNotBlank()) {
         val footer = footerTemplate
             .replace("{name}", uname)
             .replace("{uid}", uid.toString())
@@ -35,7 +35,7 @@ suspend fun LiveInfo.drawLive(): Image {
             .replace("{time}", liveTime.formatTime)
             .replace("{type}", "直播")
         ParagraphBuilder(footerParagraphStyle, FontUtils.fonts).addText(footer).build().layout(cardRect.width)
-    }else null
+    } else null
 
     return Surface.makeRasterN32Premul(
         (cardRect.width + margin).toInt(),
@@ -143,9 +143,10 @@ fun Canvas.drawLiveOrnament(link: String?, qrCodeColor: Int?, label: String?) {
         "None" -> {}
         else -> {
             val labelTextLine = TextLine.make(label, font.makeWithSize(quality.subTitleFontSize))
-            val y = ((quality.faceSize - quality.subTitleFontSize - quality.badgePadding * 2 + quality.contentSpace) / 2)
+            val y =
+                ((quality.faceSize - quality.subTitleFontSize - quality.badgePadding * 2 + quality.contentSpace) / 2)
             drawLabelCard(
-                labelTextLine ,
+                labelTextLine,
                 cardContentRect.right - labelTextLine.width - quality.badgePadding * 4 - abs(y),
                 y + quality.cardPadding,
                 Paint().apply {

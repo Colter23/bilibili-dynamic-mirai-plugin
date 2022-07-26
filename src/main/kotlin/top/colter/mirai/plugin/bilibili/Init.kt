@@ -27,10 +27,10 @@ suspend fun checkCookie() {
             val cookie = cookieFile.readText().decode<List<EditThisCookie>>().toCookie()
             if (!cookie.isEmpty()) {
                 BiliBiliDynamic.cookie = cookie
-            }else {
+            } else {
                 BiliBiliDynamic.logger.error("cookies.json 中缺少必要的值 [SESSDATA] [bili_jct]")
             }
-        }catch (e: Exception) {
+        } catch (e: Exception) {
             BiliBiliDynamic.logger.error("解析 cookies.json 失败")
         }
     }
@@ -39,7 +39,7 @@ suspend fun checkCookie() {
     try {
         BiliBiliDynamic.mid = biliClient.userInfo()?.mid!!
         BiliBiliDynamic.logger.info("BiliBili UID: ${BiliBiliDynamic.mid}")
-    }catch (e: Exception) {
+    } catch (e: Exception) {
         BiliBiliDynamic.logger.error(e.message)
         BiliBiliDynamic.logger.error("如未登录，请bot管理员在聊天环境内发送 /bili login 进行登录")
         return
@@ -57,7 +57,7 @@ suspend fun initTagid() {
             }
             val res = biliClient.createGroup(accountConfig.followGroup) ?: throw Exception()
             BiliBiliDynamic.tagid = res.tagId
-        }catch (e: Exception){
+        } catch (e: Exception) {
             BiliBiliDynamic.logger.error("初始化分组失败 ${e.message}")
         }
 
@@ -66,11 +66,11 @@ suspend fun initTagid() {
 
 fun loadFonts() {
     BiliBiliDynamic.dataFolderPath.resolve("font").apply {
-        if (exists()){
+        if (exists()) {
             forEachDirectoryEntry {
                 loadTypeface(it.toString(), it.name.split(".").first())
             }
-        }else {
+        } else {
             createDirectory()
         }
     }

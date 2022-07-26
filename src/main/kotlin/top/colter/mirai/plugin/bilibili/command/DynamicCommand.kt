@@ -181,7 +181,7 @@ object DynamicCommand : CompositeCommand(
             sendMessage("权限不足, 无法修改其他人的配置")
             return
         }
-        matchUser(user){
+        matchUser(user) {
             BiliDataTasker.addAtAll(type, it, contact)
         }?.let { sendMessage(it) }
     }
@@ -192,7 +192,7 @@ object DynamicCommand : CompositeCommand(
             sendMessage("权限不足, 无法修改其他人的配置")
             return
         }
-        matchUser(user){
+        matchUser(user) {
             BiliDataTasker.delAtAll(type, it, contact)
         }?.let { sendMessage(it) }
     }
@@ -203,7 +203,7 @@ object DynamicCommand : CompositeCommand(
             sendMessage("权限不足, 无法查看其他人的配置")
             return
         }
-        matchUser(user){
+        matchUser(user) {
             BiliDataTasker.listAtAll(it, contact)
         }?.let { sendMessage(it) }
     }
@@ -216,8 +216,8 @@ object DynamicCommand : CompositeCommand(
         }
         if (user == "0") {
             BiliDataTasker.config(fromEvent, 0, contact)
-        }else {
-            matchUser(user){
+        } else {
+            matchUser(user) {
                 BiliDataTasker.config(fromEvent, it, contact)
                 null
             }?.let { sendMessage(it) }
@@ -242,7 +242,7 @@ object DynamicCommand : CompositeCommand(
 
     @SubCommand("new", "最新动态")
     suspend fun CommandSenderOnMessage<*>.new(user: String, count: Int = 1) {
-        matchUser(user){
+        matchUser(user) {
             val list = biliClient.getUserNewDynamic(it)?.items?.subList(0, count)
             list?.forEach { di ->
                 BiliBiliDynamic.dynamicChannel.send(DynamicDetail(di, Contact().delegate))

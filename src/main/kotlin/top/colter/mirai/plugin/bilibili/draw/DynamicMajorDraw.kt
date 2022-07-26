@@ -280,7 +280,14 @@ suspend fun ModuleDynamic.Major.Live.drawGeneral(): Image {
 
 suspend fun ModuleDynamic.Major.LiveRcmd.drawGeneral(): Image {
     val info = liveInfo.livePlayInfo
-    return drawSmallCard(info.title, "${info.parentAreaName} · ${info.areaName}", info.cover, "直播", "${info.roomId}", null)
+    return drawSmallCard(
+        info.title,
+        "${info.parentAreaName} · ${info.areaName}",
+        info.cover,
+        "直播",
+        "${info.roomId}",
+        null
+    )
 }
 
 suspend fun ModuleDynamic.Major.Archive.drawSmall(): Image {

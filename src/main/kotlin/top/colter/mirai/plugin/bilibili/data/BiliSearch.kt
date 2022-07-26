@@ -33,7 +33,7 @@ data class BiliSearch(
     val inBlackKey: Int? = null,
     @SerialName("in_white_key")
     val inWhiteKey: Int? = null,
-){
+) {
     @Serializable
     data class CostTime(
         @SerialName("params_check")
@@ -57,6 +57,7 @@ data class BiliSearch(
         @SerialName("main_handler")
         val mainHandler: Float? = null,
     )
+
     @Serializable
     data class SearchResult(
         @SerialName("type")
@@ -95,7 +96,7 @@ data class BiliSearch(
         val officialVerify: OfficialVerify? = null,
         @SerialName("hit_columns")
         val hitColumns: List<String>? = null,
-    ){
+    ) {
         @Serializable
         data class Res(
             @SerialName("aid")
@@ -127,6 +128,7 @@ data class BiliSearch(
             @SerialName("is_union_video")
             val isUnionVideo: Int? = null,
         )
+
         @Serializable
         data class OfficialVerify(
             @SerialName("type")

@@ -378,7 +378,7 @@ suspend fun Canvas.drawTextArea(text: String, rect: Rect, textX: Float, textY: F
         textNode.add(RichText.Text(text.substring(index, text.length)))
     }
 
-    for (node in textNode){
+    for (node in textNode) {
         when (node) {
             is RichText.Text -> {
                 for (point in node.value.codePoints()) {
@@ -405,16 +405,18 @@ suspend fun Canvas.drawTextArea(text: String, rect: Rect, textX: Float, textY: F
                 var emojiImg: Image? = null
                 try {
                     emojiImg = getOrDownloadImage(twemoji(emoji), CacheType.EMOJI)
-                }catch (_: Exception){ }
+                } catch (_: Exception) {
+                }
                 try {
                     val e = emoji.split("-")
                     val et = if (e.last() == "fe0f") {
                         e.dropLast(1)
-                    }else {
+                    } else {
                         e.plus("fe0f")
                     }.joinToString("-")
                     emojiImg = getOrDownloadImage(twemoji(et), CacheType.EMOJI)
-                }catch (_: Exception){ }
+                } catch (_: Exception) {
+                }
 
                 if (x + emojiSize > rect.right) {
                     x = rect.left

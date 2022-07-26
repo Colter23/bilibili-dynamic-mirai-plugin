@@ -131,7 +131,7 @@ object SendTasker : BiliTasker() {
                                 if (isAtAll || hasPerm) {
                                     if (atAllPlus == "SINGLE_MESSAGE" || it1.last().content.contains("[转发消息]")) {
                                         it.sendMessage(it1.plusElement(buildMessageChain { +AtAll }))
-                                    }else {
+                                    } else {
                                         val last = it1.last().plus("\n").plus(AtAll)
                                         it.sendMessage(it1.dropLast(1).plusElement(last))
                                     }
@@ -246,6 +246,7 @@ object SendTasker : BiliTasker() {
                 true
             }.toMutableSet()
         } catch (e: Throwable) {
+            logger.warning(e)
             null
         }
     }

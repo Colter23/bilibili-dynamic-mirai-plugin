@@ -64,7 +64,7 @@ suspend fun BiliClient.groupAddUser(uid: Long, tagid: Int): BiliResult {
 suspend fun BiliClient.searchUser(
     keyword: String,
     order: String = "",
-    orderSort:Int = 0,
+    orderSort: Int = 0,
     userType: Int = 0,
     page: Int = 1,
     pageSize: Int = 20

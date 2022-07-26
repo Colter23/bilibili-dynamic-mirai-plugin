@@ -39,9 +39,9 @@ private fun JsonObject.decodeJsonObject(objName: String): String {
         appendLine("@Serializable")
         appendLine("data class $objName(")
 
-        entries.forEach{
+        entries.forEach {
             val key = it.key.replace(" ", "_")
-            if (noteValue && it.value is JsonPrimitive){
+            if (noteValue && it.value is JsonPrimitive) {
                 appendLine("    // ${it.value}")
             }
             appendLine("    @SerialName(\"$key\")")
@@ -58,9 +58,9 @@ private fun JsonObject.decodeJsonObject(objName: String): String {
                     }
                     is JsonArray -> {
                         val arr = it.value.jsonArray.first()
-                        val attr = if (arr is JsonPrimitive){
+                        val attr = if (arr is JsonPrimitive) {
                             arr.jsonPrimitive.parse()
-                        }else {
+                        } else {
                             val k = snakeToCamel(key)
                             obj += "\n" + arr.jsonObject.decodeJsonObject(k)
                             k
@@ -71,13 +71,13 @@ private fun JsonObject.decodeJsonObject(objName: String): String {
                         appendLine("    val ${snakeToCamelLowerFirst(key)}: JsonElement? = null,")
                     }
                 }
-            }catch (e: Exception){
+            } catch (e: Exception) {
                 println(e)
                 println("Error Key: ${it.key}")
             }
         }
         append(")")
-        if (obj != ""){
+        if (obj != "") {
             append("{")
             appendLine(obj.replace("\n", "\n    "))
             append("}")

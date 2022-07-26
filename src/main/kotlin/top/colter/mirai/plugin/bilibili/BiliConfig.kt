@@ -219,7 +219,7 @@ data class TemplateConfig(
     val forwardCard: ForwardDisplay = ForwardDisplay(),
     var footer: FooterConfig = FooterConfig(),
 
-)
+    )
 
 @Serializable
 data class FooterConfig(

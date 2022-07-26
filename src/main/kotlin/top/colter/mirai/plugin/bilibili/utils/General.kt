@@ -33,7 +33,7 @@ import kotlin.math.min
 
 internal val logger by lazy {
     try {
-       BiliBiliDynamic.logger
+        BiliBiliDynamic.logger
     } catch (_: Throwable) {
         MiraiLogger.Factory.create(BiliClient::class)
     }
@@ -62,7 +62,7 @@ fun <T> Collection<T>.plusOrNull(element: T?): List<T> {
     }
 }
 
-fun HttpRequestBuilder.bodyParameter(key: String, value: Any){
+fun HttpRequestBuilder.bodyParameter(key: String, value: Any) {
     headers.append("Content-Type", "application/x-www-form-urlencoded")
     setBody(if (body is EmptyContent) "$key=$value" else "$body&$key=$value")
 }
@@ -238,21 +238,21 @@ fun findContactAll(delegate: Long): Contact? {
 val Contact.delegate get() = (if (this is Group) id * -1 else id).toString()
 
 
-fun findLocalIdOrName(target: String): List<Pair<Long, Double>>{
+fun findLocalIdOrName(target: String): List<Pair<Long, Double>> {
     return try {
         listOf(Pair(target.toLong(), 1.0))
-    }catch (e: NumberFormatException){
-        val list = BiliData.dynamic.map { Pair(it.key ,it.value.name) }
+    } catch (e: NumberFormatException) {
+        val list = BiliData.dynamic.map { Pair(it.key, it.value.name) }
         fuzzySearch(list, target)
     }
 }
 
-suspend fun findRemoteIdOrName(target: String): List<Pair<Long, Double>>{
+suspend fun findRemoteIdOrName(target: String): List<Pair<Long, Double>> {
     return try {
         listOf(Pair(target.toLong(), 1.0))
-    }catch (e: NumberFormatException){
+    } catch (e: NumberFormatException) {
         val users = biliClient.searchUser(target)
-        val list = BiliData.dynamic.map { Pair(it.key ,it.value.name) }
+        val list = BiliData.dynamic.map { Pair(it.key, it.value.name) }
         fuzzySearch(list, target)
     }
 }
@@ -263,7 +263,7 @@ fun fuzzySearch(
     minRate: Double = 0.2,
     matchRate: Double = 0.6,
     disambiguationRate: Double = 0.1,
-): List<Pair<Long, Double>>{
+): List<Pair<Long, Double>> {
     val candidates = list
         .associateWith { it.second.fuzzyMatchWith(target) }
         .filter { it.value >= minRate }
@@ -321,7 +321,7 @@ data class ActionMessage(
 )
 
 suspend fun actionNotify(subject: Long?, message: ActionMessage) {
-    if (BiliConfig.enableConfig.notifyEnable && subject != BiliConfig.admin){
+    if (BiliConfig.enableConfig.notifyEnable && subject != BiliConfig.admin) {
         actionNotify(buildString {
             appendLine("操作人: ${message.operator}")
             appendLine("目标: ${message.target}")
@@ -330,6 +330,7 @@ suspend fun actionNotify(subject: Long?, message: ActionMessage) {
         })
     }
 }
+
 suspend fun actionNotify(message: String) {
     findContactAll(BiliConfig.admin)?.sendMessage(message)
 }
@@ -338,9 +339,9 @@ inline fun matchUser(user: String, matchSuccess: (uid: Long) -> String?): String
     val u = findLocalIdOrName(user)
     return if (u.isEmpty()) {
         "未匹配到用户哦"
-    }else if (u.size == 1) {
+    } else if (u.size == 1) {
         matchSuccess(u.first().first)
-    }else {
+    } else {
         buildString {
             appendLine("有多个匹配项：")
             u.forEach {

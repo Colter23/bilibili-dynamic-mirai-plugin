@@ -61,16 +61,16 @@ val cardContentRect: Rect by lazy {
 val mainTypeface: Typeface by lazy {
     val mainFont = imageConfig.font.split(";").first().split(".").first()
     try {
-        if (mainFont.isBlank()){
+        if (mainFont.isBlank()) {
             logger.warning("配置文件未配置字体, 尝试加载 font 目录下的字体")
             val f = FontUtils.defaultFont
-            if (f == null){
+            if (f == null) {
                 throw Exception()
-            }else {
+            } else {
                 logger.info("成功加载 ${f.familyName} 字体")
                 return@lazy f
             }
-        }else {
+        } else {
             matchFamily(mainFont).matchStyle(FontStyle.NORMAL)!!
         }
     } catch (e: Exception) {
@@ -86,7 +86,8 @@ fun loadSysDefaultFont(): Typeface {
             val f = matchFamily(it).matchStyle(FontStyle.NORMAL)!!
             logger.info("加载默认字体 $it 成功")
             return f
-        } catch (_: Exception) { }
+        } catch (_: Exception) {
+        }
     }
     throw Exception("无法加载默认字体, 请自行配置字体或准备字体文件")
 }
@@ -196,7 +197,7 @@ suspend fun DynamicItem.drawDynamic(themeColor: Int, isForward: Boolean = false)
     }
 
     val footerTemplate = BiliConfig.templateConfig.footer.dynamicFooter
-    val footerParagraph = if (footerTemplate.isNotBlank() && !isForward){
+    val footerParagraph = if (footerTemplate.isNotBlank() && !isForward) {
         val footer = footerTemplate
             .replace("{name}", modules.moduleAuthor.name)
             .replace("{uid}", modules.moduleAuthor.mid.toString())
@@ -204,7 +205,7 @@ suspend fun DynamicItem.drawDynamic(themeColor: Int, isForward: Boolean = false)
             .replace("{time}", formatTime)
             .replace("{type}", type.text)
         ParagraphBuilder(footerParagraphStyle, FontUtils.fonts).addText(footer).build().layout(cardRect.width)
-    }else null
+    } else null
 
     val margin = if (isForward) quality.cardPadding * 2 else quality.cardMargin * 2
 

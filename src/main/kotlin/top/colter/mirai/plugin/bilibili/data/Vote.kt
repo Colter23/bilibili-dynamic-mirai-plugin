@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 data class Vote(
     @SerialName("info")
     val info: VoteInfo,
-){
+) {
     @Serializable
     data class VoteInfo(
         @SerialName("vote_id")
