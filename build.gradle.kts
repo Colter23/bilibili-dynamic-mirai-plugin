@@ -42,10 +42,6 @@ dependencies{
         exclude(group = "org.jetbrains.kotlinx")
         exclude(group = "org.slf4j")
     }
-    api("org.jetbrains.skiko:skiko-awt:0.7.26") {
-        exclude(group = "org.jetbrains.kotlin")
-        exclude(group = "org.jetbrains.kotlinx")
-    }
 
     implementation("com.google.zxing:javase:3.5.0")
     compileOnly("xyz.cssxsh.mirai:mirai-skia-plugin:1.1.6")
@@ -56,4 +52,8 @@ dependencies{
     testImplementation("org.jetbrains.skiko:skiko-awt-runtime-linux-arm64:0.7.26")
     testImplementation("org.jetbrains.skiko:skiko-awt-runtime-macos-x64:0.7.26")
     testImplementation("org.jetbrains.skiko:skiko-awt-runtime-macos-arm64:0.7.26")
+}
+
+mirai {
+    jvmTarget = JavaVersion.VERSION_11
 }

@@ -36,8 +36,8 @@ Vtuber 字幕组及粉丝群如需要使用可通过群联系我, 使用我搭�
 ### 手动下载jar包 (与下面二选一)   
 插件本体: [**releases**](https://github.com/Colter23/bilibili-dynamic-mirai-plugin/releases)
 
-### MCL 指令安装 (与上面二选一)
-`./mcl --update-package top.colter:bilibili-dynamic-mirai-plugin --channel maven --type plugin`
+### ~~MCL 指令安装 (与上面二选一)~~
+~~`./mcl --update-package top.colter:bilibili-dynamic-mirai-plugin --channel maven --type plugin`~~
 
 ## 指令
 
