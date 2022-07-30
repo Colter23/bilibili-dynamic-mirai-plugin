@@ -10,7 +10,7 @@ import top.colter.mirai.plugin.bilibili.data.LiveDetail
 import top.colter.mirai.plugin.bilibili.utils.sendAll
 import java.time.Instant
 
-object LiveCheckTasker : BiliCheckTasker() {
+object LiveCheckTasker : BiliCheckTasker("Live") {
     override var interval by BiliConfig.checkConfig::liveInterval
 
     private val liveChannel by BiliBiliDynamic::liveChannel
@@ -22,7 +22,6 @@ object LiveCheckTasker : BiliCheckTasker() {
     private var lastLive: Long = Instant.now().epochSecond
 
     override suspend fun main() = withTimeout(180003) {
-        logger.debug("Check Live...")
         val liveList = client.getLive()
 
         if (liveList != null) {

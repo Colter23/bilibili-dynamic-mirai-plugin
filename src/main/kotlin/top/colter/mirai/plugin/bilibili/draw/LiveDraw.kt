@@ -1,7 +1,9 @@
 package top.colter.mirai.plugin.bilibili.draw
 
 import org.jetbrains.skia.*
+import org.jetbrains.skia.paragraph.Alignment
 import org.jetbrains.skia.paragraph.ParagraphBuilder
+import org.jetbrains.skia.paragraph.ParagraphStyle
 import org.jetbrains.skia.svg.SVGDOM
 import top.colter.mirai.plugin.bilibili.BiliConfig
 import top.colter.mirai.plugin.bilibili.BiliData
@@ -22,7 +24,7 @@ suspend fun LiveInfo.drawLive(): Image {
     val margin = quality.cardMargin * 2
 
     val avatar = drawAvatar()
-    val cover = getOrDownloadImage(cover, CacheType.IMAGES)
+    val cover = getOrDownloadImageDefault(cover, CacheType.IMAGES)
 
     val height = (avatar.height + quality.contentSpace + cover.height * cardRect.width / cover.width).toInt()
 
@@ -51,7 +53,6 @@ suspend fun LiveInfo.drawLive(): Image {
                 cardBadgeArc
             )
 
-            drawCard(rrect)
             drawRectShadowAntiAlias(rrect.inflate(1f), theme.cardShadow)
 
             if (BiliConfig.imageConfig.badgeEnable.left) {
@@ -70,6 +71,8 @@ suspend fun LiveInfo.drawLive(): Image {
                 drawBadge(roomId.toString(), font, Color.WHITE, Color.makeRGB(72, 199, 240), rrect, Position.TOP_RIGHT)
             }
 
+            drawCard(rrect)
+
             var top = quality.cardMargin + quality.badgeHeight.toFloat()
 
             drawScaleWidthImage(avatar, cardRect.width, quality.cardMargin.toFloat(), top)
@@ -78,8 +81,8 @@ suspend fun LiveInfo.drawLive(): Image {
             val dst = RRect.makeXYWH(
                 quality.cardMargin.toFloat(),
                 top,
-                cardRect.width,
-                cardRect.width * cover.height / cover.width,
+                cardRect.width - quality.cardOutlineWidth / 2,
+                (cardRect.width * cover.height / cover.width)  - quality.cardOutlineWidth / 2,
                 quality.cardArc
             )
             drawImageRRect(cover, dst)
@@ -98,18 +101,38 @@ suspend fun LiveInfo.drawAvatar(): Image {
         canvas.apply {
             drawAvatar(face, null, null, quality.faceSize, quality.verifyIconSize)
 
-            val textLineTitle = TextLine.make(title, font.makeWithSize(quality.nameFontSize))
-            val textLineTime =
-                TextLine.make("$uname  ${liveTime.formatTime}", font.makeWithSize(quality.subTitleFontSize))
+            val paragraphStyle = ParagraphStyle().apply {
+                maxLinesCount = 1
+                ellipsis = "..."
+                alignment = Alignment.LEFT
+                textStyle = titleTextStyle.apply {
+                    fontSize = quality.nameFontSize
+                }
+            }
+
+            val w = cardContentRect.width - quality.pendantSize -
+                if (BiliConfig.imageConfig.cardOrnament == "QrCode" ) quality.ornamentHeight else 0f
+
+            val titleParagraph =
+                ParagraphBuilder(paragraphStyle, FontUtils.fonts).addText(title).build()
+                    .layout(w)
+            paragraphStyle.apply {
+                textStyle = descTextStyle.apply {
+                    fontSize = quality.subTitleFontSize
+                }
+            }
+            val timeParagraph =
+                ParagraphBuilder(paragraphStyle, FontUtils.fonts).addText("$uname  ${liveTime.formatTime}").build()
+                    .layout(w)
 
             val x = quality.faceSize + quality.cardPadding * 3f
             val space = (quality.pendantSize - quality.nameFontSize - quality.subTitleFontSize) / 3
-            var y = quality.nameFontSize + space * 1.25f
+            var y =  space * 1.25f
 
-            drawTextLine(textLineTitle, x, y, Paint().apply { color = theme.titleColor })
+            titleParagraph.paint(this, x, y)
 
-            y += quality.subTitleFontSize + space * 0.5f
-            drawTextLine(textLineTime, x, y, Paint().apply { color = theme.subTitleColor })
+            y += quality.nameFontSize + space * 0.5f
+            timeParagraph.paint(this, x, y)
 
             val color = BiliData.dynamic[uid]?.color ?: BiliConfig.imageConfig.defaultColor
             val colors = color.split(";", "；").map { Color.makeRGB(it.trim()) }.first()
@@ -142,20 +165,20 @@ fun Canvas.drawLiveOrnament(link: String?, qrCodeColor: Int?, label: String?) {
         }
         "None" -> {}
         else -> {
-            val labelTextLine = TextLine.make(label, font.makeWithSize(quality.subTitleFontSize))
-            val y =
-                ((quality.faceSize - quality.subTitleFontSize - quality.badgePadding * 2 + quality.contentSpace) / 2)
-            drawLabelCard(
-                labelTextLine,
-                cardContentRect.right - labelTextLine.width - quality.badgePadding * 4 - abs(y),
-                y + quality.cardPadding,
-                Paint().apply {
-                    color = theme.subLeftBadge.fontColor
-                },
-                Paint().apply {
-                    color = theme.subLeftBadge.bgColor
-                }
-            )
+            //val labelTextLine = TextLine.make(label, font.makeWithSize(quality.subTitleFontSize))
+            //val y =
+            //    ((quality.faceSize - quality.subTitleFontSize - quality.badgePadding * 2 + quality.contentSpace) / 2)
+            //drawLabelCard(
+            //    labelTextLine,
+            //    cardContentRect.right - labelTextLine.width - quality.badgePadding * 4 - abs(y),
+            //    y + quality.cardPadding,
+            //    Paint().apply {
+            //        color = theme.subLeftBadge.fontColor
+            //    },
+            //    Paint().apply {
+            //        color = theme.subLeftBadge.bgColor
+            //    }
+            //)
         }
     }
 }

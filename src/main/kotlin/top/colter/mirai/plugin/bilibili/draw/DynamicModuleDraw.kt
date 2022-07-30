@@ -139,16 +139,17 @@ suspend fun drawAdditionalCard(
             var x = quality.cardPadding.toFloat()
 
             if (cover != null) {
-                val img = getOrDownloadImage(cover, CacheType.OTHER)
-                val imgRect = RRect.makeXYWH(
-                    quality.cardPadding.toFloat(),
-                    quality.subTitleFontSize + quality.cardPadding + 1f,
-                    quality.additionalCardHeight.toFloat() * img.width / img.height,
-                    quality.additionalCardHeight.toFloat(),
-                    quality.cardArc
-                ).inflate(-1f) as RRect
-                drawImageRRect(img, imgRect)
-                x += imgRect.width
+                getOrDownloadImage(cover, CacheType.OTHER)?.let {img ->
+                    val imgRect = RRect.makeXYWH(
+                        quality.cardPadding.toFloat(),
+                        quality.subTitleFontSize + quality.cardPadding + 1f,
+                        quality.additionalCardHeight.toFloat() * img.width / img.height,
+                        quality.additionalCardHeight.toFloat(),
+                        quality.cardArc
+                    ).inflate(-1f) as RRect
+                    drawImageRRect(img, imgRect)
+                    x += imgRect.width
+                }
             }
 
             x += quality.cardPadding
@@ -297,25 +298,25 @@ suspend fun ModuleDynamic.Desc.drawGeneral(): Image {
                     }
 
                     "RICH_TEXT_NODE_TYPE_EMOJI" -> {
-                        val img = getOrDownloadImage(it.emoji!!.iconUrl, CacheType.EMOJI)
+                        getOrDownloadImage(it.emoji!!.iconUrl, CacheType.EMOJI)?.let { img ->
+                            val emojiSize = TextLine.make("🙂", font).height
 
-                        val emojiSize = TextLine.make("🙂", font).height
-
-                        if (x + emojiSize > textCardRect.right) {
-                            x = textCardRect.left
-                            y += emojiSize + quality.lineSpace
+                            if (x + emojiSize > textCardRect.right) {
+                                x = textCardRect.left
+                                y += emojiSize + quality.lineSpace
+                            }
+                            val srcRect = Rect.makeXYWH(0f, 0f, img.width.toFloat(), img.height.toFloat())
+                            val tarRect = Rect.makeXYWH(x, y - emojiSize * 0.8f, emojiSize, emojiSize)
+                            drawImageRect(
+                                img,
+                                srcRect,
+                                tarRect,
+                                FilterMipmap(FilterMode.LINEAR, MipmapMode.NEAREST),
+                                null,
+                                true
+                            )
+                            x += emojiSize
                         }
-                        val srcRect = Rect.makeXYWH(0f, 0f, img.width.toFloat(), img.height.toFloat())
-                        val tarRect = Rect.makeXYWH(x, y - emojiSize * 0.8f, emojiSize, emojiSize)
-                        drawImageRect(
-                            img,
-                            srcRect,
-                            tarRect,
-                            FilterMipmap(FilterMode.LINEAR, MipmapMode.NEAREST),
-                            null,
-                            true
-                        )
-                        x += emojiSize
                     }
 
                     "RICH_TEXT_NODE_TYPE_WEB",
@@ -399,43 +400,50 @@ suspend fun Canvas.drawTextArea(text: String, rect: Rect, textX: Float, textY: F
             }
 
             is RichText.Emoji -> {
-                val emoji = node.value.codePoints().mapToObj { it.toString(16) }.collect(Collectors.joining("-"))
-                val emojiSize = TextLine.make("🙂", font).height
+                if (emojiTypeface != null) {
+                    val tl = TextLine.make(node.value, emojiFont)
+                    if (x + tl.width > rect.right) {
+                        x = rect.left
+                        y += tl.height + quality.lineSpace
+                    }
+                    drawTextLine(tl, x, y, paint)
+                    x += tl.width
+                }else {
+                    val emoji = node.value.codePoints().mapToObj { it.toString(16) }.collect(Collectors.joining("-"))
+                    val emojiSize = TextLine.make("🙂", font).height
 
-                var emojiImg: Image? = null
-                try {
-                    emojiImg = getOrDownloadImage(twemoji(emoji), CacheType.EMOJI)
-                } catch (_: Exception) {
-                }
-                try {
-                    val e = emoji.split("-")
-                    val et = if (e.last() == "fe0f") {
-                        e.dropLast(1)
-                    } else {
-                        e.plus("fe0f")
-                    }.joinToString("-")
-                    emojiImg = getOrDownloadImage(twemoji(et), CacheType.EMOJI)
-                } catch (_: Exception) {
-                }
+                    var emojiImg: Image? = null
+                    try {
+                        emojiImg = getOrDownloadImage(twemoji(emoji), CacheType.EMOJI)
+                    } catch (_: Exception) { }
+                    try {
+                        val e = emoji.split("-")
+                        val et = if (e.last() == "fe0f") {
+                            e.dropLast(1)
+                        } else {
+                            e.plus("fe0f")
+                        }.joinToString("-")
+                        emojiImg = getOrDownloadImage(twemoji(et), CacheType.EMOJI)
+                    } catch (_: Exception) { }
 
-                if (x + emojiSize > rect.right) {
-                    x = rect.left
-                    y += emojiSize + quality.lineSpace
+                    if (x + emojiSize > rect.right) {
+                        x = rect.left
+                        y += emojiSize + quality.lineSpace
+                    }
+                    if (emojiImg != null) {
+                        val srcRect = Rect.makeXYWH(0f, 0f, emojiImg.width.toFloat(), emojiImg.height.toFloat())
+                        val tarRect = Rect.makeXYWH(x, y - emojiSize * 0.8f, emojiSize * 0.9f, emojiSize * 0.9f)
+                        drawImageRect(
+                            emojiImg,
+                            srcRect,
+                            tarRect,
+                            FilterMipmap(FilterMode.LINEAR, MipmapMode.NEAREST),
+                            null,
+                            true
+                        )
+                    }
+                    x += emojiSize
                 }
-                if (emojiImg != null) {
-                    val srcRect = Rect.makeXYWH(0f, 0f, emojiImg.width.toFloat(), emojiImg.height.toFloat())
-                    val tarRect = Rect.makeXYWH(x, y - emojiSize * 0.8f, emojiSize * 0.9f, emojiSize * 0.9f)
-                    drawImageRect(
-                        emojiImg,
-                        srcRect,
-                        tarRect,
-                        FilterMipmap(FilterMode.LINEAR, MipmapMode.NEAREST),
-                        null,
-                        true
-                    )
-                }
-                //drawTextLine(tl, x, y, paint)
-                x += emojiSize
             }
         }
     }
@@ -499,41 +507,41 @@ suspend fun Canvas.drawOrnament(decorate: ModuleAuthor.Decorate?, link: String?,
     when (BiliConfig.imageConfig.cardOrnament) {
         "FanCard" -> {
             if (decorate != null) {
-                val fanImg = getOrDownloadImage(decorate.cardUrl, CacheType.USER)
-                val srcFRect = Rect(0f, 0f, fanImg.width.toFloat(), fanImg.height.toFloat())
+                getOrDownloadImage(decorate.cardUrl, CacheType.USER)?.let {fanImg ->
+                    val srcFRect = Rect(0f, 0f, fanImg.width.toFloat(), fanImg.height.toFloat())
 
-                val cardHeight = when (decorate.type) {
-                    1, 2 -> quality.ornamentHeight * 0.6f
-                    else -> quality.ornamentHeight
-                }
+                    val cardHeight = when (decorate.type) {
+                        1, 2 -> quality.ornamentHeight * 0.6f
+                        else -> quality.ornamentHeight
+                    }
 
-                val cardWidth = fanImg.width * cardHeight / fanImg.height
+                    val cardWidth = fanImg.width * cardHeight / fanImg.height
 
-                val y = ((quality.faceSize - cardHeight + quality.contentSpace) / 2)
-                val tarFRect = Rect.makeXYWH(
-                    cardContentRect.right - cardWidth - abs(y),
-                    y + quality.cardPadding,
-                    cardWidth,
-                    cardHeight
-                )
-
-                drawImageRect(
-                    fanImg,
-                    srcFRect,
-                    tarFRect,
-                    FilterMipmap(FilterMode.LINEAR, MipmapMode.NEAREST),
-                    null,
-                    true
-                )
-
-                if (decorate.type == 3 && decorate.fan?.numStr != "") {
-                    val textLineFan = TextLine.make(decorate.fan?.numStr, fansCardFont)
-                    drawTextLine(
-                        textLineFan,
-                        tarFRect.right - textLineFan.width * 2,
-                        tarFRect.bottom - (cardHeight - fansCardFont.size) / 2,
-                        Paint().apply { color = Color.makeRGB(decorate.fan!!.color) }
+                    val y = ((quality.faceSize - cardHeight + quality.contentSpace) / 2)
+                    val tarFRect = Rect.makeXYWH(
+                        cardContentRect.right - cardWidth - abs(y),
+                        y + quality.cardPadding,
+                        cardWidth,
+                        cardHeight
                     )
+
+                    drawImageRect(
+                        fanImg,
+                        srcFRect,
+                        tarFRect,
+                        FilterMipmap(FilterMode.LINEAR, MipmapMode.NEAREST),
+                        null,
+                        true
+                    )
+                    if (decorate.type == 3 && decorate.fan?.numStr != "") {
+                        val textLineFan = TextLine.make(decorate.fan?.numStr, fansCardFont)
+                        drawTextLine(
+                            textLineFan,
+                            tarFRect.right - textLineFan.width * 2,
+                            tarFRect.bottom - (cardHeight - fansCardFont.size) / 2,
+                            Paint().apply { color = Color.makeRGB(decorate.fan!!.color) }
+                        )
+                    }
                 }
             }
         }

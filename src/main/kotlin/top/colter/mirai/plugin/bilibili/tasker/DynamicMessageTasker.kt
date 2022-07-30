@@ -26,7 +26,7 @@ object DynamicMessageTasker : BiliTasker() {
         val dynamicDetail = dynamicChannel.receive()
         withTimeout(180002) {
             val dynamicItem = dynamicDetail.item
-            logger.debug(dynamicItem.idStr)
+            logger.debug("动态: ${dynamicItem.modules.moduleAuthor.name}@${dynamicItem.idStr}@${dynamicItem.typeStr}")
             messageChannel.send(dynamicItem.buildMessage(dynamicDetail.contact))
         }
     }

@@ -45,6 +45,7 @@ object BiliConfig : AutoSavePluginConfig("BiliConfig") {
           interval: 动态检测间隔(推荐 15-30) 单位秒
           liveInterval: 直播检测间隔(与动态检测独立) 单位秒
           lowSpeed: 低频检测时间段与倍率(例: 3-8x2 三点到八点检测间隔为正常间隔的2倍) 24小时制
+          checkReportInterval: 检测报告间隔 单位分
     """
     )
     val checkConfig: CheckConfig by value()
@@ -189,6 +190,7 @@ data class CheckConfig(
     var interval: Int = 15,
     var liveInterval: Int = 20,
     var lowSpeed: String = "0-0x2",
+    val checkReportInterval: Int = 10
 )
 
 
@@ -208,7 +210,7 @@ data class TemplateConfig(
         "TextOnly" to "{name}@{type}\n{link}\n{content}\n{images}",
         "OneMsg" to "{draw}\n{name}@{type}\n{link}",
         "TwoMsg" to "{draw}\r{name}@{uid}@{type}\n{time}\n{link}",
-        "ForwardMsg" to "{draw}{>>}作者：{name}\nUID：{uid}\n时间：{time}\n类型：{type}\n链接：{link}\r{content}\r{images}{<<}",
+        "ForwardMsg" to "{draw}{>>}作者：{name}\nUID：{uid}\n时间：{time}\n类型：{type}\n链接：{links}\r{content}\r{images}{<<}",
     ),
     val livePush: MutableMap<String, String> = mutableMapOf(
         "DrawOnly" to "{draw}",
@@ -218,8 +220,7 @@ data class TemplateConfig(
     ),
     val forwardCard: ForwardDisplay = ForwardDisplay(),
     var footer: FooterConfig = FooterConfig(),
-
-    )
+)
 
 @Serializable
 data class FooterConfig(

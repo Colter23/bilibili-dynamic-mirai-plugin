@@ -44,12 +44,13 @@ abstract class BiliTasker(
                         main()
                         after()
                     } catch (e: Throwable) {
-                        BiliBiliDynamic.logger.error(e.message)
+                        BiliBiliDynamic.logger.error(this::class.simpleName + e)
                         delay(120000L)
                     }
                     delay(interval * 1000L)
                 }
             }
+            if (!isActive) BiliBiliDynamic.logger.error("${this::class.simpleName} 已停止工作!")
         }
 
         return taskers.add(this)

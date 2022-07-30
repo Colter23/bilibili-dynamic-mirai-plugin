@@ -9,10 +9,11 @@ import top.colter.mirai.plugin.bilibili.data.ModuleDynamic
 import top.colter.mirai.plugin.bilibili.utils.CacheType
 import top.colter.mirai.plugin.bilibili.utils.FontUtils
 import top.colter.mirai.plugin.bilibili.utils.getOrDownloadImage
+import top.colter.mirai.plugin.bilibili.utils.getOrDownloadImageDefault
 import kotlin.math.ceil
 
 
-suspend fun ModuleDynamic.Major.makeGeneral(isForward: Boolean = false): Image? {
+suspend fun ModuleDynamic.Major.makeGeneral(isForward: Boolean = false): Image {
     return when (type) {
         "MAJOR_TYPE_ARCHIVE" -> if (isForward) archive!!.drawSmall() else archive!!.drawGeneral()
         "MAJOR_TYPE_DRAW" -> draw!!.drawGeneral()
@@ -99,16 +100,17 @@ suspend fun ModuleDynamic.Major.Common.drawGeneral(): Image {
 
             var x = quality.cardPadding.toFloat()
 
-            val img = getOrDownloadImage(cover, CacheType.OTHER)
-            val imgRect = RRect.makeXYWH(
-                quality.cardPadding.toFloat(),
-                1f,
-                quality.additionalCardHeight.toFloat() * img.width / img.height,
-                quality.additionalCardHeight.toFloat(),
-                quality.cardArc
-            ).inflate(-1f) as RRect
-            drawImageRRect(img, imgRect)
-            x += imgRect.width + quality.cardPadding
+            getOrDownloadImage(cover, CacheType.OTHER)?.let { img ->
+                val imgRect = RRect.makeXYWH(
+                    quality.cardPadding.toFloat(),
+                    1f,
+                    quality.additionalCardHeight.toFloat() * img.width / img.height,
+                    quality.additionalCardHeight.toFloat(),
+                    quality.cardArc
+                ).inflate(-1f) as RRect
+                drawImageRRect(img, imgRect)
+                x += imgRect.width + quality.cardPadding
+            }
 
             val titleParagraph =
                 ParagraphBuilder(paragraphStyle, FontUtils.fonts).addText(title).build()
@@ -163,7 +165,7 @@ suspend fun ModuleDynamic.Major.Archive.drawGeneral(): Image {
         ParagraphBuilder(paragraphStyle, FontUtils.fonts).addText(desc.replace("\r\n", " ").replace("\n", " ")).build()
             .layout(paragraphWidth)
 
-    val coverImg = getOrDownloadImage(cover, CacheType.IMAGES)
+    val coverImg = getOrDownloadImageDefault(cover, CacheType.IMAGES)
 
     val videoCoverHeight = cardContentRect.width * coverImg.height / coverImg.width
     val videoCardHeight = videoCoverHeight + titleParagraph.height + descParagraph.height + quality.cardPadding
@@ -367,7 +369,7 @@ suspend fun drawSmallCard(
             }
 
             // 封面
-            val coverImg = getOrDownloadImage(cover, CacheType.IMAGES)
+            val coverImg = getOrDownloadImageDefault(cover, CacheType.IMAGES)
             val coverRRect = RRect.makeComplexXYWH(
                 videoCardRect.left, videoCardRect.top, coverWidth,
                 quality.smallCardHeight.toFloat(), cardBadgeArc
@@ -458,7 +460,7 @@ suspend fun ModuleDynamic.Major.Draw.drawGeneral(): Image {
             var y = quality.drawSpace.toFloat()
 
             items.forEachIndexed { index, drawItem ->
-                val img = getOrDownloadImage(drawItem.src, CacheType.IMAGES)
+                val img = getOrDownloadImageDefault(drawItem.src, CacheType.IMAGES)
                 val dstRect = RRect.makeXYWH(x, y, drawItemWidth, drawItemHeight, quality.cardArc)
 
                 drawRRect(dstRect, Paint().apply {
@@ -540,7 +542,7 @@ suspend fun ModuleDynamic.Major.Article.drawGeneral(): Image {
                 cardBadgeArc
             ).inflate(-1f) as RRect
             if (covers.size == 1) {
-                val coverImg = getOrDownloadImage(covers[0], CacheType.IMAGES)
+                val coverImg = getOrDownloadImageDefault(covers[0], CacheType.IMAGES)
                 drawImageRRect(coverImg, coverRRect)
             } else {
                 var imgX = articleCardRect.left
@@ -548,7 +550,7 @@ suspend fun ModuleDynamic.Major.Article.drawGeneral(): Image {
                 save()
                 clipRRect(coverRRect, true)
                 covers.forEach {
-                    val img = getOrDownloadImage(it, CacheType.IMAGES)
+                    val img = getOrDownloadImageDefault(it, CacheType.IMAGES)
                     val tar = RRect.makeXYWH(imgX, articleCardRect.top, imgW, articleCoverHeight, 0f)
                     drawImageClip(img, tar, Paint())
                     imgX += articleCardRect.width / 3 + 2
@@ -658,7 +660,7 @@ suspend fun ModuleDynamic.Major.Music.drawGeneral(): Image {
             }
 
             // 封面
-            val coverImg = getOrDownloadImage(cover, CacheType.IMAGES)
+            val coverImg = getOrDownloadImageDefault(cover, CacheType.IMAGES)
             val coverRRect = RRect.makeComplexXYWH(
                 musicCardRect.left,
                 musicCardRect.top,

@@ -96,6 +96,14 @@ val font: Font by lazy {
     Font(mainTypeface, quality.contentFontSize)
 }
 
+val emojiTypeface: Typeface? by lazy {
+    xyz.cssxsh.skia.FontUtils.matchFamily("Noto Color Emoji")?.matchStyle(FontStyle.NORMAL)
+}
+
+val emojiFont: Font by lazy {
+    Font(emojiTypeface, quality.contentFontSize)
+}
+
 val fansCardFont: Font by lazy {
     Font(loadTypeface(Data.makeFromBytes(loadResourceBytes("font/FansCard.ttf"))), quality.subTitleFontSize)
 }
@@ -223,8 +231,6 @@ suspend fun DynamicItem.drawDynamic(themeColor: Int, isForward: Boolean = false)
                 cardBadgeArc
             )
 
-            drawCard(rrect)
-
             if (isForward) {
                 drawRectShadowAntiAlias(rrect.inflate(1f), theme.smallCardShadow)
             } else {
@@ -246,6 +252,8 @@ suspend fun DynamicItem.drawDynamic(themeColor: Int, isForward: Boolean = false)
             if (imageConfig.badgeEnable.right) {
                 drawBadge(did, font, theme.mainRightBadge.fontColor, theme.mainRightBadge.bgColor, rrect, TOP_RIGHT)
             }
+
+            drawCard(rrect)
 
             var top = quality.cardMargin + quality.badgeHeight.toFloat()
             for (img in imgList) {
@@ -351,25 +359,25 @@ suspend fun Canvas.drawAvatar(
             Paint().apply { color = theme.faceOutlineColor })
     }
 
-    drawImageRRect(faceImg, tarFaceRect)
+    faceImg?.let { drawImageRRect(it, tarFaceRect) }
 
     if (hasPendant) {
-        val pendantImg = getOrDownloadImage(pendant!!, CacheType.USER)
-
-        val srcPendantRect = Rect(0f, 0f, pendantImg.width.toFloat(), pendantImg.height.toFloat())
-        val tarPendantRect = Rect.makeXYWH(
-            tarFaceRect.left + tarFaceRect.width / 2 - quality.pendantSize / 2,
-            tarFaceRect.top + tarFaceRect.height / 2 - quality.pendantSize / 2,
-            quality.pendantSize, quality.pendantSize
-        )
-        drawImageRect(
-            pendantImg,
-            srcPendantRect,
-            tarPendantRect,
-            FilterMipmap(FilterMode.LINEAR, MipmapMode.NEAREST),
-            null,
-            true
-        )
+        getOrDownloadImage(pendant!!, CacheType.USER)?.let { pendantImg ->
+            val srcPendantRect = Rect(0f, 0f, pendantImg.width.toFloat(), pendantImg.height.toFloat())
+            val tarPendantRect = Rect.makeXYWH(
+                tarFaceRect.left + tarFaceRect.width / 2 - quality.pendantSize / 2,
+                tarFaceRect.top + tarFaceRect.height / 2 - quality.pendantSize / 2,
+                quality.pendantSize, quality.pendantSize
+            )
+            drawImageRect(
+                pendantImg,
+                srcPendantRect,
+                tarPendantRect,
+                FilterMipmap(FilterMode.LINEAR, MipmapMode.NEAREST),
+                null,
+                true
+            )
+        }
     }
 
     val verifyIcon = when (verifyType) {
@@ -424,6 +432,8 @@ fun Canvas.drawBadge(
             quality.badgeHeight.toFloat(), 0f, 0f, quality.badgeArc, quality.badgeArc
         )
     }
+
+    drawRectShadowAntiAlias(rrect.inflate(1f), theme.smallCardShadow)
 
     drawCard(rrect, bgColor)
 

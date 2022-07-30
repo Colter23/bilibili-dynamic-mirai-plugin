@@ -272,7 +272,7 @@ object SendTasker : BiliTasker() {
                 "title" -> lm.title
                 "area" -> lm.area
                 "link" -> lm.link
-                "cover" -> uploadImage(lm.cover, CacheType.IMAGES, contact).serializeToMiraiCode()
+                "cover" -> uploadImage(lm.cover, CacheType.IMAGES, contact)?.serializeToMiraiCode()?: ""
                 "draw" -> {
                     if (lm.drawPath == null) {
                         "[绘制直播图片失败]"
@@ -373,6 +373,7 @@ object SendTasker : BiliTasker() {
             .replace("{type}", dm.type.text)
             .replace("{content}", dm.content)
             .replace("{link}", dm.links?.get(0)?.value!!)
+            .replace("{link}", dm.links.joinToString("\n"))
     }
 
     private suspend fun buildMsg(ms: String, dm: DynamicMessage, contact: Contact): String {
@@ -389,10 +390,11 @@ object SendTasker : BiliTasker() {
                 "type" -> dm.type.text
                 "content" -> dm.content
                 "link" -> dm.links?.get(0)?.value!!
+                "links" -> dm.links?.joinToString("\n")!!
                 "images" -> {
                     buildString {
                         dm.images?.forEach {
-                            appendLine(uploadImage(it, CacheType.IMAGES, contact).serializeToMiraiCode())
+                            appendLine(uploadImage(it, CacheType.IMAGES, contact)?.serializeToMiraiCode())
                         }
                     }
                 }

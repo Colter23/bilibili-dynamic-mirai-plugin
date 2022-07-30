@@ -156,31 +156,47 @@ fun cacheImage(image: Image, path: String, cacheType: CacheType): String {
     return "${cacheType.path}/$path"
 }
 
-suspend fun getOrDownload(url: String, cacheType: CacheType = CacheType.UNKNOWN): ByteArray {
-    val fileName = url.split("?").first().split("@").first().split("/").last()
+suspend fun getOrDownload(url: String, cacheType: CacheType = CacheType.UNKNOWN): ByteArray? {
+     try {
+        val fileName = url.split("?").first().split("@").first().split("/").last()
 
-    val filePath = if (cacheType == CacheType.UNKNOWN) {
-        cachePath.findFile(fileName) ?: CacheType.OTHER.cacheFile(fileName)
-    } else {
-        cacheType.cacheFile(fileName)
-    }
-    return if (filePath.exists()) {
-        filePath.setLastModifiedTime(FileTime.from(Instant.now()))
-        filePath.readBytes()
-    } else {
-        biliClient.useHttpClient {
-            it.get(url).body<ByteArray>().apply {
-                filePath.writeBytes(this)
+        val filePath = if (cacheType == CacheType.UNKNOWN) {
+            cachePath.findFile(fileName) ?: CacheType.OTHER.cacheFile(fileName)
+        } else {
+            cacheType.cacheFile(fileName)
+        }
+         return if (filePath.exists()) {
+            filePath.setLastModifiedTime(FileTime.from(Instant.now()))
+            filePath.readBytes()
+        } else {
+            biliClient.useHttpClient {
+                it.get(url).body<ByteArray>().apply {
+                    filePath.writeBytes(this)
+                }
             }
         }
+    }catch (e: Exception) {
+        logger.error("获取图片失败! \n$e")
+        return null
     }
 }
 
-suspend fun getOrDownloadImage(url: String, cacheType: CacheType = CacheType.UNKNOWN): Image =
-    Image.makeFromEncoded(getOrDownload(url, cacheType))
+suspend fun getOrDownloadImage(url: String, cacheType: CacheType = CacheType.UNKNOWN) = try {
+    getOrDownload(url, cacheType)?.let { Image.makeFromEncoded(it) }
+}catch (e: Exception){
+    logger.error("解析图片失败! \n$e")
+    null
+}
 
-suspend fun uploadImage(url: String, cacheType: CacheType = CacheType.UNKNOWN, contact: Contact) =
-    contact.uploadImage(getOrDownload(url, cacheType).toExternalResource().toAutoCloseable())
+suspend fun getOrDownloadImageDefault(url: String, cacheType: CacheType = CacheType.UNKNOWN) =
+    getOrDownloadImage(url, cacheType)?: Image.makeFromEncoded(loadResourceBytes("image/IMAGE_MISS.png"))
+
+suspend fun uploadImage(url: String, cacheType: CacheType = CacheType.UNKNOWN, contact: Contact) = try {
+    getOrDownload(url, cacheType)?.toExternalResource()?.let { contact.uploadImage(it.toAutoCloseable()) }
+}catch (e: Exception){
+    logger.error("上传图片失败! \n$e")
+    null
+}
 
 
 /**
