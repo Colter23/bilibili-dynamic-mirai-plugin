@@ -37,6 +37,7 @@ Vtuber 字幕组及粉丝群如需要使用可通过群联系我, 使用我搭�
 插件本体: [**releases**](https://github.com/Colter23/bilibili-dynamic-mirai-plugin/releases)
 
 ### MCL 指令安装 (与上面二选一)
+中央仓库会延迟几个小时   
 `./mcl --update-package top.colter:bilibili-dynamic-mirai-plugin --channel maven --type plugin`
 
 ## 指令
@@ -44,7 +45,7 @@ Vtuber 字幕组及粉丝群如需要使用可通过群联系我, 使用我搭�
 常用指令帮助图   
 可通过 `/bili help` 指令获取    
 如果你对这张图有什么建议也可以反馈    
-<img src="docs/img/help.png" width="500" alt="帮助">
+<img src="docs/img/help.png" width="600" alt="帮助">
 
 | 订阅相关                                  | 描述                  |
 |---------------------------------------|---------------------|
