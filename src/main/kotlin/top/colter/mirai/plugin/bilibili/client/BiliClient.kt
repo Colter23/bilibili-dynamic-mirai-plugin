@@ -23,7 +23,7 @@ import java.io.IOException
 open class BiliClient : Closeable {
     override fun close() = clients.forEach { it.close() }
 
-    val proxys = if (proxyConfig.proxy.isNotBlank()) {
+    private val proxys = if (proxyConfig.proxy.isNotBlank()) {
         mutableListOf<ProxyConfig>().apply {
             proxyConfig.proxy.forEach {
                 if (it != "") {

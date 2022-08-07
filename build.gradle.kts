@@ -3,13 +3,12 @@ plugins {
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.serialization") version kotlinVersion
 
-
-    id("net.mamoe.mirai-console") version "2.12.0"
+    id("net.mamoe.mirai-console") version "2.12.1"
     id("net.mamoe.maven-central-publish") version "0.7.1"
 }
 
 group = "top.colter"
-version = "3.0.0"
+version = "3.0.2"
 
 repositories {
     mavenLocal()
@@ -26,7 +25,7 @@ mavenCentralPublish {
     }
 }
 
-dependencies{
+dependencies {
     implementation("io.ktor:ktor-client-okhttp:2.0.3") {
         exclude(group = "org.jetbrains.kotlin")
         exclude(group = "org.jetbrains.kotlinx")

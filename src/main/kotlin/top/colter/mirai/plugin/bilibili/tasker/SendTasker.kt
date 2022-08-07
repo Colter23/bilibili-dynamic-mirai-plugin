@@ -114,7 +114,7 @@ object SendTasker : BiliTasker() {
                             val aa = atAll[it.id]?.get(biliMessage.uid) ?: atAll[it.id]?.get(0L)
                             if (biliMessage.contact == null && it is Group && it.botPermission.level > 0) {
                                 var isAtAll = false
-                                if (aa != null && aa.isNotEmpty()) {
+                                if (!aa.isNullOrEmpty()) {
                                     if (aa.contains(AtAllType.ALL)) isAtAll = true
                                     else when (biliMessage) {
                                         is DynamicMessage ->
@@ -149,11 +149,16 @@ object SendTasker : BiliTasker() {
     }
 
     private suspend fun Contact.sendMessage(messages: List<Message>) {
-        messages.forEach {
-            sendMessage(it)
-            delay(messageInterval)
+        try {
+            messages.forEach {
+                sendMessage(it)
+                delay(messageInterval)
+            }
+            delay(pushInterval)
+        }catch (e: Exception) {
+            logger.error("发送消息失败！", e)
+            delay(pushInterval)
         }
-        delay(pushInterval)
     }
 
     fun DynamicType.toAtAllType() =

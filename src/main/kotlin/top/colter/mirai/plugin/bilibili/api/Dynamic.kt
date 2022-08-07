@@ -8,19 +8,6 @@ import top.colter.mirai.plugin.bilibili.data.DynamicItem
 import top.colter.mirai.plugin.bilibili.data.DynamicList
 import top.colter.mirai.plugin.bilibili.utils.decode
 
-internal suspend inline fun <reified T> BiliClient.getData(
-    url: String,
-    crossinline block: HttpRequestBuilder.() -> Unit = {}
-): T? {
-    val res = get<BiliResult>(url, block)
-
-    return if (res.code != 0 || res.data == null) {
-        throw Exception("URL: $url ${res.message}")
-    } else {
-        res.data.decode()
-    }
-}
-
 /**
  * 获取账号全部最新动态
  * @param page 分页 (每页20左右)

@@ -26,6 +26,10 @@ object BiliData : AutoSavePluginData("BiliData") {
     // key: contact
     @ValueDescription("AtAll")
     val atAll: MutableMap<Long, MutableMap<Long, MutableSet<AtAllType>>> by value()
+
+    // key: group name
+    @ValueDescription("分组")
+    val group: MutableMap<String, Group> by value()
 }
 
 @Serializable
@@ -34,8 +38,17 @@ data class SubData(
     var color: String? = null,
     var last: Long = Instant.now().epochSecond,
     var lastLive: Long = Instant.now().epochSecond,
-    val contacts: MutableList<String> = mutableListOf(),
+    val contacts: MutableSet<String> = mutableSetOf(),
+    val groups: MutableSet<String> = mutableSetOf(),
     val banList: MutableMap<String, String> = mutableMapOf(),
+)
+
+@Serializable
+data class Group(
+    val groupName: String,
+    val creator: Long,
+    val admin: MutableSet<Long> = mutableSetOf(),
+    val contacts: MutableSet<String> = mutableSetOf(),
 )
 
 @Serializable

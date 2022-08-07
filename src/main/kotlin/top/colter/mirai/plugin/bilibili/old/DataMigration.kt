@@ -22,7 +22,8 @@ fun migrationData() {
                         if (u.color == "#d3edfa") null else u.color,
                         u.last,
                         u.lastLive,
-                        u.contacts.keys.toMutableList(),
+                        u.contacts.keys.toMutableSet(),
+                        mutableSetOf(),
                         u.banList
                     )
                     u.contacts.forEach { (c, l) ->

@@ -27,6 +27,8 @@ object DynamicCommand : CompositeCommand(
     description = "动态指令"
 ) {
 
+    private val admin by BiliConfig::admin
+
     @SubCommand("h", "help", "帮助", "menu")
     suspend fun CommandSender.help() {
         loadResourceBytes("image/HELP.png").toExternalResource().toAutoCloseable().sendAsImageTo(Contact())
@@ -60,7 +62,7 @@ object DynamicCommand : CompositeCommand(
             return
         }
         matchUser(user) {
-            BiliDataTasker.removeSubscribe(it, contact.delegate).let { it1 -> "对 ${it1?.name} 取消订阅成功!" }
+            BiliDataTasker.removeSubscribe(it, contact.delegate)
         }?.let {
             sendMessage(it)
             actionNotify(this.subject?.id, ActionMessage(name, contact.name, "取消订阅", it))
@@ -89,15 +91,21 @@ object DynamicCommand : CompositeCommand(
 
     @SubCommand("listAll", "la", "全部订阅列表")
     suspend fun CommandSender.listAll() {
-        if (BiliConfig.admin == Contact().id || BiliConfig.admin == user?.id)
+        if (admin == Contact().id || admin == user?.id || user == null)
             sendMessage(BiliDataTasker.listAll())
         else sendMessage("仅bot管理员可获取")
     }
 
     @SubCommand("listUser", "lu", "用户列表")
-    suspend fun CommandSender.listUser() {
-        if (BiliConfig.admin == Contact().id || BiliConfig.admin == user?.id)
-            sendMessage(BiliDataTasker.listUser())
+    suspend fun CommandSender.listUser(user: String = "") {
+        if (admin == Contact().id || admin == this.user?.id || this.user == null)
+            if (user.isEmpty()) {
+                sendMessage(BiliDataTasker.listUser())
+            }else {
+                matchUser(user) {
+                    BiliDataTasker.listUser(it)
+                }?.let { sendMessage(it) }
+            }
         else sendMessage("仅bot管理员可获取")
     }
 
@@ -250,6 +258,26 @@ object DynamicCommand : CompositeCommand(
             if (list != null && list.isNotEmpty()) "少女祈祷中..." else "未找到动态"
         }?.let { sendMessage(it) }
     }
+
+    @SubCommand("create", "创建分组")
+    suspend fun CommandSender.createGroup(name: String) = sendMessage(
+        BiliDataTasker.createGroup(name, subject?.id ?:0L)
+    )
+
+    @SubCommand("delGroup", "dg", "删除分组")
+    suspend fun CommandSender.delGroup(name: String) = sendMessage(
+        BiliDataTasker.delGroup(name, subject?.id ?:0L)
+    )
+
+    @SubCommand("pushGroup", "pg", "添加分组")
+    suspend fun CommandSender.pushGroup(name: String, contacts: String) = sendMessage(
+        BiliDataTasker.pushGroupContact(name, contacts, subject?.id ?:0L)
+    )
+
+    @SubCommand("delGroup", "pg", "添加分组")
+    suspend fun CommandSender.delGroupContact(name: String, contacts: String) = sendMessage(
+        BiliDataTasker.delGroupContact(name, contacts, subject?.id ?:0L)
+    )
 
 }
 
