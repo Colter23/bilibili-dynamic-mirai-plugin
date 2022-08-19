@@ -4,9 +4,15 @@ import kotlinx.serialization.Serializable
 import net.mamoe.mirai.console.data.AutoSavePluginData
 import net.mamoe.mirai.console.data.ValueDescription
 import net.mamoe.mirai.console.data.value
+import top.colter.mirai.plugin.bilibili.utils.findContact
+import top.colter.mirai.plugin.bilibili.utils.findContactAll
+import top.colter.mirai.plugin.bilibili.utils.name
 import java.time.Instant
 
 object BiliData : AutoSavePluginData("BiliData") {
+    @ValueDescription("数据版本")
+    var dataVersion: Int by value(0)
+
     // key: uid
     @ValueDescription("订阅信息")
     val dynamic: MutableMap<Long, SubData> by value(mutableMapOf(0L to SubData("ALL")))
@@ -17,15 +23,15 @@ object BiliData : AutoSavePluginData("BiliData") {
 
     // key: template name
     @ValueDescription("动态推送模板")
-    val dynamicPushTemplate: MutableMap<String, MutableSet<Long>> by value()
+    val dynamicPushTemplate: MutableMap<String, MutableSet<String>> by value()
 
     // key: template name
     @ValueDescription("直播推送模板")
-    val livePushTemplate: MutableMap<String, MutableSet<Long>> by value()
+    val livePushTemplate: MutableMap<String, MutableSet<String>> by value()
 
     // key: contact
     @ValueDescription("AtAll")
-    val atAll: MutableMap<Long, MutableMap<Long, MutableSet<AtAllType>>> by value()
+    val atAll: MutableMap<String, MutableMap<Long, MutableSet<AtAllType>>> by value()
 
     // key: group name
     @ValueDescription("分组")
@@ -39,17 +45,30 @@ data class SubData(
     var last: Long = Instant.now().epochSecond,
     var lastLive: Long = Instant.now().epochSecond,
     val contacts: MutableSet<String> = mutableSetOf(),
-    val groups: MutableSet<String> = mutableSetOf(),
+    //val groups: MutableSet<String> = mutableSetOf(),
     val banList: MutableMap<String, String> = mutableMapOf(),
 )
 
 @Serializable
 data class Group(
-    val groupName: String,
+    val name: String,
     val creator: Long,
     val admin: MutableSet<Long> = mutableSetOf(),
     val contacts: MutableSet<String> = mutableSetOf(),
-)
+) {
+    override fun toString(): String {
+        return """
+分组名: $name
+创建者: ${findContactAll(creator)?.run { "$name($id)" }?:creator}
+
+管理员: 
+${admin.joinToString("\n") { findContactAll(it)?.run { "$name($id)" }?:it.toString() }.ifEmpty { "暂无管理员" }}
+
+用户: 
+${contacts.joinToString("\n") { findContact(it)?.run { "$name($id)" }?:it }.ifEmpty { "暂无用户" }}
+""".trimIndent()
+    }
+}
 
 @Serializable
 enum class FilterType {

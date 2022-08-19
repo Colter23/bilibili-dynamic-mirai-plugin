@@ -17,13 +17,14 @@ import net.mamoe.mirai.utils.info
 import top.colter.mirai.plugin.bilibili.command.DynamicCommand
 import top.colter.mirai.plugin.bilibili.data.*
 import top.colter.mirai.plugin.bilibili.old.migration
+import top.colter.mirai.plugin.bilibili.old.updateData
 import top.colter.mirai.plugin.bilibili.tasker.*
 
 object BiliBiliDynamic : KotlinPlugin(
     JvmPluginDescription(
         id = "top.colter.bilibili-dynamic-mirai-plugin",
         name = "BiliBili Dynamic",
-        version = "3.0.2",
+        version = "3.0.3",
     ) {
         author("Colter")
         dependsOn("xyz.cssxsh.mirai.plugin.mirai-skia-plugin", ">= 1.1.0")
@@ -38,6 +39,7 @@ object BiliBiliDynamic : KotlinPlugin(
     val dynamicChannel = Channel<DynamicDetail>(20)
     val liveChannel = Channel<LiveDetail>(20)
     val messageChannel = Channel<BiliMessage>(20)
+    val missChannel = Channel<BiliMessage>(10)
 
     val liveGwp = PermissionId(BiliBiliDynamic.description.id, "live.atall")
     val videoGwp = PermissionId(BiliBiliDynamic.description.id, "video.atall")
@@ -49,6 +51,8 @@ object BiliBiliDynamic : KotlinPlugin(
          * @author cssxsh
          */
         runAfterStartup {
+            updateData()
+
             DynamicCheckTasker.start()
             LiveCheckTasker.start()
             DynamicMessageTasker.start()

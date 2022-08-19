@@ -10,6 +10,7 @@ import top.colter.mirai.plugin.bilibili.data.DynamicDetail
 import top.colter.mirai.plugin.bilibili.data.DynamicType
 import top.colter.mirai.plugin.bilibili.utils.sendAll
 import top.colter.mirai.plugin.bilibili.utils.time
+import java.time.Instant
 
 object DynamicCheckTasker : BiliCheckTasker("Dynamic") {
 
@@ -33,7 +34,7 @@ object DynamicCheckTasker : BiliCheckTasker("Dynamic") {
     private val historyDynamic = ArrayList<String>(capacity)
     private var lastIndex = 0
 
-    //private var lastDynamic: Long = Instant.now().epochSecond
+    private var lastDynamic: Long = Instant.now().epochSecond
 
     override suspend fun main() = withTimeout(180001) {
         val dynamicList = client.getNewDynamic()
@@ -43,7 +44,8 @@ object DynamicCheckTasker : BiliCheckTasker("Dynamic") {
                 .filter {
                     !banType.contains(it.type)
                 }.filter {
-                    //it.time > lastDynamic
+                    it.time > lastDynamic
+                }.filter {
                     !historyDynamic.contains(it.did)
                 }.filter {
                     if (listenAllDynamicMode) true else followingUsers.contains(it.modules.moduleAuthor.mid)

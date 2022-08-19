@@ -23,7 +23,7 @@ object CacheClearTasker : BiliTasker() {
         forEachDirectoryEntry {
             if (it.isDirectory()) {
                 it.clearExpireFile(expire)
-            } else if (System.currentTimeMillis() - it.toFile().lastModified() >= expire * interval * 1000) {
+            } else if (System.currentTimeMillis() - it.toFile().lastModified() >= expire * interval * unitTime) {
                 it.toFile().delete()
             }
         }

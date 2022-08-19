@@ -23,6 +23,7 @@ abstract class BiliTasker(
     private var job: Job? = null
 
     abstract var interval: Int
+    open val unitTime: Long = 1000
 
     protected open fun init() {}
 
@@ -43,14 +44,14 @@ abstract class BiliTasker(
                         before()
                         main()
                         after()
-                    } catch (e: Throwable) {
-                        BiliBiliDynamic.logger.error(this::class.simpleName + e)
+                    } catch (t: Throwable) {
+                        logger.error(this::class.simpleName + t)
                         delay(120000L)
                     }
-                    delay(interval * 1000L)
+                    delay(interval * unitTime)
                 }
             }
-            if (!isActive) BiliBiliDynamic.logger.error("${this::class.simpleName} 已停止工作!")
+            if (!isActive) logger.error("${this::class.simpleName} 已停止工作!")
         }
 
         return taskers.add(this)

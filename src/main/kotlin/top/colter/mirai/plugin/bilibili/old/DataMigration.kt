@@ -3,6 +3,8 @@ package top.colter.mirai.plugin.bilibili.old
 import top.colter.mirai.plugin.bilibili.*
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic.reload
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic.save
+import top.colter.mirai.plugin.bilibili.utils.delegate
+import top.colter.mirai.plugin.bilibili.utils.findContactAll
 
 fun migration() {
     migrationData()
@@ -23,7 +25,7 @@ fun migrationData() {
                         u.last,
                         u.lastLive,
                         u.contacts.keys.toMutableSet(),
-                        mutableSetOf(),
+                        //mutableSetOf(),
                         u.banList
                     )
                     u.contacts.forEach { (c, l) ->
@@ -120,5 +122,33 @@ fun migrationConfig() {
             BiliPluginConfig.save()
             BiliBiliDynamic.logger.info("配置转移成功")
         }
+    }
+}
+
+fun updateData() {
+    if (BiliData.dataVersion == 0) {
+        BiliData.dynamicPushTemplate.forEach {
+            val s = it.value.map {
+                println(it)
+                findContactAll(it.toLong())?.delegate
+            }.filterNotNull().toSet()
+            it.value.clear()
+            it.value.addAll(s)
+        }
+        BiliData.livePushTemplate.forEach {
+            val s = it.value.map {
+                findContactAll(it.toLong())?.delegate
+            }.filterNotNull().toSet()
+            it.value.clear()
+            it.value.addAll(s)
+        }
+        BiliData.atAll.apply {
+            val m = map {
+                (findContactAll(it.key.toLong())?.delegate?:it.key) to it.value
+            }.toMap()
+            clear()
+            putAll(m)
+        }
+        BiliData.dataVersion = 1
     }
 }

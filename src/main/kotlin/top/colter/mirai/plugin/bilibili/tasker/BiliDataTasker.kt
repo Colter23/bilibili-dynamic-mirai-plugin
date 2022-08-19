@@ -20,9 +20,10 @@ import top.colter.mirai.plugin.bilibili.*
 import top.colter.mirai.plugin.bilibili.AtAllType.*
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic.save
 import top.colter.mirai.plugin.bilibili.BiliConfig.accountConfig
-import top.colter.mirai.plugin.bilibili.BiliData.group
 import top.colter.mirai.plugin.bilibili.api.*
 import top.colter.mirai.plugin.bilibili.client.BiliClient
+import top.colter.mirai.plugin.bilibili.command.GroupOrContact
+import top.colter.mirai.plugin.bilibili.command.subject
 import top.colter.mirai.plugin.bilibili.data.DynamicMessage
 import top.colter.mirai.plugin.bilibili.data.LiveMessage
 import top.colter.mirai.plugin.bilibili.data.LoginData
@@ -43,7 +44,8 @@ object BiliDataTasker {
 
     private val dynamic by BiliData::dynamic
     private val filter by BiliData::filter
-    //private val group by BiliData::group
+    private val group by BiliData::group
+    private val atAll by BiliData::atAll
 
     suspend fun listenAll(subject: String) = mutex.withLock {
         dynamic.forEach { (_, sub) ->
@@ -64,9 +66,8 @@ object BiliDataTasker {
 
         val attr = client.isFollow(uid)?.attribute
         if (attr == 0) {
-            if (!accountConfig.autoFollow) {
-                return "未关注此用户"
-            } else {
+            if (!accountConfig.autoFollow) return "未关注此用户"
+            else {
                 val res = client.follow(uid)
                 if (res.code != 0) return "关注失败: ${res.message}"
                 if (accountConfig.followGroup.isNotEmpty()) {
@@ -75,17 +76,13 @@ object BiliDataTasker {
                 }
                 actionNotify("通知: 账号关注 $uid")
             }
-        } else if (attr == 128) {
-            return "此账号已被拉黑"
-        }
+        } else if (attr == 128) return "此账号已被拉黑"
         return null
     }
 
     suspend fun setColor(uid: Long, color: String) = mutex.withLock {
         color.split(";", "；").forEach {
-            if (it.first() != '#' || it.length != 7) {
-                return@withLock "格式错误，请输入16进制颜色，如: #d3edfa"
-            }
+            if (it.first() != '#' || it.length != 7) return@withLock "格式错误，请输入16进制颜色，如: #d3edfa"
         }
         dynamic[uid]?.color = color
         "设置完成"
@@ -93,7 +90,6 @@ object BiliDataTasker {
 
     suspend fun addSubscribe(uid: Long, subject: String) = mutex.withLock {
         if (isFollow(uid, subject)) return@withLock "之前订阅过这个人哦"
-
         if (dynamic[0]?.contacts?.contains(subject) == true) dynamic[0]?.contacts?.remove(subject)
 
         if (!dynamic.containsKey(uid)) {
@@ -103,8 +99,41 @@ object BiliDataTasker {
             dynamic[uid] = SubData(u?.name!!)
         }
 
-        dynamic[uid]!!.contacts.add(subject)
+        dynamic[uid]?.contacts?.apply {
+            try {
+                subject.toLong()
+            } catch (e: NumberFormatException) {
+                group[subject]?.contacts?.let {
+                    removeAll(it)
+                }
+            }
+            add(subject)
+        }
         "订阅 ${dynamic[uid]?.name} 成功!"
+    }
+
+    suspend fun removeSubscribe(uid: Long, subject: String) = mutex.withLock {
+        if (!isFollow(uid, subject)) return@withLock "还未订阅此人哦"
+        val user = dynamic[uid]!!
+        if (user.contacts.remove(subject)) {
+            if (user.contacts.isEmpty()) dynamic.remove(uid)
+            if (filter[subject]?.run {
+                remove(uid)
+                isEmpty()
+            } == true) filter.remove(subject)
+            if (atAll[subject]?.run {
+                remove(uid)
+                isEmpty()
+            } == true) atAll.remove(subject)
+            "对 ${user.name} 取消订阅成功"
+        }else "取消订阅失败"
+    }
+
+    suspend fun removeAllSubscribe(subject: String) = mutex.withLock {
+        filter.remove(subject)
+        atAll.remove(subject)
+        group.forEach { (_, g) -> g.contacts.remove(subject) }
+        dynamic.count { (_, sub) -> sub.contacts.remove(subject) }
     }
 
     suspend fun addFilter(type: FilterType, mode: FilterMode?, regex: String?, uid: Long, subject: String) =
@@ -131,12 +160,9 @@ object BiliDataTasker {
                         dynamicFilter.typeSelect.list.add(t)
                     }
                 }
-
                 FilterType.REGULAR -> {
                     if (mode != null) dynamicFilter.regularSelect.mode = mode
-                    if (regex != null && regex != "") {
-                        dynamicFilter.regularSelect.list.add(regex)
-                    }
+                    if (regex != null && regex != "") dynamicFilter.regularSelect.list.add(regex)
                 }
             }
             "设置成功"
@@ -145,9 +171,7 @@ object BiliDataTasker {
     suspend fun listFilter(uid: Long, subject: String) = mutex.withLock {
         if (!isFollow(uid, subject)) return@withLock "还未订阅此人哦"
 
-        if (!(filter.containsKey(subject) && filter[subject]!!.containsKey(uid))) {
-            return@withLock "目标没有过滤器"
-        }
+        if (!(filter.containsKey(subject) && filter[subject]!!.containsKey(uid))) return@withLock "目标没有过滤器"
 
         buildString {
             //appendLine("当前目标过滤器: ")
@@ -156,18 +180,14 @@ object BiliDataTasker {
             if (typeSelect.list.isNotEmpty()) {
                 append("动态类型过滤器: ")
                 appendLine(typeSelect.mode.value)
-                typeSelect.list.forEachIndexed { index, type ->
-                    appendLine("  t$index: ${type.value}")
-                }
+                typeSelect.list.forEachIndexed { index, type -> appendLine("  t$index: ${type.value}") }
                 appendLine()
             }
             val regularSelect = filter[subject]!![uid]!!.regularSelect
             if (regularSelect.list.isNotEmpty()) {
                 append("正则过滤器: ")
                 appendLine(regularSelect.mode.value)
-                regularSelect.list.forEachIndexed { index, reg ->
-                    appendLine("  r$index: $reg")
-                }
+                regularSelect.list.forEachIndexed { index, reg -> appendLine("  r$index: $reg") }
                 appendLine()
             }
         }
@@ -189,38 +209,13 @@ object BiliDataTasker {
             filter[subject]!![uid]!!.typeSelect.list
         } else if (index[0] == 'r') {
             filter[subject]!![uid]!!.regularSelect.list
-        } else {
-            return@withLock "索引类型错误"
-        }
+        } else return@withLock "索引类型错误"
         if (filter.size < i) return@withLock "索引超出范围"
         val t = filter[i]
         filter.removeAt(i)
 
-        if (flag) {
-            "已删除 ${(t as DynamicFilterType).value} 类型过滤"
-        } else {
-            "已删除 ${(t as String)} 正则过滤"
-        }
-    }
-
-    suspend fun removeSubscribe(uid: Long, subject: String) = mutex.withLock {
-        if (!isFollow(uid, subject)) return@withLock "还未订阅此人哦"
-        val user = dynamic[uid]!!
-        if (user.contacts.remove(subject)) {
-            if (user.contacts.size == 0) dynamic.remove(uid)
-            "对 ${user.name} 取消订阅成功"
-        }else {
-            "取消订阅失败"
-        }
-    }
-
-    suspend fun removeAllSubscribe(subject: String) = mutex.withLock {
-        dynamic.count { (_, sub) ->
-            if (sub.contacts.contains(subject)) {
-                sub.contacts.remove(subject)
-                true
-            } else false
-        }
+        if (flag) "已删除 ${(t as DynamicFilterType).value} 类型过滤"
+        else "已删除 ${(t as String)} 正则过滤"
     }
 
     suspend fun list(subject: String) = mutex.withLock {
@@ -265,18 +260,26 @@ object BiliDataTasker {
             }
             val group = StringBuilder()
             val friend = StringBuilder()
+            val gg = StringBuilder()
             user.forEach {
-                findContact(it).apply {
-                    when (this) {
-                        is Group -> group.appendLine("${name}@${id}")
-                        is Friend -> friend.appendLine("${nick}@${id}")
+                try {
+                    it.toLong()
+                    findContact(it).apply {
+                        when (this) {
+                            is Group -> group.appendLine("$name@$id")
+                            is Friend -> friend.appendLine("$nick@$id")
+                        }
                     }
+                }catch (e: NumberFormatException) {
+                    gg.appendLine(it)
                 }
             }
             appendLine("====群====")
             append(group.ifEmpty { "无\n" })
             appendLine("====好友====")
             append(friend.ifEmpty { "无\n" })
+            appendLine("====分组====")
+            append(gg.ifEmpty { "无\n" })
             appendLine()
             append("共 ${user.size} 名用户")
         }
@@ -315,7 +318,6 @@ object BiliDataTasker {
         }.onFailure {
             contact.sendMessage("登录失败 ${it.message}")
         }
-
     }
 
     suspend fun listTemplate(type: String, subject: Contact) {
@@ -329,11 +331,8 @@ object BiliDataTasker {
         }
 
         // https://t.bilibili.com/385190177693666264
-        val dynamic = if (type == "d") {
-            biliClient.getDynamicDetail("385190177693666264")?.buildMessage()!!
-        } else {
-            biliClient.getLive(1, 1)?.rooms?.first()?.buildMessage()!!
-        }
+        val dynamic = if (type == "d") biliClient.getDynamicDetail("385190177693666264")?.buildMessage()!!
+        else biliClient.getLive(1, 1)?.rooms?.first()?.buildMessage()!!
 
         subject.sendMessage(buildForwardMessage(subject) {
             var pt = 0
@@ -343,15 +342,11 @@ object BiliDataTasker {
                 subject.bot named dynamic.uname at dynamic.timestamp + pt says t.key
                 subject.bot named dynamic.uname at dynamic.timestamp + pt says buildForwardMessage(subject) {
                     when (dynamic) {
-                        is DynamicMessage -> {
-                            dynamic.buildMessage(t.value, subject).forEach {
-                                subject.bot named dynamic.uname at dynamic.timestamp + pt says it
-                            }
+                        is DynamicMessage -> dynamic.buildMessage(t.value, listOf(subject)).forEach {
+                            subject.bot named dynamic.uname at dynamic.timestamp + pt says it
                         }
-                        is LiveMessage -> {
-                            dynamic.buildMessage(t.value, subject).forEach {
-                                subject.bot named dynamic.uname at dynamic.timestamp + pt says it
-                            }
+                        is LiveMessage -> dynamic.buildMessage(t.value, listOf(subject)).forEach {
+                            subject.bot named dynamic.uname at dynamic.timestamp + pt says it
                         }
                     }
                 }
@@ -364,7 +359,7 @@ object BiliDataTasker {
         })
     }
 
-    suspend fun setTemplate(type: String, template: String, subject: Contact) = mutex.withLock {
+    suspend fun setTemplate(type: String, template: String, subject: String) = mutex.withLock {
         val pushTemplates = when (type) {
             "d" -> BiliConfig.templateConfig.dynamicPush
             "l" -> BiliConfig.templateConfig.livePush
@@ -376,15 +371,11 @@ object BiliDataTasker {
             else -> return@withLock "类型错误 d:动态 l:直播"
         }
         if (pushTemplates.containsKey(template)) {
-            push.forEach { (_, u) ->
-                u.remove(subject.id)
-            }
+            push.forEach { (_, u) -> u.remove(subject) }
             if (!push.containsKey(template)) push[template] = mutableSetOf()
-            push[template]!!.add(subject.id)
+            push[template]!!.add(subject)
             "配置完成"
-        } else {
-            "没有这个模板哦 $template"
-        }
+        } else "没有这个模板哦 $template"
     }
 
     private fun toAtAllType(type: String) =
@@ -395,133 +386,161 @@ object BiliDataTasker {
             "视频", "video", "v" -> VIDEO
             "音乐", "music", "m" -> MUSIC
             "专栏", "article" -> ARTICLE
-            else -> {
-                null
-            }
+            else -> null
         }
 
-    suspend fun addAtAll(type: String, uid: Long = 0L, contact: Contact) = mutex.withLock {
+    suspend fun addAtAll(type: String, uid: Long = 0L, target: GroupOrContact) = mutex.withLock {
         val atAllType = toAtAllType(type) ?: return "没有这个类型哦 [$type]"
-        if (contact !is Group) return "仅在群聊中有用哦"
-        if (contact.botPermission.level == 0) return "Bot不为管理员, 无法使用At全体"
-
-        val list = BiliData.atAll.getOrPut(contact.id) { mutableMapOf() }.getOrPut(uid) { mutableSetOf() }
+        if (target.group == null) {
+            if (target.contact !is Group) return "仅在群聊中有用哦"
+            if (target.contact.botPermission.level == 0) return "Bot不为管理员, 无法使用At全体"
+        }
+        val list = atAll.getOrPut(target.subject) { mutableMapOf() }.getOrPut(uid) { mutableSetOf() }
         if (list.isEmpty()) {
             list.add(atAllType)
-            BiliData.atAll[contact.id]?.set(uid, list)
-        } else {
-            when (atAllType) {
-                ALL -> {
-                    list.clear()
-                    list.add(atAllType)
-                }
-                DYNAMIC -> {
-                    list.removeAll(listOf(ALL, VIDEO, MUSIC, ARTICLE))
-                    list.add(atAllType)
-                }
-                LIVE -> {
-                    list.remove(ALL)
-                    list.add(atAllType)
-                }
-                else -> {
-                    list.remove(ALL)
-                    list.remove(DYNAMIC)
-                    list.add(atAllType)
-                }
+            atAll[target.subject]?.set(uid, list)
+        } else when (atAllType) {
+            ALL -> {
+                list.clear()
+                list.add(atAllType)
+            }
+            DYNAMIC -> {
+                list.removeAll(listOf(ALL, VIDEO, MUSIC, ARTICLE))
+                list.add(atAllType)
+            }
+            LIVE -> {
+                list.remove(ALL)
+                list.add(atAllType)
+            }
+            else -> {
+                list.remove(ALL)
+                list.remove(DYNAMIC)
+                list.add(atAllType)
             }
         }
         "添加成功"
     }
 
-    fun delAtAll(type: String, uid: Long = 0L, contact: Contact): String {
-        val atAllType = toAtAllType(type) ?: return "没有这个类型哦 [$type]"
-        return if (BiliData.atAll[contact.id]?.get(uid)?.remove(atAllType) == true) "删除成功" else "删除失败"
+    suspend fun delAtAll(type: String, uid: Long = 0L, subject: String) = mutex.withLock {
+        val atAllType = toAtAllType(type) ?: return@withLock "没有这个类型哦 [$type]"
+        if (atAll[subject]?.get(uid)?.remove(atAllType) == true) "删除成功" else "删除失败"
     }
 
-    fun listAtAll(uid: Long = 0L, contact: Contact): String {
-        val list = BiliData.atAll[contact.id]?.get(uid)
-        if (list == null || list.isEmpty()) return "没有At全体项哦"
-        return buildString {
-            list.forEach {
-                appendLine(it.value)
-            }
-        }
+    suspend fun listAtAll(uid: Long = 0L, subject: String) = mutex.withLock {
+        val list = atAll[subject]?.get(uid)
+        if (list.isNullOrEmpty()) return@withLock "没有At全体项哦"
+        buildString { list.forEach { appendLine(it.value) } }
     }
 
-    fun createGroup(name: String, operator: Long): String {
-        return if (!group.containsKey(name)) {
+    suspend fun createGroup(name: String, operator: Long) = mutex.withLock {
+        if (!group.containsKey(name)) {
+            if (name.matches("^[0-9]*$".toRegex())) return@withLock "分组名不能全为数字"
             group[name] = Group(name, operator)
-            "添加成功"
-        }else {
-            "分组名称重复"
-        }
+            "创建成功"
+        }else "分组名称重复"
     }
 
-    fun delGroup(name: String, operator: Long): String {
-        return if (group.containsKey(name)) {
+    suspend fun delGroup(name: String, operator: Long) = mutex.withLock {
+        if (group.containsKey(name)) {
             if (group[name]!!.creator == operator) {
+                dynamic.forEach { (_, s) -> s.contacts.remove(name) }
+                BiliData.dynamicPushTemplate.forEach { (_, c) -> c.remove(name) }
+                BiliData.livePushTemplate.forEach { (_, c) -> c.remove(name) }
+                filter.remove(name)
+                atAll.remove(name)
                 group.remove(name)
                 "删除成功"
-            }else {
-                "无权删除"
-            }
-        }else {
-            "没有此分组 [$name]"
+            }else "无权删除"
+        }else "没有此分组 [$name]"
+    }
+
+    suspend fun listGroup(name: String? = null, operator: Long) = mutex.withLock {
+        if (name == null) {
+            group.values.filter {
+                operator == BiliConfig.admin || operator == it.creator || it.admin.contains(operator)
+            }.joinToString("\n") {
+                "${it.name}@${findContactAll(it.creator)?.name?:it.creator}"
+            }.ifEmpty { "没有创建或管理任何分组哦" }
+        } else {
+            group[name]?.toString() ?: "没有此分组哦"
         }
     }
 
-    fun pushGroupContact(name: String, contacts: String, operator: Long): String {
-        return if (group.containsKey(name)) {
+    suspend fun setGroupAdmin(name: String, contacts: String, operator: Long) = mutex.withLock {
+        if (group.containsKey(name)) {
+            if (group[name]!!.creator == operator) {
+                var failMsg = ""
+                group[name]?.admin?.addAll(contacts.split(",","，").map {
+                    findContactAll(it).run {
+                        if (this != null && this is Friend) id else {
+                            failMsg += "$it, "
+                            null
+                        }
+                    }
+                }.filterNotNull().toSet())
+                if (failMsg.isEmpty()) "添加成功"
+                else "[$failMsg] 添加失败"
+            }else "无权添加"
+        }else "没有此分组 [$name]"
+    }
+
+    suspend fun banGroupAdmin(name: String, contacts: String, operator: Long) = mutex.withLock {
+        if (group.containsKey(name)) {
+            if (group[name]!!.creator == operator) {
+                var failMsg = ""
+                val admin = group[name]!!.admin
+                contacts.split(",","，").map {
+                    try {
+                        it.toLong()
+                    }catch (e: NumberFormatException) {
+                        failMsg += "$it, "
+                        null
+                    }
+                }.filterNotNull().toSet().forEach {
+                    if (!admin.remove(it)) failMsg += "$it, "
+                }
+                if (failMsg.isEmpty()) "删除成功"
+                else "[$failMsg] 删除失败"
+            }else "无权删除"
+        }else "没有此分组 [$name]"
+    }
+
+    suspend fun pushGroupContact(name: String, contacts: String, operator: Long) = mutex.withLock {
+        if (group.containsKey(name)) {
             if (checkGroupPerm(name, operator)) {
                 var failMsg = ""
                 group[name]?.contacts?.addAll(contacts.split(",","，").map {
-                    findContact(it)?.let {
-                        failMsg += "$it, "
-                        it.delegate
-                    } ?: ""
-                }.filter { it.isNotEmpty() }.toSet())
-                if (failMsg.isEmpty()) {
-                    "添加成功"
-                }else {
-                    "[$failMsg] 添加失败"
-                }
-            }else {
-                "无权添加"
-            }
-        }else {
-            "没有此分组 [$name]"
-        }
+                    findContactAll(it)?.delegate.apply {
+                        if (this == null) failMsg += "$it, "
+                    }
+                }.filterNotNull().toSet())
+                if (failMsg.isEmpty()) "添加成功"
+                else "[$failMsg] 添加失败"
+            }else "无权添加"
+        }else "没有此分组 [$name]"
     }
 
-    fun delGroupContact(name: String, contacts: String, operator: Long): String {
-        return if (group.containsKey(name)) {
+    suspend fun delGroupContact(name: String, contacts: String, operator: Long) = mutex.withLock {
+        if (group.containsKey(name)) {
             if (checkGroupPerm(name, operator)) {
                 var failMsg = ""
                 group[name]?.contacts?.removeAll(contacts.split(",","，").map {
-                    findContact(it)?.let {
+                    findContactAll(it)?.let {
                         failMsg += "$it, "
                         it.delegate
                     } ?: ""
                 }.filter { it.isNotEmpty() }.toSet())
-                if (failMsg.isEmpty()) {
-                    "删除成功"
-                }else {
-                    "[$failMsg] 删除失败"
-                }
-            }else {
-                "无权删除"
-            }
-        }else {
-            "没有此分组 [$name]"
-        }
+                if (failMsg.isEmpty()) "删除成功"
+                else "[$failMsg] 删除失败"
+            }else "无权删除"
+        }else "没有此分组 [$name]"
     }
 
-    private fun checkGroupPerm(name: String, operator: Long): Boolean =
+    fun checkGroupPerm(name: String, operator: Long): Boolean =
         group[name]?.creator == operator || group[name]?.admin?.contains(operator) == true
 
 
     suspend fun config(event: MessageEvent, uid: Long = 0L, contact: Contact) {
-
         val subject = event.subject
         if (uid != 0L && !((dynamic.containsKey(uid) && dynamic[uid]!!.contacts.contains(contact.delegate)))) {
             subject.sendMessage("没有订阅这个人哦 [$uid]")
@@ -541,7 +560,7 @@ object BiliDataTasker {
             var i = 1
             if (contact is Group) {
                 configMap[i.toString()] = "ATALL"
-                val aa = BiliData.atAll[contact.id]?.get(uid)?.isNotEmpty()
+                val aa = atAll[contact.delegate]?.get(uid)?.isNotEmpty()
                 appendLine("  $i: At全体 [${aa ?: false}]")
                 appendLine("      $i.1: 当前At全体项")
                 appendLine("      $i.2: 添加At全体")
@@ -553,9 +572,9 @@ object BiliDataTasker {
                 appendLine("  ${i++}: 主题色 [${user?.color ?: BiliConfig.imageConfig.defaultColor}]")
             }
             if (uid == 0L) {
-                val cdl = BiliData.dynamicPushTemplate.filter { it.value.contains(contact.id) }.map { it.key }
+                val cdl = BiliData.dynamicPushTemplate.filter { it.value.contains(contact.delegate) }.map { it.key }
                 val currDynamic = if (cdl.isNotEmpty()) cdl.first() else BiliConfig.templateConfig.defaultDynamicPush
-                val cll = BiliData.livePushTemplate.filter { it.value.contains(contact.id) }.map { it.key }
+                val cll = BiliData.livePushTemplate.filter { it.value.contains(contact.delegate) }.map { it.key }
                 val currLive = if (cll.isNotEmpty()) cll.first() else BiliConfig.templateConfig.defaultLivePush
                 configMap[i.toString()] = "PUSH"
                 appendLine("  $i: 推送模板")
@@ -610,9 +629,7 @@ object BiliDataTasker {
                 "ATALL" -> {
                     val b = selectContent.split(".").last()
                     when (b) {
-                        "1" -> {
-                            subject.sendMessage(listAtAll(uid, contact))
-                        }
+                        "1" -> subject.sendMessage(listAtAll(uid, contact.delegate))
                         "2" -> {
                             subject.sendMessage(buildString {
                                 appendLine("请选择要At全体的内容: ")
@@ -647,15 +664,14 @@ object BiliDataTasker {
                                 timeout(120_000) { false }
                             }
                             if (res == null) return
-
-                            subject.sendMessage(addAtAll(selectType, uid, contact))
+                            subject.sendMessage(addAtAll(selectType, uid, GroupOrContact(contact)))
                         }
                         "3" -> {
-                            val list = BiliData.atAll[contact.id]?.get(uid)
+                            val list = atAll[contact.delegate]?.get(uid)
                             if (list == null || list.isEmpty()) subject.sendMessage("没有At全体哦")
-                            subject.sendMessage("At全体项:\n" + listAtAll(uid, contact) + "\n请回复要删除的项")
+                            subject.sendMessage("At全体项:\n" + listAtAll(uid, contact.delegate) + "\n请回复要删除的项")
                             val type = event.nextMessage().content
-                            subject.sendMessage(delAtAll(type, uid, contact))
+                            subject.sendMessage(delAtAll(type, uid, contact.delegate))
                         }
                     }
                 }
@@ -721,7 +737,7 @@ object BiliDataTasker {
                             timeout(120_000) { false }
                         }
                         if (res == null) return
-                        subject.sendMessage(setTemplate(if (b == "1") "d" else "l", selectTemplate, subject))
+                        subject.sendMessage(setTemplate(if (b == "1") "d" else "l", selectTemplate, subject.delegate))
                     }
                 }
 
@@ -858,6 +874,5 @@ object BiliDataTasker {
 
     private fun isFollow(uid: Long, subject: String) =
         uid == 0L || (dynamic.containsKey(uid) && dynamic[uid]!!.contacts.contains(subject))
-
 
 }

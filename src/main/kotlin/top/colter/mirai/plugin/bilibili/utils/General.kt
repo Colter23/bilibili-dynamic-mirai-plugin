@@ -9,6 +9,7 @@ import net.mamoe.mirai.Bot
 import net.mamoe.mirai.contact.Contact
 import net.mamoe.mirai.contact.Friend
 import net.mamoe.mirai.contact.Group
+import net.mamoe.mirai.utils.ExternalResource
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
 import net.mamoe.mirai.utils.MiraiLogger
 import org.jetbrains.skia.Image
@@ -191,40 +192,78 @@ suspend fun getOrDownloadImage(url: String, cacheType: CacheType = CacheType.UNK
 suspend fun getOrDownloadImageDefault(url: String, cacheType: CacheType = CacheType.UNKNOWN) =
     getOrDownloadImage(url, cacheType)?: Image.makeFromEncoded(loadResourceBytes("image/IMAGE_MISS.png"))
 
-suspend fun uploadImage(url: String, cacheType: CacheType = CacheType.UNKNOWN, contact: Contact) = try {
-    getOrDownload(url, cacheType)?.toExternalResource()?.let { contact.uploadImage(it.toAutoCloseable()) }
+suspend fun Contact.uploadImage(url: String, cacheType: CacheType = CacheType.UNKNOWN) = try {
+    getOrDownload(url, cacheType)?.toExternalResource()?.let { uploadImage(it.toAutoCloseable()) }
 }catch (e: Exception){
     logger.error("上传图片失败! \n$e")
     null
 }
 
+suspend fun List<Contact>.uploadImage(url: String, cacheType: CacheType = CacheType.UNKNOWN): String? {
+    var sc: String? = null
+    for(c in this) {
+        sc = c.uploadImage(url, cacheType)?.serializeToMiraiCode()
+        if (sc != null) break
+    }
+    return sc
+}
+
+suspend fun List<Contact>.uploadImage(path: Path): String? =
+    uploadImage(path.readBytes().toExternalResource().toAutoCloseable())
+
+suspend fun List<Contact>.uploadImage(resource: ExternalResource): String? {
+    for(c in this) {
+        runCatching {
+            c.uploadImage(resource).serializeToMiraiCode()
+        }.onSuccess {
+            return it
+        }
+    }
+    return null
+}
 
 /**
  * 查找Contact
  */
 fun findContact(del: String): Contact? {
-    if (del.isBlank()) return null
-    val delegate = del.toLong()
-    for (bot in Bot.instances) {
-        if (delegate < 0) {
-            for (group in bot.groups) {
-                if (group.id == delegate * -1) return group
-            }
-        } else {
-            for (friend in bot.friends) {
-                if (friend.id == delegate) return friend
-            }
-            for (stranger in bot.strangers) {
-                if (stranger.id == delegate) return stranger
-            }
-            for (group in bot.groups) {
-                for (member in group.members) {
-                    if (member.id == delegate) return member
+    if (del.isBlank()) {
+        logger.error("查找用户为空")
+        return null
+    }
+    val delegate = try { del.toLong() } catch (e: NumberFormatException) { return null }
+    try {
+        for (bot in Bot.instances) {
+            if (delegate < 0) {
+                for (group in bot.groups) {
+                    if (group.id == delegate * -1) return group
+                }
+            } else {
+                for (friend in bot.friends) {
+                    if (friend.id == delegate) return friend
+                }
+                for (stranger in bot.strangers) {
+                    if (stranger.id == delegate) return stranger
+                }
+                for (group in bot.groups) {
+                    for (member in group.members) {
+                        if (member.id == delegate) return member
+                    }
                 }
             }
         }
+    }catch (t: Throwable) {
+        logger.error("获取用户失败")
     }
+    logger.error("未找到此用户 [$del]")
     return null
+}
+
+fun findContactAll(delegate: String): Contact? {
+    return try {
+        findContactAll(delegate.toLong())
+    }catch (e: NumberFormatException) {
+        null
+    }
 }
 
 fun findContactAll(delegate: Long): Contact? {
@@ -335,6 +374,10 @@ data class ActionMessage(
     val action: String,
     val message: String,
 )
+
+suspend fun actionNotify(subject: Long?, operator: String, target: String, action: String, message: String) {
+    actionNotify(subject, ActionMessage(operator, target, action, message))
+}
 
 suspend fun actionNotify(subject: Long?, message: ActionMessage) {
     if (BiliConfig.enableConfig.notifyEnable && subject != BiliConfig.admin) {

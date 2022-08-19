@@ -9,22 +9,19 @@ import net.mamoe.mirai.contact.Contact
 import net.mamoe.mirai.contact.Group
 import net.mamoe.mirai.message.code.MiraiCode
 import net.mamoe.mirai.message.data.*
-import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
 import top.colter.mirai.plugin.bilibili.*
+import top.colter.mirai.plugin.bilibili.data.BiliMessage
 import top.colter.mirai.plugin.bilibili.data.DynamicMessage
 import top.colter.mirai.plugin.bilibili.data.DynamicType
 import top.colter.mirai.plugin.bilibili.data.LiveMessage
 import top.colter.mirai.plugin.bilibili.tasker.BiliDataTasker.mutex
-import top.colter.mirai.plugin.bilibili.utils.CacheType
-import top.colter.mirai.plugin.bilibili.utils.cachePath
-import top.colter.mirai.plugin.bilibili.utils.findContact
-import top.colter.mirai.plugin.bilibili.utils.uploadImage
+import top.colter.mirai.plugin.bilibili.utils.*
 import kotlin.io.path.notExists
-import kotlin.io.path.readBytes
 
 object SendTasker : BiliTasker() {
 
-    override var interval: Int = 0
+    override var interval: Int = 1
+    override val unitTime: Long = 500
 
     private val templateConfig by BiliConfig::templateConfig
     private val atAllPlus = BiliConfig.pushConfig.atAllPlus
@@ -32,37 +29,39 @@ object SendTasker : BiliTasker() {
     private val dynamic by BiliData::dynamic
     private val filter by BiliData::filter
     private val atAll by BiliData::atAll
+    private val group by BiliData::group
+
+    private val messageChannel by BiliBiliDynamic::messageChannel
+    private val missChannel by BiliBiliDynamic::missChannel
 
     private val messageInterval = BiliConfig.pushConfig.messageInterval
     private val pushInterval = BiliConfig.pushConfig.pushInterval
 
     private val forwardRegex = """\{>>}(.*?)\{<<}""".toRegex()
-
     private val tagRegex = """\{([a-z]+)}""".toRegex()
 
     override suspend fun main() {
-        val biliMessage = BiliBiliDynamic.messageChannel.receive()
+        //val biliMessage = messageChannel.receive()
+        var isMiss = false
+        var m = missChannel.tryReceive().getOrNull()
+        if (m == null) messageChannel.tryReceive().getOrNull()?.let {
+            m = it
+            missChannel.trySend(it)
+        } else isMiss = true
+        if (m == null) return
+        val biliMessage = m!!
 
         withTimeout(300005) {
-            val contactIdList = if (biliMessage.contact == null) {
-                when (biliMessage) {
-                    is DynamicMessage -> getDynamicContactList(biliMessage.uid, biliMessage.content, biliMessage.type)
-                    is LiveMessage -> getLiveContactList(biliMessage.uid)
-                }
-            } else {
-                listOf(biliMessage.contact!!)
-            }
+            val contactList = if (biliMessage.contact == null) when (biliMessage) {
+                is DynamicMessage -> getDynamicContactList(biliMessage.uid, biliMessage.content, biliMessage.type)
+                is LiveMessage -> getLiveContactList(biliMessage.uid)
+            } else listOf(biliMessage.contact!!)
 
-            if (!contactIdList.isNullOrEmpty()) {
-                val contactList = mutableListOf<Contact>()
-                contactIdList.forEach {
-                    val c = findContact(it)
-                    if (c != null) {
-                        contactList.add(c)
-                    }
-                }
+            if (!contactList.isNullOrEmpty()) {
+                //val contactList = mutableListOf<Contact>()
+                //contactIdList.forEach { findContact(it)?.let { contactList.add(it) } }
 
-                val templateMap: MutableMap<String, MutableSet<Contact>> = mutableMapOf()
+                val templateMap: MutableMap<String, MutableSet<String>> = mutableMapOf()
 
                 val pushTemplates = when (biliMessage) {
                     is DynamicMessage -> templateConfig.dynamicPush
@@ -80,86 +79,122 @@ object SendTasker : BiliTasker() {
                 }
 
                 if (push.isEmpty()) {
-                    if (templateMap[defaultTemplate] == null) templateMap[defaultTemplate] =
-                        mutableSetOf()
-                    contactList.forEach {
-                        templateMap[defaultTemplate]!!.add(it)
-                    }
+                    if (templateMap[defaultTemplate] == null) templateMap[defaultTemplate] = mutableSetOf()
+                    contactList.forEach { templateMap[defaultTemplate]!!.add(it) }
                 }
 
                 push.forEach { (t, u) ->
                     contactList.forEach {
-                        if (u.contains(it.id)) {
+                        if (u.contains(it)) {
                             if (templateMap[t] == null) templateMap[t] = mutableSetOf()
                             templateMap[t]!!.add(it)
                         } else {
-                            if (templateMap[defaultTemplate] == null) templateMap[defaultTemplate] =
-                                mutableSetOf()
+                            if (templateMap[defaultTemplate] == null) templateMap[defaultTemplate] = mutableSetOf()
                             templateMap[defaultTemplate]!!.add(it)
                         }
                     }
                 }
 
+                val contacts = contactList.toContacts()
                 val templateMsgMap: MutableMap<String, List<Message>> = mutableMapOf()
                 templateMap.forEach {
                     templateMsgMap[it.key] = when (biliMessage) {
-                        is DynamicMessage -> biliMessage.buildMessage(pushTemplates[it.key]!!, contactList.first())
-                        is LiveMessage -> biliMessage.buildMessage(pushTemplates[it.key]!!, contactList.first())
+                        is DynamicMessage -> biliMessage.buildMessage(pushTemplates[it.key]!!, contacts)
+                        is LiveMessage -> biliMessage.buildMessage(pushTemplates[it.key]!!, contacts)
                     }
                 }
+                val contactAtAll: MutableMap<Contact, Boolean> = mutableMapOf()
+                val contactMessage: MutableMap<Contact, List<Message>> = mutableMapOf()
 
                 for (temp in templateMap) {
-                    temp.value.forEach {
-                        templateMsgMap[temp.key]?.let { it1 ->
-                            val aa = atAll[it.id]?.get(biliMessage.uid) ?: atAll[it.id]?.get(0L)
-                            if (biliMessage.contact == null && it is Group && it.botPermission.level > 0) {
-                                var isAtAll = false
-                                if (!aa.isNullOrEmpty()) {
-                                    if (aa.contains(AtAllType.ALL)) isAtAll = true
-                                    else when (biliMessage) {
-                                        is DynamicMessage ->
-                                            if (aa.contains(AtAllType.DYNAMIC) || aa.contains(biliMessage.type.toAtAllType()))
-                                                isAtAll = true
-                                        is LiveMessage -> if (aa.contains(AtAllType.LIVE)) isAtAll = true
+                    templateMsgMap[temp.key]?.let { msg ->
+                        temp.value.forEach {
+                            try {
+                                it.toLong()
+                                findContact(it)?.let {
+                                    contactMessage[it] = msg
+                                    if (!contactAtAll.containsKey(it) || contactAtAll[it] != true)
+                                        contactAtAll[it] = checkAtAll(it, biliMessage)
+                                }
+                            } catch (e: NumberFormatException) {
+                                group[it]?.contacts?.forEach {
+                                    findContact(it)?.let {
+                                        if (!contactMessage.contains(it)) contactMessage[it] = msg
+                                        if (!contactAtAll.containsKey(it) || contactAtAll[it] != true)
+                                            contactAtAll[it] = checkAtAll(it, biliMessage)
                                     }
                                 }
-                                val gwp = when (biliMessage) {
-                                    is DynamicMessage -> if (biliMessage.type == DynamicType.DYNAMIC_TYPE_AV) BiliBiliDynamic.videoGwp else null
-                                    is LiveMessage -> BiliBiliDynamic.liveGwp
-                                }
-                                val hasPerm = it.permitteeId.getPermittedPermissions().any { it.id == gwp }
-                                if (isAtAll || hasPerm) {
-                                    if (atAllPlus == "SINGLE_MESSAGE" || it1.last().content.contains("[转发消息]")) {
-                                        it.sendMessage(it1.plusElement(buildMessageChain { +AtAll }))
-                                    } else {
-                                        val last = it1.last().plus("\n").plus(AtAll)
-                                        it.sendMessage(it1.dropLast(1).plusElement(last))
-                                    }
-                                } else {
-                                    it.sendMessage(it1)
-                                }
-                            } else {
-                                it.sendMessage(it1)
                             }
                         }
                     }
                 }
+                contactMessage.forEach { (c, msg) ->
+                    c.sendMessage(if (contactAtAll[c] == true) {
+                        if (atAllPlus == "SINGLE_MESSAGE" || msg.last().content.contains("[转发消息]")) {
+                            msg.plusElement(buildMessageChain { +AtAll })
+                        } else {
+                            val last = msg.last().plus("\n").plus(AtAll)
+                            msg.dropLast(1).plusElement(last)
+                        } } else msg
+                    )
+                }
             }
         }
+        if (!isMiss) missChannel.tryReceive()
     }
 
-    private suspend fun Contact.sendMessage(messages: List<Message>) {
-        try {
-            messages.forEach {
-                sendMessage(it)
-                delay(messageInterval)
+    fun Collection<String>.toContacts(): List<Contact> {
+        val list: MutableSet<Contact> = mutableSetOf()
+        forEach { cg ->
+            try {
+                cg.toLong()
+                findContact(cg)?.let { c -> list.add(c) }
+            }catch (e: NumberFormatException) {
+                group[cg]?.contacts?.forEach {
+                    findContact(it)?.let { c -> list.add(c) }
+                }
             }
-            delay(pushInterval)
-        }catch (e: Exception) {
-            logger.error("发送消息失败！", e)
-            delay(pushInterval)
         }
+        return list.toList()
     }
+
+    private suspend fun Contact.sendMessage(messages: List<Message>) = try {
+        messages.forEach {
+            sendMessage(it)
+            delay(messageInterval)
+        }
+        delay(pushInterval)
+    }catch (e: Throwable) {
+        logger.error("发送消息失败！", e)
+        delay(pushInterval)
+    }
+
+    fun checkAtAll(contact: Contact?, biliMessage: BiliMessage): Boolean {
+        //val contact = findContact(this)
+        if (contact != null && (contact !is Group || contact.botPermission.level <= 0)) return false
+        var isAtAll = false
+        val aa = atAll[contact?.delegate?:this]?.get(biliMessage.uid) ?: atAll[contact?.delegate?:this]?.get(0L)
+        if (!aa.isNullOrEmpty()) {
+            if (aa.contains(AtAllType.ALL)) isAtAll = true
+            else when (biliMessage) {
+                is DynamicMessage ->
+                    if (aa.contains(AtAllType.DYNAMIC) || aa.contains(biliMessage.type.toAtAllType()))
+                        isAtAll = true
+                is LiveMessage -> if (aa.contains(AtAllType.LIVE)) isAtAll = true
+            }
+        }
+        if (contact != null) {
+            val gwp = when (biliMessage) {
+                is DynamicMessage -> if (biliMessage.type == DynamicType.DYNAMIC_TYPE_AV) BiliBiliDynamic.videoGwp else null
+                is LiveMessage -> BiliBiliDynamic.liveGwp
+            }
+            val hasPerm = (contact as Group).permitteeId.getPermittedPermissions().any { it.id == gwp }
+            return isAtAll || hasPerm
+        }
+        return isAtAll
+    }
+
+
 
     fun DynamicType.toAtAllType() =
         when (this) {
@@ -196,8 +231,10 @@ object SendTasker : BiliTasker() {
                 val list: MutableSet<String> = mutableSetOf()
                 list.addAll(all.contacts)
                 val subData = dynamic[uid] ?: return list
+
                 list.addAll(subData.contacts)
                 list.removeAll(subData.banList.keys)
+
                 list.filter { contact ->
                     if (filter.containsKey(contact) && (filter[contact]!!.containsKey(uid) || filter[contact]!!.containsKey(0L))) {
                         val dynamicFilter = filter[contact]!![uid] ?: filter[contact]!![0L]!!
@@ -234,8 +271,10 @@ object SendTasker : BiliTasker() {
             val list: MutableSet<String> = mutableSetOf()
             list.addAll(all.contacts)
             val subData = dynamic[uid] ?: return list
+
             list.addAll(subData.contacts)
             list.removeAll(subData.banList.keys)
+
             list.filter { contact ->
                 if (filter.containsKey(contact) && (filter[contact]!!.containsKey(uid) || filter[contact]!!.containsKey(0L))) {
                     val dynamicFilter = filter[contact]!![uid] ?: filter[contact]!![0L]!!
@@ -256,13 +295,10 @@ object SendTasker : BiliTasker() {
         }
     }
 
-    suspend fun LiveMessage.buildMessage(template: String, contact: Contact): List<Message> {
-        return buildMsgList(template) {
-            buildLiveMsg(it, this, contact)
-        }
-    }
+    suspend fun LiveMessage.buildMessage(template: String, contacts: List<Contact>) =
+        buildMsgList(template) { buildLiveMsg(it, this, contacts) }
 
-    private suspend fun buildLiveMsg(ms: String, lm: LiveMessage, contact: Contact): String {
+    private suspend fun buildLiveMsg(ms: String, lm: LiveMessage, contacts: List<Contact>): String {
         var p = 0
         var content = ms
 
@@ -277,25 +313,13 @@ object SendTasker : BiliTasker() {
                 "title" -> lm.title
                 "area" -> lm.area
                 "link" -> lm.link
-                "cover" -> uploadImage(lm.cover, CacheType.IMAGES, contact)?.serializeToMiraiCode()?: ""
-                "draw" -> {
-                    if (lm.drawPath == null) {
-                        "[绘制直播图片失败]"
-                    } else {
-                        val path = cachePath.resolve(lm.drawPath)
-                        if (path.notExists()) {
-                            "[未找到绘制的直播图片]"
-                        } else {
-                            contact.uploadImage(
-                                cachePath.resolve(lm.drawPath).readBytes().toExternalResource().toAutoCloseable()
-                            ).serializeToMiraiCode()
-                        }
-                    }
+                "cover" -> contacts.uploadImage(lm.cover, CacheType.IMAGES) ?: ""
+                "draw" -> if (lm.drawPath == null) "[绘制直播图片失败]" else {
+                    val path = cachePath.resolve(lm.drawPath)
+                    if (path.notExists()) "[未找到绘制的直播图片]"
+                    else contacts.uploadImage(path) ?: "[上传图片失败]"
                 }
-
-                else -> {
-                    "[不支持的类型: ${key.destructured.component1()}]"
-                }
+                else -> "[不支持的类型: ${key.destructured.component1()}]"
             }
             content = content.replaceRange(key.range, rep)
             p = key.range.first + rep.length
@@ -303,58 +327,51 @@ object SendTasker : BiliTasker() {
         return content
     }
 
-    suspend fun DynamicMessage.buildMessage(template: String, contact: Contact): List<Message> {
-
+    suspend fun DynamicMessage.buildMessage(template: String, contacts: List<Contact>): List<Message> {
         val msgList = mutableListOf<Message>()
-
         val msgTemplate = template.replace("\n", "\\n").replace("\r", "\\r")
-
         val forwardCardTemplate = templateConfig.forwardCard
-
         val res = forwardRegex.findAll(msgTemplate)
-
         var index = 0
 
         res.forEach { mr ->
             if (mr.range.first > index) {
                 msgList.addAll(buildMsgList(msgTemplate.substring(index, mr.range.first)) {
-                    buildMsg(it, this, contact)
+                    buildMsg(it, this, contacts)
                 })
             }
-            msgList.add(buildForwardMessage(contact,
-                object : ForwardMessage.DisplayStrategy {
-                    override fun generateBrief(forward: RawForwardMessage): String {
-                        return buildSimpleMsg(forwardCardTemplate.brief, this@buildMessage)
+            val msg = buildMsgList(mr.destructured.component1()) {
+                buildMsg(it, this@buildMessage, contacts)
+            }
+            if (msg.isNotEmpty())
+                msgList.add(buildForwardMessage(contacts.first(),
+                    object : ForwardMessage.DisplayStrategy {
+                        override fun generateBrief(forward: RawForwardMessage): String {
+                            return buildSimpleMsg(forwardCardTemplate.brief, this@buildMessage)
+                        }
+                        override fun generatePreview(forward: RawForwardMessage): List<String> {
+                            return buildSimpleMsg(forwardCardTemplate.preview, this@buildMessage).split(
+                                "\\n", "\n"
+                            )
+                        }
+                        override fun generateSummary(forward: RawForwardMessage): String {
+                            return buildSimpleMsg(forwardCardTemplate.summary, this@buildMessage)
+                        }
+                        override fun generateTitle(forward: RawForwardMessage): String {
+                            return buildSimpleMsg(forwardCardTemplate.title, this@buildMessage)
+                        }
                     }
-
-                    override fun generatePreview(forward: RawForwardMessage): List<String> {
-                        return buildSimpleMsg(forwardCardTemplate.preview, this@buildMessage).split(
-                            "\\n",
-                            "\n"
-                        )
+                ) {
+                    msg.forEach {
+                        contacts.first().bot named this@buildMessage.uname at this@buildMessage.timestamp says it
                     }
-
-                    override fun generateSummary(forward: RawForwardMessage): String {
-                        return buildSimpleMsg(forwardCardTemplate.summary, this@buildMessage)
-                    }
-
-                    override fun generateTitle(forward: RawForwardMessage): String {
-                        return buildSimpleMsg(forwardCardTemplate.title, this@buildMessage)
-                    }
-                }
-            ) {
-                buildMsgList(mr.destructured.component1()) {
-                    buildMsg(it, this@buildMessage, contact)
-                }.forEach {
-                    contact.bot named this@buildMessage.uname at this@buildMessage.timestamp says it
-                }
-            })
+                })
             index = mr.range.last + 1
         }
 
         if (index < msgTemplate.length) {
             msgList.addAll(buildMsgList(msgTemplate.substring(index, msgTemplate.length)) {
-                buildMsg(it, this, contact)
+                buildMsg(it, this, contacts)
             })
         }
 
@@ -365,7 +382,9 @@ object SendTasker : BiliTasker() {
         val msgs = template.split("\\r", "\r")
         val msgList = mutableListOf<Message>()
         msgs.forEach { ms ->
-            msgList.add(MiraiCode.deserializeMiraiCode(build(ms)))
+            build(ms).let {
+                if (it.isNotBlank()) msgList.add(MiraiCode.deserializeMiraiCode(it))
+            }
         }
         return msgList.toList()
     }
@@ -381,7 +400,7 @@ object SendTasker : BiliTasker() {
             .replace("{link}", dm.links.joinToString("\n"))
     }
 
-    private suspend fun buildMsg(ms: String, dm: DynamicMessage, contact: Contact): String {
+    private suspend fun buildMsg(ms: String, dm: DynamicMessage, contacts: List<Contact>): String {
         var p = 0
         var content = ms
 
@@ -396,32 +415,15 @@ object SendTasker : BiliTasker() {
                 "content" -> dm.content
                 "link" -> dm.links?.get(0)?.value!!
                 "links" -> dm.links?.joinToString("\n")!!
-                "images" -> {
-                    buildString {
-                        dm.images?.forEach {
-                            appendLine(uploadImage(it, CacheType.IMAGES, contact)?.serializeToMiraiCode())
-                        }
-                    }
+                "images" -> buildString {
+                    dm.images?.forEach { appendLine(contacts.uploadImage(it, CacheType.IMAGES)) }
                 }
-
-                "draw" -> {
-                    if (dm.drawPath == null) {
-                        "[绘制动态失败]"
-                    } else {
-                        val path = cachePath.resolve(dm.drawPath)
-                        if (path.notExists()) {
-                            "[未找到绘制的动态]"
-                        } else {
-                            contact.uploadImage(
-                                cachePath.resolve(dm.drawPath).readBytes().toExternalResource().toAutoCloseable()
-                            ).serializeToMiraiCode()
-                        }
-                    }
+                "draw" -> if (dm.drawPath == null) "[绘制动态失败]" else {
+                    val path = cachePath.resolve(dm.drawPath)
+                    if (path.notExists()) "[未找到绘制的动态]"
+                    else contacts.uploadImage(path) ?: "[上传图片失败]"
                 }
-
-                else -> {
-                    "[不支持的类型: ${key.destructured.component1()}]"
-                }
+                else -> "[不支持的类型: ${key.destructured.component1()}]"
             }
             content = content.replaceRange(key.range, rep)
             p = key.range.first + rep.length
