@@ -25,8 +25,8 @@ internal class PluginTest {
     @Test
     fun jsonToDataClass(): Unit = runBlocking {
 
-        val url = "https://api.bilibili.com/x/web-interface/search/type?page=1&page_size=36&order=&duration=&from_source=&from_spmid=333.337&platform=pc&highlight=1&single_column=0&keyword=%E7%8C%AB%E8%8A%92&category_id=&search_type=bili_user&order_sort=0&user_type=0&dynamic_offset=0&preload=true&com2co=true"
-        json2DataClassFile(url, "BiliSearch", Path("src/main/kotlin/top/colter/mirai/plugin/bilibili/data"))
+        val url = "http://api.bilibili.com/pgc/view/web/season?season_id=6038"
+        json2DataClassFile(url, "Season", Path("src/main/kotlin/top/colter/mirai/plugin/bilibili/data"))
 
     }
 

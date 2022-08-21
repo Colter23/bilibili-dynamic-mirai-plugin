@@ -29,6 +29,12 @@ const val CREATE_GROUP = "https://api.bilibili.com/x/relation/tag/create"
 const val DEL_FOLLOW_GROUP = "https://api.bilibili.com/x/relation/tag/del"
 const val ADD_USER = "https://api.bilibili.com/x/relation/tags/addUsers"
 
+// Pgc 番剧
+const val PGC_MEDIA_INFO = "https://api.bilibili.com/pgc/review/user"
+const val PGC_INFO = "https://api.bilibili.com/pgc/view/web/season"
+const val FOLLOW_PGC = "https://api.bilibili.com/pgc/web/follow/add"
+const val UNFOLLOW_PGC = "https://api.bilibili.com/pgc/web/follow/del"
+
 // Twemoji CDN
 const val TWEMOJI = "https://twemoji.maxcdn.com/v/14.0.2/72x72"
 

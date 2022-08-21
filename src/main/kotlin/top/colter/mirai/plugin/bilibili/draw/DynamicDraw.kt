@@ -170,7 +170,7 @@ suspend fun DynamicItem.makeDrawDynamic(colors: List<Int>): String {
     val img = makeCardBg(dynamic.height, colors) {
         it.drawImage(dynamic, 0f, 0f)
     }
-    return cacheImage(img, "$uid/$idStr.png", CacheType.DRAW_DYNAMIC)
+    return cacheImage(img, "$mid/$idStr.png", CacheType.DRAW_DYNAMIC)
 }
 
 suspend fun DynamicItem.drawDynamic(themeColor: Int, isForward: Boolean = false): Image {

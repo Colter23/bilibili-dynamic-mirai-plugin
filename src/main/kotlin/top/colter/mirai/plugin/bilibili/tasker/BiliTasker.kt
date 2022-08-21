@@ -2,6 +2,7 @@ package top.colter.mirai.plugin.bilibili.tasker
 
 import kotlinx.coroutines.*
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
+import top.colter.mirai.plugin.bilibili.utils.logger
 import kotlin.coroutines.CoroutineContext
 
 abstract class BiliTasker(

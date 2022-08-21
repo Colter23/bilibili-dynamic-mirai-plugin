@@ -68,7 +68,7 @@ fun HttpRequestBuilder.bodyParameter(key: String, value: Any) {
     setBody(if (body is EmptyContent) "$key=$value" else "$body&$key=$value")
 }
 
-val DynamicItem.uid: Long
+val DynamicItem.mid: Long
     get() = modules.moduleAuthor.mid
 
 val DynamicItem.time: Long

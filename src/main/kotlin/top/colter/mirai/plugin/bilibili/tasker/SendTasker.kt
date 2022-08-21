@@ -1,7 +1,6 @@
 package top.colter.mirai.plugin.bilibili.tasker
 
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeout
 import net.mamoe.mirai.console.permission.PermissionService.Companion.getPermittedPermissions
 import net.mamoe.mirai.console.permission.PermitteeId.Companion.permitteeId
@@ -14,7 +13,6 @@ import top.colter.mirai.plugin.bilibili.data.BiliMessage
 import top.colter.mirai.plugin.bilibili.data.DynamicMessage
 import top.colter.mirai.plugin.bilibili.data.DynamicType
 import top.colter.mirai.plugin.bilibili.data.LiveMessage
-import top.colter.mirai.plugin.bilibili.tasker.BiliDataTasker.mutex
 import top.colter.mirai.plugin.bilibili.utils.*
 import kotlin.io.path.notExists
 
@@ -30,6 +28,7 @@ object SendTasker : BiliTasker() {
     private val filter by BiliData::filter
     private val atAll by BiliData::atAll
     private val group by BiliData::group
+    private val bangumi by BiliData::bangumi
 
     private val messageChannel by BiliBiliDynamic::messageChannel
     private val missChannel by BiliBiliDynamic::missChannel
@@ -53,8 +52,8 @@ object SendTasker : BiliTasker() {
 
         withTimeout(300005) {
             val contactList = if (biliMessage.contact == null) when (biliMessage) {
-                is DynamicMessage -> getDynamicContactList(biliMessage.uid, biliMessage.content, biliMessage.type)
-                is LiveMessage -> getLiveContactList(biliMessage.uid)
+                is DynamicMessage -> getDynamicContactList(biliMessage.mid, biliMessage.content, biliMessage.type)
+                is LiveMessage -> getLiveContactList(biliMessage.mid)
             } else listOf(biliMessage.contact!!)
 
             if (!contactList.isNullOrEmpty()) {
@@ -143,6 +142,7 @@ object SendTasker : BiliTasker() {
         if (!isMiss) missChannel.tryReceive()
     }
 
+
     fun Collection<String>.toContacts(): List<Contact> {
         val list: MutableSet<Contact> = mutableSetOf()
         forEach { cg ->
@@ -173,7 +173,7 @@ object SendTasker : BiliTasker() {
         //val contact = findContact(this)
         if (contact != null && (contact !is Group || contact.botPermission.level <= 0)) return false
         var isAtAll = false
-        val aa = atAll[contact?.delegate?:this]?.get(biliMessage.uid) ?: atAll[contact?.delegate?:this]?.get(0L)
+        val aa = atAll[contact?.delegate?:this]?.get(biliMessage.mid) ?: atAll[contact?.delegate?:this]?.get(0L)
         if (!aa.isNullOrEmpty()) {
             if (aa.contains(AtAllType.ALL)) isAtAll = true
             else when (biliMessage) {
@@ -193,8 +193,6 @@ object SendTasker : BiliTasker() {
         }
         return isAtAll
     }
-
-
 
     fun DynamicType.toAtAllType() =
         when (this) {
@@ -224,20 +222,23 @@ object SendTasker : BiliTasker() {
         }
 
 
-    private suspend fun getDynamicContactList(uid: Long, content: String, type: DynamicType): MutableSet<String>? =
-        mutex.withLock {
+    private fun getDynamicContactList(mid: Long, content: String, type: DynamicType): MutableSet<String>? {
             return try {
+                if (type == DynamicType.DYNAMIC_TYPE_PGC) {
+                    return bangumi[mid]?.contacts
+                }
+
                 val all = dynamic[0] ?: return null
                 val list: MutableSet<String> = mutableSetOf()
                 list.addAll(all.contacts)
-                val subData = dynamic[uid] ?: return list
+                val subData = dynamic[mid] ?: return list
 
                 list.addAll(subData.contacts)
                 list.removeAll(subData.banList.keys)
 
                 list.filter { contact ->
-                    if (filter.containsKey(contact) && (filter[contact]!!.containsKey(uid) || filter[contact]!!.containsKey(0L))) {
-                        val dynamicFilter = filter[contact]!![uid] ?: filter[contact]!![0L]!!
+                    if (filter.containsKey(contact) && (filter[contact]!!.containsKey(mid) || filter[contact]!!.containsKey(0L))) {
+                        val dynamicFilter = filter[contact]!![mid] ?: filter[contact]!![0L]!!
                         val typeSelect = dynamicFilter.typeSelect
                         if (typeSelect.list.isNotEmpty()) {
                             val b = typeSelect.list.contains(type.toFilterType())
@@ -265,7 +266,7 @@ object SendTasker : BiliTasker() {
             }
         }
 
-    private suspend fun getLiveContactList(uid: Long): MutableSet<String>? = mutex.withLock {
+    private fun getLiveContactList(uid: Long): MutableSet<String>? {
         return try {
             val all = dynamic[0] ?: return null
             val list: MutableSet<String> = mutableSetOf()
@@ -305,8 +306,8 @@ object SendTasker : BiliTasker() {
         while (true) {
             val key = tagRegex.find(content, p) ?: break
             val rep = when (key.destructured.component1()) {
-                "name" -> lm.uname
-                "uid" -> lm.uid.toString()
+                "name" -> lm.name
+                "uid" -> lm.mid.toString()
                 "rid" -> lm.rid.toString()
                 "time" -> lm.time
                 "type" -> "直播"
@@ -363,7 +364,7 @@ object SendTasker : BiliTasker() {
                     }
                 ) {
                     msg.forEach {
-                        contacts.first().bot named this@buildMessage.uname at this@buildMessage.timestamp says it
+                        contacts.first().bot named this@buildMessage.name at this@buildMessage.timestamp says it
                     }
                 })
             index = mr.range.last + 1
@@ -390,8 +391,8 @@ object SendTasker : BiliTasker() {
     }
 
     private fun buildSimpleMsg(ms: String, dm: DynamicMessage): String {
-        return ms.replace("{name}", dm.uname)
-            .replace("{uid}", dm.uid.toString())
+        return ms.replace("{name}", dm.name)
+            .replace("{uid}", dm.mid.toString())
             .replace("{did}", dm.did)
             .replace("{time}", dm.time)
             .replace("{type}", dm.type.text)
@@ -407,8 +408,8 @@ object SendTasker : BiliTasker() {
         while (true) {
             val key = tagRegex.find(content, p) ?: break
             val rep = when (key.destructured.component1()) {
-                "name" -> dm.uname
-                "uid" -> dm.uid.toString()
+                "name" -> dm.name
+                "uid" -> dm.mid.toString()
                 "did" -> dm.did
                 "time" -> dm.time
                 "type" -> dm.type.text

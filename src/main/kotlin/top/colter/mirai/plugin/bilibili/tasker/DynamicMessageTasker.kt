@@ -10,8 +10,9 @@ import top.colter.mirai.plugin.bilibili.data.DynamicType.*
 import top.colter.mirai.plugin.bilibili.draw.makeDrawDynamic
 import top.colter.mirai.plugin.bilibili.draw.makeRGB
 import top.colter.mirai.plugin.bilibili.utils.formatTime
+import top.colter.mirai.plugin.bilibili.utils.logger
+import top.colter.mirai.plugin.bilibili.utils.mid
 import top.colter.mirai.plugin.bilibili.utils.time
-import top.colter.mirai.plugin.bilibili.utils.uid
 
 object DynamicMessageTasker : BiliTasker() {
 
@@ -21,6 +22,7 @@ object DynamicMessageTasker : BiliTasker() {
     private val messageChannel by BiliBiliDynamic::messageChannel
 
     private val dynamic by BiliData::dynamic
+    private val bangumi by BiliData::bangumi
 
     override suspend fun main() {
         val dynamicDetail = dynamicChannel.receive()
@@ -162,7 +164,8 @@ object DynamicMessageTasker : BiliTasker() {
 
     suspend fun DynamicItem.makeDynamic(): String? {
         return if (BiliConfig.enableConfig.drawEnable) {
-            val color = dynamic[uid]?.color ?: BiliConfig.imageConfig.defaultColor
+            val color = (if (this.type == DYNAMIC_TYPE_PGC) bangumi[mid]?.color else dynamic[mid]?.color)
+                ?: BiliConfig.imageConfig.defaultColor
             val colors = color.split(";", "；").map { Color.makeRGB(it.trim()) }
             makeDrawDynamic(colors)
         } else null

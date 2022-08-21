@@ -11,6 +11,7 @@ import top.colter.mirai.plugin.bilibili.data.LiveMessage
 import top.colter.mirai.plugin.bilibili.draw.makeDrawLive
 import top.colter.mirai.plugin.bilibili.draw.makeRGB
 import top.colter.mirai.plugin.bilibili.utils.formatTime
+import top.colter.mirai.plugin.bilibili.utils.logger
 
 object LiveMessageTasker : BiliTasker() {
     override var interval: Int = 0

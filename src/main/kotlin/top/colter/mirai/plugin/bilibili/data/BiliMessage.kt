@@ -5,8 +5,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 sealed interface BiliMessage {
-    val uid: Long
-    val uname: String
+    val mid: Long
+    val name: String
     val time: String
     val timestamp: Int
     val drawPath: String?
@@ -16,8 +16,8 @@ sealed interface BiliMessage {
 @Serializable
 data class DynamicMessage(
     val did: String,
-    override val uid: Long,
-    override val uname: String,
+    override val mid: Long,
+    override val name: String,
     val type: DynamicType,
     override val time: String,
     override val timestamp: Int,
@@ -37,8 +37,8 @@ data class DynamicMessage(
 @Serializable
 data class LiveMessage(
     val rid: Long,
-    override val uid: Long,
-    override val uname: String,
+    override val mid: Long,
+    override val name: String,
     override val time: String,
     override val timestamp: Int,
     val title: String,

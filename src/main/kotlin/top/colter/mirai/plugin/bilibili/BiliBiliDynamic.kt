@@ -24,14 +24,14 @@ object BiliBiliDynamic : KotlinPlugin(
     JvmPluginDescription(
         id = "top.colter.bilibili-dynamic-mirai-plugin",
         name = "BiliBili Dynamic",
-        version = "3.0.3",
+        version = "3.0.4",
     ) {
         author("Colter")
         dependsOn("xyz.cssxsh.mirai.plugin.mirai-skia-plugin", ">= 1.1.0")
     }
 ) {
 
-    var mid: Long = 0L
+    var uid: Long = 0L
     var tagid: Int = 0
 
     var cookie = BiliCookie()

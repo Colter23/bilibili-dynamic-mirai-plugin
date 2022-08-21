@@ -37,8 +37,8 @@ suspend fun checkCookie() {
     if (BiliBiliDynamic.cookie.isEmpty()) BiliBiliDynamic.cookie.parse(accountConfig.cookie)
 
     try {
-        BiliBiliDynamic.mid = biliClient.userInfo()?.mid!!
-        BiliBiliDynamic.logger.info("BiliBili UID: ${BiliBiliDynamic.mid}")
+        BiliBiliDynamic.uid = biliClient.userInfo()?.mid!!
+        BiliBiliDynamic.logger.info("BiliBili UID: ${BiliBiliDynamic.uid}")
     } catch (e: Exception) {
         BiliBiliDynamic.logger.error(e.message)
         BiliBiliDynamic.logger.error("如未登录，请bot管理员在聊天环境内发送 /bili login 进行登录")

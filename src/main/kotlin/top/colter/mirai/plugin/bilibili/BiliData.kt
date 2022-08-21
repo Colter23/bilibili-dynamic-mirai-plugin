@@ -36,6 +36,10 @@ object BiliData : AutoSavePluginData("BiliData") {
     // key: group name
     @ValueDescription("分组")
     val group: MutableMap<String, Group> by value()
+
+    // key: season id
+    @ValueDescription("番剧")
+    val bangumi: MutableMap<Long, Bangumi> by value(mutableMapOf())
 }
 
 @Serializable
@@ -45,7 +49,6 @@ data class SubData(
     var last: Long = Instant.now().epochSecond,
     var lastLive: Long = Instant.now().epochSecond,
     val contacts: MutableSet<String> = mutableSetOf(),
-    //val groups: MutableSet<String> = mutableSetOf(),
     val banList: MutableMap<String, String> = mutableMapOf(),
 )
 
@@ -69,6 +72,17 @@ ${contacts.joinToString("\n") { findContact(it)?.run { "$name($id)" }?:it }.ifEm
 """.trimIndent()
     }
 }
+
+@Serializable
+data class Bangumi(
+    val title: String,
+    val seasonId: Long,
+    val mediaId: Long,
+    val type: String,
+    var isEnd: Boolean = false,
+    var color: String? = null,
+    val contacts: MutableSet<String> = mutableSetOf(),
+)
 
 @Serializable
 enum class FilterType {

@@ -37,3 +37,13 @@ data class LoginData(
     @SerialName("oauthKey")
     val oauthKey: String? = null
 )
+
+@Serializable
+data class PgcResult(
+    @SerialName("code")
+    val code: Int,
+    @SerialName("message")
+    val message: String? = null,
+    @SerialName("result")
+    val result: JsonElement? = null
+)

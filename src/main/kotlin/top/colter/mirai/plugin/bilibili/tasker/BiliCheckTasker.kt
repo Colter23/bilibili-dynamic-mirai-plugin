@@ -1,6 +1,7 @@
 package top.colter.mirai.plugin.bilibili.tasker
 
 import top.colter.mirai.plugin.bilibili.BiliConfig
+import top.colter.mirai.plugin.bilibili.utils.logger
 import java.time.Instant
 import java.time.LocalTime
 
