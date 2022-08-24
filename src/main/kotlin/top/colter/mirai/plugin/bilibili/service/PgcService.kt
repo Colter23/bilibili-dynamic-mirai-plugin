@@ -25,7 +25,6 @@ object PgcService {
     }
 
     suspend fun followPgcBySsid(ssid: Long, subject: String): String {
-        //return client.followPgc(ssid)?.toast!!
         client.followPgc(ssid) ?: return "追番失败"
         bangumi.getOrPut(ssid) {
             val season = client.pgcSeasonInfo(ssid) ?: return "获取番剧信息失败, 如果是港澳台番剧请用 media id (md11111) 订阅"
@@ -56,6 +55,34 @@ object PgcService {
         }.apply {
             contacts.add(subject)
             return "追番成功( •̀ ω •́ )✧ [$title]"
+        }
+    }
+
+    fun delPgc(id: String, subject: String): String {
+        val regex = pgcRegex.find(id) ?: return "ID 格式错误 例(ss11111, md22222)"
+
+        val type = regex.destructured.component1()
+        val id = regex.destructured.component2().toLong()
+
+        return when (type) {
+            "ss" -> {
+                val pgc = bangumi[id] ?: return "没有这个番剧哦"
+                if (pgc.contacts.remove(subject)) {
+                    if (pgc.contacts.isEmpty()) bangumi.remove(id)
+                    "删除成功"
+                } else "没有订阅这个番剧哦"
+            }
+            "md" -> {
+                val pgc = bangumi.filter { it.value.mediaId == id }.values
+                if (pgc.isEmpty()) return "没有这个番剧哦"
+                val contacts = pgc.first().contacts
+                if (contacts.remove(subject)) {
+                    if (contacts.isEmpty()) bangumi.remove(pgc.first().seasonId)
+                    "删除成功"
+                } else "没有订阅这个番剧哦"
+            }
+            "ep" -> "无法通过ep进行删除，请使用 ss 或 md"
+            else -> "额(⊙﹏⊙)"
         }
     }
 

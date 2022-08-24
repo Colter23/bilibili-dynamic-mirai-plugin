@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "top.colter"
-version = "3.0.4"
+version = "3.1.0"
 
 repositories {
     mavenLocal()
@@ -43,7 +43,7 @@ dependencies {
     }
 
     implementation("com.google.zxing:javase:3.5.0")
-    compileOnly("xyz.cssxsh.mirai:mirai-skia-plugin:1.1.7")
+    compileOnly("xyz.cssxsh.mirai:mirai-skia-plugin:1.1.8")
 
     testImplementation(kotlin("test", "1.7.0"))
     testImplementation("org.jetbrains.skiko:skiko-awt-runtime-windows-x64:0.7.27")

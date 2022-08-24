@@ -123,7 +123,7 @@ object DynamicService {
             appendLine("番剧: ")
             val cc = bangumi.count { (ssid, sub) ->
                 if (subject in sub.contacts) {
-                    appendLine("${sub.title}@$ssid")
+                    appendLine("${sub.title}@ss$ssid")
                     true
                 }else false
             }

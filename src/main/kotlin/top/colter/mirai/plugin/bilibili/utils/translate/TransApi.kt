@@ -62,7 +62,7 @@ fun trans(text: String): String? {
                         }
                     }
                 } catch (e: Exception) {
-                    BiliBiliDynamic.logger.error("Baidu translation failure! 百度翻译失败!")
+                    BiliBiliDynamic.logger.error("Baidu translation failure! 百度翻译失败! $e")
                 }
             } else {
                 return null

@@ -53,23 +53,23 @@ object DynamicCommand : CompositeCommand(
         if (checkPerm(target)) {
             if (pgcRegex.matches(id)) {
                 sendMessage(PgcService.followPgc(id, target.subject))
-            }else {
-                try {
-                    DynamicService.addSubscribe(id.toLong(), target.subject).let {
-                        sendMessage(it)
-                        actionNotify(this.subject?.id, name, target.name, "订阅", it)
-                    }
-                } catch (e: NumberFormatException) {
-                    sendMessage("ID错误 [$id]")
+            }else try {
+                DynamicService.addSubscribe(id.toLong(), target.subject).let {
+                    sendMessage(it)
+                    actionNotify(this.subject?.id, name, target.name, "订阅", it)
                 }
+            } catch (e: NumberFormatException) {
+                sendMessage("ID错误 [$id]")
             }
         }
     }
 
     @SubCommand("del", "删除")
-    suspend fun CommandSender.del(user: String, target: GroupOrContact = GroupOrContact(Contact())) {
+    suspend fun CommandSender.del(id: String, target: GroupOrContact = GroupOrContact(Contact())) {
         if (checkPerm(target)) {
-            matchUser(user) {
+            if (pgcRegex.matches(id)) {
+                sendMessage(PgcService.delPgc(id, target.subject))
+            }else matchUser(id) {
                 DynamicService.removeSubscribe(it, target.subject)
             }?.let {
                 sendMessage(it)
