@@ -6,11 +6,15 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class TransResult(
     @SerialName("from")
-    val from: String,
+    val from: String? = null,
     @SerialName("to")
-    val to: String,
+    val to: String? = null,
     @SerialName("trans_result")
-    val transResult: List<TransData>
+    val transResult: List<TransData>? = null,
+    @SerialName("error_code")
+    val errorCode: String? = null,
+    @SerialName("error_msg")
+    val errorMsg: String? = null,
 )
 
 @Serializable

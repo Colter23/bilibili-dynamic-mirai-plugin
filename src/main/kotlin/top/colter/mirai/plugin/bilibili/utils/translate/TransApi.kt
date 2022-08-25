@@ -1,8 +1,8 @@
 package top.colter.mirai.plugin.bilibili.utils.translate
 
-import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
 import top.colter.mirai.plugin.bilibili.BiliConfig
 import top.colter.mirai.plugin.bilibili.utils.json
+import top.colter.mirai.plugin.bilibili.utils.logger
 
 class TransApi(private val appid: String, private val securityKey: String) {
     fun getTransResult(query: String, from: String, to: String): String? {
@@ -33,7 +33,12 @@ class TransApi(private val appid: String, private val securityKey: String) {
 }
 
 var jp =
-    "[ぁあぃいぅうぇえぉおかがきぎくぐけげこごさざしじすずせぜそぞただちぢっつづてでとどなにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれろゎわゐゑをんゔゕゖ゚゛゜ゝゞゟ゠ァアィイゥウェエォオカガキギクグケゲコゴサザシジスズセゼソゾタダチヂッツヅテデトドナニヌネノハバパヒビピフブプヘベペホボポマミムメモャヤュユョヨラリルレロヮワヰヱヲンヴヵヶヷヸヹヺ・ーヽヾヿ㍿]"
+    "[ぁあぃいぅうぇえぉおかがきぎくぐけげこごさざしじすずせぜそぞただちぢっつづてでとどなにぬねのはばぱひびぴふぶぷへべぺほぼぽまみむめもゃやゅゆょよらりるれろゎわゐゑをんゔゕゖ゚゛゜ゝゞゟ゠ァアィイゥウェエォオカガキギクグケゲコゴサザシジスズセゼソゾタダチヂッツヅテデトドナニヌネノハバパヒビピフブプヘベペホボポマミムメモャヤュユョヨラリルレロヮワヰヱヲンヴヵヶヷヸヹヺ・ーヽヾヿ㍿]".toRegex()
+
+private val api = TransApi(
+    BiliConfig.translateConfig.baidu.APP_ID,
+    BiliConfig.translateConfig.baidu.SECURITY_KEY
+)
 
 //文本翻译
 fun trans(text: String): String? {
@@ -43,33 +48,30 @@ fun trans(text: String): String? {
             while (msg.indexOf('[') != -1) {
                 msg = msg.replaceRange(msg.indexOf('['), msg.indexOf(']') + 1, "  ")
             }
-
-            if (msg.contains(jp.toRegex()) || !msg.contains("[\u4e00-\u9fa5]".toRegex())) {
+            if (msg.contains(jp) || !msg.contains("[\u4e00-\u9fa5]".toRegex())) {
                 try {
-                    val api = TransApi(
-                        BiliConfig.translateConfig.baidu.APP_ID,
-                        BiliConfig.translateConfig.baidu.SECURITY_KEY
-                    )
                     val resMsg = api.getTransResult(msg, "auto", "zh")
-                    val transResult = resMsg?.let { json.parseToJsonElement(it) }
-                        ?.let { json.decodeFromJsonElement(TransResult.serializer(), it) }
-                    if (transResult?.from != "zh") {
+                    if (resMsg == null) {
+                        logger.error("翻译数据获取失败")
+                        return null
+                    }
+                    val transResult = resMsg.let { json.decodeFromString(TransResult.serializer(), it) }
+                    if (transResult.errorCode != null) {
+                        logger.error("翻译错误 code: ${transResult.errorCode}  msg: ${transResult.errorMsg}")
+                        return null
+                    }
+                    if (transResult.from != "zh") {
                         return buildString {
-                            for (item in transResult?.transResult!!) {
-                                append(item.dst)
-                                append("\n")
+                            for (item in transResult.transResult!!) {
+                                appendLine(item.dst)
                             }
                         }
                     }
                 } catch (e: Exception) {
-                    BiliBiliDynamic.logger.error("Baidu translation failure! 百度翻译失败! $e")
+                    logger.error("Baidu translation failure! 百度翻译失败! $e")
                 }
-            } else {
-                return null
-            }
-        } else {
-            BiliBiliDynamic.logger.error("Baidu translation API not configured! 未配置百度翻译API")
-        }
+            } else return null
+        } else logger.error("Baidu translation API not configured! 未配置百度翻译API")
     }
     return null
 }
