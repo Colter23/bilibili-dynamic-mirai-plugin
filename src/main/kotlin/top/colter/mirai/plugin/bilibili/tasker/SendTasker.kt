@@ -9,10 +9,7 @@ import net.mamoe.mirai.contact.Group
 import net.mamoe.mirai.message.code.MiraiCode
 import net.mamoe.mirai.message.data.*
 import top.colter.mirai.plugin.bilibili.*
-import top.colter.mirai.plugin.bilibili.data.BiliMessage
-import top.colter.mirai.plugin.bilibili.data.DynamicMessage
-import top.colter.mirai.plugin.bilibili.data.DynamicType
-import top.colter.mirai.plugin.bilibili.data.LiveMessage
+import top.colter.mirai.plugin.bilibili.data.*
 import top.colter.mirai.plugin.bilibili.utils.*
 import kotlin.io.path.notExists
 
@@ -53,7 +50,8 @@ object SendTasker : BiliTasker() {
         withTimeout(300005) {
             val contactList = if (biliMessage.contact == null) when (biliMessage) {
                 is DynamicMessage -> getDynamicContactList(biliMessage.mid, biliMessage.content, biliMessage.type)
-                is LiveMessage -> getLiveContactList(biliMessage.mid)
+                is LiveMessage,
+                is LiveCloseMessage -> getLiveContactList(biliMessage.mid)
             } else listOf(biliMessage.contact!!)
 
             if (!contactList.isNullOrEmpty()) {
@@ -65,16 +63,19 @@ object SendTasker : BiliTasker() {
                 val pushTemplates = when (biliMessage) {
                     is DynamicMessage -> templateConfig.dynamicPush
                     is LiveMessage -> templateConfig.livePush
+                    is LiveCloseMessage -> templateConfig.liveClose
                 }
 
                 val push = when (biliMessage) {
                     is DynamicMessage -> BiliData.dynamicPushTemplate
                     is LiveMessage -> BiliData.livePushTemplate
+                    is LiveCloseMessage -> BiliData.liveCloseTemplate
                 }
 
                 val defaultTemplate = when (biliMessage) {
                     is DynamicMessage -> templateConfig.defaultDynamicPush
                     is LiveMessage -> templateConfig.defaultLivePush
+                    is LiveCloseMessage -> templateConfig.defaultLiveClose
                 }
 
                 if (push.isEmpty()) {
@@ -100,6 +101,7 @@ object SendTasker : BiliTasker() {
                     templateMsgMap[it.key] = when (biliMessage) {
                         is DynamicMessage -> biliMessage.buildMessage(pushTemplates[it.key]!!, contacts)
                         is LiveMessage -> biliMessage.buildMessage(pushTemplates[it.key]!!, contacts)
+                        is LiveCloseMessage -> biliMessage.buildMessage(pushTemplates[it.key]!!)
                     }
                 }
                 val contactAtAll: MutableMap<Contact, Boolean> = mutableMapOf()
@@ -158,7 +160,7 @@ object SendTasker : BiliTasker() {
         return list.toList()
     }
 
-    private suspend fun Contact.sendMessage(messages: List<Message>) = try {
+    suspend fun Contact.sendMessage(messages: List<Message>) = try {
         messages.forEach {
             sendMessage(it)
             delay(messageInterval)
@@ -181,12 +183,14 @@ object SendTasker : BiliTasker() {
                     if (aa.contains(AtAllType.DYNAMIC) || aa.contains(biliMessage.type.toAtAllType()))
                         isAtAll = true
                 is LiveMessage -> if (aa.contains(AtAllType.LIVE)) isAtAll = true
+                is LiveCloseMessage -> isAtAll = false
             }
         }
         if (contact != null) {
             val gwp = when (biliMessage) {
                 is DynamicMessage -> if (biliMessage.type == DynamicType.DYNAMIC_TYPE_AV) BiliBiliDynamic.videoGwp else null
                 is LiveMessage -> BiliBiliDynamic.liveGwp
+                is LiveCloseMessage -> null
             }
             val hasPerm = (contact as Group).permitteeId.getPermittedPermissions().any { it.id == gwp }
             return isAtAll || hasPerm
@@ -266,7 +270,7 @@ object SendTasker : BiliTasker() {
             }
         }
 
-    private fun getLiveContactList(uid: Long): MutableSet<String>? {
+    fun getLiveContactList(uid: Long): MutableSet<String>? {
         return try {
             val all = dynamic[0] ?: return null
             val list: MutableSet<String> = mutableSetOf()
@@ -398,7 +402,6 @@ object SendTasker : BiliTasker() {
             .replace("{type}", dm.type.text)
             .replace("{content}", dm.content)
             .replace("{link}", dm.links?.get(0)?.value!!)
-            .replace("{link}", dm.links.joinToString("\n"))
     }
 
     private suspend fun buildMsg(ms: String, dm: DynamicMessage, contacts: List<Contact>): String {
@@ -431,4 +434,20 @@ object SendTasker : BiliTasker() {
         }
         return content
     }
+
+    fun LiveCloseMessage.buildMessage(template: String) = listOf(buildMessageChain {
+        + PlainText(buildCloseMsg(template, this@buildMessage))
+    })
+    private fun buildCloseMsg(ms: String, lcm: LiveCloseMessage): String {
+        return ms.replace("{name}", lcm.name)
+            .replace("{uid}", lcm.mid.toString())
+            .replace("{rid}", lcm.rid.toString())
+            .replace("{startTime}", lcm.time)
+            .replace("{endTime}", lcm.endTime)
+            .replace("{duration}", lcm.duration)
+            .replace("{title}", lcm.title)
+            .replace("{area}", lcm.area)
+            .replace("{link}", lcm.link)
+    }
+
 }

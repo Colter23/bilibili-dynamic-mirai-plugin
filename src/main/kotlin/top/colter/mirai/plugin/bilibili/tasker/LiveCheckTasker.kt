@@ -2,10 +2,10 @@ package top.colter.mirai.plugin.bilibili.tasker
 
 import kotlinx.coroutines.withTimeout
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
+import top.colter.mirai.plugin.bilibili.BiliBiliDynamic.liveUsers
 import top.colter.mirai.plugin.bilibili.BiliConfig
 import top.colter.mirai.plugin.bilibili.BiliData
 import top.colter.mirai.plugin.bilibili.api.getLive
-import top.colter.mirai.plugin.bilibili.client.BiliClient
 import top.colter.mirai.plugin.bilibili.data.LiveDetail
 import top.colter.mirai.plugin.bilibili.utils.sendAll
 import java.time.Instant
@@ -14,10 +14,7 @@ object LiveCheckTasker : BiliCheckTasker("Live") {
     override var interval = BiliConfig.checkConfig.liveInterval
 
     private val liveChannel by BiliBiliDynamic::liveChannel
-
     private val dynamic by BiliData::dynamic
-
-    private val client = BiliClient()
 
     private var lastLive: Long = Instant.now().epochSecond
 
@@ -35,8 +32,11 @@ object LiveCheckTasker : BiliCheckTasker("Live") {
                     it.liveTime
                 }
 
-            if (lives.isNotEmpty()) lastLive = lives.last().liveTime
-            liveChannel.sendAll(lives.map { LiveDetail(it) })
+            if (lives.isNotEmpty()) {
+                lastLive = lives.last().liveTime
+                liveChannel.sendAll(lives.map { LiveDetail(it) })
+                liveUsers.addAll(lives.map { it.uid })
+            }
         }
 
     }

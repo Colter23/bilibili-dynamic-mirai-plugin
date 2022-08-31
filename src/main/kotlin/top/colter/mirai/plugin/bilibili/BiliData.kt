@@ -29,6 +29,10 @@ object BiliData : AutoSavePluginData("BiliData") {
     @ValueDescription("直播推送模板")
     val livePushTemplate: MutableMap<String, MutableSet<String>> by value()
 
+    // key: template name
+    @ValueDescription("直播结束模板")
+    val liveCloseTemplate: MutableMap<String, MutableSet<String>> by value()
+
     // key: contact
     @ValueDescription("AtAll")
     val atAll: MutableMap<String, MutableMap<Long, MutableSet<AtAllType>>> by value()

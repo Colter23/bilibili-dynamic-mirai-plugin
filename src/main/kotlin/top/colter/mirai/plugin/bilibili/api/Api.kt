@@ -11,6 +11,7 @@ const val DYNAMIC_DETAIL = "https://api.bilibili.com/x/polymer/web-dynamic/v1/de
 
 // Live
 const val LIVE_LIST = "https://api.live.bilibili.com/xlive/web-ucenter/v1/xfetter/GetWebList"
+const val LIVE_STATUS_BATCH = "https://api.live.bilibili.com/room/v1/Room/get_status_info_by_uids"
 
 // Search
 const val SEARCH = "https://api.bilibili.com/x/web-interface/search/type"

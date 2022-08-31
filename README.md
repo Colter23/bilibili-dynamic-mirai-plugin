@@ -71,8 +71,8 @@ Vtuber 字幕组及粉丝群如需要使用可通过群联系我, 使用我搭�
 |---------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `/bili <config / 配置> [uid / 用户名] [目标]`                  | 交互式配置 (可配置主题色 模板 过滤器)                                                                                                                                                                         |
 | `/bili <color / 颜色> <uid / 用户名> <HEX颜色>`                | 为目标 UID 设置图片推送主题色                                                                                                                                                                             |
-| `/bili <templateList / tl / 模板列表>`                      | 查看推送模板推送效果                                                                                                                                                                                    |
-| `/bili <template / t / 模板> <模板类型> <模板名> [目标]`           | 设置模板 <br/>模板类型: `d`(动态模板)  `l`(直播模板)                                                                                                                                                          |
+| `/bili <templateList / tl / 模板列表> [模板类型]`               | 查看推送模板推送效果 <br/>模板类型: `d`(动态模板)  `l`(直播模板) `le`(直播结束模板)                                                                                                                                       |
+| `/bili <template / t / 模板> <模板类型> <模板名> [目标]`           | 设置模板 <br/>模板类型: 上面                                                                                                                                                                            |
 | `/bili <atall / aa / at全体> [类型] [uid / 用户名] [目标]`       | 设置At全体  可加多个  类型: <br/> `全部 / all / a` : 动态与直播 <br/> `全部动态 / dynamic / d` : 全部动态 <br/> `直播 / live / l` : 直播 <br/> `视频 / video / v` : 视频 <br/> `音乐 / music / m` : 音乐 <br/> `专栏 / article` : 专栏 |
 | `/bili <delAtall / daa / 取消at全体> [类型] [uid / 用户名] [目标]` | 取消一个At全体项                                                                                                                                                                                     |
 | `/bili <listAtall / laa / at全体列表> [uid / 用户名] [目标]`     | 查看At全体项列表                                                                                                                                                                                     |
@@ -280,14 +280,16 @@ Vtuber 字幕组及粉丝群如需要使用可通过群联系我, 使用我搭�
 | `brightness` | `0.0` ~ `1.0`    | 锁定的亮度             |
 
 #### TemplateConfig
-| 配置项                  | 取值                                | 说明       |
-|----------------------|-----------------------------------|----------|
-| `defaultDynamicPush` | 下方动态推送模板名                         | 默认动态推送模板 |
-| `defaultLivePush`    | 下方直播推送模板名                         | 默认直播推送模板 |
-| `dynamicPush`        | [动态模板配置项](#动态模板配置项)               | 动态推送模板   |
-| `livePush`           | [直播模板配置项](#直播模板配置项)               | 默认绘图主题色  |
-| `forwardCard`        | [ForwardDisplay](#ForwardDisplay) | QQ转发卡片外观 |
-| `footer`             | [FooterConfig](#FooterConfig)     | 绘制图片页脚模板 |
+| 配置项                 | 取值                                | 说明                 |
+|---------------------|-----------------------------------|--------------------|
+| `defaultDynamicPush` | 下方动态推送模板名                         | 默认动态推送模板           |
+| `defaultLivePush`   | 下方直播推送模板名                         | 默认直播推送模板           |
+| `defaultLiveClose`  | 下方直播结束推送模板名                       | 默认直播推送模板           |
+| `dynamicPush`       | [动态模板配置项](#动态模板配置项)               | 动态推送模板 (可自行添加新项)   |
+| `livePush`          | [直播模板配置项](#直播模板配置项)               | 直播推送模板 (可自行添加新项)   |
+| `liveClose`         | [直播结束模板配置项](#直播结束模板配置项)       | 直播结束推送模板 (可自行添加新项) |
+| `forwardCard`       | [ForwardDisplay](#ForwardDisplay) | QQ转发卡片外观           |
+| `footer`            | [FooterConfig](#FooterConfig)     | 绘制图片页脚模板           |
 
 ##### ForwardDisplay
 | 配置项       | 取值                  | 说明                     |
@@ -307,13 +309,13 @@ Vtuber 字幕组及粉丝群如需要使用可通过群联系我, 使用我搭�
 ##### 动态模板配置项
 `{draw}`: 绘制的动态图  
 `{name}`: 名称  
-`{uid}`: 用户ID
-`{did}`: 动态ID
-`{type}`: 动态类型  
-`{time}`: 时间  
+`{uid}`: 用户ID   
+`{did}`: 动态ID   
+`{type}`: 动态类型   
+`{time}`: 时间   
 `{content}`: 动态内容  
-`{images}`: 动态中的图  
-`{link}`: 动态链接  
+`{images}`: 动态中的图   
+`{link}`: 动态链接   
 `{links}`: 视频专栏等有多个链接  
 `\n`: 换行  
 `\r`: 分割对话(会生成多个QQ消息)  
@@ -323,18 +325,32 @@ Vtuber 字幕组及粉丝群如需要使用可通过群联系我, 使用我搭�
 
 ##### 直播模板配置项
 `{draw}`: 绘制的直播图  
-`{name}`: 名称  
-`{uid}`: 用户ID
-`{rid}`: 房间号
-`{time}`: 直播开始时间  
-`{title}`: 直播标题  
-`{area}`: 直播分区  
-`{cover}`: 直播封面  
+`{name}`: 名称   
+`{uid}`: 用户ID   
+`{rid}`: 房间号   
+`{time}`: 直播开始时间   
+`{title}`: 直播标题   
+`{area}`: 直播分区   
+`{cover}`: 直播封面   
 `{link}`: 直播链接  
 `\n`: 换行  
 `\r`: 分割对话(会生成多个QQ消息)  
 
 注: 直播模板不支持 ({>>}{<<}) 转发消息
+
+##### 直播结束模板配置项
+`{name}`: 名称   
+`{uid}`: 用户ID   
+`{rid}`: 房间号   
+`{title}`: 直播标题  
+`{area}`: 直播分区   
+`{startTime}`: 直播开始时间   
+`{endTime}`: 直播结束时间  
+`{duration}`: 直播时长  
+`{link}`: 直播链接   
+`\n`: 换行
+
+注: 直播结束模板不支持 ({>>}{<<}) 转发消息 和 (\r) 分隔对话
 
 ##### 转发卡片配置项
 `{name}`: 名称  
@@ -452,6 +468,7 @@ imageConfig:
 templateConfig:
   defaultDynamicPush: OneMsg
   defaultLivePush: OneMsg
+  defaultLiveClose: SimpleMsg
   dynamicPush:
     DrawOnly: '{draw}'
     TextOnly: "{name}@{type}\n{link}\n{content}\n{images}"
@@ -463,6 +480,9 @@ templateConfig:
     TextOnly: "{name}@直播\n{link}\n标题: {title}"
     OneMsg: "{draw}\n{name}@直播\n{link}"
     TwoMsg: "{draw}\r{name}@{uid}@直播\n{title}\n{time}\n{link}"
+  liveClose:
+    SimpleMsg: "{name} 值播结束啦!\n直播时长: {duration}"
+    ComplexMsg: "{name} 值播结束啦!\n标题: {title}\n直播时长: {duration}"
   forwardCard:
     title: '{name} {type} 详情'
     summary: 'ID: {did}'
@@ -884,10 +904,16 @@ v2:
 
 ### 字体
 
-[HarmonyOS Sans](https://developer.harmonyos.com/cn/docs/design/des-resources/general-0000001157315901)
+#### [HarmonyOS Sans](https://developer.harmonyos.com/cn/docs/design/des-resources/general-0000001157315901)
 
 选择下载 52.2MB 的字体压缩包文件, 请使用压缩包内 `HarmonyOS_Sans_SC` 目录下的字体, 此目录下的字体为简体中文   
 里面不同文件代表不同的粗细, 建议使用 `Medium` 
+
+#### [霞鹜文楷](https://github.com/lxgw/LxgwWenKai)
+请使用 `bold` 粗细的字体
+
+
+**下载到字体后请把字文件放到 `data\top.colter.bilibili-dynamic-mirai-plugin\font` 文件夹内**
 
 ### 手动获取 Cookie
 推荐使用 `/bili login` 指令进行登录

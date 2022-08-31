@@ -24,7 +24,7 @@ object BiliBiliDynamic : KotlinPlugin(
     JvmPluginDescription(
         id = "top.colter.bilibili-dynamic-mirai-plugin",
         name = "BiliBili Dynamic",
-        version = "3.1.1",
+        version = "3.1.2",
     ) {
         author("Colter")
         dependsOn("xyz.cssxsh.mirai.plugin.mirai-skia-plugin", ">= 1.1.0")
@@ -41,6 +41,8 @@ object BiliBiliDynamic : KotlinPlugin(
     val messageChannel = Channel<BiliMessage>(20)
     val missChannel = Channel<BiliMessage>(10)
 
+    val liveUsers = mutableListOf<Long>()
+
     val liveGwp = PermissionId(BiliBiliDynamic.description.id, "live.atall")
     val videoGwp = PermissionId(BiliBiliDynamic.description.id, "video.atall")
     val crossContact = PermissionId(BiliBiliDynamic.description.id, "crossContact")
@@ -55,6 +57,7 @@ object BiliBiliDynamic : KotlinPlugin(
 
             DynamicCheckTasker.start()
             LiveCheckTasker.start()
+            LiveCloseCheckTasker.start()
             DynamicMessageTasker.start()
             LiveMessageTasker.start()
             SendTasker.start()

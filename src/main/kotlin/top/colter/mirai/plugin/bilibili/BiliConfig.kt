@@ -188,7 +188,7 @@ data class BiliAccountConfig(
 @Serializable
 data class CheckConfig(
     var interval: Int = 15,
-    var liveInterval: Int = 20,
+    var liveInterval: Int = 15,
     var lowSpeed: String = "0-0x2",
     val checkReportInterval: Int = 10
 )
@@ -205,6 +205,7 @@ data class PushConfig(
 data class TemplateConfig(
     var defaultDynamicPush: String = "OneMsg",
     var defaultLivePush: String = "OneMsg",
+    var defaultLiveClose: String = "SimpleMsg",
     val dynamicPush: MutableMap<String, String> = mutableMapOf(
         "DrawOnly" to "{draw}",
         "TextOnly" to "{name}@{type}\n{link}\n{content}\n{images}",
@@ -217,6 +218,10 @@ data class TemplateConfig(
         "TextOnly" to "{name}@直播\n{link}\n标题: {title}",
         "OneMsg" to "{draw}\n{name}@直播\n{link}",
         "TwoMsg" to "{draw}\r{name}@{uid}@直播\n{title}\n{time}\n{link}",
+    ),
+    val liveClose: MutableMap<String, String> = mutableMapOf(
+        "SimpleMsg" to "{name} 值播结束啦!\n直播时长: {duration}",
+        "ComplexMsg" to "{name} 值播结束啦!\n标题: {title}\n直播时长: {duration}"
     ),
     val forwardCard: ForwardDisplay = ForwardDisplay(),
     var footer: FooterConfig = FooterConfig(),

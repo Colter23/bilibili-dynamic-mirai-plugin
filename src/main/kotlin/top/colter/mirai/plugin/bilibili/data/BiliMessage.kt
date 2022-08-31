@@ -48,3 +48,19 @@ data class LiveMessage(
     override val drawPath: String? = null,
     override val contact: String? = null
 ) : BiliMessage
+
+@Serializable
+data class LiveCloseMessage(
+    val rid: Long,
+    override val mid: Long,
+    override val name: String,
+    override val time: String,
+    override val timestamp: Int,
+    val endTime: String,
+    val duration: String,
+    val title: String,
+    val area: String,
+    val link: String,
+    override val drawPath: String? = null,
+    override val contact: String? = null
+) : BiliMessage

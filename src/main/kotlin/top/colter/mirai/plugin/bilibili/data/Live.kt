@@ -34,7 +34,13 @@ data class LiveInfo(
     @SerialName("cover_from_user")
     val cover: String,
     @SerialName("liveTime")
-    val liveTime: Long,
+    val liveTimeStart: Long? = null,
+    @SerialName("live_time")
+    val liveTimeDuration: Long,
+    @SerialName("live_status")
+    val liveStatus: Int,
     @SerialName("area_v2_name")
     val area: String,
-)
+){
+    val liveTime get() = liveTimeStart ?: liveTimeDuration
+}

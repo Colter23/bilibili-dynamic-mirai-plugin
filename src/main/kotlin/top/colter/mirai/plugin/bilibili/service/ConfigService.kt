@@ -52,10 +52,13 @@ object ConfigService {
                 val currDynamic = if (cdl.isNotEmpty()) cdl.first() else BiliConfig.templateConfig.defaultDynamicPush
                 val cll = BiliData.livePushTemplate.filter { it.value.contains(contact.delegate) }.map { it.key }
                 val currLive = if (cll.isNotEmpty()) cll.first() else BiliConfig.templateConfig.defaultLivePush
+                val clel = BiliData.liveCloseTemplate.filter { it.value.contains(contact.delegate) }.map { it.key }
+                val currLiveClose = if (clel.isNotEmpty()) clel.first() else BiliConfig.templateConfig.defaultLiveClose
                 configMap[i.toString()] = "PUSH"
                 appendLine("  $i: 推送模板")
                 appendLine("      $i.1: 动态推送模板 [$currDynamic]")
                 appendLine("      $i.2: 直播推送模板 [$currLive]")
+                appendLine("      $i.3: 直播结束模板 [$currLiveClose]")
                 i++
             }
 
@@ -182,6 +185,7 @@ object ConfigService {
                     val template = when (b) {
                         "1" -> BiliConfig.templateConfig.dynamicPush
                         "2" -> BiliConfig.templateConfig.livePush
+                        "3" -> BiliConfig.templateConfig.liveClose
                         else -> {
                             subject.sendMessage("没有这个选项哦")
                             null
@@ -189,7 +193,7 @@ object ConfigService {
                     }
                     if (template != null) {
                         subject.sendMessage("请选择一个推送模板, 回复模板名\n生成模板需要一定时间...")
-                        TemplateService.listTemplate(if (b == "1") "d" else "l", subject)
+                        TemplateService.listTemplate(if (b == "1") "d" else if (b == "2") "l" else "le", subject)
                         var c = 0
                         var res: String? = null
                         var selectTemplate = ""
@@ -213,7 +217,7 @@ object ConfigService {
                             timeout(120_000) { false }
                         }
                         if (res == null) return
-                        subject.sendMessage(setTemplate(if (b == "1") "d" else "l", selectTemplate, subject.delegate))
+                        subject.sendMessage(setTemplate(if (b == "1") "d" else if (b == "2") "l" else "le", selectTemplate, subject.delegate))
                     }
                 }
 

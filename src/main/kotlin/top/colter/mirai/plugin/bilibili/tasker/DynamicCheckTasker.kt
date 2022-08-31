@@ -5,7 +5,6 @@ import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
 import top.colter.mirai.plugin.bilibili.BiliConfig
 import top.colter.mirai.plugin.bilibili.BiliData
 import top.colter.mirai.plugin.bilibili.api.getNewDynamic
-import top.colter.mirai.plugin.bilibili.client.BiliClient
 import top.colter.mirai.plugin.bilibili.data.DynamicDetail
 import top.colter.mirai.plugin.bilibili.data.DynamicType
 import top.colter.mirai.plugin.bilibili.utils.sendAll
@@ -22,8 +21,6 @@ object DynamicCheckTasker : BiliCheckTasker("Dynamic") {
     private val bangumi by BiliData::bangumi
 
     private val listenAllDynamicMode = false
-
-    private val client = BiliClient()
 
     private val banType = listOf(
         DynamicType.DYNAMIC_TYPE_LIVE,

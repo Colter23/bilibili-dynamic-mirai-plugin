@@ -21,7 +21,7 @@ internal suspend inline fun <reified T> BiliClient.getData(
         isLogin = false
         throw Exception("账号登录失效，请使用 /bili login 重新登录")
     } else if (res.code != 0 || res.data == null) {
-        throw Exception("URL: $url ${res.message}")
+        throw Exception("URL: $url, CODE: ${res.code}, MSG: ${res.message}")
     } else {
         isLogin = true
         res.data.decode()
