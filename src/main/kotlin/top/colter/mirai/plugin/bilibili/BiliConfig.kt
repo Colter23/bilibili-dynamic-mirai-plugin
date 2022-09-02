@@ -5,6 +5,7 @@ import net.mamoe.mirai.console.data.AutoSavePluginConfig
 import net.mamoe.mirai.console.data.ValueDescription
 import net.mamoe.mirai.console.data.value
 import org.jetbrains.skia.paragraph.Alignment
+import top.colter.mirai.plugin.bilibili.service.TriggerMode
 import top.colter.mirai.plugin.bilibili.utils.CacheType
 
 
@@ -21,6 +22,7 @@ object BiliConfig : AutoSavePluginConfig("BiliConfig") {
         功能开关:
           drawEnable: 绘图开关
           notifyEnable: 操作通知开关
+          liveCloseNotifyEnable: 直播结束通知开关
           lowSpeedEnable: 低频检测开关
           translateEnable: 翻译开关
           proxyEnable: 代理开关
@@ -66,7 +68,7 @@ object BiliConfig : AutoSavePluginConfig("BiliConfig") {
         当 ImageQuality.yml / ImageTheme.yml 中的 customOverload 开启后下面对应的配置将不再生效 
           quality: 图片质量(分辨率), 内置 800w: 800px, 1000w: 1000px, 1200w: 1200px, 1500w: 1500px(图片宽度)
           theme: 绘图主题, 内置 v3: 新版绘图主题, v2: 旧版绘图主题
-          font: 绘图字体 字体名或字体文件名(不用加后缀) 目前仅支持单字体 字体放到插件数据路径下 `font` 文件夹中
+          font: 绘图字体 字体名或字体文件名(不用加后缀) 目前仅支持单字体 字体放到插件数据路径下 `font` 文件夹中 为空时自动下载默认字体
           defaultColor: 默认绘图主题色 支持多个值自定义渐变 中间用分号`;`号分隔 单个值会自动生成渐变色
           cardOrnament: 卡片装饰 FanCard(粉丝卡片)  QrCode(动态链接二维码)  None(无)
           colorGenerator: 渐变色生成器配置 
@@ -78,9 +80,12 @@ object BiliConfig : AutoSavePluginConfig("BiliConfig") {
     @ValueDescription(
         """
         模板配置:
-          defaultDynamicPush: 默认使用的推送模板, 填写下方动态模板名
+          defaultDynamicPush: 默认使用的动态推送模板, 填写下方动态模板名
+          defaultLivePush: 默认使用的直播推送模板, 填写下方直播模板名
+          defaultLiveClose: 默认使用的直播结束推送模板, 填写下方直播结束模板名
           dynamicPush: 动态推送模板
           livePush: 直播推送模板
+          liveClose: 直播结束推送模板
           forwardCard: 转发卡片模板
           footer: 图片页脚
     """
@@ -120,12 +125,22 @@ object BiliConfig : AutoSavePluginConfig("BiliConfig") {
     )
     val translateConfig: TranslateConfig by value()
 
+    @ValueDescription(
+        """
+        链接解析配置:
+          triggerMode: 触发模式 At(@bot时触发)  Always(一直)  Never(无法通过聊天触发)
+          regex: 正则列表 具体可看github
+    """
+    )
+    val linkResolveConfig: LinkResolveConfig by value()
+
 }
 
 @Serializable
 data class EnableConfig(
     val drawEnable: Boolean = true,
     val notifyEnable: Boolean = true,
+    val liveCloseNotifyEnable: Boolean = true,
     val lowSpeedEnable: Boolean = true,
     var translateEnable: Boolean = false,
     val proxyEnable: Boolean = false,
@@ -148,7 +163,7 @@ data class TranslateConfig(
 data class ImageConfig(
     val quality: String = "1000w",
     val theme: String = "v3",
-    var font: String = "HarmonyOS Sans SC Medium",
+    var font: String = "",
     var defaultColor: String = "#d3edfa",
     var cardOrnament: String = "FanCard",
     val colorGenerator: ColorGenerator = ColorGenerator(),
@@ -253,3 +268,17 @@ data class CacheConfig(
     )
 )
 
+@Serializable
+data class LinkResolveConfig(
+    val triggerMode: TriggerMode = TriggerMode.At,
+    val regex: List<String> = listOf(
+        """(www.bilibili.com/video/)?((BV[0-9A-z]{10})|(av\d{1,10}))""",
+        """(www.bilibili.com/read/)?(cv\d{1,10})""",
+        """((www|m).bilibili.com/bangumi/(play|media)/)?((ss|ep|md)\d+)""",
+        """[tm].bilibili.com/(dynamic/)?(\d+)""",
+        """live.bilibili.com/(h5/)?(\d+)""",
+        """b23.tv/([0-9A-z]+)""",
+    )
+){
+    val reg: List<Regex> get() = regex.map { it.toRegex() }
+}

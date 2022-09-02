@@ -2,11 +2,7 @@ package top.colter.mirai.plugin.bilibili.api
 
 import io.ktor.client.request.*
 import top.colter.mirai.plugin.bilibili.client.BiliClient
-import top.colter.mirai.plugin.bilibili.data.BiliResult
-import top.colter.mirai.plugin.bilibili.data.DynamicDetail
-import top.colter.mirai.plugin.bilibili.data.DynamicItem
-import top.colter.mirai.plugin.bilibili.data.DynamicList
-import top.colter.mirai.plugin.bilibili.utils.decode
+import top.colter.mirai.plugin.bilibili.data.*
 
 /**
  * 获取账号全部最新动态
@@ -46,3 +42,26 @@ suspend fun BiliClient.getDynamicDetail(did: String): DynamicItem? {
     }?.item
 }
 
+suspend fun BiliClient.getVideoDetail(id: String): VideoDetail? {
+    return getData(VIDEO_DETAIL) {
+        if (id.contains("BV")) parameter("bvid", id)
+        else parameter("aid", id.removePrefix("av"))
+    }
+}
+
+suspend fun BiliClient.getArticleDetailOld(id: String): ArticleDetail? {
+    return getData(ARTICLE_DETAIL) {
+        if (id.startsWith("cv")) parameter("id", id.removePrefix("cv"))
+        else parameter("id", id)
+    }
+}
+
+suspend fun BiliClient.getArticleDetail(id: String): ArticleDetail? {
+    return getArticleList(listOf(id))?.get(id)
+}
+
+suspend fun BiliClient.getArticleList(ids: List<String>): Map<String, ArticleDetail>? {
+    return getData(ARTICLE_LIST) {
+        parameter("ids", ids.joinToString(","))
+    }
+}

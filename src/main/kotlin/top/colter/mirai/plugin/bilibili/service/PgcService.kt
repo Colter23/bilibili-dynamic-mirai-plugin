@@ -2,9 +2,9 @@ package top.colter.mirai.plugin.bilibili.service
 
 import top.colter.mirai.plugin.bilibili.Bangumi
 import top.colter.mirai.plugin.bilibili.api.followPgc
-import top.colter.mirai.plugin.bilibili.api.pgcEpisodeInfo
-import top.colter.mirai.plugin.bilibili.api.pgcMediaInfo
-import top.colter.mirai.plugin.bilibili.api.pgcSeasonInfo
+import top.colter.mirai.plugin.bilibili.api.getEpisodeInfo
+import top.colter.mirai.plugin.bilibili.api.getMediaInfo
+import top.colter.mirai.plugin.bilibili.api.getSeasonInfo
 
 val pgcRegex = """^((?:ss)|(?:md)|(?:ep))(\d{4,10})$""".toRegex()
 
@@ -27,7 +27,7 @@ object PgcService {
     suspend fun followPgcBySsid(ssid: Long, subject: String): String {
         client.followPgc(ssid) ?: return "追番失败"
         bangumi.getOrPut(ssid) {
-            val season = client.pgcSeasonInfo(ssid) ?: return "获取番剧信息失败, 如果是港澳台番剧请用 media id (md11111) 订阅"
+            val season = client.getSeasonInfo(ssid) ?: return "获取番剧信息失败, 如果是港澳台番剧请用 media id (md11111) 订阅"
             Bangumi(season.title, season.seasonId, season.mediaId, type(season.type))
         }.apply {
             contacts.add(subject)
@@ -36,7 +36,7 @@ object PgcService {
     }
 
     suspend fun followPgcByMdid(mdid: Long, subject: String): String {
-        val season = client.pgcMediaInfo(mdid) ?: return "获取番剧信息失败"
+        val season = client.getMediaInfo(mdid) ?: return "获取番剧信息失败"
         val ssid = season.media.seasonId
         client.followPgc(ssid) ?: return "追番失败"
         bangumi.getOrPut(ssid) {
@@ -48,7 +48,7 @@ object PgcService {
     }
 
     suspend fun followPgcByEpid(epid: Long, subject: String): String {
-        val season = client.pgcEpisodeInfo(epid) ?: return "获取番剧信息失败, 如果是港澳台番剧请用 media id (md11111) 订阅"
+        val season = client.getEpisodeInfo(epid) ?: return "获取番剧信息失败, 如果是港澳台番剧请用 media id (md11111) 订阅"
         client.followPgc(season.seasonId) ?: return "追番失败"
         bangumi.getOrPut(season.seasonId) {
             Bangumi(season.title, season.seasonId, season.mediaId, type(season.type))

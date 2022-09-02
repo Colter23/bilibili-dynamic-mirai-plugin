@@ -1,6 +1,7 @@
 package top.colter.mirai.plugin.bilibili.api
 
 import io.ktor.client.request.*
+import io.ktor.http.*
 import top.colter.mirai.plugin.bilibili.client.BiliClient
 import top.colter.mirai.plugin.bilibili.data.BiliResult
 import top.colter.mirai.plugin.bilibili.utils.actionNotify
@@ -26,4 +27,13 @@ internal suspend inline fun <reified T> BiliClient.getData(
         isLogin = true
         res.data.decode()
     }
+}
+
+suspend fun BiliClient.redirect(url: String): String? {
+    return useHttpClient {
+        it.config {
+            followRedirects = false
+            expectSuccess = false
+        }.head(url)
+    }.headers[HttpHeaders.Location]
 }

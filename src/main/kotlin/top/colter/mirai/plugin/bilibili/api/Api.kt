@@ -9,9 +9,17 @@ const val NEW_DYNAMIC = "https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/
 const val SPACE_DYNAMIC = "https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/space"
 const val DYNAMIC_DETAIL = "https://api.bilibili.com/x/polymer/web-dynamic/v1/detail"
 
+// Video
+const val VIDEO_DETAIL = "https://api.bilibili.com/x/web-interface/view"
+
+// Article
+const val ARTICLE_DETAIL = "https://api.bilibili.com/x/article/viewinfo"
+const val ARTICLE_LIST = "https://api.bilibili.com/x/article/cards"
+
 // Live
 const val LIVE_LIST = "https://api.live.bilibili.com/xlive/web-ucenter/v1/xfetter/GetWebList"
 const val LIVE_STATUS_BATCH = "https://api.live.bilibili.com/room/v1/Room/get_status_info_by_uids"
+const val LIVE_DETAIL = "https://api.live.bilibili.com/room/v1/Room/get_info"
 
 // Search
 const val SEARCH = "https://api.bilibili.com/x/web-interface/search/type"

@@ -143,7 +143,7 @@ suspend fun ModuleDynamic.Major.Common.drawGeneral(): Image {
     }.makeImageSnapshot()
 }
 
-suspend fun ModuleDynamic.Major.Archive.drawGeneral(): Image {
+suspend fun ModuleDynamic.Major.Archive.drawGeneral(showStat: Boolean = false): Image {
 
     val paragraphStyle = ParagraphStyle().apply {
         maxLinesCount = 2
@@ -246,12 +246,14 @@ suspend fun ModuleDynamic.Major.Archive.drawGeneral(): Image {
             })
 
             val durationText = TextLine.make(durationText, font)
-            //val playInfo = TextLine.make("${stat.play}观看 ${stat.danmaku}弹幕", font.makeWithSize(22f))
+            val playInfo = if (showStat) TextLine.make("${stat.play}观看 ${stat.danmaku}弹幕", font) else null
 
+            val textX = coverMaskRRect.left + quality.cardPadding * 1.3f
+            val textY = coverRRect.bottom - durationText.height - quality.cardPadding
             drawLabelCard(
                 durationText,
-                coverMaskRRect.left + quality.cardPadding * 1.3f,
-                coverRRect.bottom - durationText.height - quality.cardPadding,
+                textX,
+                textY,
                 Paint().apply {
                     color = Color.WHITE
                 },
@@ -260,6 +262,21 @@ suspend fun ModuleDynamic.Major.Archive.drawGeneral(): Image {
                     alpha = 140
                 }
             )
+
+            if (playInfo != null) {
+                drawLabelCard(
+                    playInfo,
+                    textX + durationText.width + quality.badgePadding * 4,
+                    textY,
+                    Paint().apply {
+                        color = Color.WHITE
+                    },
+                    Paint().apply {
+                        color = Color.BLACK
+                        alpha = 0
+                    }
+                )
+            }
 
             titleParagraph.paint(
                 this,
@@ -286,7 +303,12 @@ suspend fun ModuleDynamic.Major.LiveRcmd.drawGeneral(): Image {
         info.title,
         "${info.parentAreaName} · ${info.areaName}",
         info.cover,
-        "直播",
+        when (info.liveStatus) {
+            0 -> "未开播"
+            1 -> "直播中"
+            2 -> "轮播中"
+            else -> "直播"
+        },
         "${info.roomId}",
         null
     )

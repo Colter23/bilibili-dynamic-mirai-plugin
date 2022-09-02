@@ -9,10 +9,16 @@ data class BiliUser(
     val mid: Long,
     @SerialName("name")
     val name: String? = "",
+    @SerialName("face")
+    val face: String? = "",
+    @SerialName("official")
+    val official: ModuleAuthor.OfficialVerify? = null,
+    @SerialName("vip")
+    val vip: ModuleAuthor.Vip? = null,
+    @SerialName("pendant")
+    val pendant: ModuleAuthor.Pendant? = null,
     //@SerialName("sex")
     //val sex: String,
-    //@SerialName("face")
-    //val face: String,
     //@SerialName("face_nft")
     //val faceNft: Int,
     //@SerialName("face_nft_type")
@@ -39,12 +45,6 @@ data class BiliUser(
     //val fansBadge: Boolean,
     //@SerialName("fans_medal")
     //val fansMedal: FansMedal,
-    //@SerialName("official")
-    //val official: Official,
-    //@SerialName("vip")
-    //val vip: ModuleAuthor.Vip,
-    //@SerialName("pendant")
-    //val pendant: ModuleAuthor.Pendant,
     //@SerialName("nameplate")
     //val nameplate: Nameplate,
     //@SerialName("user_honour_info")
@@ -65,7 +65,7 @@ data class BiliUser(
     //@SerialName("sys_notice")
     //val sysNotice: ?,
 
-) {
+): BiliDetail {
     @Serializable
     data class Nameplate(
         @SerialName("nid")

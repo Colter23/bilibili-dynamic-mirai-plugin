@@ -90,7 +90,7 @@ data class DynamicItem(
     val modules: Modules,
     @SerialName("orig")
     val orig: DynamicItem? = null,
-) {
+): BiliDetail {
 
     val type: DynamicType
         get() =
@@ -196,7 +196,7 @@ data class ModuleAuthor(
      * AUTHOR_TYPE_PGC    番剧
      */
     @SerialName("type")
-    val type: String,
+    val type: String = "AUTHOR_TYPE_NORMAL",
 
     @SerialName("mid")
     val mid: Long,
@@ -204,6 +204,12 @@ data class ModuleAuthor(
     val name: String,
     @SerialName("face")
     val face: String,
+    @SerialName("pub_ts")
+    val pubTs: Long = 0,
+    @SerialName("pub_time")
+    val pubTime: String = "",
+    @SerialName("pub_action")
+    val pubAction: String = "",
     @SerialName("face_nft")
     val faceNFT: Boolean? = null,
     @SerialName("following")
@@ -211,13 +217,7 @@ data class ModuleAuthor(
     @SerialName("label")
     val label: String = "",
     @SerialName("jump_url")
-    val jumpUrl: String,
-    @SerialName("pub_action")
-    val pubAction: String = "",
-    @SerialName("pub_time")
-    val pubTime: String = "",
-    @SerialName("pub_ts")
-    val pubTs: Long,
+    val jumpUrl: String? = null,
     @SerialName("official_verify")
     val officialVerify: OfficialVerify? = null,
     @SerialName("vip")
@@ -243,13 +243,13 @@ data class ModuleAuthor(
         @SerialName("name")
         val name: String,
         @SerialName("expire")
-        val expire: Int,
+        val expire: Int? = null,
         @SerialName("image")
         val image: String,
         @SerialName("image_enhance")
-        val imageEnhance: String,
+        val imageEnhance: String? = null,
         @SerialName("image_enhance_frame")
-        val imageEnhanceFrame: String,
+        val imageEnhanceFrame: String? = null,
     )
 
     /**
@@ -279,22 +279,22 @@ data class ModuleAuthor(
     @Serializable
     data class Vip(
         @SerialName("type")
-        val type: Int,
+        val type: Int? = null,
 
         @SerialName("avatar_subscript")
-        val avatarSubscript: Int,
+        val avatarSubscript: Int? = null,
         @SerialName("avatar_subscript_url")
-        val avatarSubscriptUrl: String,
+        val avatarSubscriptUrl: String? = null,
         @SerialName("due_date")
-        val dueDate: Long,
+        val dueDate: Long? = null,
         @SerialName("label")
-        val label: Label,
+        val label: Label? = null,
         @SerialName("nickname_color")
-        val nicknameColor: String,
+        val nicknameColor: String? = null,
         @SerialName("status")
-        val status: Int,
+        val status: Int? = null,
         @SerialName("theme_type")
-        val themeType: Int,
+        val themeType: Int? = null,
     ) {
         /**
          * 标签
@@ -309,19 +309,19 @@ data class ModuleAuthor(
         @Serializable
         data class Label(
             @SerialName("bg_color")
-            val bgColor: String,
+            val bgColor: String? = null,
             @SerialName("bg_style")
-            val bgStyle: Int,
+            val bgStyle: Int? = null,
             @SerialName("border_color")
-            val borderColor: String,
+            val borderColor: String? = null,
             @SerialName("label_theme")
-            val labelTheme: String,
+            val labelTheme: String? = null,
             @SerialName("path")
-            val path: String,
+            val path: String? = null,
             @SerialName("text")
-            val text: String,
+            val text: String? = null,
             @SerialName("text_color")
-            val textColor: String,
+            val textColor: String? = null,
         )
     }
 
@@ -1215,7 +1215,6 @@ data class ModuleDynamic(
             @SerialName("tips")
             val tips: String? = null,
         )
-
 
         /**
          * 统计

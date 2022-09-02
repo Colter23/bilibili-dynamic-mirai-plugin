@@ -9,6 +9,7 @@ import top.colter.mirai.plugin.bilibili.data.toCookie
 import top.colter.mirai.plugin.bilibili.utils.FontUtils.loadTypeface
 import top.colter.mirai.plugin.bilibili.utils.biliClient
 import top.colter.mirai.plugin.bilibili.utils.decode
+import xyz.cssxsh.mirai.skia.downloadTypeface
 import kotlin.io.path.createDirectory
 import kotlin.io.path.exists
 import kotlin.io.path.forEachDirectoryEntry
@@ -64,14 +65,27 @@ suspend fun initTagid() {
     }
 }
 
-fun loadFonts() {
-    BiliBiliDynamic.dataFolderPath.resolve("font").apply {
-        if (exists()) {
-            forEachDirectoryEntry {
-                loadTypeface(it.toString(), it.name.split(".").first())
+suspend fun loadFonts() {
+    val fontFolder = BiliBiliDynamic.dataFolder.resolve("font")
+    val fontFolderPath = BiliBiliDynamic.dataFolderPath.resolve("font")
+    val LXGW = fontFolder.resolve("LXGWWenKai-Bold.ttf")
+
+    fontFolderPath.apply {
+        if (!exists()) createDirectory()
+        if (fontFolder.listFiles().none { it.isFile } || !LXGW.exists()) {
+            try {
+                downloadTypeface(fontFolder, "https://file.zfont.cn/d/file/font_cn_file/霞鹜文楷-v1.235.2.zip")
+                val f = fontFolder.resolve("霞鹜文楷-v1.235.2")
+                f.resolve("LXGWWenKai-Bold.ttf").copyTo(LXGW)
+                try {
+                    f.walkBottomUp().onLeave { it.delete() }
+                }catch (_: Exception) { }
+            }catch (e: Exception) {
+                BiliBiliDynamic.logger.error("下载字体失败! ${e}")
             }
-        } else {
-            createDirectory()
+        }
+        forEachDirectoryEntry {
+            if (it.toFile().isFile) loadTypeface(it.toString(), it.name.split(".").first())
         }
     }
 }

@@ -12,6 +12,7 @@ import java.time.Instant
 
 object LiveCheckTasker : BiliCheckTasker("Live") {
     override var interval = BiliConfig.checkConfig.liveInterval
+    private val liveCloseEnable = BiliConfig.enableConfig.liveCloseNotifyEnable
 
     private val liveChannel by BiliBiliDynamic::liveChannel
     private val dynamic by BiliData::dynamic
@@ -35,7 +36,7 @@ object LiveCheckTasker : BiliCheckTasker("Live") {
             if (lives.isNotEmpty()) {
                 lastLive = lives.last().liveTime
                 liveChannel.sendAll(lives.map { LiveDetail(it) })
-                liveUsers.addAll(lives.map { it.uid })
+                if (liveCloseEnable) liveUsers.putAll(lives.map { it.uid to it.liveTime })
             }
         }
 

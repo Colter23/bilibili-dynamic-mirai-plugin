@@ -19,7 +19,7 @@ data class PgcFollow(
 data class PgcMedia(
     @SerialName("media")
     val media: Media,
-) {
+): BiliDetail {
     @Serializable
     data class Media(
         @SerialName("media_id")
@@ -144,7 +144,7 @@ data class PgcSeason(
     //val upInfo: UpInfo? = null,
     //@SerialName("user_status")
     //val userStatus: UserStatus? = null,
-){
+): BiliDetail{
     @Serializable
     data class Activity(
         @SerialName("head_bg_url")

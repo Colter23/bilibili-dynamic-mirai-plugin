@@ -41,7 +41,7 @@ object BiliBiliDynamic : KotlinPlugin(
     val messageChannel = Channel<BiliMessage>(20)
     val missChannel = Channel<BiliMessage>(10)
 
-    val liveUsers = mutableListOf<Long>()
+    val liveUsers = mutableMapOf<Long, Long>()
 
     val liveGwp = PermissionId(BiliBiliDynamic.description.id, "live.atall")
     val videoGwp = PermissionId(BiliBiliDynamic.description.id, "video.atall")
@@ -57,11 +57,11 @@ object BiliBiliDynamic : KotlinPlugin(
 
             DynamicCheckTasker.start()
             LiveCheckTasker.start()
-            LiveCloseCheckTasker.start()
             DynamicMessageTasker.start()
             LiveMessageTasker.start()
             SendTasker.start()
             ListenerTasker.start()
+            if (BiliConfig.enableConfig.liveCloseNotifyEnable) LiveCloseCheckTasker.start()
             if (BiliConfig.enableConfig.cacheClearEnable) CacheClearTasker.start()
         }
     }

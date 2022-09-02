@@ -196,13 +196,13 @@ Vtuber 字幕组及粉丝群如需要使用可通过群联系我, 使用我搭�
 </details>
 
 #### ~~At全体权限~~
-**3.0.0-BETA4 后废弃**   
+3.0.0-BETA4 后废弃    
 废弃后仍可使用, 但不推荐, 推荐使用前面的指令进行配置
 
-| 权限名   | ID                                                     |
-|-------|--------------------------------------------------------|
-| 直播@全体 | `top.colter.bilibili-dynamic-mirai-plugin:live.atall`  |
-| 视频@全体 | `top.colter.bilibili-dynamic-mirai-plugin:video.atall` |
+| 权限名       | ID                                                         |
+|-----------|------------------------------------------------------------|
+| ~~直播@全体~~ | ~~`top.colter.bilibili-dynamic-mirai-plugin:live.atall`~~  |
+| ~~视频@全体~~ | ~~`top.colter.bilibili-dynamic-mirai-plugin:video.atall`~~ |
 
 
 ## 配置
@@ -213,40 +213,42 @@ Vtuber 字幕组及粉丝群如需要使用可通过群联系我, 使用我搭�
 分辨率与主题配置已经内置了多套数据
 
 ### BiliConfig.yml
-| 配置项               | 取值                                       | 说明   |
-|-------------------|------------------------------------------|------|
-| `admin`           | QQ号 / 群号                                 | 管理员  |
-| `enableConfig`    | [EnableConfig](#EnableConfig)            | 功能开关 |
-| `accountConfig`   | [BiliAccountConfig](#BiliAccountConfig)  | 账号配置 |
-| `checkConfig`     | [CheckConfig](#CheckConfig)              | 检测配置 |
-| `pushConfig`      | [PushConfig](#PushConfig)                | 推送配置 |
-| `imageConfig`     | [ImageConfig](#ImageConfig)              | 绘图配置 |
-| `templateConfig`  | [TemplateConfig](#TemplateConfig)        | 模板配置 |
-| `cacheConfig`     | [CacheConfig](#CacheConfig)              | 缓存配置 |
-| `proxyConfig`     | [ProxyConfig](#ProxyConfig)              | 代理配置 |
-| `translateConfig` | [TranslateConfig](#TranslateConfig)      | 翻译配置 |
+| 配置项                 | 取值                                      | 说明             |
+|---------------------|-----------------------------------------|----------------|
+| `admin`             | QQ号 / 群号                                | 管理员            |
+| `enableConfig`      | [EnableConfig](#EnableConfig)           | 功能开关           |
+| `accountConfig`     | [BiliAccountConfig](#BiliAccountConfig) | 账号配置           |
+| `checkConfig`       | [CheckConfig](#CheckConfig)             | 检测配置           |
+| `pushConfig`        | [PushConfig](#PushConfig)               | 推送配置           |
+| `imageConfig`       | [ImageConfig](#ImageConfig)             | 绘图配置           |
+| `templateConfig`    | [TemplateConfig](#TemplateConfig)       | 模板配置           |
+| `cacheConfig`       | [CacheConfig](#CacheConfig)             | 缓存配置           |
+| `proxyConfig`       | [ProxyConfig](#ProxyConfig)             | 代理配置           |
+| `translateConfig`   | [TranslateConfig](#TranslateConfig)     | 翻译配置           |
+| `linkResolveConfig` | [LinkResolveConfig](#LinkResolveConfig) | 链接解析配置(v3.1.2) |
 
 ---------------------
 
 #### EnableConfig
-| 配置项                | 取值               | 说明     |
-|--------------------|------------------|--------|
-| `drawEnable`       | `true` / `false` | 绘图开关   |
-| `notifyEnable`     | `true` / `false` | 操作通知开关 |
-| `lowSpeedEnable`   | `true` / `false` | 低频检测开关 |
-| `translateEnable`  | `true` / `false` | 翻译开关   |
-| `proxyEnable`      | `true` / `false` | 代理开关   |
-| `cacheClearEnable` | `true` / `false` | 缓存清理开关 |
+| 功能开关                    | 取值               | 说明       |
+|-------------------------|------------------|----------|
+| `drawEnable`            | `true` / `false` | 绘图开关     |
+| `notifyEnable`          | `true` / `false` | 操作通知开关   |
+| `liveCloseNotifyEnable` | `true` / `false` | 直播结束通知开关 |
+| `lowSpeedEnable`        | `true` / `false` | 低频检测开关   |
+| `translateEnable`       | `true` / `false` | 翻译开关     |
+| `proxyEnable`           | `true` / `false` | 代理开关     |
+| `cacheClearEnable`      | `true` / `false` | 缓存清理开关   |
 
 #### BiliAccountConfig
-| 配置项           | 取值                            | 说明       |
+| 账号配置          | 取值                            | 说明       |
 |---------------|-------------------------------|----------|
 | `cookie`      | SESSDATA=xxxx; bili_jct=xxxx; | B站Cookie |
 | `autoFollow`  | `true` / `false`              | 自动关注     |
 | `followGroup` | 最长16字符                        | 关注时保存的分组 |
 
 #### CheckConfig
-| 配置项                   | 取值                         | 说明                                      |
+| 检测配置                  | 取值                         | 说明                                      |
 |-----------------------|----------------------------|-----------------------------------------|
 | `interval`            | 推荐 15-60 单位秒               | 动态检测间隔                                  |
 | `liveInterval`        | 单位秒                        | 直播检测间隔                                  |
@@ -254,25 +256,25 @@ Vtuber 字幕组及粉丝群如需要使用可通过群联系我, 使用我搭�
 | `checkReportInterval` | 单位分 为 0 时代表每次检测都汇报         | 检测报报间隔 (在debug里打印) 报告中最后的数代表在间隔内进行了几次检测 |
 
 #### PushConfig
-| 配置项               | 取值                                               | 说明                  |
+| 推送配置              | 取值                                               | 说明                  |
 |-------------------|--------------------------------------------------|---------------------|
 | `messageInterval` | 单位毫秒                                             | QQ中同一个群中连续发送多个消息的间隔 |
 | `pushInterval`    | 单位毫秒                                             | QQ中连续发送多个群之间的间隔     |
 | `atAllPlus`       | `SINGLE_MESSAGE`: 单独的消息  `PLUS_END`: 追加到最后一条消息后面 | At全体拼接方式            |
 
 #### ImageConfig
-| 配置项              | 取值                                                        | 说明                                                 |
-|------------------|-----------------------------------------------------------|----------------------------------------------------|
-| `quality`        | `800w` / `1000w` / `1200w` / `1500w` (图片宽度)               | 图片质量(分辨率)                                          |
-| `theme`          | `v3` (新版绘图主题) / `v3RainbowOutline` (彩虹边框) / `v2` (旧版绘图主题) | 绘图主题 (目前两套其实都差不多，鸡肋功能)                             |
-| `font`           | 字体名 / 字体文件名(不用加后缀)                                        | 绘图字体 目前仅支持单字体 字体放到插件数据路径下 `font` 文件夹中 -> [字体](#字体) |
-| `defaultColor`   | HEX颜色值 (#d3edfa;#fde8ed)                                  | 默认绘图主题色 支持多个值自定义渐变 中间用分号`;`号分隔 单个值会自动生成渐变色         |
-| `cardOrnament`   | `FanCard` (粉丝卡片) / `QrCode` (动态链接二维码) / `None` (无)        | 卡片装饰                                               |
-| `colorGenerator` | [ColorGenerator](#ColorGenerator)                         | 渐变色生成器配置 (用于图片背景) 仅当主题色为单个值时会自动生成                  |
-| `badgeEnable`    | `true` / `false`                                          | 卡片顶部的标签                                            |
+| 绘图配置             | 取值                                                        | 说明                                                                                                  |
+|------------------|-----------------------------------------------------------|-----------------------------------------------------------------------------------------------------|
+| `quality`        | `800w` / `1000w` / `1200w` / `1500w` (图片宽度)               | 图片质量(分辨率)                                                                                           |
+| `theme`          | `v3` (新版绘图主题) / `v3RainbowOutline` (彩虹边框) / `v2` (旧版绘图主题) | 绘图主题 (目前两套其实都差不多，鸡肋功能)                                                                              |
+| `font`           | 字体名 / 字体文件名(不用加后缀)                                        | 绘图字体 目前仅支持单字体 字体放到插件数据路径下 `font` 文件夹中 <br/> 如果不配置此项且 `font` 目录下为空时自动下载霞鹜文楷字体并使用 <br/> 相关: [字体](#字体) |
+| `defaultColor`   | HEX颜色值 (#d3edfa;#fde8ed)                                  | 默认绘图主题色 支持多个值自定义渐变 中间用分号`;`号分隔 单个值会自动生成渐变色                                                          |
+| `cardOrnament`   | `FanCard` (粉丝卡片) / `QrCode` (动态链接二维码) / `None` (无)        | 卡片装饰                                                                                                |
+| `colorGenerator` | [ColorGenerator](#ColorGenerator)                         | 渐变色生成器配置 (用于图片背景) 仅当主题色为单个值时会自动生成                                                                   |
+| `badgeEnable`    | `true` / `false`                                          | 卡片顶部的标签                                                                                             |
 
 ##### ColorGenerator
-| 配置项          | 取值               | 说明                |
+| 渐变色生成器       | 取值               | 说明                |
 |--------------|------------------|-------------------|
 | `hueStep`    | `0` ~ `120`      | 渐变色H(色相)步长 (默认三步) |
 | `lockSB`     | `true` / `false` | 锁定 S(饱和度) B(亮度)   |
@@ -280,19 +282,19 @@ Vtuber 字幕组及粉丝群如需要使用可通过群联系我, 使用我搭�
 | `brightness` | `0.0` ~ `1.0`    | 锁定的亮度             |
 
 #### TemplateConfig
-| 配置项                 | 取值                                | 说明                 |
-|---------------------|-----------------------------------|--------------------|
+| 模板配置                 | 取值                                | 说明                 |
+|----------------------|-----------------------------------|--------------------|
 | `defaultDynamicPush` | 下方动态推送模板名                         | 默认动态推送模板           |
-| `defaultLivePush`   | 下方直播推送模板名                         | 默认直播推送模板           |
-| `defaultLiveClose`  | 下方直播结束推送模板名                       | 默认直播推送模板           |
-| `dynamicPush`       | [动态模板配置项](#动态模板配置项)               | 动态推送模板 (可自行添加新项)   |
-| `livePush`          | [直播模板配置项](#直播模板配置项)               | 直播推送模板 (可自行添加新项)   |
-| `liveClose`         | [直播结束模板配置项](#直播结束模板配置项)       | 直播结束推送模板 (可自行添加新项) |
-| `forwardCard`       | [ForwardDisplay](#ForwardDisplay) | QQ转发卡片外观           |
-| `footer`            | [FooterConfig](#FooterConfig)     | 绘制图片页脚模板           |
+| `defaultLivePush`    | 下方直播推送模板名                         | 默认直播推送模板           |
+| `defaultLiveClose`   | 下方直播结束推送模板名                       | 默认直播推送模板           |
+| `dynamicPush`        | [动态模板配置项](#动态模板配置项)               | 动态推送模板 (可自行添加新项)   |
+| `livePush`           | [直播模板配置项](#直播模板配置项)               | 直播推送模板 (可自行添加新项)   |
+| `liveClose`          | [直播结束模板配置项](#直播结束模板配置项)           | 直播结束推送模板 (可自行添加新项) |
+| `forwardCard`        | [ForwardDisplay](#ForwardDisplay) | QQ转发卡片外观           |
+| `footer`             | [FooterConfig](#FooterConfig)     | 绘制图片页脚模板           |
 
 ##### ForwardDisplay
-| 配置项       | 取值                  | 说明                     |
+| 转发样式      | 取值                  | 说明                     |
 |-----------|---------------------|------------------------|
 | `title`   | [转发卡片配置项](#转发卡片配置项) | 转发卡片标题                 |
 | `preview` | [转发卡片配置项](#转发卡片配置项) | 中间的预览，最多4行行之间用 `\n` 隔开 |
@@ -300,11 +302,11 @@ Vtuber 字幕组及粉丝群如需要使用可通过群联系我, 使用我搭�
 | `brief`   | [转发卡片配置项](#转发卡片配置项) | 从群外看显示的文字              |
 
 ##### FooterConfig
-| 配置项             | 取值                          | 说明   |
-|-----------------|-----------------------------|------|
-| `dynamicFooter` | [页脚配置项](#页脚配置项)             | 动态页脚 |
-| `liveFooter`    | [页脚配置项](#页脚配置项)             | 直播页脚 |
-| `footerAlign`   | `LEFT` / `CENTER` / `RIGHT` | 对其方式 |
+| 页脚配置            | 取值                          | 说明        |
+|-----------------|-----------------------------|-----------|
+| `dynamicFooter` | [页脚配置项](#页脚配置项)             | 动态页脚 (可空) |
+| `liveFooter`    | [页脚配置项](#页脚配置项)             | 直播页脚 (可空) |
+| `footerAlign`   | `LEFT` / `CENTER` / `RIGHT` | 对其方式      |
 
 ##### 动态模板配置项
 `{draw}`: 绘制的动态图  
@@ -370,20 +372,36 @@ Vtuber 字幕组及粉丝群如需要使用可通过群联系我, 使用我搭�
 
 
 #### CacheConfig
-| 配置项       | 取值                                                                                                                                       | 说明                             |
+| 缓存配置      | 取值                                                                                                                                       | 说明                             |
 |-----------|------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------|
 | `expires` | 单位`天`  为 `0` 时表示不清理此类图片<br/>`DRAW`: 由插件绘制的图片<br/>`IMAGES`: 动态图和封面等<br/>`EMOJI`: B站的Emoji<br/>`USER`: 用户头像,头像挂件,粉丝卡片套装等<br/>`OTHER`: 其他图片 | 图片过期时长, 当图片在指定时间内未被再次使用, 就会被删除 |
 
 #### ProxyConfig
-| 配置项     | 取值    | 说明   |
+| 代理配置    | 取值    | 说明   |
 |---------|-------|------|
 | `proxy` | 代理服务器 | 代理列表 |
 
 #### TranslateConfig
-| 配置项       | 取值                      | 说明                                   |
-|-----------|-------------------------|--------------------------------------|
-| `cutLine` | 例如: `\n\n〓〓〓 翻译 〓〓〓\n`  | 正文与翻译的分割线                            |
-| `baidu`   | `APP_ID` `SECURITY_KEY` | 百度翻译密钥配置 https://api.fanyi.baidu.com |
+| 翻译        | 取值                      | 说明                                                   |
+|-----------|-------------------------|------------------------------------------------------|
+| `cutLine` | 例如: `\n\n〓〓〓 翻译 〓〓〓\n`  | 正文与翻译的分割线                                            |
+| `baidu`   | `APP_ID` `SECURITY_KEY` | 百度翻译密钥配置 (需要通用翻译api key) https://api.fanyi.baidu.com |
+
+#### LinkResolveConfig
+| 链接解析(v3.1.2)  | 取值                                                     | 说明                                                   |
+|---------------|--------------------------------------------------------|------------------------------------------------------|
+| `triggerMode` | `At`: @bot时触发 <br> `Always`: 一直 <br> `Never`: 无法通过聊天触发 | 触发链接解析的模式                                            |
+| `regex`       | [正则表达式](#链接解析正则)                                       | B站链接的正则表达式, 下方给出了一些正则, 如果你不想解析某种链接可从配置中删除, 同时支持自定义正则 |
+
+##### 链接解析正则
+| 类型  | 完全匹配                                                                               | 仅匹配ID号                                   |
+|-----|------------------------------------------------------------------------------------|------------------------------------------|
+| 视频  | `(www.bilibili.com/video/)?((BV[0-9A-z]{10})&#124;(av\d{1,10}))`                   | `^((BV[0-9A-z]{10})&#124;(av\d{1,10}))$` |
+| 专栏  | `(www.bilibili.com/read/)?(cv\d{1,10})`                                            | `^(cv\d{1,10})$`                         |
+| 番剧  | `((www&#124;m).bilibili.com/bangumi/(play&#124;media)/)?((ss&#124;ep&#124;md)\d+)` | `^((ss&#124;ep&#124;md)\d+)$`            |
+| 动态  | `[tm].bilibili.com/(dynamic/)?(\d+)`                                               |                                          |
+| 直播  | `live.bilibili.com/(h5/)?(\d+)`                                                    |                                          |
+| 短链  | `b23.tv/([0-9A-z]+)`                                                               |                                          |
 
 #### `BiliConfig.yml` 配置文件模板
 <details>
@@ -439,7 +457,7 @@ pushConfig:
 # 当 ImageQuality.yml / ImageTheme.yml 中的 customOverload 开启后下面对应的配置将不再生效
 #   quality: 图片质量(分辨率), 内置 800w: 800px, 1000w: 1000px, 1200w: 1200px, 1500w: 1500px(图片宽度)
 #   theme: 绘图主题, 内置 v3: 新版绘图主题, v2: 旧版绘图主题
-#   font: 绘图字体 字体名或字体文件名(不用加后缀) 目前仅支持单字体 字体放到插件数据路径下 `font` 文件夹中
+#   font: 绘图字体 字体名或字体文件名(不用加后缀) 目前仅支持单字体 字体放到插件数据路径下 `font` 文件夹中  为空时自动下载默认字体
 #   defaultColor: 默认绘图主题色 支持多个值自定义渐变 中间用分号`;`号分隔 单个值会自动生成渐变色
 #   cardOrnament: 卡片装饰 FanCard(粉丝卡片)  QrCode(动态链接二维码)  None(无)
 #   colorGenerator: 渐变色生成器配置 
@@ -910,7 +928,7 @@ v2:
 里面不同文件代表不同的粗细, 建议使用 `Medium` 
 
 #### [霞鹜文楷](https://github.com/lxgw/LxgwWenKai)
-请使用 `bold` 粗细的字体
+请使用 `bold` 粗细的字体   
 
 
 **下载到字体后请把字文件放到 `data\top.colter.bilibili-dynamic-mirai-plugin\font` 文件夹内**

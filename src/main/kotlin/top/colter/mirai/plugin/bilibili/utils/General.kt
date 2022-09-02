@@ -7,6 +7,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.serialization.Serializable
 import net.mamoe.mirai.Bot
 import net.mamoe.mirai.contact.Contact
+import net.mamoe.mirai.contact.Contact.Companion.sendImage
 import net.mamoe.mirai.contact.Friend
 import net.mamoe.mirai.contact.Group
 import net.mamoe.mirai.utils.ExternalResource
@@ -23,6 +24,7 @@ import top.colter.mirai.plugin.bilibili.data.DynamicItem
 import top.colter.mirai.plugin.bilibili.data.DynamicType.*
 import java.nio.file.Path
 import java.nio.file.attribute.FileTime
+import java.time.Duration
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
@@ -83,6 +85,30 @@ val Long.formatTime: String
 fun Long.formatTime(template: String = "yyyy年MM月dd日 HH:mm:ss"): String = DateTimeFormatter.ofPattern(template)
     .format(LocalDateTime.ofEpochSecond(this, 0, OffsetDateTime.now().offset))
 
+fun Long.formatDuration(isText: Boolean = true): String {
+    val duration = Duration.ofSeconds(this)
+    val day = duration.toDays()
+    val hour = duration.minusDays(day).toHours()
+    val minute = duration.minusDays(day).minusHours(hour).toMinutes()
+    val second = duration.minusDays(day).minusHours(hour).minusMinutes(minute).toSeconds()
+    return if (isText) buildString {
+        if (day > 0) append("${day}天 ")
+        if (hour > 0) append("${hour}小时 ")
+        if (minute > 0) append("${minute}分钟 ")
+        if (second > 0) append("${second}秒")
+    }else buildString {
+        if (day > 0) append("${day.formatZero}:")
+        if (hour > 0) append("${hour.formatZero}:")
+        if (minute > 0) append("${minute.formatZero}:")
+        if (second > 0) append(second.formatZero)
+    }
+}
+
+fun Int.formatDuration(isText: Boolean = true): String = this.toLong().formatDuration(isText)
+
+val Long.formatZero: String get() = if (this in 1..9) "0$this" else this.toString()
+val Int.formatZero: String get() = this.toLong().formatZero
+
 val DynamicItem.link: String
     get() = when (type) {
         DYNAMIC_TYPE_WORD,
@@ -132,6 +158,7 @@ enum class CacheType(val path: String) {
     DRAW("draw"),
     DRAW_DYNAMIC("draw/dynamic"),
     DRAW_LIVE("draw/live"),
+    DRAW_SEARCH("draw/search"),
     IMAGES("images"),
     EMOJI("emoji"),
     USER("user"),
@@ -191,6 +218,13 @@ suspend fun getOrDownloadImage(url: String, cacheType: CacheType = CacheType.UNK
 
 suspend fun getOrDownloadImageDefault(url: String, cacheType: CacheType = CacheType.UNKNOWN) =
     getOrDownloadImage(url, cacheType)?: Image.makeFromEncoded(loadResourceBytes("image/IMAGE_MISS.png"))
+
+suspend fun Contact.sendImage(url: String, cacheType: CacheType = CacheType.UNKNOWN) = try {
+    getOrDownload(url, cacheType)?.toExternalResource()?.let { sendImage(it.toAutoCloseable()) }
+}catch (e: Exception){
+    logger.error("发送图片失败! \n$e")
+    null
+}
 
 suspend fun Contact.uploadImage(url: String, cacheType: CacheType = CacheType.UNKNOWN) = try {
     getOrDownload(url, cacheType)?.toExternalResource()?.let { uploadImage(it.toAutoCloseable()) }

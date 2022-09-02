@@ -24,10 +24,8 @@ internal class PluginTest {
 
     @Test
     fun jsonToDataClass(): Unit = runBlocking {
-
-        val url = "https://api.live.bilibili.com/room/v1/Room/get_status_info_by_uids?uids[]=324798&uids[]=672328094"
-        json2DataClassFile(url, "LiveStatus", Path("src/main/kotlin/top/colter/mirai/plugin/bilibili/data"))
-
+        val url = "https://api.live.bilibili.com/room/v1/Room/get_info?room_id=21448649"
+        json2DataClassFile(url, "Liiii", Path("src/main/kotlin/top/colter/mirai/plugin/bilibili/data"))
     }
 
     @Test
@@ -148,13 +146,13 @@ internal class PluginTest {
                     487550002,
                     "猫芒ベル_Official",
                     "https://i1.hdslb.com/bfs/face/652385c47e4742b6e26e19995a2407c83756b1f7.jpg",
+                    1650707078,
+                    "2022-04-23 17:44",
+                    "",
                     false,
                     true,
                     "",
                     "//space.bilibili.com/487550002/dynamic",
-                    "",
-                    "2022-04-23 17:44",
-                    1650707078,
                     ModuleAuthor.OfficialVerify(
                         0,
                         ""
@@ -303,13 +301,13 @@ internal class PluginTest {
                         487550002,
                         "猫芒ベル_Official",
                         "https://i1.hdslb.com/bfs/face/652385c47e4742b6e26e19995a2407c83756b1f7.jpg",
+                        1650707078,
+                        "2022-04-23 17:44",
+                        "",
                         false,
                         true,
                         "",
                         "//space.bilibili.com/487550002/dynamic",
-                        "",
-                        "2022-04-23 17:44",
-                        1650707078,
                         ModuleAuthor.OfficialVerify(
                             0,
                             ""

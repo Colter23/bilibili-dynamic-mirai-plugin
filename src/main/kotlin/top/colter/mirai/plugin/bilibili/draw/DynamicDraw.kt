@@ -80,9 +80,10 @@ val mainTypeface: Typeface by lazy {
 }
 
 fun loadSysDefaultFont(): Typeface {
-    val defaultList = listOf("HarmonyOS Sans SC", "Source Han Sans", "SimHei", "sans-serif")
+    val defaultList = listOf("HarmonyOS Sans SC", "LXGW WenKai", "Source Han Sans", "SimHei", "sans-serif")
     defaultList.forEach {
         try {
+
             val f = matchFamily(it).matchStyle(FontStyle.NORMAL)!!
             logger.info("加载默认字体 $it 成功")
             return f
@@ -192,26 +193,41 @@ suspend fun DynamicItem.drawDynamic(themeColor: Int, isForward: Boolean = false)
         }
     }
 
-    var height = imgList.sumOf {
+    var plusHeight = 0
+    if (type == DynamicType.DYNAMIC_TYPE_WORD || type == DYNAMIC_TYPE_NONE) {
+        plusHeight += quality.contentSpace * 2
+    }
+
+    val footer = if (!isForward) {
+        buildFooter(modules.moduleAuthor.name, modules.moduleAuthor.mid, did, formatTime, type.text)
+    } else null
+
+    return imgList.assembleCard(did, footer, plusHeight, isForward)
+
+}
+
+fun buildFooter(name: String, uid: Long, id: String, time: String, type: String): String? {
+    val footerTemplate = BiliConfig.templateConfig.footer.dynamicFooter
+    return if (footerTemplate.isNotBlank()) {
+        footerTemplate
+            .replace("{name}", name)
+            .replace("{uid}", uid.toString())
+            .replace("{id}", id)
+            .replace("{time}", time)
+            .replace("{type}", type)
+    } else null
+}
+
+fun List<Image>.assembleCard(id: String, footer: String? = null, plusHeight: Int = 0, isForward: Boolean = false, tag: String? = null): Image {
+    val height = sumOf {
         if (it.width > cardRect.width) {
             (cardRect.width * it.height / it.width + quality.contentSpace).toInt()
         } else {
             it.height + quality.contentSpace
         }
-    }
+    } + plusHeight
 
-    if (type == DynamicType.DYNAMIC_TYPE_WORD || type == DYNAMIC_TYPE_NONE) {
-        height += quality.contentSpace * 2
-    }
-
-    val footerTemplate = BiliConfig.templateConfig.footer.dynamicFooter
-    val footerParagraph = if (footerTemplate.isNotBlank() && !isForward) {
-        val footer = footerTemplate
-            .replace("{name}", modules.moduleAuthor.name)
-            .replace("{uid}", modules.moduleAuthor.mid.toString())
-            .replace("{id}", did)
-            .replace("{time}", formatTime)
-            .replace("{type}", type.text)
+    val footerParagraph = if (footer != null) {
         ParagraphBuilder(footerParagraphStyle, FontUtils.fonts).addText(footer).build().layout(cardRect.width)
     } else null
 
@@ -240,7 +256,7 @@ suspend fun DynamicItem.drawDynamic(themeColor: Int, isForward: Boolean = false)
             if (imageConfig.badgeEnable.left) {
                 val svg = loadSVG("icon/${if (isForward) "FORWARD" else "BILIBILI_LOGO"}.svg")
                 drawBadge(
-                    if (isForward) "转发动态" else "动态",
+                    tag ?: if (isForward) "转发动态" else "动态",
                     font,
                     theme.mainLeftBadge.fontColor,
                     theme.mainLeftBadge.bgColor,
@@ -250,13 +266,13 @@ suspend fun DynamicItem.drawDynamic(themeColor: Int, isForward: Boolean = false)
                 )
             }
             if (imageConfig.badgeEnable.right) {
-                drawBadge(did, font, theme.mainRightBadge.fontColor, theme.mainRightBadge.bgColor, rrect, TOP_RIGHT)
+                drawBadge(id, font, theme.mainRightBadge.fontColor, theme.mainRightBadge.bgColor, rrect, TOP_RIGHT)
             }
 
             drawCard(rrect)
 
             var top = quality.cardMargin + quality.badgeHeight.toFloat()
-            for (img in imgList) {
+            for (img in this@assembleCard) {
 
                 //drawScaleWidthImageOutline(img, cardRect.width, quality.cardMargin.toFloat(), top, isForward)
                 drawScaleWidthImage(img, cardRect.width, quality.cardMargin.toFloat(), top)
