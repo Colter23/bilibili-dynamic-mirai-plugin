@@ -38,7 +38,7 @@ object LiveMessageTasker : BiliTasker() {
             title,
             cover,
             area,
-            LIVE_LINK(roomId),
+            LIVE_LINK(roomId.toString()),
             makeLive(),
             contact
         )

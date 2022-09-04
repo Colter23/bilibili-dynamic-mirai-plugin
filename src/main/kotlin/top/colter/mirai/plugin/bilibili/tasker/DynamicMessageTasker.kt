@@ -82,7 +82,7 @@ object DynamicMessageTasker : BiliTasker() {
         }
     }
 
-    fun DynamicItem.dynamicLinks(): List<DynamicMessage.Link> {
+    suspend fun DynamicItem.dynamicLinks(): List<DynamicMessage.Link> {
         return when (type) {
             DYNAMIC_TYPE_FORWARD -> {
                 listOf(
@@ -106,7 +106,7 @@ object DynamicMessageTasker : BiliTasker() {
                 listOf(
                     DynamicMessage.Link(
                         DYNAMIC_TYPE_ARTICLE.text,
-                        ARTICLE_LINK(this.modules.moduleDynamic.major?.article?.id!!)
+                        ARTICLE_LINK(this.modules.moduleDynamic.major?.article?.id!!.toString())
                     ),
                     DynamicMessage.Link("动态", DYNAMIC_LINK(did))
                 )
@@ -116,7 +116,7 @@ object DynamicMessageTasker : BiliTasker() {
                 listOf(
                     DynamicMessage.Link(
                         DYNAMIC_TYPE_AV.text,
-                        VIDEO_LINK(this.modules.moduleDynamic.major?.archive?.aid)
+                        VIDEO_LINK(this.modules.moduleDynamic.major?.archive?.aid.toString())
                     ),
                     DynamicMessage.Link("动态", DYNAMIC_LINK(did))
                 )
@@ -126,7 +126,7 @@ object DynamicMessageTasker : BiliTasker() {
                 listOf(
                     DynamicMessage.Link(
                         DYNAMIC_TYPE_MUSIC.text,
-                        MUSIC_LINK(this.modules.moduleDynamic.major?.music?.id!!)
+                        MUSIC_LINK(this.modules.moduleDynamic.major?.music?.id!!.toString())
                     ),
                     DynamicMessage.Link("动态", DYNAMIC_LINK(did))
                 )
@@ -134,7 +134,7 @@ object DynamicMessageTasker : BiliTasker() {
 
             DYNAMIC_TYPE_PGC -> {
                 listOf(
-                    DynamicMessage.Link(DYNAMIC_TYPE_PGC.text, PGC_LINK(this.modules.moduleDynamic.major?.pgc?.epid!!)),
+                    DynamicMessage.Link(DYNAMIC_TYPE_PGC.text, EPISODE_LINK(this.modules.moduleDynamic.major?.pgc?.epid!!.toString())),
                     DynamicMessage.Link("动态", DYNAMIC_LINK(did))
                 )
             }
@@ -143,7 +143,7 @@ object DynamicMessageTasker : BiliTasker() {
                 listOf(
                     DynamicMessage.Link(
                         DYNAMIC_TYPE_LIVE.text,
-                        LIVE_LINK(this.modules.moduleDynamic.major?.live?.id!!)
+                        LIVE_LINK(this.modules.moduleDynamic.major?.live?.id!!.toString())
                     ),
                     DynamicMessage.Link("动态", DYNAMIC_LINK(did))
                 )
@@ -153,7 +153,7 @@ object DynamicMessageTasker : BiliTasker() {
                 listOf(
                     DynamicMessage.Link(
                         DYNAMIC_TYPE_LIVE_RCMD.text,
-                        LIVE_LINK(this.modules.moduleDynamic.major?.liveRcmd?.liveInfo?.livePlayInfo?.roomId!!)
+                        LIVE_LINK(this.modules.moduleDynamic.major?.liveRcmd?.liveInfo?.livePlayInfo?.roomId!!.toString())
                     ),
                     DynamicMessage.Link("动态", DYNAMIC_LINK(did))
                 )

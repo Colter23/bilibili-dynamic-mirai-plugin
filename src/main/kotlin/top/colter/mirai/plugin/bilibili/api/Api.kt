@@ -44,6 +44,9 @@ const val PGC_INFO = "https://api.bilibili.com/pgc/view/web/season"
 const val FOLLOW_PGC = "https://api.bilibili.com/pgc/web/follow/add"
 const val UNFOLLOW_PGC = "https://api.bilibili.com/pgc/web/follow/del"
 
+// Short Link
+const val SHORT_LINK = "https://api.bilibili.com/x/share/click"
+
 // Twemoji CDN
 const val TWEMOJI = "https://twemoji.maxcdn.com/v/14.0.2/72x72"
 

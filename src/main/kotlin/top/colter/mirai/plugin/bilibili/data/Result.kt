@@ -47,3 +47,15 @@ data class PgcResult(
     @SerialName("result")
     val result: JsonElement? = null
 )
+
+@Serializable
+data class ShortLinkData(
+    @SerialName("title")
+    val title: String? = null,
+    @SerialName("content")
+    val content: String? = null,
+    @SerialName("link")
+    val link: String,
+    @SerialName("count")
+    val count: Int? = null
+)

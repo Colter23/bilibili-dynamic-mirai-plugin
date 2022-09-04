@@ -261,6 +261,7 @@ Vtuber 字幕组及粉丝群如需要使用可通过群联系我, 使用我搭�
 | `messageInterval` | 单位毫秒                                             | QQ中同一个群中连续发送多个消息的间隔 |
 | `pushInterval`    | 单位毫秒                                             | QQ中连续发送多个群之间的间隔     |
 | `atAllPlus`       | `SINGLE_MESSAGE`: 单独的消息  `PLUS_END`: 追加到最后一条消息后面 | At全体拼接方式            |
+| `toShortLink`     | `true` / `false`                                 | 是否把链接都转为短链 (不推荐)    |
 
 #### ImageConfig
 | 绘图配置             | 取值                                                        | 说明                                                                                                  |
@@ -391,6 +392,7 @@ Vtuber 字幕组及粉丝群如需要使用可通过群联系我, 使用我搭�
 | 链接解析(v3.1.2)  | 取值                                                     | 说明                                                   |
 |---------------|--------------------------------------------------------|------------------------------------------------------|
 | `triggerMode` | `At`: @bot时触发 <br> `Always`: 一直 <br> `Never`: 无法通过聊天触发 | 触发链接解析的模式                                            |
+| `returnLink`  | `true` / `false`                                       | 是否返回解析的链接                                            |
 | `regex`       | [正则表达式](#链接解析正则)                                       | B站链接的正则表达式, 下方给出了一些正则, 如果你不想解析某种链接可从配置中删除, 同时支持自定义正则 |
 
 ##### 链接解析正则
@@ -448,10 +450,12 @@ checkConfig:
 #   messageInterval: QQ中同一个群中连续发送多个消息的间隔 单位毫秒
 #   pushInterval: QQ中连续发送多个群之间的间隔 单位毫秒
 #   atAllPlus: At全体拼接方式 SINGLE_MESSAGE: 单独的消息  PLUS_END: 追加到最后一条消息后面
+#   toShortLink: 是否把链接都转为短链 (不推荐)
 pushConfig:
   messageInterval: 100
   pushInterval: 500
   atAllPlus: PLUS_END
+  toShortLink: false
 
 # 图片配置:
 # 当 ImageQuality.yml / ImageTheme.yml 中的 customOverload 开启后下面对应的配置将不再生效
@@ -499,8 +503,8 @@ templateConfig:
     OneMsg: "{draw}\n{name}@直播\n{link}"
     TwoMsg: "{draw}\r{name}@{uid}@直播\n{title}\n{time}\n{link}"
   liveClose:
-    SimpleMsg: "{name} 值播结束啦!\n直播时长: {duration}"
-    ComplexMsg: "{name} 值播结束啦!\n标题: {title}\n直播时长: {duration}"
+    SimpleMsg: "{name} 直播结束啦!\n直播时长: {duration}"
+    ComplexMsg: "{name} 直播结束啦!\n标题: {title}\n直播时长: {duration}"
   forwardCard:
     title: '{name} {type} 详情'
     summary: 'ID: {did}'
@@ -542,6 +546,21 @@ translateConfig:
   baidu:
     APP_ID: ''
     SECURITY_KEY: ''
+    
+# 链接解析配置:
+#   triggerMode: 触发模式 At(@bot时触发)  Always(一直)  Never(无法通过聊天触发)
+#   returnLink: 是否返回解析的链接
+#   regex: 正则列表 具体可看github
+linkResolveConfig:
+  triggerMode: At
+  returnLink: false
+  regex:
+    - '(www.bilibili.com/video/)?((BV[0-9A-z]{10})|(av\d{1,10}))'
+    - '(www.bilibili.com/read/)?(cv\d{1,10})'
+    - '((www|m).bilibili.com/bangumi/(play|media)/)?((ss|ep|md)\d+)'
+    - '[tm].bilibili.com/(dynamic/)?(\d+)'
+    - 'live.bilibili.com/(h5/)?(\d+)'
+    - 'b23.tv/([0-9A-z]+)'
 
 ```
 </details>

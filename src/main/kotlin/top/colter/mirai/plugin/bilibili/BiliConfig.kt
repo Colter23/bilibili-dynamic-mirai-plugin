@@ -58,6 +58,7 @@ object BiliConfig : AutoSavePluginConfig("BiliConfig") {
           messageInterval: QQ中同一个群中连续发送多个消息的间隔 单位毫秒
           pushInterval: QQ中连续发送多个群之间的间隔 单位毫秒
           atAllPlus: At全体拼接方式 SINGLE_MESSAGE: 单独的消息  PLUS_END: 追加到最后一条消息后面
+          toShortLink: 是否把链接都转为短链 (不推荐)
     """
     )
     val pushConfig: PushConfig by value()
@@ -129,6 +130,7 @@ object BiliConfig : AutoSavePluginConfig("BiliConfig") {
         """
         链接解析配置:
           triggerMode: 触发模式 At(@bot时触发)  Always(一直)  Never(无法通过聊天触发)
+          returnLink: 是否返回解析的链接
           regex: 正则列表 具体可看github
     """
     )
@@ -214,6 +216,7 @@ data class PushConfig(
     val messageInterval: Long = 100,
     val pushInterval: Long = 500,
     val atAllPlus: String = "PLUS_END", // SINGLE_MESSAGE PLUS_END
+    val toShortLink: Boolean = false,
 )
 
 @Serializable
@@ -235,8 +238,8 @@ data class TemplateConfig(
         "TwoMsg" to "{draw}\r{name}@{uid}@直播\n{title}\n{time}\n{link}",
     ),
     val liveClose: MutableMap<String, String> = mutableMapOf(
-        "SimpleMsg" to "{name} 值播结束啦!\n直播时长: {duration}",
-        "ComplexMsg" to "{name} 值播结束啦!\n标题: {title}\n直播时长: {duration}"
+        "SimpleMsg" to "{name} 直播结束啦!\n直播时长: {duration}",
+        "ComplexMsg" to "{name} 直播结束啦!\n标题: {title}\n直播时长: {duration}"
     ),
     val forwardCard: ForwardDisplay = ForwardDisplay(),
     var footer: FooterConfig = FooterConfig(),
@@ -271,6 +274,7 @@ data class CacheConfig(
 @Serializable
 data class LinkResolveConfig(
     val triggerMode: TriggerMode = TriggerMode.At,
+    val returnLink: Boolean = false,
     val regex: List<String> = listOf(
         """(www.bilibili.com/video/)?((BV[0-9A-z]{10})|(av\d{1,10}))""",
         """(www.bilibili.com/read/)?(cv\d{1,10})""",

@@ -33,7 +33,7 @@ object TemplateService {
             "l" -> biliClient.getLive(1, 1)?.rooms?.first()?.buildMessage()!!
             "le" -> LiveCloseMessage(
                 0,0,"Test", "2022年1月1日 00:00:00", 1640966400, "2022年1月1日 01:02:03",
-                "1小时 2分钟 3秒", "测试测试测试TEST", "游戏", LIVE_LINK(0)
+                "1小时 2分钟 3秒", "测试测试测试TEST", "游戏", LIVE_LINK("0")
             )
             else -> return
         }

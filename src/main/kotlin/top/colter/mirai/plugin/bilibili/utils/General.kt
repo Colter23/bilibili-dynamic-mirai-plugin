@@ -99,8 +99,8 @@ fun Long.formatDuration(isText: Boolean = true): String {
     }else buildString {
         if (day > 0) append("${day.formatZero}:")
         if (hour > 0) append("${hour.formatZero}:")
-        if (minute > 0) append("${minute.formatZero}:")
-        if (second > 0) append(second.formatZero)
+        append("${minute.formatZero}:")
+        append(second.formatZero)
     }
 }
 

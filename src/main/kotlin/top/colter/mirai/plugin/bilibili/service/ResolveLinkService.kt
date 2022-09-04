@@ -13,7 +13,7 @@ private val regex = BiliConfig.linkResolveConfig.reg
 
 fun matchingRegular(content: String): LinkType? {
     return if (regex.any { it.find(content) != null }) {
-        top.colter.mirai.plugin.bilibili.utils.logger.info("开始解析链接 -> $content")
+        logger.info("开始解析链接 -> $content")
         matchingInternalRegular(content)
     } else null
 }
@@ -36,7 +36,7 @@ fun matchingInternalRegular(content: String): LinkType? {
         type.id = matchResult.destructured.component1()
         type
     }else {
-        top.colter.mirai.plugin.bilibili.utils.logger.warning("未匹配到链接! -> $content")
+        logger.warning("未匹配到链接! -> $content")
         null
     }
 }
@@ -50,6 +50,7 @@ enum class TriggerMode {
 interface ResolveLink {
     //suspend fun resolve(): BiliDetail?
     suspend fun drawGeneral(): String?
+    suspend fun getLink(): String
 }
 
 enum class LinkType(val regex: List<Regex>, var id: String? = null): ResolveLink {
@@ -61,6 +62,9 @@ enum class LinkType(val regex: List<Regex>, var id: String? = null): ResolveLink
                 drawGeneral(id!!, "视频", pubdate.formatTime, toDrawAuthorData(), toDrawData().drawGeneral(true))
             }
         }
+
+        override suspend fun getLink(): String = VIDEO_LINK(id!!)
+
     },
     Article(listOf(
         """(?:www.bilibili.com/read/)?(cv\d{1,10})""".toRegex()
@@ -70,6 +74,8 @@ enum class LinkType(val regex: List<Regex>, var id: String? = null): ResolveLink
                 drawGeneral(id!!, "专栏", time.formatTime, author, toDrawData().drawGeneral())
             }
         }
+
+        override suspend fun getLink(): String = ARTICLE_LINK(id!!.removePrefix("cv"))
     },
     Dynamic(listOf(
         """[tm].bilibili.com/(?:dynamic/)?(\d+)""".toRegex()
@@ -78,6 +84,8 @@ enum class LinkType(val regex: List<Regex>, var id: String? = null): ResolveLink
             val color = Color.makeRGB(BiliConfig.imageConfig.defaultColor)
             return biliClient.getDynamicDetail(id!!)?.makeDrawDynamic(listOf(color))
         }
+
+        override suspend fun getLink(): String = DYNAMIC_LINK(id!!)
     },
     Live(listOf(
         """live.bilibili.com/(?:h5/)?(\d+)""".toRegex()
@@ -88,6 +96,8 @@ enum class LinkType(val regex: List<Regex>, var id: String? = null): ResolveLink
             val data = room.toDrawData().drawGeneral()
             return drawGeneral(id!!, "直播", Instant.now().epochSecond.formatTime, author, data)
         }
+
+        override suspend fun getLink(): String = LIVE_LINK(id!!)
     },
     User(listOf(
         """space.bilibili.com/(\d+)""".toRegex()
@@ -96,6 +106,8 @@ enum class LinkType(val regex: List<Regex>, var id: String? = null): ResolveLink
             val author = biliClient.userInfo(id!!.toLong())?.toDrawAuthorData() ?: return null
             return drawGeneral(id!!, "用户", Instant.now().epochSecond.formatTime, author, null)
         }
+
+        override suspend fun getLink(): String = SPACE_LINK(id!!)
     },
     Pgc(listOf(
         """(?:(?:www|m).bilibili.com/bangumi/(?:play|media)/)?((?:ss|ep|md)\d+)""".toRegex()
@@ -106,6 +118,8 @@ enum class LinkType(val regex: List<Regex>, var id: String? = null): ResolveLink
             val data = info.toPgc()?.drawSmall()
             return drawGeneral(id!!, "番剧", Instant.now().epochSecond.formatTime, author, data)
         }
+
+        override suspend fun getLink(): String = PGC_LINK(id!!)
     },
     ShortLink(listOf(
         """b23.tv/([0-9A-z]+)""".toRegex()
@@ -116,6 +130,8 @@ enum class LinkType(val regex: List<Regex>, var id: String? = null): ResolveLink
                 matchingInternalRegular(link)?.drawGeneral()
             }else null
         }
+
+        override suspend fun getLink(): String = "$BASE_SHORT/$id"
     }
 }
 

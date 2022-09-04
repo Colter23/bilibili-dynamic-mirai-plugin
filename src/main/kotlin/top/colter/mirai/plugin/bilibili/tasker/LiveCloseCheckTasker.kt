@@ -39,7 +39,7 @@ object LiveCloseCheckTasker : BiliCheckTasker("LiveClose")  {
                     (nowTime - liveTime).formatDuration(),
                     info.title,
                     info.area,
-                    LIVE_LINK(info.roomId)
+                    LIVE_LINK(info.roomId.toString())
                 ))
                 liveUsers.remove(info.uid)
             }

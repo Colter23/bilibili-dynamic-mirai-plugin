@@ -4,24 +4,19 @@ import net.mamoe.mirai.Bot
 import net.mamoe.mirai.event.events.BotLeaveEvent
 import net.mamoe.mirai.event.events.GroupMessageEvent
 import net.mamoe.mirai.event.globalEventChannel
-import net.mamoe.mirai.message.data.At
-import net.mamoe.mirai.message.data.Image
-import net.mamoe.mirai.message.data.content
-import net.mamoe.mirai.message.data.toMessageChain
+import net.mamoe.mirai.message.data.*
 import top.colter.mirai.plugin.bilibili.BiliConfig
 import top.colter.mirai.plugin.bilibili.BiliData
 import top.colter.mirai.plugin.bilibili.service.DynamicService.removeAllSubscribe
 import top.colter.mirai.plugin.bilibili.service.TriggerMode
 import top.colter.mirai.plugin.bilibili.service.matchingRegular
-import top.colter.mirai.plugin.bilibili.utils.delegate
-import top.colter.mirai.plugin.bilibili.utils.findContact
-import top.colter.mirai.plugin.bilibili.utils.logger
-import top.colter.mirai.plugin.bilibili.utils.sendImage
+import top.colter.mirai.plugin.bilibili.utils.*
 
 object ListenerTasker : BiliTasker() {
     override var interval: Int = -1
 
     private val triggerMode = BiliConfig.linkResolveConfig.triggerMode
+    private val returnLink = BiliConfig.linkResolveConfig.returnLink
 
     override suspend fun main() {
         globalEventChannel().subscribeAlways<BotLeaveEvent> {
@@ -35,19 +30,26 @@ object ListenerTasker : BiliTasker() {
         }
 
         globalEventChannel().subscribeAlways<GroupMessageEvent> {
+            var f = false
             when (triggerMode) {
                 TriggerMode.At -> {
                     val at = message.filterIsInstance(At::class.java)
                     if (at.isNotEmpty() && at.any { Bot.instances.map { it.id }.contains(it.target) }) {
-                        val msg = message.filter { it !is At && it !is Image }.toMessageChain().content.trim()
-                        matchingRegular(msg)?.drawGeneral()?.let { it1 -> subject.sendImage(it1) }
+                        f = true
                     }
                 }
-                TriggerMode.Always -> {
-                    val msg = message.filter { it !is At && it !is Image }.toMessageChain().content.trim()
-                    matchingRegular(msg)?.drawGeneral()?.let { it1 -> subject.sendImage(it1) }
-                }
-                TriggerMode.Never -> {}
+                TriggerMode.Always -> f = true
+                TriggerMode.Never -> f = false
+            }
+            if (f) {
+                val msg = message.filter { it !is At && it !is Image }.toMessageChain().content.trim()
+                val type = matchingRegular(msg)
+                val img = type?.drawGeneral() ?: return@subscribeAlways
+                val imgMsg = subject.uploadImage(img, CacheType.DRAW_SEARCH) ?: return@subscribeAlways
+                subject.sendMessage(buildMessageChain {
+                    + imgMsg
+                    if (returnLink) + PlainText(type.getLink())
+                })
             }
         }
     }
