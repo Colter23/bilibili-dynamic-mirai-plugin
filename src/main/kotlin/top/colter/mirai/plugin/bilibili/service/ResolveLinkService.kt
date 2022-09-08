@@ -82,7 +82,13 @@ enum class LinkType(val regex: List<Regex>, var id: String? = null): ResolveLink
     )) {
         override suspend fun drawGeneral(): String? {
             val color = Color.makeRGB(BiliConfig.imageConfig.defaultColor)
-            return biliClient.getDynamicDetail(id!!)?.makeDrawDynamic(listOf(color))
+            return biliClient.getDynamicDetail(id!!)?.run {
+                val dynamic = drawDynamic(color)
+                val img = makeCardBg(dynamic.height, listOf(color)) {
+                    it.drawImage(dynamic, 0f, 0f)
+                }
+                cacheImage(img, "$idStr.png", CacheType.DRAW_SEARCH)
+            }
         }
 
         override suspend fun getLink(): String = DYNAMIC_LINK(id!!)

@@ -836,6 +836,9 @@ data class ModuleDynamic(
     ) {
         /**
          * 视频
+         * https://t.bilibili.com/703209180117336130 动态视频
+         * https://t.bilibili.com/703118805403959368 合作视频
+         * https://t.bilibili.com/703102853898567699 直播回放
          * @param type 类型
          * @param aid AVID
          * @param bvid BVID

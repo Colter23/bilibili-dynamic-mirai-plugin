@@ -2,6 +2,7 @@ package top.colter.mirai.plugin.bilibili.data
 
 import top.colter.mirai.plugin.bilibili.BiliConfig
 import top.colter.mirai.plugin.bilibili.api.articleShortLink
+import top.colter.mirai.plugin.bilibili.api.dynamicShortLink
 import top.colter.mirai.plugin.bilibili.api.liveShortLink
 import top.colter.mirai.plugin.bilibili.api.spaceShortLink
 import top.colter.mirai.plugin.bilibili.utils.biliClient
@@ -19,7 +20,9 @@ const val BASE_SHORT = "b23.tv"
 val toShortLink: Boolean by lazy { BiliConfig.pushConfig.toShortLink }
 
 suspend fun DYNAMIC_LINK(id: String) =
-    if (toShortLink) "$BASE_SHORT/$id" else "$BASE_DYNAMIC/$id"
+    if (toShortLink) biliClient.dynamicShortLink(id).run {
+        this?.removePrefix("https://") ?: "$BASE_DYNAMIC/cv$id"
+    } else "$BASE_DYNAMIC/$id"
 
 suspend fun ARTICLE_LINK(id: String) =
     if (toShortLink) {

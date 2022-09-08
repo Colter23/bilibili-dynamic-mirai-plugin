@@ -81,3 +81,15 @@ suspend fun BiliClient.searchUser(
         parameter("user_type", userType) // 0: 全部用户  1: UP主用户  2: 普通用户  3: 认证用户
     }
 }
+
+suspend fun BiliClient.searchUserVideo(
+    uid: Long,
+    count: Int = 1,
+    order: String = "pubdate",
+): VideoList? {
+    return getData(SPACE_SEARCH) {
+        parameter("mid", uid)
+        parameter("ps", count)
+        parameter("order", order)
+    }
+}

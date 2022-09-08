@@ -246,7 +246,14 @@ suspend fun ModuleDynamic.Major.Archive.drawGeneral(showStat: Boolean = false): 
             })
 
             val durationText = TextLine.make(durationText, font)
-            val playInfo = if (showStat) TextLine.make("${stat.play}观看 ${stat.danmaku}弹幕", font) else null
+            val playInfo = if (showStat) {
+                val play = stat.play.toInt()
+                var playStr = play.toString()
+                if (play > 10000) {
+                    playStr = "%.1f".format(play / 10000f) + "万"
+                }
+                TextLine.make("${playStr}观看 ${stat.danmaku}弹幕", font)
+            } else null
 
             val textX = coverMaskRRect.left + quality.cardPadding * 1.3f
             val textY = coverRRect.bottom - durationText.height - quality.cardPadding

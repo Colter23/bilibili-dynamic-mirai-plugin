@@ -24,9 +24,10 @@ const val LIVE_DETAIL = "https://api.live.bilibili.com/room/v1/Room/get_info"
 // Search
 const val SEARCH = "https://api.bilibili.com/x/web-interface/search/type"
 
-// User
+// Space
 const val USER_INFO = "https://api.bilibili.com/x/space/acc/info"
 const val USER_ID = "https://api.bilibili.com/x/web-interface/nav"
+const val SPACE_SEARCH = "https://api.bilibili.com/x/space/arc/search"
 
 // Follow
 const val IS_FOLLOW = "https://api.bilibili.com/x/relation"

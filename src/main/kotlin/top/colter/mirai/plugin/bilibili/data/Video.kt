@@ -208,3 +208,30 @@ data class VideoDetail(
         val isPaySeason: Boolean? = null,
     )
 }
+
+@Serializable
+data class VideoList(
+    val list: VList
+){
+    @Serializable
+    data class VList(
+        val vlist: List<VideoInfo>
+    )
+}
+
+@Serializable
+data class VideoInfo(
+    val aid: Long,
+    val title: String,
+    val bvid: String,
+    val description: String,
+    val pic: String,
+    val length: String,
+    @SerialName("created")
+    val time: Long,
+    val mid: Long,
+    val author: String,
+    val play: Long,
+    @SerialName("video_review")
+    val danmaku: Long,
+)

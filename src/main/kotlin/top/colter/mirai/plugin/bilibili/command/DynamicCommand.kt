@@ -7,6 +7,8 @@ import net.mamoe.mirai.console.command.descriptor.CommandArgumentParserException
 import net.mamoe.mirai.console.command.descriptor.buildCommandArgumentContext
 import net.mamoe.mirai.console.permission.PermissionService.Companion.hasPermission
 import net.mamoe.mirai.contact.Contact
+import net.mamoe.mirai.message.data.PlainText
+import net.mamoe.mirai.message.data.buildMessageChain
 import net.mamoe.mirai.utils.ExternalResource.Companion.sendAsImageTo
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
@@ -17,6 +19,7 @@ import top.colter.mirai.plugin.bilibili.FilterType
 import top.colter.mirai.plugin.bilibili.api.getDynamicDetail
 import top.colter.mirai.plugin.bilibili.api.getLive
 import top.colter.mirai.plugin.bilibili.api.getUserNewDynamic
+import top.colter.mirai.plugin.bilibili.api.searchUserVideo
 import top.colter.mirai.plugin.bilibili.data.DynamicDetail
 import top.colter.mirai.plugin.bilibili.data.LiveDetail
 import top.colter.mirai.plugin.bilibili.service.*
@@ -241,6 +244,27 @@ object DynamicCommand : CompositeCommand(
                 BiliBiliDynamic.dynamicChannel.send(DynamicDetail(di, Contact().delegate))
             }
             if (!list.isNullOrEmpty()) "少女祈祷中..." else "未找到动态"
+        }?.let { sendMessage(it) }
+    }
+
+    @SubCommand("video", "最新视频")
+    suspend fun CommandSenderOnMessage<*>.newVideo(user: String) {
+        matchUser(user) {
+            biliClient.searchUserVideo(it)?.list?.vlist?.run {
+                if (isNotEmpty()) {
+                    val video = first()
+                    val type = matchingRegular(video.bvid)
+                    val img = type?.drawGeneral() ?: return
+                    val imgMsg = Contact().uploadImage(img, CacheType.DRAW_SEARCH) ?: return
+                    sendMessage(buildMessageChain {
+                        + imgMsg
+                        if (BiliConfig.linkResolveConfig.returnLink) + PlainText(type.getLink())
+                    })
+                    null
+                }else {
+                    "未找到视频"
+                }
+            }
         }?.let { sendMessage(it) }
     }
 
