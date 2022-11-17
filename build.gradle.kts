@@ -1,14 +1,14 @@
 plugins {
-    val kotlinVersion = "1.7.10"
+    val kotlinVersion = "1.7.20"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.serialization") version kotlinVersion
 
-    id("net.mamoe.mirai-console") version "2.13.0-M1"
-    id("net.mamoe.maven-central-publish") version "0.7.1"
+    id("net.mamoe.mirai-console") version "2.13.0-RC2"
+    id("me.him188.maven-central-publish") version "1.0.0-dev-3"
 }
 
 group = "top.colter"
-version = "3.2.0"
+version = "3.2.1"
 
 repositories {
     mavenLocal()
@@ -26,24 +26,24 @@ mavenCentralPublish {
 }
 
 dependencies {
-    implementation("io.ktor:ktor-client-okhttp:2.1.0") {
+    implementation("io.ktor:ktor-client-okhttp:2.1.3") {
         exclude(group = "org.jetbrains.kotlin")
         exclude(group = "org.jetbrains.kotlinx")
         exclude(group = "org.slf4j")
     }
-    implementation("io.ktor:ktor-client-encoding:2.1.0") {
+    implementation("io.ktor:ktor-client-encoding:2.1.3") {
         exclude(group = "org.jetbrains.kotlin")
         exclude(group = "org.jetbrains.kotlinx")
         exclude(group = "org.slf4j")
     }
-    implementation("io.ktor:ktor-serialization-kotlinx-json:2.1.0") {
+    implementation("io.ktor:ktor-serialization-kotlinx-json:2.1.3") {
         exclude(group = "org.jetbrains.kotlin")
         exclude(group = "org.jetbrains.kotlinx")
         exclude(group = "org.slf4j")
     }
 
     implementation("com.google.zxing:javase:3.5.0")
-    compileOnly("xyz.cssxsh.mirai:mirai-skia-plugin:1.1.8")
+    compileOnly("xyz.cssxsh.mirai:mirai-skia-plugin:1.2.1")
 
     testImplementation(kotlin("test", "1.7.0"))
     testImplementation("org.jetbrains.skiko:skiko-awt-runtime-windows-x64:0.7.27")

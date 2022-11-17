@@ -80,8 +80,8 @@ suspend fun loadFonts() {
                 try {
                     f.walkBottomUp().onLeave { it.delete() }
                 }catch (_: Exception) { }
-            }catch (e: Exception) {
-                BiliBiliDynamic.logger.error("下载字体失败! ${e}")
+            }catch (e: Throwable) {
+                BiliBiliDynamic.logger.error("下载字体失败! $e")
             }
         }
         forEachDirectoryEntry {

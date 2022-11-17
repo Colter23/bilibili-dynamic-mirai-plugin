@@ -1,5 +1,6 @@
 package top.colter.mirai.plugin.bilibili.command
 
+import kotlinx.coroutines.TimeoutCancellationException
 import net.mamoe.mirai.console.command.CommandSender
 import net.mamoe.mirai.console.command.CommandSenderOnMessage
 import net.mamoe.mirai.console.command.CompositeCommand
@@ -9,13 +10,12 @@ import net.mamoe.mirai.console.permission.PermissionService.Companion.hasPermiss
 import net.mamoe.mirai.contact.Contact
 import net.mamoe.mirai.message.data.PlainText
 import net.mamoe.mirai.message.data.buildMessageChain
+import net.mamoe.mirai.message.data.content
+import net.mamoe.mirai.message.nextMessage
 import net.mamoe.mirai.utils.ExternalResource.Companion.sendAsImageTo
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
-import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
+import top.colter.mirai.plugin.bilibili.*
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic.crossContact
-import top.colter.mirai.plugin.bilibili.BiliConfig
-import top.colter.mirai.plugin.bilibili.FilterMode
-import top.colter.mirai.plugin.bilibili.FilterType
 import top.colter.mirai.plugin.bilibili.api.getDynamicDetail
 import top.colter.mirai.plugin.bilibili.api.getLive
 import top.colter.mirai.plugin.bilibili.api.getUserNewDynamic
@@ -56,7 +56,7 @@ object DynamicCommand : CompositeCommand(
         if (checkPerm(target)) {
             if (pgcRegex.matches(id)) {
                 sendMessage(PgcService.followPgc(id, target.subject))
-            }else try {
+            } else try {
                 DynamicService.addSubscribe(id.toLong(), target.subject).let {
                     sendMessage(it)
                     actionNotify(this.subject?.id, name, target.name, "订阅", it)
@@ -72,7 +72,7 @@ object DynamicCommand : CompositeCommand(
         if (checkPerm(target)) {
             if (pgcRegex.matches(id)) {
                 sendMessage(PgcService.delPgc(id, target.subject))
-            }else matchUser(id) {
+            } else matchUser(id) {
                 DynamicService.removeSubscribe(it, target.subject)
             }?.let {
                 sendMessage(it)
@@ -109,7 +109,7 @@ object DynamicCommand : CompositeCommand(
         if (admin == Contact().id || admin == this.user?.id || this.user == null)
             if (user.isEmpty()) {
                 sendMessage(DynamicService.listUser())
-            }else {
+            } else {
                 matchUser(user) {
                     DynamicService.listUser(it)
                 }?.let { sendMessage(it) }
@@ -118,7 +118,12 @@ object DynamicCommand : CompositeCommand(
     }
 
     @SubCommand("filterMode", "fm", "过滤模式")
-    suspend fun CommandSender.filterMode(type: String, mode: String, uid: Long = 0L, target: GroupOrContact = GroupOrContact(Contact())) {
+    suspend fun CommandSender.filterMode(
+        type: String,
+        mode: String,
+        uid: Long = 0L,
+        target: GroupOrContact = GroupOrContact(Contact())
+    ) {
         if (checkPerm(target)) {
             sendMessage(
                 FilterService.addFilter(
@@ -131,14 +136,22 @@ object DynamicCommand : CompositeCommand(
     }
 
     @SubCommand("filterType", "ft", "类型过滤")
-    suspend fun CommandSender.filterType(type: String, uid: Long = 0L, target: GroupOrContact = GroupOrContact(Contact())) {
+    suspend fun CommandSender.filterType(
+        type: String,
+        uid: Long = 0L,
+        target: GroupOrContact = GroupOrContact(Contact())
+    ) {
         if (checkPerm(target)) {
             sendMessage(FilterService.addFilter(FilterType.TYPE, null, type, uid, target.subject))
         }
     }
 
     @SubCommand("filterReg", "fr", "正则过滤")
-    suspend fun CommandSender.filterReg(reg: String, uid: Long = 0L, target: GroupOrContact = GroupOrContact(Contact())) {
+    suspend fun CommandSender.filterReg(
+        reg: String,
+        uid: Long = 0L,
+        target: GroupOrContact = GroupOrContact(Contact())
+    ) {
         if (checkPerm(target)) {
             sendMessage(FilterService.addFilter(FilterType.REGULAR, null, reg, uid, target.subject))
         }
@@ -152,7 +165,11 @@ object DynamicCommand : CompositeCommand(
     }
 
     @SubCommand("filterDel", "fd", "过滤删除")
-    suspend fun CommandSender.filterDel(index: String, uid: Long = 0L, target: GroupOrContact = GroupOrContact(Contact())) {
+    suspend fun CommandSender.filterDel(
+        index: String,
+        uid: Long = 0L,
+        target: GroupOrContact = GroupOrContact(Contact())
+    ) {
         if (checkPerm(target)) {
             sendMessage(FilterService.delFilter(index, uid, target.subject))
         }
@@ -165,7 +182,11 @@ object DynamicCommand : CompositeCommand(
     }
 
     @SubCommand("template", "t", "模板")
-    suspend fun CommandSender.template(type: String, template: String, target: GroupOrContact = GroupOrContact(Contact())) {
+    suspend fun CommandSender.template(
+        type: String,
+        template: String,
+        target: GroupOrContact = GroupOrContact(Contact())
+    ) {
         if (checkPerm(target)) {
             sendMessage(TemplateService.setTemplate(type, template, target.subject))
         }
@@ -180,7 +201,11 @@ object DynamicCommand : CompositeCommand(
     }
 
     @SubCommand("atall", "aa", "at全体")
-    suspend fun CommandSender.atall(type: String = "a", user: String = "0", target: GroupOrContact = GroupOrContact(Contact())) {
+    suspend fun CommandSender.atall(
+        type: String = "a",
+        user: String = "0",
+        target: GroupOrContact = GroupOrContact(Contact())
+    ) {
         if (checkPerm(target)) {
             matchUser(user) {
                 AtAllService.addAtAll(type, it, target)
@@ -189,7 +214,11 @@ object DynamicCommand : CompositeCommand(
     }
 
     @SubCommand("delAtall", "daa", "取消at全体")
-    suspend fun CommandSender.delAtall(type: String = "a", user: String = "0", target: GroupOrContact = GroupOrContact(Contact())) {
+    suspend fun CommandSender.delAtall(
+        type: String = "a",
+        user: String = "0",
+        target: GroupOrContact = GroupOrContact(Contact())
+    ) {
         if (checkPerm(target)) {
             matchUser(user) {
                 AtAllService.delAtAll(type, it, target.subject)
@@ -207,7 +236,10 @@ object DynamicCommand : CompositeCommand(
     }
 
     @SubCommand("config", "配置")
-    suspend fun CommandSenderOnMessage<*>.config(user: String = "0", target: GroupOrContact = GroupOrContact(Contact())) {
+    suspend fun CommandSenderOnMessage<*>.config(
+        user: String = "0",
+        target: GroupOrContact = GroupOrContact(Contact())
+    ) {
         if (checkPerm(target)) {
             if (user == "0") {
                 ConfigService.config(fromEvent, 0, target.contact!!)
@@ -257,11 +289,11 @@ object DynamicCommand : CompositeCommand(
                     val img = type?.drawGeneral() ?: return
                     val imgMsg = Contact().uploadImage(img, CacheType.DRAW_SEARCH) ?: return
                     sendMessage(buildMessageChain {
-                        + imgMsg
-                        if (BiliConfig.linkResolveConfig.returnLink) + PlainText(type.getLink())
+                        +imgMsg
+                        if (BiliConfig.linkResolveConfig.returnLink) +PlainText(type.getLink())
                     })
                     null
-                }else {
+                } else {
                     "未找到视频"
                 }
             }
@@ -270,45 +302,85 @@ object DynamicCommand : CompositeCommand(
 
     @SubCommand("create", "创建分组")
     suspend fun CommandSender.createGroup(name: String) = sendMessage(
-        GroupService.createGroup(name, subject?.id ?:0L)
+        GroupService.createGroup(name, subject?.id ?: 0L)
     )
 
     @SubCommand("listGroup", "lg", "分组列表")
     suspend fun CommandSender.listGroup(name: String? = null) = sendMessage(
-        GroupService.listGroup(name, subject?.id ?:0L)
+        GroupService.listGroup(name, subject?.id ?: 0L)
     )
 
     @SubCommand("delGroup", "dg", "删除分组")
     suspend fun CommandSender.delGroup(name: String) = sendMessage(
-        GroupService.delGroup(name, subject?.id ?:0L)
+        GroupService.delGroup(name, subject?.id ?: 0L)
     )
 
     @SubCommand("addGroupAdmin", "aga", "添加分组管理员")
     suspend fun CommandSender.setGroupAdmin(name: String, contacts: String) = sendMessage(
-        GroupService.setGroupAdmin(name, contacts, subject?.id ?:0L)
+        GroupService.setGroupAdmin(name, contacts, subject?.id ?: 0L)
     )
 
     @SubCommand("banGroupAdmin", "bga", "删除分组管理员")
     suspend fun CommandSender.banGroupAdmin(name: String, contacts: String) = sendMessage(
-        GroupService.banGroupAdmin(name, contacts, subject?.id ?:0L)
+        GroupService.banGroupAdmin(name, contacts, subject?.id ?: 0L)
     )
 
     @SubCommand("push", "添加分组")
     suspend fun CommandSender.pushGroup(name: String, contacts: String) = sendMessage(
-        GroupService.pushGroupContact(name, contacts, subject?.id ?:0L)
+        GroupService.pushGroupContact(name, contacts, subject?.id ?: 0L)
     )
 
     @SubCommand("ban")
     suspend fun CommandSender.delGroupContact(name: String, contacts: String) = sendMessage(
-        GroupService.delGroupContact(name, contacts, subject?.id ?:0L)
+        GroupService.delGroupContact(name, contacts, subject?.id ?: 0L)
     )
+
+    @SubCommand("clear")
+    suspend fun CommandSenderOnMessage<*>.clear() {
+        if (BiliConfig.admin == user!!.id) {
+            val map = mutableMapOf<String, MutableList<Long>>()
+            BiliData.dynamic.forEach { (uid, sub) ->
+                sub.contacts.forEach {
+                    try {
+                        it.toLong()
+                        if (findContactAll(it) == null) {
+                            map.getOrPut(it) { mutableListOf() }.add(uid)
+                        }
+                    } catch (_: NumberFormatException) {
+                    }
+                }
+            }
+            if (map.isEmpty()) {
+                sendMessage("未找到失效的群/好友")
+                return
+            }
+            sendMessage("发下以下失效的群/好友：\n\n${map.keys.joinToString("\n")}\n\n带负号的为群\n确认删除这些用户吗\n请回复 ‘确定’ 或 ‘取消’")
+            try {
+                val msg = fromEvent.nextMessage(300000)
+                if (msg.content == "确定") {
+                    map.forEach { (c, u) ->
+                        u.forEach {
+                            DynamicService.removeSubscribe(it, c)
+                        }
+                    }
+                    sendMessage("删除成功")
+                } else sendMessage("已取消")
+            } catch (_: TimeoutCancellationException) {
+            }
+        }else {
+            sendMessage("权限不足，仅bot管理员可操作")
+        }
+
+    }
 
     suspend fun CommandSender.checkPerm(target: GroupOrContact): Boolean {
         if (target.group != null && !GroupService.checkGroupPerm(target.group.name, Contact().id)) {
             sendMessage("权限不足, 无法操作其他分组")
             return false
         }
-        if (target.group == null && !hasPermission(crossContact) && (target.contact?.delegate ?: "0") != Contact().delegate) {
+        if (target.group == null && !hasPermission(crossContact) && (target.contact?.delegate
+                ?: "0") != Contact().delegate
+        ) {
             sendMessage("权限不足, 无法操作其他人")
             return false
         }

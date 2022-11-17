@@ -21,7 +21,7 @@ val toShortLink: Boolean by lazy { BiliConfig.pushConfig.toShortLink }
 
 suspend fun DYNAMIC_LINK(id: String) =
     if (toShortLink) biliClient.dynamicShortLink(id).run {
-        this?.removePrefix("https://") ?: "$BASE_DYNAMIC/cv$id"
+        this?.removePrefix("https://") ?: "$BASE_DYNAMIC/$id"
     } else "$BASE_DYNAMIC/$id"
 
 suspend fun ARTICLE_LINK(id: String) =
@@ -33,7 +33,7 @@ suspend fun ARTICLE_LINK(id: String) =
 
 fun VIDEO_LINK(id: String): String {
     val tid = if (id.contains("BV") || id.contains("av")) id else "av$id"
-    return if (toShortLink) "$BASE_SHORT/$id" else "$BASE_VIDEO/$tid"
+    return if (toShortLink) "$BASE_SHORT/$tid" else "$BASE_VIDEO/$tid"
 }
 
 suspend fun SPACE_LINK(id: String): String = if (toShortLink) {
