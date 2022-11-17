@@ -343,7 +343,7 @@ object DynamicCommand : CompositeCommand(
                 sub.contacts.forEach {
                     try {
                         it.toLong()
-                        if (findContactAll(it) == null) {
+                        if (findContact(it) == null) {
                             map.getOrPut(it) { mutableListOf() }.add(uid)
                         }
                     } catch (_: NumberFormatException) {
@@ -354,7 +354,7 @@ object DynamicCommand : CompositeCommand(
                 sendMessage("未找到失效的群/好友")
                 return
             }
-            sendMessage("发下以下失效的群/好友：\n\n${map.keys.joinToString("\n")}\n\n带负号的为群\n确认删除这些用户吗\n请回复 ‘确定’ 或 ‘取消’")
+            sendMessage("发现以下失效的群/好友：\n\n${map.keys.joinToString("\n")}\n\n带负号的为群\n确认删除这些用户的订阅吗\n请回复 ‘确定’ 或 ‘取消’")
             try {
                 val msg = fromEvent.nextMessage(300000)
                 if (msg.content == "确定") {
