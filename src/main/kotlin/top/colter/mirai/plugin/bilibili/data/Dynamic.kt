@@ -48,6 +48,7 @@ enum class DynamicType(val text: String) {
     DYNAMIC_TYPE_PGC("番剧"),
     DYNAMIC_TYPE_COMMON_SQUARE("动态"),
     DYNAMIC_TYPE_COMMON_VERTICAL("动态"),
+    DYNAMIC_TYPE_UGC_SEASON("合集"),
     DYNAMIC_TYPE_NONE("动态被删除"),
     DYNAMIC_TYPE_UNKNOWN("未知的动态"),
 }
@@ -92,24 +93,11 @@ data class DynamicItem(
     val orig: DynamicItem? = null,
 ): BiliDetail {
 
-    val type: DynamicType
-        get() =
-            when (typeStr) {
-                "DYNAMIC_TYPE_WORD" -> DynamicType.DYNAMIC_TYPE_WORD
-                "DYNAMIC_TYPE_DRAW" -> DynamicType.DYNAMIC_TYPE_DRAW
-                "DYNAMIC_TYPE_ARTICLE" -> DynamicType.DYNAMIC_TYPE_ARTICLE
-                "DYNAMIC_TYPE_FORWARD" -> DynamicType.DYNAMIC_TYPE_FORWARD
-                "DYNAMIC_TYPE_AV" -> DynamicType.DYNAMIC_TYPE_AV
-                "DYNAMIC_TYPE_MUSIC" -> DynamicType.DYNAMIC_TYPE_MUSIC
-                "DYNAMIC_TYPE_LIVE" -> DynamicType.DYNAMIC_TYPE_LIVE
-                "DYNAMIC_TYPE_LIVE_RCMD" -> DynamicType.DYNAMIC_TYPE_LIVE_RCMD
-                "DYNAMIC_TYPE_PGC" -> DynamicType.DYNAMIC_TYPE_PGC
-                "DYNAMIC_TYPE_COMMON_SQUARE" -> DynamicType.DYNAMIC_TYPE_COMMON_SQUARE
-                "DYNAMIC_TYPE_COMMON_VERTICAL" -> DynamicType.DYNAMIC_TYPE_COMMON_VERTICAL
-                "DYNAMIC_TYPE_NONE" -> DynamicType.DYNAMIC_TYPE_NONE
-                else -> DynamicType.DYNAMIC_TYPE_UNKNOWN
-            }
-
+    val type: DynamicType get() = try {
+        DynamicType.valueOf(typeStr)
+    }catch (e: IllegalArgumentException){
+        DynamicType.DYNAMIC_TYPE_UNKNOWN
+    }
 
     val did: String get() = idStr ?: "0"
 
@@ -405,6 +393,7 @@ data class ModuleDynamic(
          * ADDITIONAL_TYPE_VOTE     投票
          * ADDITIONAL_TYPE_UGC      相关视频
          * ADDITIONAL_TYPE_GOODS    商品
+         * ADDITIONAL_TYPE_UPOWER_LOTTERY  充电抽奖
          */
         @SerialName("type")
         val type: String,
@@ -419,7 +408,32 @@ data class ModuleDynamic(
         val ugc: Ugc? = null,
         @SerialName("goods")
         val goods: Goods? = null,
+        @SerialName("upower_lottery")
+        val lottery: Lottery? = null,
     ) {
+        /**
+         * https://t.bilibili.com/729548651221745712
+         */
+        @Serializable
+        data class Lottery(
+            @SerialName("rid")
+            val rid: Long,
+            @SerialName("title")
+            val title: String,
+            @SerialName("mid")
+            val mid: Long,
+            @SerialName("state")
+            val state: Int,
+            @SerialName("is_upower_active")
+            val active: Boolean,
+            @SerialName("desc")
+            val desc: Desc,
+            @SerialName("button")
+            val button: Button,
+            @SerialName("jump_url")
+            val jumpUrl: String,
+        )
+
         /**
          * 活动
          * https://t.bilibili.com/666029864355102737
@@ -810,6 +824,7 @@ data class ModuleDynamic(
          * MAJOR_TYPE_LIVE_RCMD  直播
          * MAJOR_TYPE_PGC        番剧
          * MAJOR_TYPE_COMMON     活动
+         * MAJOR_TYPE_UGC_SEASON 广播剧
          * MAJOR_TYPE_NONE       空
          */
         @SerialName("type")
@@ -831,9 +846,13 @@ data class ModuleDynamic(
         val pgc: Pgc? = null,
         @SerialName("common")
         val common: Common? = null,
+        @SerialName("ugc_season")
+        val ugcSeason: Archive? = null,
         @SerialName("none")
         val none: None? = null,
     ) {
+
+
         /**
          * 视频
          * https://t.bilibili.com/703209180117336130 动态视频
@@ -858,7 +877,7 @@ data class ModuleDynamic(
             @SerialName("aid")
             val aid: String,
             @SerialName("bvid")
-            val bvid: String,
+            val bvid: String? = null,
             @SerialName("title")
             val title: String,
             @SerialName("cover")
@@ -933,7 +952,7 @@ data class ModuleDynamic(
                     @SerialName("mid")
                     val mid: Long = 0,
                     @SerialName("item_id")
-                    val itemId: Int = 0,
+                    val itemId: String,
                     @SerialName("source")
                     val source: Int = 0,
                     @SerialName("type")

@@ -9,7 +9,7 @@ import top.colter.mirai.plugin.bilibili.service.TriggerMode
 import top.colter.mirai.plugin.bilibili.utils.CacheType
 
 
-object BiliConfig : AutoSavePluginConfig("BiliConfig") {
+object BiliConfig: AutoSavePluginConfig("BiliConfig") {
 
     @ValueDescription("具体的配置文件描述请前往下方链接查看")
     val help: String by value("https://github.com/Colter23/bilibili-dynamic-mirai-plugin#BiliConfig.yml")

@@ -6,6 +6,7 @@ import net.mamoe.mirai.console.permission.PermissionService.Companion.getPermitt
 import net.mamoe.mirai.console.permission.PermitteeId.Companion.permitteeId
 import net.mamoe.mirai.contact.Contact
 import net.mamoe.mirai.contact.Group
+import net.mamoe.mirai.contact.isBotMuted
 import net.mamoe.mirai.message.code.MiraiCode
 import net.mamoe.mirai.message.data.*
 import top.colter.mirai.plugin.bilibili.*
@@ -129,7 +130,9 @@ object SendTasker : BiliTasker() {
                         }
                     }
                 }
-                contactMessage.forEach { (c, msg) ->
+                for ((c, msg) in contactMessage) {
+                    if (c is Group && c.isBotMuted) continue
+
                     c.sendMessage(if (contactAtAll[c] == true) {
                         if (atAllPlus == "SINGLE_MESSAGE" || msg.last().content.contains("[转发消息]")) {
                             msg.plusElement(buildMessageChain { +AtAll })
@@ -217,6 +220,7 @@ object SendTasker : BiliTasker() {
 
             DynamicType.DYNAMIC_TYPE_FORWARD -> DynamicFilterType.FORWARD
             DynamicType.DYNAMIC_TYPE_AV,
+            DynamicType.DYNAMIC_TYPE_UGC_SEASON,
             DynamicType.DYNAMIC_TYPE_PGC -> DynamicFilterType.VIDEO
 
             DynamicType.DYNAMIC_TYPE_MUSIC -> DynamicFilterType.MUSIC

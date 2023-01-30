@@ -6,10 +6,7 @@ import org.jetbrains.skia.paragraph.ParagraphBuilder
 import org.jetbrains.skia.paragraph.ParagraphStyle
 import top.colter.mirai.plugin.bilibili.BiliConfig
 import top.colter.mirai.plugin.bilibili.data.ModuleDynamic
-import top.colter.mirai.plugin.bilibili.utils.CacheType
-import top.colter.mirai.plugin.bilibili.utils.FontUtils
-import top.colter.mirai.plugin.bilibili.utils.getOrDownloadImage
-import top.colter.mirai.plugin.bilibili.utils.getOrDownloadImageDefault
+import top.colter.mirai.plugin.bilibili.utils.*
 import kotlin.math.ceil
 
 
@@ -165,7 +162,8 @@ suspend fun ModuleDynamic.Major.Archive.drawGeneral(showStat: Boolean = false): 
         ParagraphBuilder(paragraphStyle, FontUtils.fonts).addText(desc.replace("\r\n", " ").replace("\n", " ")).build()
             .layout(paragraphWidth)
 
-    val coverImg = getOrDownloadImageDefault(cover, CacheType.IMAGES)
+    val fallbackUrl = imgApi(cover, cardContentRect.width.toInt(), (cardContentRect.width * 0.625).toInt())
+    val coverImg = getOrDownloadImageDefault(cover, fallbackUrl, CacheType.IMAGES)
 
     val videoCoverHeight = cardContentRect.width * coverImg.height / coverImg.width
     val videoCardHeight = videoCoverHeight + titleParagraph.height + descParagraph.height + quality.cardPadding
@@ -398,7 +396,8 @@ suspend fun drawSmallCard(
             }
 
             // 封面
-            val coverImg = getOrDownloadImageDefault(cover, CacheType.IMAGES)
+            val fallbackUrl = imgApi(cover, coverWidth.toInt(), quality.smallCardHeight)
+            val coverImg = getOrDownloadImageDefault(cover, fallbackUrl, CacheType.IMAGES)
             val coverRRect = RRect.makeComplexXYWH(
                 videoCardRect.left, videoCardRect.top, coverWidth,
                 quality.smallCardHeight.toFloat(), cardBadgeArc
@@ -489,7 +488,8 @@ suspend fun ModuleDynamic.Major.Draw.drawGeneral(): Image {
             var y = quality.drawSpace.toFloat()
 
             items.forEachIndexed { index, drawItem ->
-                val img = getOrDownloadImageDefault(drawItem.src, CacheType.IMAGES)
+                val fallbackUrl = imgApi(drawItem.src, drawItemWidth.toInt(), drawItemHeight.toInt())
+                val img = getOrDownloadImageDefault(drawItem.src, fallbackUrl, CacheType.IMAGES)
                 val dstRect = RRect.makeXYWH(x, y, drawItemWidth, drawItemHeight, quality.cardArc)
 
                 drawRRect(dstRect, Paint().apply {
@@ -571,7 +571,8 @@ suspend fun ModuleDynamic.Major.Article.drawGeneral(): Image {
                 cardBadgeArc
             ).inflate(-1f) as RRect
             if (covers.size == 1) {
-                val coverImg = getOrDownloadImageDefault(covers[0], CacheType.IMAGES)
+                val fallbackUrl = imgApi(covers[0], articleCardRect.width.toInt(), articleCoverHeight.toInt())
+                val coverImg = getOrDownloadImageDefault(covers[0], fallbackUrl, CacheType.IMAGES)
                 drawImageRRect(coverImg, coverRRect)
             } else {
                 var imgX = articleCardRect.left
@@ -579,7 +580,8 @@ suspend fun ModuleDynamic.Major.Article.drawGeneral(): Image {
                 save()
                 clipRRect(coverRRect, true)
                 covers.forEach {
-                    val img = getOrDownloadImageDefault(it, CacheType.IMAGES)
+                    val fallbackUrl = imgApi(it, imgW.toInt(), articleCoverHeight.toInt())
+                    val img = getOrDownloadImageDefault(it, fallbackUrl, CacheType.IMAGES)
                     val tar = RRect.makeXYWH(imgX, articleCardRect.top, imgW, articleCoverHeight, 0f)
                     drawImageClip(img, tar, Paint())
                     imgX += articleCardRect.width / 3 + 2
@@ -689,7 +691,8 @@ suspend fun ModuleDynamic.Major.Music.drawGeneral(): Image {
             }
 
             // 封面
-            val coverImg = getOrDownloadImageDefault(cover, CacheType.IMAGES)
+            val fallbackUrl = imgApi(cover, musicCardHeight.toInt(), musicCardHeight.toInt())
+            val coverImg = getOrDownloadImageDefault(cover, fallbackUrl, CacheType.IMAGES)
             val coverRRect = RRect.makeComplexXYWH(
                 musicCardRect.left,
                 musicCardRect.top,

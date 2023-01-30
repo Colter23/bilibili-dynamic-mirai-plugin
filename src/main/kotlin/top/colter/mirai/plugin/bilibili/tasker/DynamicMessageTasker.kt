@@ -58,6 +58,7 @@ object DynamicMessageTasker : BiliTasker() {
             DYNAMIC_TYPE_AV -> modules.moduleDynamic.major?.archive?.title!!
             DYNAMIC_TYPE_MUSIC -> modules.moduleDynamic.major?.music?.title!!
             DYNAMIC_TYPE_PGC -> modules.moduleDynamic.major?.pgc?.title!!
+            DYNAMIC_TYPE_UGC_SEASON -> modules.moduleDynamic.major?.ugcSeason?.title!!
             DYNAMIC_TYPE_COMMON_VERTICAL,
             DYNAMIC_TYPE_COMMON_SQUARE -> modules.moduleDynamic.major?.common?.title!!
             DYNAMIC_TYPE_LIVE -> modules.moduleDynamic.major?.live?.title!!
@@ -75,6 +76,7 @@ object DynamicMessageTasker : BiliTasker() {
             DYNAMIC_TYPE_AV -> listOf(modules.moduleDynamic.major?.archive?.cover!!)
             DYNAMIC_TYPE_MUSIC -> listOf(modules.moduleDynamic.major?.music?.cover!!)
             DYNAMIC_TYPE_PGC -> listOf(modules.moduleDynamic.major?.pgc?.cover!!)
+            DYNAMIC_TYPE_UGC_SEASON -> listOf(modules.moduleDynamic.major?.ugcSeason?.cover!!)
             DYNAMIC_TYPE_COMMON_SQUARE -> listOf(modules.moduleDynamic.major?.common?.cover!!)
             DYNAMIC_TYPE_LIVE -> listOf(modules.moduleDynamic.major?.live?.cover!!)
             DYNAMIC_TYPE_LIVE_RCMD -> listOf(modules.moduleDynamic.major?.liveRcmd?.liveInfo?.livePlayInfo?.cover!!)
@@ -96,6 +98,7 @@ object DynamicMessageTasker : BiliTasker() {
             DYNAMIC_TYPE_DRAW,
             DYNAMIC_TYPE_COMMON_VERTICAL,
             DYNAMIC_TYPE_COMMON_SQUARE,
+            DYNAMIC_TYPE_UGC_SEASON,
             DYNAMIC_TYPE_UNKNOWN -> {
                 listOf(
                     DynamicMessage.Link("动态", DYNAMIC_LINK(did))
@@ -158,6 +161,7 @@ object DynamicMessageTasker : BiliTasker() {
                     DynamicMessage.Link("动态", DYNAMIC_LINK(did))
                 )
             }
+
         }
 
     }

@@ -109,6 +109,8 @@ fun Int.formatDuration(isText: Boolean = true): String = this.toLong().formatDur
 val Long.formatZero: String get() = if (this in 1..9) "0$this" else this.toString()
 val Int.formatZero: String get() = this.toLong().formatZero
 
+fun imgApi(imgUrl: String, width: Int, height: Int): String = "${imgUrl}@${width}w_${height}h_1e_1c.png"
+
 val DynamicItem.link: String
     get() = when (type) {
         DYNAMIC_TYPE_WORD,
@@ -124,6 +126,7 @@ val DynamicItem.link: String
         DYNAMIC_TYPE_LIVE -> "https://live.bilibili.com/${modules.moduleDynamic.major?.live?.id}"
         DYNAMIC_TYPE_LIVE_RCMD -> "https://live.bilibili.com/${modules.moduleDynamic.major?.live?.id}"
         DYNAMIC_TYPE_PGC -> "https://www.bilibili.com/bangumi/play/ep${modules.moduleDynamic.major?.pgc?.epid}"
+        DYNAMIC_TYPE_UGC_SEASON -> "https://www.bilibili.com/video/av${modules.moduleDynamic.major?.ugcSeason?.aid}"
         DYNAMIC_TYPE_NONE -> ""
     }
 
@@ -197,39 +200,47 @@ suspend fun getOrDownload(url: String, cacheType: CacheType = CacheType.UNKNOWN)
             filePath.setLastModifiedTime(FileTime.from(Instant.now()))
             filePath.readBytes()
         } else {
-            biliClient.useHttpClient {
-                it.get(url).body<ByteArray>().apply {
-                    filePath.writeBytes(this)
+            try {
+                biliClient.useHttpClient {
+                    it.get(url).body<ByteArray>().apply {
+                        filePath.writeBytes(this)
+                    }
                 }
+            }catch (t: Throwable) {
+                logger.error("下载图片失败! $url\n$t")
+                return null
             }
         }
-    }catch (e: Exception) {
-        logger.error("获取图片失败! \n$e")
+    }catch (t: Throwable) {
+        logger.error("获取图片失败! $url\n$t")
         return null
     }
 }
 
 suspend fun getOrDownloadImage(url: String, cacheType: CacheType = CacheType.UNKNOWN) = try {
     getOrDownload(url, cacheType)?.let { Image.makeFromEncoded(it) }
-}catch (e: Exception){
-    logger.error("解析图片失败! \n$e")
+}catch (t: Throwable){
+    logger.error("解析图片失败! $url\n$t")
     null
 }
 
-suspend fun getOrDownloadImageDefault(url: String, cacheType: CacheType = CacheType.UNKNOWN) =
-    getOrDownloadImage(url, cacheType)?: Image.makeFromEncoded(loadResourceBytes("image/IMAGE_MISS.png"))
+suspend fun getOrDownloadImageDefault(url: String, fallbackUrl: String, cacheType: CacheType = CacheType.UNKNOWN) =
+    getOrDownloadImage(url, cacheType)?:
+    getOrDownloadImage(fallbackUrl, cacheType)?:
+    Image.makeFromEncoded(loadResourceBytes("image/IMAGE_MISS.png"))
+
 
 suspend fun Contact.sendImage(url: String, cacheType: CacheType = CacheType.UNKNOWN) = try {
     getOrDownload(url, cacheType)?.toExternalResource()?.let { sendImage(it.toAutoCloseable()) }
 }catch (e: Exception){
-    logger.error("发送图片失败! \n$e")
+    logger.error("发送图片失败! $url\n$e")
     null
 }
 
 suspend fun Contact.uploadImage(url: String, cacheType: CacheType = CacheType.UNKNOWN) = try {
     getOrDownload(url, cacheType)?.toExternalResource()?.let { uploadImage(it.toAutoCloseable()) }
 }catch (e: Exception){
-    logger.error("上传图片失败! \n$e")
+    logger.error("上传图片失败! $url\n$e")
     null
 }
 

@@ -24,7 +24,9 @@ suspend fun LiveInfo.drawLive(): Image {
     val margin = quality.cardMargin * 2
 
     val avatar = drawAvatar()
-    val cover = getOrDownloadImageDefault(cover, CacheType.IMAGES)
+    val fw = cardRect.width - quality.cardOutlineWidth / 2
+    val fallbackUrl = imgApi(cover, fw.toInt(), (fw * 0.625).toInt())
+    val cover = getOrDownloadImageDefault(cover, fallbackUrl, CacheType.IMAGES)
 
     val height = (avatar.height + quality.contentSpace + cover.height * cardRect.width / cover.width).toInt()
 

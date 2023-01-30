@@ -48,7 +48,7 @@ data class VideoDetail(
     @SerialName("season_id")
     val seasonId: Int? = null,
     @SerialName("premiere")
-    val premiere: String? = null,
+    val premiere: Premiere? = null,
     @SerialName("teenage_mode")
     val teenageMode: Int? = null,
     @SerialName("is_chargeable_season")
@@ -153,6 +153,19 @@ data class VideoDetail(
         val rotate: Int? = null,
     )
     @Serializable
+    data class Premiere(
+        @SerialName("state")
+        val state: Int? = null,
+        @SerialName("start_time")
+        val startTime: Long? = null,
+        @SerialName("now_time")
+        val nowTime: Long? = null,
+        @SerialName("room_id")
+        val roomId: Long? = null,
+        @SerialName("sid")
+        val sid: Int? = null,
+    )
+    @Serializable
     data class Pages(
         @SerialName("cid")
         val cid: Int? = null,
@@ -172,17 +185,7 @@ data class VideoDetail(
         val dimension: Dimension? = null,
         @SerialName("first_frame")
         val firstFrame: String? = null,
-    ){
-        @Serializable
-        data class Dimension(
-            @SerialName("width")
-            val width: Int? = null,
-            @SerialName("height")
-            val height: Int? = null,
-            @SerialName("rotate")
-            val rotate: Int? = null,
-        )
-    }
+    )
 
     @Serializable
     data class UgcSeason(
