@@ -19,6 +19,7 @@ suspend fun ModuleDynamic.Major.makeGeneral(isForward: Boolean = false): Image {
         "MAJOR_TYPE_LIVE" -> live!!.drawGeneral()
         "MAJOR_TYPE_LIVE_RCMD" -> liveRcmd!!.drawGeneral()
         "MAJOR_TYPE_PGC" -> pgc!!.drawSmall()
+        "MAJOR_TYPE_UGC_SEASON" -> ugcSeason!!.drawSmall()
         "MAJOR_TYPE_COMMON" -> common!!.drawGeneral()
         "MAJOR_TYPE_NONE" -> drawInfoText(none?.tips!!)
         else -> drawInfoText("无法绘制类型为 [$type] 的动态类型, 请把动态链接反馈给开发者")
@@ -320,7 +321,7 @@ suspend fun ModuleDynamic.Major.LiveRcmd.drawGeneral(): Image {
 }
 
 suspend fun ModuleDynamic.Major.Archive.drawSmall(): Image {
-    return drawSmallCard(title, desc, cover, badge.text, "av$aid  |  $bvid", durationText)
+    return drawSmallCard(title, desc, cover, badge.text, "av$aid", durationText)
 }
 
 suspend fun ModuleDynamic.Major.Pgc.drawSmall(): Image {

@@ -852,7 +852,6 @@ data class ModuleDynamic(
         val none: None? = null,
     ) {
 
-
         /**
          * 视频
          * https://t.bilibili.com/703209180117336130 动态视频
@@ -873,7 +872,7 @@ data class ModuleDynamic(
         @Serializable
         data class Archive(
             @SerialName("type")
-            val type: Int,
+            val type: Int? = null,
             @SerialName("aid")
             val aid: String,
             @SerialName("bvid")
