@@ -422,7 +422,7 @@ object SendTasker : BiliTasker() {
                 "type" -> dm.type.text
                 "content" -> dm.content
                 "link" -> dm.links?.get(0)?.value!!
-                "links" -> dm.links?.joinToString("\n")!!
+                "links" -> dm.links?.joinToString("\n") { it.value }!!
                 "images" -> buildString {
                     dm.images?.forEach { appendLine(contacts.uploadImage(it, CacheType.IMAGES)) }
                 }

@@ -4,6 +4,10 @@ import net.mamoe.mirai.contact.Contact
 import net.mamoe.mirai.contact.Group
 import net.mamoe.mirai.event.events.MessageEvent
 import net.mamoe.mirai.event.whileSelectMessages
+import net.mamoe.mirai.message.MessageReceipt
+import net.mamoe.mirai.message.data.PlainText
+import net.mamoe.mirai.message.data.QuoteReply
+import net.mamoe.mirai.message.data.buildMessageChain
 import net.mamoe.mirai.message.data.content
 import net.mamoe.mirai.message.nextMessage
 import top.colter.mirai.plugin.bilibili.*
@@ -25,7 +29,7 @@ object ConfigService {
         val user = if (uid != 0L) dynamic[uid] else null
         val configMap = mutableMapOf<String, String>()
 
-        subject.sendMessage(buildString {
+        val configMsg = subject.sendMessage(buildString {
             appendLine("配置: ")
             append("用户: ")
             appendLine(if (uid == 0L) "全局" else user?.name)
@@ -77,11 +81,14 @@ object ConfigService {
             append("[中括号]内为当前值\n请输入编号, 2分钟未回复自动退出\n或回复 退出 来主动退出")
         })
 
+        var regMsg: MessageReceipt<Contact>? = null
+
         while (true) {
             var cc = 0
             var rres: String? = null
             var selectContent = ""
             var selectConfig = ""
+
             event.whileSelectMessages {
                 "退出" {
                     event.subject.sendMessage("已退出")
@@ -102,6 +109,7 @@ object ConfigService {
                 }
                 timeout(120_000) { false }
             }
+            regMsg?.recall()
             if (rres == null) return
 
             when (selectConfig) {
@@ -319,7 +327,12 @@ object ConfigService {
                     }
                 }
             }
-            subject.sendMessage("配置结束\n输入上方编号以继续\n不回复或回复 退出 来退出")
+            regMsg = subject.sendMessage(
+                buildMessageChain {
+                    + QuoteReply(configMsg.source)
+                    + PlainText("输入编号以继续\n不回复或回复 退出 来退出")
+                }
+            )
         }
     }
 }

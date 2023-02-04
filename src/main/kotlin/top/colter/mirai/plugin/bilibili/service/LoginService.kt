@@ -22,8 +22,8 @@ object LoginService {
         val loginData = client.getLoginUrl().data!!.decode<LoginData>()
 
         val image = loginQrCode(loginData.url)
-        image.encodeToData()!!.bytes.toExternalResource().toAutoCloseable().sendAsImageTo(contact)
-        contact.sendMessage("请使用BiliBili手机APP扫码登录 3分钟有效")
+        val qrMsg = image.encodeToData()!!.bytes.toExternalResource().toAutoCloseable().sendAsImageTo(contact)
+        val loginMsg = contact.sendMessage("请使用BiliBili手机APP扫码登录 3分钟有效")
         runCatching {
             withTimeout(180000) {
                 while (isActive) {
@@ -51,6 +51,10 @@ object LoginService {
         }.onFailure {
             contact.sendMessage("登录失败 ${it.message}")
         }
+        try {
+            qrMsg.recall()
+            loginMsg.recall()
+        }catch (_: Throwable) {}
     }
 
 }

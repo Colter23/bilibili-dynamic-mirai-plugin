@@ -144,16 +144,15 @@ enum class LinkType(val regex: List<Regex>, var id: String? = null): ResolveLink
 suspend fun drawGeneral(id: String, tag: String, time: String, author: ModuleAuthor, imgData: org.jetbrains.skia.Image?): String {
     val footer = buildFooter(author.name, author.mid, id, time, tag)
 
-    val color = Color.makeRGB(BiliConfig.imageConfig.defaultColor)
-
+    val colors = BiliConfig.imageConfig.defaultColor.split(";", "；").map { Color.makeRGB(it.trim()) }
     val imgList = mutableListOf(
-        author.drawGeneral(time, VIDEO_LINK(id), color),
+        author.drawGeneral(time, VIDEO_LINK(id), colors.first()),
     )
     imgData?.let { imgList.add(it) }
 
     val cimg = imgList.assembleCard(id, footer, tag = "搜索")
 
-    val img = makeCardBg(cimg.height, listOf(color)) {
+    val img = makeCardBg(cimg.height, colors) {
         it.drawImage(cimg, 0f, 0f)
     }
     return cacheImage(img, "$id.png", CacheType.DRAW_SEARCH)
