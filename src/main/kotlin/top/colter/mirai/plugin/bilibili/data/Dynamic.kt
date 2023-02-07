@@ -370,7 +370,7 @@ data class ModuleDynamic(
     @SerialName("additional")
     val additional: Additional? = null,
     @SerialName("desc")
-    val desc: Desc? = null,
+    val desc: ContentDesc? = null,
     @SerialName("major")
     val major: Major? = null,
     @SerialName("topic")
@@ -412,6 +412,7 @@ data class ModuleDynamic(
         val lottery: Lottery? = null,
     ) {
         /**
+         * 充电抽奖
          * https://t.bilibili.com/729548651221745712
          */
         @Serializable
@@ -517,24 +518,6 @@ data class ModuleDynamic(
             @SerialName("button")
             val button: Button,
         ) {
-            /**
-             * 预约描述
-             * @param text 文字
-             * @param jumpUrl 跳转链接
-             * @param style 样式 灰色#99a2aa(0) 蓝色#00a1d6(1)
-             * @param visible 是否可见
-             */
-            @Serializable
-            data class Desc(
-                @SerialName("text")
-                val text: String,
-                @SerialName("style")
-                val style: Int,
-                @SerialName("jump_url")
-                val jumpUrl: String? = null,
-                @SerialName("visible")
-                val visible: Boolean? = null,
-            )
 
             /**
              * 预约封面?
@@ -549,6 +532,25 @@ data class ModuleDynamic(
                 val online: String? = null,
             )
         }
+
+        /**
+         * 描述
+         * @param text 文字
+         * @param jumpUrl 跳转链接
+         * @param style 样式 灰色#99a2aa(0) 蓝色#00a1d6(1)
+         * @param visible 是否可见
+         */
+        @Serializable
+        data class Desc(
+            @SerialName("text")
+            val text: String,
+            @SerialName("style")
+            val style: Int,
+            @SerialName("jump_url")
+            val jumpUrl: String? = null,
+            @SerialName("visible")
+            val visible: Boolean? = null,
+        )
 
         /**
          * 投票
@@ -736,7 +738,7 @@ data class ModuleDynamic(
      * @param text 全部文字
      */
     @Serializable
-    data class Desc(
+    data class ContentDesc(
         @SerialName("rich_text_nodes")
         val richTextNodes: List<RichTextNode>,
         @SerialName("text")
