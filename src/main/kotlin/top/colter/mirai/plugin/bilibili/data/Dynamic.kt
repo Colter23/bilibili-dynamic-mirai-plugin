@@ -421,7 +421,7 @@ data class ModuleDynamic(
             val rid: Long,
             @SerialName("title")
             val title: String,
-            @SerialName("mid")
+            @SerialName("up_mid")
             val mid: Long,
             @SerialName("state")
             val state: Int,

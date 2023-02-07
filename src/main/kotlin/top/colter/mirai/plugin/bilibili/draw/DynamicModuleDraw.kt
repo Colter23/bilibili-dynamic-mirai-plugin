@@ -85,6 +85,16 @@ suspend fun ModuleDynamic.Additional.makeGeneral(): Image? {
             )
         }
 
+        "ADDITIONAL_TYPE_UPOWER_LOTTERY" -> {
+            drawAdditionalCard(
+                "充电抽奖",
+                null,
+                lottery!!.title,
+                lottery.desc.text,
+                null
+            )
+        }
+
         else -> {
             logger.warning("未知类型附加卡片 $type")
             null
