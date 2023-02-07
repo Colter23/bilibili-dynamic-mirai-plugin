@@ -247,13 +247,13 @@ suspend fun ModuleDynamic.Topic.drawGeneral(): Image {
 
 }
 
-suspend fun ModuleDynamic.Desc.drawGeneral(): Image {
+suspend fun ModuleDynamic.ContentDesc.drawGeneral(): Image {
     val paragraphStyle = ParagraphStyle().apply {
         alignment = Alignment.LEFT
         textStyle = titleTextStyle
     }
 
-    val traCutLineNode = ModuleDynamic.Desc.RichTextNode(
+    val traCutLineNode = ModuleDynamic.ContentDesc.RichTextNode(
         "RICH_TEXT_NODE_TYPE_TEXT",
         BiliConfig.translateConfig.cutLine,
         BiliConfig.translateConfig.cutLine
@@ -281,7 +281,7 @@ suspend fun ModuleDynamic.Desc.drawGeneral(): Image {
         canvas.apply {
             val nodes = if (tra != null) {
                 richTextNodes.plus(traCutLineNode).plus(
-                    ModuleDynamic.Desc.RichTextNode(
+                    ModuleDynamic.ContentDesc.RichTextNode(
                         "RICH_TEXT_NODE_TYPE_TEXT", tra, tra
                     )
                 )
