@@ -325,7 +325,7 @@ data class ModuleAuthor(
     @Serializable
     data class Decorate(
         @SerialName("id")
-        val id: Int,
+        val id: Long,
         @SerialName("type")
         val type: Int,
         @SerialName("name")
