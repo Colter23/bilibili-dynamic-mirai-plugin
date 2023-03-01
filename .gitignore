@@ -135,3 +135,4 @@ src/test/kotlin/RunTerminal.kt
 /data
 /logs
 /plugins
+/bin
