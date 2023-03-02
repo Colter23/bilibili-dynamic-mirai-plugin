@@ -138,3 +138,6 @@ src/test/kotlin/RunTerminal.kt
 /bin
 /plugin-libraries
 /plugin-shared-libraries
+
+# ignore test outputs
+src/test/resources/output/**
