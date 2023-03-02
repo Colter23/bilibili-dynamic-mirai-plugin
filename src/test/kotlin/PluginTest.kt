@@ -51,6 +51,7 @@ internal class PluginTest {
         val DYNAMIC_START = 1498838400L
         fun dynamictime(id: Long): Long = (id shr 32) + DYNAMIC_START
         println(dynamictime(649955687456047124))
+
     }
 
 
@@ -205,25 +206,25 @@ internal class PluginTest {
                         "测试主题",
                         ""
                     ),
-                    desc = ModuleDynamic.Desc(
+                    desc = ModuleDynamic.ContentDesc(
                         listOf(
-                            ModuleDynamic.Desc.RichTextNode(
+                            ModuleDynamic.ContentDesc.RichTextNode(
                                 "RICH_TEXT_NODE_TYPE_TEXT",
                                 "AAAAAA好唯美的😶‍🌫️曲调，好温柔👩🏻‍⚕️🙃的歌声",
                                 "AAAAAA好唯美的\uD83D\uDE36\u200D\uD83C\uDF2B️曲调，好温柔\uD83D\uDC69\uD83C\uDFFB\u200D⚕️\uD83D\uDE43的歌声",
                             ),
-                            ModuleDynamic.Desc.RichTextNode(
+                            ModuleDynamic.ContentDesc.RichTextNode(
                                 "RICH_TEXT_NODE_TYPE_EMOJI",
                                 "[tv_难过]",
                                 "[tv_难过]",
-                                emoji = ModuleDynamic.Desc.RichTextNode.Emoji(
+                                emoji = ModuleDynamic.ContentDesc.RichTextNode.Emoji(
                                     1,
                                     "http://i0.hdslb.com/bfs/emote/87f46748d3f142ebc6586ff58860d0e2fc8263ba.png",
                                     1,
                                     "[tv_难过]"
                                 )
                             ),
-                            ModuleDynamic.Desc.RichTextNode(
+                            ModuleDynamic.ContentDesc.RichTextNode(
                                 "RICH_TEXT_NODE_TYPE_TEXT",
                                 "测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试",
                                 "测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试",
@@ -273,9 +274,9 @@ internal class PluginTest {
                             1802011210,
                             "直播预约：玥玥春日新衣发布",
                             2623,
-                            ModuleDynamic.Additional.Reserve.Desc("04-17 20:00 直播", 0),
-                            ModuleDynamic.Additional.Reserve.Desc("2623人预约", 0),
-                            ModuleDynamic.Additional.Reserve.Desc("预约有奖：新衣立牌*3份、玥玥钥匙扣*3份", 0),
+                            ModuleDynamic.Additional.Desc("04-17 20:00 直播", 0),
+                            ModuleDynamic.Additional.Desc("2623人预约", 0),
+                            ModuleDynamic.Additional.Desc("预约有奖：新衣立牌*3份、玥玥钥匙扣*3份", 0),
 
                             null,
                             0,
@@ -354,71 +355,71 @@ internal class PluginTest {
                     ),
 
                     ModuleDynamic(
-                        desc = ModuleDynamic.Desc(
+                        desc = ModuleDynamic.ContentDesc(
                             listOf(
-                                ModuleDynamic.Desc.RichTextNode(
+                                ModuleDynamic.ContentDesc.RichTextNode(
                                     "RICH_TEXT_NODE_TYPE_TEXT",
                                     "好唯美的😶‍🌫️曲调，好温柔👩🏻‍⚕️🙃的歌声",
                                     "好唯美的\uD83D\uDE36\u200D\uD83C\uDF2B️曲调，好温柔\uD83D\uDC69\uD83C\uDFFB\u200D⚕️\uD83D\uDE43的歌声",
                                 ),
-                                //ModuleDynamic.Desc.RichTextNode(
+                                //ModuleDynamic.ContentDesc.RichTextNode(
                                 //    "RICH_TEXT_NODE_TYPE_EMOJI",
                                 //    "[tv_难过]",
                                 //    "[tv_难过]",
-                                //    emoji = ModuleDynamic.Desc.RichTextNode.Emoji(
+                                //    emoji = ModuleDynamic.ContentDesc.RichTextNode.Emoji(
                                 //        1,
                                 //        "http://i0.hdslb.com/bfs/emote/87f46748d3f142ebc6586ff58860d0e2fc8263ba.png",
                                 //        1,
                                 //        "[tv_难过]"
                                 //    )
                                 //),
-                                ModuleDynamic.Desc.RichTextNode(
+                                ModuleDynamic.ContentDesc.RichTextNode(
                                     "RICH_TEXT_NODE_TYPE_TEXT",
                                     "感受到雨中\n\n的茶香了吗？",
                                     "感受到雨中\n\n的茶香了吗？",
                                 ),
                                 // 𓂚𓈖𓇋𓂝𓎛𓇹 鬼
-                                ModuleDynamic.Desc.RichTextNode(
+                                ModuleDynamic.ContentDesc.RichTextNode(
                                     "RICH_TEXT_NODE_TYPE_TEXT",
                                     "𓂚𓈖𓇋𓂝𓎛𓇹\n",
                                     "𓂚𓈖𓇋𓂝𓎛𓇹\n",
                                 ),
-                                ModuleDynamic.Desc.RichTextNode(
+                                ModuleDynamic.ContentDesc.RichTextNode(
                                     "RICH_TEXT_NODE_TYPE_TEXT",
                                     "नमस्ते\n",
                                     "नमस्ते\n",
                                 ),
-                                ModuleDynamic.Desc.RichTextNode(
+                                ModuleDynamic.ContentDesc.RichTextNode(
                                     "RICH_TEXT_NODE_TYPE_TEXT",
                                     "Olá\n",
                                     "Olá\n",
                                 ),
-                                ModuleDynamic.Desc.RichTextNode(
+                                ModuleDynamic.ContentDesc.RichTextNode(
                                     "RICH_TEXT_NODE_TYPE_TEXT",
                                     "Здравствуйте\n",
                                     "Здравствуйте\n",
                                 ),
-                                ModuleDynamic.Desc.RichTextNode(
+                                ModuleDynamic.ContentDesc.RichTextNode(
                                     "RICH_TEXT_NODE_TYPE_TEXT",
                                     "【𝕭𝖊𝖙 𝖔𝖓 𝖒𝖊】\n",
                                     "【𝕭𝖊𝖙 𝖔𝖓 𝖒𝖊】\n",
                                 ),
-                                ModuleDynamic.Desc.RichTextNode(
+                                ModuleDynamic.ContentDesc.RichTextNode(
                                     "RICH_TEXT_NODE_TYPE_TEXT",
                                     "ᵉᵛᵉʳʸ ˡⁱᶠᵉ ᵗʰᵃᵗ ᵍᵒᵉˢ ᵗᵒ ᵈᵉᵃᵗʰ ⁱˢ ᵍʳᵒʷⁱⁿᵍ ᵖᵃˢˢⁱᵒⁿᵃᵗᵉˡʸ.\n",
                                     "ᵉᵛᵉʳʸ ˡⁱᶠᵉ ᵗʰᵃᵗ ᵍᵒᵉˢ ᵗᵒ ᵈᵉᵃᵗʰ ⁱˢ ᵍʳᵒʷⁱⁿᵍ ᵖᵃˢˢⁱᵒⁿᵃᵗᵉˡʸ.\n",
                                 ),
-                                ModuleDynamic.Desc.RichTextNode(
+                                ModuleDynamic.ContentDesc.RichTextNode(
                                     "RICH_TEXT_NODE_TYPE_TOPIC",
                                     "#原创歌曲#",
                                     "#原创歌曲#",
                                 ),
-                                ModuleDynamic.Desc.RichTextNode(
+                                ModuleDynamic.ContentDesc.RichTextNode(
                                     "RICH_TEXT_NODE_TYPE_TOPIC",
                                     "#虚拟歌手#",
                                     "#虚拟歌手#",
                                 ),
-                                ModuleDynamic.Desc.RichTextNode(
+                                ModuleDynamic.ContentDesc.RichTextNode(
                                     "RICH_TEXT_NODE_TYPE_WEB",
                                     "https://www.bilibili.com/medialist/play/ml1604262874",
                                     "网页链接",
