@@ -524,18 +524,34 @@ suspend fun ModuleDynamic.Major.Draw.drawGeneral(): Image {
 fun ModuleDynamic.Major.Blocked.drawGeneral(): Image {
     val img = when(blockType){
         1 -> Image.makeFromEncoded(loadResourceBytes("image/SponsorBlocked.png"))
-        else -> Image.makeFromEncoded(loadResourceBytes("image/IMAGE_MISS.png"))
+        else -> Image.makeFromEncoded(loadResourceBytes("image/Blocked_BG_Day.png"))
     }
-    val w = img.width + 2 * quality.cardPadding
-    val h = img.height + 3 * quality.cardPadding
-
-    return Surface.makeRasterN32Premul(w, h).apply {
-        canvas.drawImageClip(
-            img,
-            RRect.Companion.makeXYWH(
-                quality.cardPadding.toFloat(), 0f,
-                img.width.toFloat(), img.height.toFloat(), quality.cardArc
+    val w = cardContentRect.width - 2 * quality.cardPadding
+    val h = img.height / img.width * w
+    return Surface.makeRasterN32Premul(
+        (w + 2 * quality.cardPadding).toInt(), (h + 2 * quality.cardPadding).toInt()
+    ).apply {
+        canvas.apply {
+            drawImageClip(
+                img,
+                RRect.Companion.makeXYWH(
+                    quality.cardPadding.toFloat(), 0f,
+                    w, h, quality.cardArc
             ))
+            if(blockType!= 1){
+                val paragraphStyle = ParagraphStyle().apply {
+                    maxLinesCount = 2
+                    ellipsis = "..."
+                    alignment = Alignment.CENTER
+                    textStyle = titleTextStyle.apply {
+                        color = Color.WHITE
+                    }
+                }
+                val hintMessage = ParagraphBuilder(paragraphStyle, FontUtils.fonts)
+                    .addText(hintMessage).build().layout(w)
+                hintMessage.paint(this, 0f, (h - hintMessage.height)/2 + quality.cardPadding)
+            }
+        }
     }.makeImageSnapshot()
 }
 
