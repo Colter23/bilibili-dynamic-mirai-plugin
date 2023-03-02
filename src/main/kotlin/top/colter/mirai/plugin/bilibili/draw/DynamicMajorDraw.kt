@@ -13,6 +13,7 @@ import kotlin.math.ceil
 suspend fun ModuleDynamic.Major.makeGeneral(isForward: Boolean = false): Image {
     return when (type) {
         "MAJOR_TYPE_ARCHIVE" -> if (isForward) archive!!.drawSmall() else archive!!.drawGeneral()
+        "MAJOR_TYPE_BLOCKED" -> blocked!!.drawGeneral()
         "MAJOR_TYPE_DRAW" -> draw!!.drawGeneral()
         "MAJOR_TYPE_ARTICLE" -> article!!.drawGeneral()
         "MAJOR_TYPE_MUSIC" -> music!!.drawGeneral()
@@ -517,6 +518,24 @@ suspend fun ModuleDynamic.Major.Draw.drawGeneral(): Image {
                 }
             }
         }
+    }.makeImageSnapshot()
+}
+
+fun ModuleDynamic.Major.Blocked.drawGeneral(): Image {
+    val img = when(blockType){
+        1 -> Image.makeFromEncoded(loadResourceBytes("image/SponsorBlocked.png"))
+        else -> Image.makeFromEncoded(loadResourceBytes("image/IMAGE_MISS.png"))
+    }
+    val w = img.width + 2 * quality.cardPadding
+    val h = img.height + 3 * quality.cardPadding
+
+    return Surface.makeRasterN32Premul(w, h).apply {
+        canvas.drawImageClip(
+            img,
+            RRect.Companion.makeXYWH(
+                quality.cardPadding.toFloat(), 0f,
+                img.width.toFloat(), img.height.toFloat(), quality.cardArc
+            ))
     }.makeImageSnapshot()
 }
 
