@@ -136,3 +136,5 @@ src/test/kotlin/RunTerminal.kt
 /logs
 /plugins
 /bin
+/plugin-libraries
+/plugin-shared-libraries
