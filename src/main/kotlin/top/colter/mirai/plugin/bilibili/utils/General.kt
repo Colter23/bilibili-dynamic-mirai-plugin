@@ -189,6 +189,9 @@ fun cacheImage(image: Image, path: String, cacheType: CacheType): String {
 
 suspend fun getOrDownload(url: String, cacheType: CacheType = CacheType.UNKNOWN): ByteArray? {
      try {
+        if(url.startsWith("resources/")){
+            return loadResourceBytes(url.replace("resources/", ""))
+        }
         val fileName = url.split("?").first().split("@").first().split("/").last()
 
         val filePath = if (cacheType == CacheType.UNKNOWN) {

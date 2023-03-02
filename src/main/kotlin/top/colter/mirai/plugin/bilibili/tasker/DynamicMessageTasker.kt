@@ -53,7 +53,9 @@ object DynamicMessageTasker : BiliTasker() {
         return when (type) {
             DYNAMIC_TYPE_FORWARD -> "${modules.moduleDynamic.desc?.text}\n\n 转发动态:\n${orig?.textContent()}"
             DYNAMIC_TYPE_WORD,
-            DYNAMIC_TYPE_DRAW -> modules.moduleDynamic.desc?.text ?: ""
+            DYNAMIC_TYPE_DRAW -> modules.moduleDynamic.desc?.text
+                ?: modules.moduleDynamic.major?.blocked?.hintMessage?:
+                ""
             DYNAMIC_TYPE_ARTICLE -> modules.moduleDynamic.major?.article?.title!!
             DYNAMIC_TYPE_AV -> modules.moduleDynamic.major?.archive?.title!!
             DYNAMIC_TYPE_MUSIC -> modules.moduleDynamic.major?.music?.title!!
@@ -71,7 +73,13 @@ object DynamicMessageTasker : BiliTasker() {
     fun DynamicItem.dynamicImages(): List<String>? {
         return when (type) {
             DYNAMIC_TYPE_FORWARD -> orig?.dynamicImages()!!
-            DYNAMIC_TYPE_DRAW -> modules.moduleDynamic.major?.draw?.items?.map { it.src }
+            DYNAMIC_TYPE_DRAW -> {
+                if(modules.moduleDynamic.major?.draw != null)
+                  modules.moduleDynamic.major?.draw?.items?.map { it.src }
+                else if (modules.moduleDynamic.major?.blocked != null)
+                    listOf("resources/image/SponsorBlocked.png")
+                else listOf()
+            }
             DYNAMIC_TYPE_ARTICLE -> modules.moduleDynamic.major?.article?.covers
             DYNAMIC_TYPE_AV -> listOf(modules.moduleDynamic.major?.archive?.cover!!)
             DYNAMIC_TYPE_MUSIC -> listOf(modules.moduleDynamic.major?.music?.cover!!)
