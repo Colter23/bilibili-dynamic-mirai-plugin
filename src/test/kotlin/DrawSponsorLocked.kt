@@ -76,8 +76,8 @@ class DrawSponsorLocked {
         }
         val hintMessage = ParagraphBuilder(paragraphStyle, FontUtils.fonts).addText(hintMessage).build()
         val buttonMessage = ParagraphBuilder(paragraphStyle, FontUtils.fonts).addText(button.text).build()
-        val bgImage = getOrDownloadImage(bgImg.imgDark, CacheType.IMAGES)!!
-        val lockIcon = getOrDownloadImage(icon.imgDark, CacheType.IMAGES)!!
+        val bgImage = getOrDownloadImage(bgImg.imgDay, CacheType.IMAGES)!!
+        val lockIcon = getOrDownloadImage(icon.imgDay, CacheType.IMAGES)!!
         val buttonIcon = getOrDownloadImage(button.icon)!!
 
         val bgWidth = cardContentRect.width - quality.cardPadding * 2
