@@ -7,12 +7,12 @@ import top.colter.mirai.plugin.bilibili.BiliConfig
 import top.colter.mirai.plugin.bilibili.BiliData
 import top.colter.mirai.plugin.bilibili.data.*
 import top.colter.mirai.plugin.bilibili.data.DynamicType.*
+import top.colter.mirai.plugin.bilibili.draw.drawBlockedDefault
+import top.colter.mirai.plugin.bilibili.draw.drawGeneral
 import top.colter.mirai.plugin.bilibili.draw.makeDrawDynamic
 import top.colter.mirai.plugin.bilibili.draw.makeRGB
-import top.colter.mirai.plugin.bilibili.utils.formatTime
+import top.colter.mirai.plugin.bilibili.utils.*
 import top.colter.mirai.plugin.bilibili.utils.logger
-import top.colter.mirai.plugin.bilibili.utils.mid
-import top.colter.mirai.plugin.bilibili.utils.time
 
 object DynamicMessageTasker : BiliTasker() {
 
@@ -33,6 +33,10 @@ object DynamicMessageTasker : BiliTasker() {
         }
     }
 
+    fun DynamicItem.isUnlocked(): Boolean =
+        modules.moduleDynamic.major?.type != "MAJOR_TYPE_BLOCKED"
+            && modules.moduleAuthor.iconBadge?.text == "专属动态"
+
     suspend fun DynamicItem.buildMessage(contact: String? = null): DynamicMessage {
         return DynamicMessage(
             did,
@@ -50,10 +54,15 @@ object DynamicMessageTasker : BiliTasker() {
     }
 
     fun DynamicItem.textContent(): String {
+        if(isUnlocked()){
+            return "此动态为专属动态\n请自行查看详情内容"
+        }
         return when (type) {
             DYNAMIC_TYPE_FORWARD -> "${modules.moduleDynamic.desc?.text}\n\n 转发动态:\n${orig?.textContent()}"
             DYNAMIC_TYPE_WORD,
-            DYNAMIC_TYPE_DRAW -> modules.moduleDynamic.desc?.text ?: ""
+            DYNAMIC_TYPE_DRAW -> modules.moduleDynamic.desc?.text
+                ?: modules.moduleDynamic.major?.blocked?.hintMessage?:
+                ""
             DYNAMIC_TYPE_ARTICLE -> modules.moduleDynamic.major?.article?.title!!
             DYNAMIC_TYPE_AV -> modules.moduleDynamic.major?.archive?.title!!
             DYNAMIC_TYPE_MUSIC -> modules.moduleDynamic.major?.music?.title!!
@@ -68,10 +77,23 @@ object DynamicMessageTasker : BiliTasker() {
         }
     }
 
-    fun DynamicItem.dynamicImages(): List<String>? {
+    suspend fun DynamicItem.dynamicImages(): List<String>? {
+        if(isUnlocked()) {
+            val path = cacheImage(drawBlockedDefault(), "blocked_default.png", CacheType.IMAGES)
+            return listOf("cache/$path")
+        }
         return when (type) {
             DYNAMIC_TYPE_FORWARD -> orig?.dynamicImages()!!
-            DYNAMIC_TYPE_DRAW -> modules.moduleDynamic.major?.draw?.items?.map { it.src }
+            DYNAMIC_TYPE_DRAW -> when(modules.moduleDynamic.major?.type){
+                "MAJOR_TYPE_DRAW" -> modules.moduleDynamic.major?.draw?.items?.map { it.src }
+                "MAJOR_TYPE_BLOCKED" -> {
+                    val path = modules.moduleDynamic.major.blocked?.let {
+                        cacheImage(it.drawGeneral(),"blocked_$idStr.png",CacheType.IMAGES)
+                    }
+                    listOf("cache/$path")
+                }
+                else -> listOf()
+            }
             DYNAMIC_TYPE_ARTICLE -> modules.moduleDynamic.major?.article?.covers
             DYNAMIC_TYPE_AV -> listOf(modules.moduleDynamic.major?.archive?.cover!!)
             DYNAMIC_TYPE_MUSIC -> listOf(modules.moduleDynamic.major?.music?.cover!!)

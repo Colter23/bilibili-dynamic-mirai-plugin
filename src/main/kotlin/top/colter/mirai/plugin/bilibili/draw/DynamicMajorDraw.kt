@@ -13,6 +13,7 @@ import kotlin.math.ceil
 suspend fun ModuleDynamic.Major.makeGeneral(isForward: Boolean = false): Image {
     return when (type) {
         "MAJOR_TYPE_ARCHIVE" -> if (isForward) archive!!.drawSmall() else archive!!.drawGeneral()
+        "MAJOR_TYPE_BLOCKED" -> blocked!!.drawGeneral()
         "MAJOR_TYPE_DRAW" -> draw!!.drawGeneral()
         "MAJOR_TYPE_ARTICLE" -> article!!.drawGeneral()
         "MAJOR_TYPE_MUSIC" -> music!!.drawGeneral()
@@ -516,6 +517,43 @@ suspend fun ModuleDynamic.Major.Draw.drawGeneral(): Image {
                     y += drawItemHeight + quality.drawSpace
                 }
             }
+        }
+    }.makeImageSnapshot()
+}
+
+suspend fun ModuleDynamic.Major.Blocked.drawGeneral(): Image {
+    val paragraphStyle = ParagraphStyle().apply {
+        maxLinesCount = 2
+        ellipsis = "..."
+        alignment = Alignment.CENTER
+        textStyle = titleTextStyle.apply {
+            color = Color.WHITE
+        }
+    }
+    val hintMessage = ParagraphBuilder(paragraphStyle, FontUtils.fonts).addText(hintMessage).build()
+    val bgImage = getOrDownloadImage(bgImg.imgDay, CacheType.IMAGES)!!
+    val lockIcon = getOrDownloadImage(icon.imgDay, CacheType.IMAGES)!!
+
+    val bgWidth = cardContentRect.width - quality.cardPadding * 2
+    val bgHeight = bgWidth / bgImage.width * bgImage.height
+
+    val lockWidth = bgWidth / 7
+    val lockHeight = lockWidth / lockIcon.width * lockIcon.height
+
+    return Surface.makeRasterN32Premul(
+        cardContentRect.width.toInt(), (bgHeight + quality.cardPadding * 2).toInt()
+    ).apply {
+        canvas.apply {
+            var x = quality.cardPadding.toFloat()
+            var y = 0f
+            drawImageClip(bgImage, RRect.makeXYWH(x, y, bgWidth, bgHeight, quality.cardArc))
+            x += (bgWidth - lockWidth) / 2
+            y += bgHeight / 4
+            drawImageClip(lockIcon, RRect.makeXYWH(x, y, lockWidth, lockHeight, quality.cardArc))
+
+            x = quality.cardPadding.toFloat()
+            y += lockHeight + quality.drawSpace
+            hintMessage.layout(bgWidth).paint(this, x, y)
         }
     }.makeImageSnapshot()
 }

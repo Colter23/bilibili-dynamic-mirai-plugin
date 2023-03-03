@@ -168,6 +168,7 @@ data class DynamicItem(
  * @param faceNFT 是否为NFT头像
  * @param pendant 头像挂件
  * @param following 是否关注(未关注为null)
+ * @param iconBadge 徽标图案, 现已知 充电专属
  * @param label 标签
  * @param jumpUrl 跳转URL
  * @param officialVerify 官方认证
@@ -202,6 +203,8 @@ data class ModuleAuthor(
     val faceNFT: Boolean? = null,
     @SerialName("following")
     val following: Boolean? = null,
+    @SerialName("icon_badge")
+    val iconBadge: IconBadge? = null,
     @SerialName("label")
     val label: String = "",
     @SerialName("jump_url")
@@ -215,6 +218,19 @@ data class ModuleAuthor(
     @SerialName("decorate")
     val decorate: Decorate? = null,
 ) {
+    /**
+     * 徽标图案
+     *
+     */
+    @Serializable
+    data class IconBadge(
+        @SerialName("icon")
+        val icon: String = "",
+        @SerialName("render_img")
+        val renderImg: String = "",
+        @SerialName("text")
+        val text: String = ""
+    )
     /**
      * 头像挂件
      * @param pid 挂件ID
@@ -819,6 +835,7 @@ data class ModuleDynamic(
     data class Major(
         /**
          * MAJOR_TYPE_ARCHIVE    视频
+         * MAJOR_TYPE_BLOCKED    隐藏, 充电 (或其他方式?) 解锁
          * MAJOR_TYPE_DRAW       图片
          * MAJOR_TYPE_ARTICLE    专栏
          * MAJOR_TYPE_MUSIC      音乐
@@ -834,6 +851,8 @@ data class ModuleDynamic(
 
         @SerialName("archive")
         val archive: Archive? = null,
+        @SerialName("blocked")
+        val blocked: Blocked? = null,
         @SerialName("draw")
         val draw: Draw? = null,
         @SerialName("article")
@@ -896,6 +915,53 @@ data class ModuleDynamic(
             @SerialName("badge")
             val badge: Badge,
         )
+
+        /**
+         * 隐藏内容
+         *
+         * https://t.bilibili.com/767166448722247682 包月充电解锁
+         *
+         * @param blockType   隐藏类型
+         * @param bgImg       背景图片
+         * @param hintMessage 提示信息
+         */
+        @Serializable
+        data class Blocked(
+            @SerialName("blocked_type")
+            val blockType: Int,
+            @SerialName("button")
+            val button: Button,
+            @SerialName("bg_img")
+            val bgImg: Img,
+            @SerialName("hint_message")
+            val hintMessage: String,
+            @SerialName("icon")
+            val icon: Img
+        ) {
+            /**
+             * 图片组合
+             * 包含夜间、日间图片
+             * @param imgDark  夜间图片
+             * @param imgDay   日间图片
+             */
+            @Serializable
+            data class Img(
+                @SerialName("img_dark")
+                val imgDark: String,
+                @SerialName("img_day")
+                val imgDay: String,
+            )
+
+            @Serializable
+            data class Button(
+                @SerialName("icon")
+                val icon: String,
+                @SerialName("jump_url")
+                val jumpUrl: String,
+                @SerialName("text")
+                val text: String
+            )
+        }
 
         /**
          * 图片

@@ -424,7 +424,9 @@ object SendTasker : BiliTasker() {
                 "link" -> dm.links?.get(0)?.value!!
                 "links" -> dm.links?.joinToString("\n") { it.value }!!
                 "images" -> buildString {
-                    dm.images?.forEach { appendLine(contacts.uploadImage(it, CacheType.IMAGES)) }
+                    dm.images?.forEach {
+                        appendLine(contacts.uploadImage(it, CacheType.IMAGES)?:"")
+                    }
                 }
                 "draw" -> if (dm.drawPath == null) "[绘制动态失败]" else {
                     val path = cachePath.resolve(dm.drawPath)
