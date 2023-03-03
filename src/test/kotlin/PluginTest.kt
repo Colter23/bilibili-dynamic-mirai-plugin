@@ -152,6 +152,7 @@ internal class PluginTest {
                     "",
                     false,
                     true,
+                    null,
                     "",
                     "//space.bilibili.com/487550002/dynamic",
                     ModuleAuthor.OfficialVerify(
@@ -307,6 +308,7 @@ internal class PluginTest {
                         "",
                         false,
                         true,
+                        null,
                         "",
                         "//space.bilibili.com/487550002/dynamic",
                         ModuleAuthor.OfficialVerify(

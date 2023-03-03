@@ -498,7 +498,7 @@ suspend fun ModuleAuthor.drawGeneral(time: String, link: String, themeColor: Int
             val textLineName = TextLine.make(name, font.makeWithSize(quality.nameFontSize))
             val textLineTime = TextLine.make(time, font.makeWithSize(quality.subTitleFontSize))
 
-            val x = quality.faceSize + quality.cardPadding * 3.2f
+            var x = quality.faceSize + quality.cardPadding * 3.2f
             val space = (quality.pendantSize - quality.nameFontSize - quality.subTitleFontSize) / 3
             var y = quality.nameFontSize + space * 1.25f
 
@@ -506,6 +506,15 @@ suspend fun ModuleAuthor.drawGeneral(time: String, link: String, themeColor: Int
 
             y += quality.subTitleFontSize + space * 0.5f
             drawTextLine(textLineTime, x, y, Paint().apply { color = theme.subTitleColor })
+
+            iconBadge?.let {
+                val img = getOrDownloadImage(it.renderImg, CacheType.IMAGES)!!
+                val iconHeight = quality.subTitleFontSize
+                val iconWidth = img.width / img.height * iconHeight
+                x += textLineTime.width + quality.subTitleFontSize * 0.5f
+                y -= textLineTime.height - iconHeight / 2
+                drawImageRRect(img, RRect.Companion.makeXYWH(x, y, iconWidth, iconHeight, 0f))
+            }
 
             drawOrnament(decorate, link, themeColor)
         }

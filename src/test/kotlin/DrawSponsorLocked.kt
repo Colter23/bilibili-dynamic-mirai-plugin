@@ -9,18 +9,12 @@ import net.mamoe.mirai.console.plugin.PluginManager.INSTANCE.load
 import net.mamoe.mirai.console.terminal.MiraiConsoleTerminalLoader
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
 import org.jetbrains.skia.*
-import org.jetbrains.skia.paragraph.Alignment
-import org.jetbrains.skia.paragraph.ParagraphBuilder
-import org.jetbrains.skia.paragraph.ParagraphStyle
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
 import top.colter.mirai.plugin.bilibili.data.ModuleDynamic
 import top.colter.mirai.plugin.bilibili.draw.*
-import top.colter.mirai.plugin.bilibili.utils.CacheType
-import top.colter.mirai.plugin.bilibili.utils.FontUtils
-import top.colter.mirai.plugin.bilibili.utils.getOrDownloadImage
 import java.io.File
 
 

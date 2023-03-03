@@ -168,6 +168,7 @@ data class DynamicItem(
  * @param faceNFT 是否为NFT头像
  * @param pendant 头像挂件
  * @param following 是否关注(未关注为null)
+ * @param iconBadge 徽标图案, 现已知 充电专属
  * @param label 标签
  * @param jumpUrl 跳转URL
  * @param officialVerify 官方认证
@@ -202,6 +203,8 @@ data class ModuleAuthor(
     val faceNFT: Boolean? = null,
     @SerialName("following")
     val following: Boolean? = null,
+    @SerialName("icon_badge")
+    val iconBadge: IconBadge? = null,
     @SerialName("label")
     val label: String = "",
     @SerialName("jump_url")
@@ -215,6 +218,19 @@ data class ModuleAuthor(
     @SerialName("decorate")
     val decorate: Decorate? = null,
 ) {
+    /**
+     * 徽标图案
+     *
+     */
+    @Serializable
+    data class IconBadge(
+        @SerialName("icon")
+        val icon: String = "",
+        @SerialName("render_img")
+        val renderImg: String = "",
+        @SerialName("text")
+        val text: String = ""
+    )
     /**
      * 头像挂件
      * @param pid 挂件ID
