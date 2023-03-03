@@ -1,6 +1,7 @@
 package top.colter.mirai.plugin.bilibili.draw
 
 import org.jetbrains.skia.*
+import org.jetbrains.skia.paragraph.Alignment
 import org.jetbrains.skia.paragraph.ParagraphBuilder
 import org.jetbrains.skia.paragraph.ParagraphStyle
 import org.jetbrains.skia.paragraph.TextStyle
@@ -167,7 +168,7 @@ val generalPaint = Paint().apply {
 
 
 suspend fun DynamicItem.makeDrawDynamic(colors: List<Int>): String {
-    val dynamic = drawDynamic(colors.first())
+    val dynamic = drawDynamic(colors.first(), false)
     val img = makeCardBg(dynamic.height, colors) {
         it.drawImage(dynamic, 0f, 0f)
     }
@@ -175,10 +176,11 @@ suspend fun DynamicItem.makeDrawDynamic(colors: List<Int>): String {
 }
 
 suspend fun DynamicItem.drawDynamic(themeColor: Int, isForward: Boolean = false): Image {
-
+    val isUnlocked = modules.moduleAuthor.iconBadge?.text == "专属动态"
+        && modules.moduleDynamic.major?.type != "MAJOR_TYPE_BLOCKED"
     val orig = orig?.drawDynamic(themeColor, type == DYNAMIC_TYPE_FORWARD)
 
-    var imgList = modules.makeGeneral(formatTime, link, type, themeColor, isForward)
+    var imgList = modules.makeGeneral(formatTime, link, type, themeColor, isForward, isUnlocked)
 
     // 调整附加卡片顺序
     if (orig != null) {
@@ -295,14 +297,50 @@ suspend fun DynamicItem.Modules.makeGeneral(
     link: String,
     type: DynamicType,
     themeColor: Int,
-    isForward: Boolean = false
+    isForward: Boolean = false,
+    isUnlocked: Boolean = false
 ): List<Image> {
     return mutableListOf<Image>().apply {
         if (type != DYNAMIC_TYPE_NONE)
             add(if (isForward) moduleAuthor.drawForward(time) else moduleAuthor.drawGeneral(time, link, themeColor))
-        moduleDispute?.drawGeneral()?.let { add(it) }
-        addAll(moduleDynamic.makeGeneral(isForward))
+        if(isUnlocked){
+            add(drawBlockedDefault())
+        }else{
+            moduleDispute?.drawGeneral()?.let { add(it) }
+            addAll(moduleDynamic.makeGeneral(isForward))
+        }
     }
+}
+
+fun drawBlockedDefault(): Image {
+    val bgImg = Image.makeFromEncoded(loadResourceBytes("image/Blocked_BG_Day.png"))
+    val bgWidth = cardContentRect.width - 2 * quality.cardPadding
+    val bgHeight = bgImg.height / bgImg.width * bgWidth
+
+    val textStyle = ParagraphStyle().apply {
+        maxLinesCount = 2
+        ellipsis = "..."
+        alignment = Alignment.CENTER
+        textStyle = titleTextStyle.apply {
+            color = Color.WHITE
+        }
+    }
+    val text = ParagraphBuilder(textStyle, FontUtils.fonts)
+        .addText("此动态为专属动态\n请自行查看详情内容")
+        .build().layout(bgWidth)
+
+    return Surface.makeRasterN32Premul(
+        cardContentRect.width.toInt(), (bgHeight + 3 * quality.cardPadding).toInt()
+    ).apply {
+        canvas.apply {
+            val x = quality.cardPadding.toFloat()
+            var y = quality.cardPadding.toFloat()
+            drawImageClip(bgImg, RRect.Companion.makeXYWH(x, y, bgWidth, bgHeight, quality.cardArc))
+
+            y += (bgHeight - text.height) / 2
+            text.paint(this, x, y)
+        }
+    }.makeImageSnapshot()
 }
 
 fun Rect.textVertical(text: TextLine) =
