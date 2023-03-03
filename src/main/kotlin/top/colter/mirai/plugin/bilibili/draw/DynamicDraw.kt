@@ -12,6 +12,7 @@ import top.colter.mirai.plugin.bilibili.data.*
 import top.colter.mirai.plugin.bilibili.data.DynamicType.DYNAMIC_TYPE_FORWARD
 import top.colter.mirai.plugin.bilibili.data.DynamicType.DYNAMIC_TYPE_NONE
 import top.colter.mirai.plugin.bilibili.draw.Position.*
+import top.colter.mirai.plugin.bilibili.tasker.DynamicMessageTasker.isUnlocked
 import top.colter.mirai.plugin.bilibili.utils.*
 import top.colter.mirai.plugin.bilibili.utils.FontUtils.loadTypeface
 import top.colter.mirai.plugin.bilibili.utils.FontUtils.matchFamily
@@ -176,11 +177,9 @@ suspend fun DynamicItem.makeDrawDynamic(colors: List<Int>): String {
 }
 
 suspend fun DynamicItem.drawDynamic(themeColor: Int, isForward: Boolean = false): Image {
-    val isUnlocked = modules.moduleAuthor.iconBadge?.text == "专属动态"
-        && modules.moduleDynamic.major?.type != "MAJOR_TYPE_BLOCKED"
     val orig = orig?.drawDynamic(themeColor, type == DYNAMIC_TYPE_FORWARD)
 
-    var imgList = modules.makeGeneral(formatTime, link, type, themeColor, isForward, isUnlocked)
+    var imgList = modules.makeGeneral(formatTime, link, type, themeColor, isForward, isUnlocked())
 
     // 调整附加卡片顺序
     if (orig != null) {
