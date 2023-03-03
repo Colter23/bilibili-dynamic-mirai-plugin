@@ -189,9 +189,6 @@ fun cacheImage(image: Image, path: String, cacheType: CacheType): String {
 
 suspend fun getOrDownload(url: String, cacheType: CacheType = CacheType.UNKNOWN): ByteArray? {
      try {
-        if(url.startsWith("resources/")){
-            return loadResourceBytes(url.replace("resources/", ""))
-        }
         val fileName = url.split("?").first().split("@").first().split("/").last()
 
         val filePath = if (cacheType == CacheType.UNKNOWN) {
@@ -202,7 +199,10 @@ suspend fun getOrDownload(url: String, cacheType: CacheType = CacheType.UNKNOWN)
          return if (filePath.exists()) {
             filePath.setLastModifiedTime(FileTime.from(Instant.now()))
             filePath.readBytes()
-        } else {
+         } else if(url.startsWith("cache/")){
+             return null
+         }
+         else {
             try {
                 biliClient.useHttpClient {
                     it.get(url).body<ByteArray>().apply {

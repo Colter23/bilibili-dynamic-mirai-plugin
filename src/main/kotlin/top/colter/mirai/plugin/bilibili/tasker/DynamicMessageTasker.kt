@@ -7,12 +7,11 @@ import top.colter.mirai.plugin.bilibili.BiliConfig
 import top.colter.mirai.plugin.bilibili.BiliData
 import top.colter.mirai.plugin.bilibili.data.*
 import top.colter.mirai.plugin.bilibili.data.DynamicType.*
+import top.colter.mirai.plugin.bilibili.draw.drawGeneral
 import top.colter.mirai.plugin.bilibili.draw.makeDrawDynamic
 import top.colter.mirai.plugin.bilibili.draw.makeRGB
-import top.colter.mirai.plugin.bilibili.utils.formatTime
+import top.colter.mirai.plugin.bilibili.utils.*
 import top.colter.mirai.plugin.bilibili.utils.logger
-import top.colter.mirai.plugin.bilibili.utils.mid
-import top.colter.mirai.plugin.bilibili.utils.time
 
 object DynamicMessageTasker : BiliTasker() {
 
@@ -70,15 +69,18 @@ object DynamicMessageTasker : BiliTasker() {
         }
     }
 
-    fun DynamicItem.dynamicImages(): List<String>? {
+    suspend fun DynamicItem.dynamicImages(): List<String>? {
         return when (type) {
             DYNAMIC_TYPE_FORWARD -> orig?.dynamicImages()!!
-            DYNAMIC_TYPE_DRAW -> {
-                if(modules.moduleDynamic.major?.draw != null)
-                  modules.moduleDynamic.major?.draw?.items?.map { it.src }
-                else if (modules.moduleDynamic.major?.blocked != null)
-                    listOf("resources/image/SponsorBlocked.png")
-                else listOf()
+            DYNAMIC_TYPE_DRAW -> when(modules.moduleDynamic.major?.type){
+                "MAJOR_TYPE_DRAW" -> modules.moduleDynamic.major?.draw?.items?.map { it.src }
+                "MAJOR_TYPE_BLOCKED" -> {
+                    val path = modules.moduleDynamic.major.blocked?.let {
+                        cacheImage(it.drawGeneral(),"blocked_$idStr.png",CacheType.IMAGES)
+                    }
+                    listOf("cache/$path")
+                }
+                else -> listOf()
             }
             DYNAMIC_TYPE_ARTICLE -> modules.moduleDynamic.major?.article?.covers
             DYNAMIC_TYPE_AV -> listOf(modules.moduleDynamic.major?.archive?.cover!!)
