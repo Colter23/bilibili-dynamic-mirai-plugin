@@ -65,69 +65,9 @@ class DrawSponsorLocked {
     """.trimIndent()
     private val sponsorBlocked: ModuleDynamic.Major.Blocked = decoder.decodeFromString(sponsorBlockedString)
 
-    private suspend fun ModuleDynamic.Major.Blocked.drawAndSave(path: String) {
-        val paragraphStyle = ParagraphStyle().apply {
-            maxLinesCount = 2
-            ellipsis = "..."
-            alignment = Alignment.CENTER
-            textStyle = titleTextStyle.apply {
-                color = Color.WHITE
-            }
-        }
-        val hintMessage = ParagraphBuilder(paragraphStyle, FontUtils.fonts).addText(hintMessage).build()
-        val buttonMessage = ParagraphBuilder(paragraphStyle, FontUtils.fonts).addText(button.text).build()
-        val bgImage = getOrDownloadImage(bgImg.imgDay, CacheType.IMAGES)!!
-        val lockIcon = getOrDownloadImage(icon.imgDay, CacheType.IMAGES)!!
-        val buttonIcon = getOrDownloadImage(button.icon)!!
-
-        val bgWidth = cardContentRect.width - quality.cardPadding * 2
-        val bgHeight = bgWidth / bgImage.width * bgImage.height
-
-        val lockWidth = bgWidth / 7
-        val lockHeight = lockWidth / lockIcon.width * lockIcon.height
-
-        return Surface.makeRasterN32Premul(
-            bgWidth.toInt(), bgHeight.toInt()
-        ).apply {
-            canvas.apply {
-                var x = 0f
-                var y = 0f
-                drawImageClip(bgImage, RRect.makeXYWH(x, y, bgWidth, bgHeight, quality.cardArc))
-                x += (bgWidth - lockWidth) / 2
-                y += bgHeight / 4
-                drawImageClip(lockIcon, RRect.makeXYWH(x, y, lockWidth, lockHeight, quality.cardArc))
-
-                x = 0f
-                y += lockHeight + quality.drawSpace
-                hintMessage.layout(bgWidth).paint(this, x, y)
-
-                x =  bgWidth / 8 * 3
-                y += hintMessage.height + 2 * quality.drawSpace
-                val buttonWidth = bgWidth / 4
-                val buttonHeight = buttonWidth / 3
-                drawRRect(
-                    RRect.Companion.makeXYWH(x, y, buttonWidth, buttonHeight, 50f),
-                    Paint().apply {
-                        color = Color.makeRGB("#ff679a")
-                        mode = PaintMode.FILL
-                        isAntiAlias = false
-                    }
-                )
-
-                val iconHeight = buttonHeight / 3 * 2
-                x += buttonWidth / 4
-                drawImageClip(buttonIcon, RRect.Companion.makeXYWH(x, y + buttonHeight / 6, iconHeight, iconHeight, quality.cardArc))
-
-                x -= iconHeight / 8
-                y += buttonHeight / 8
-                buttonMessage.layout(buttonWidth - iconHeight).paint(this, x, y)
-            }
-        }.saveImage(path)
-    }
-
     @Test
-    fun drawAndSave() = runBlocking {
+    fun drawAndSave(): Unit = runBlocking {
         val file = File("src/test/resources/output/SponsorBlocked.png")
-        sponsorBlocked.drawAndSave(file.path)
+        sponsorBlocked.drawGeneral().encodeToData()?.let { file.writeBytes(it.bytes) }
     }
 }

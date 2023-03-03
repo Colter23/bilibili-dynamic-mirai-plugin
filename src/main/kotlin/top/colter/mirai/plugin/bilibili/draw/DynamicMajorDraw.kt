@@ -521,36 +521,39 @@ suspend fun ModuleDynamic.Major.Draw.drawGeneral(): Image {
     }.makeImageSnapshot()
 }
 
-fun ModuleDynamic.Major.Blocked.drawGeneral(): Image {
-    val img = when(blockType){
-        1 -> Image.makeFromEncoded(loadResourceBytes("image/SponsorBlocked.png"))
-        else -> Image.makeFromEncoded(loadResourceBytes("image/Blocked_BG_Day.png"))
+suspend fun ModuleDynamic.Major.Blocked.drawGeneral(): Image {
+    val paragraphStyle = ParagraphStyle().apply {
+        maxLinesCount = 2
+        ellipsis = "..."
+        alignment = Alignment.CENTER
+        textStyle = titleTextStyle.apply {
+            color = Color.WHITE
+        }
     }
-    val w = cardContentRect.width - 2 * quality.cardPadding
-    val h = img.height / img.width * w
+    val hintMessage = ParagraphBuilder(paragraphStyle, FontUtils.fonts).addText(hintMessage).build()
+    val bgImage = getOrDownloadImage(bgImg.imgDay, CacheType.IMAGES)!!
+    val lockIcon = getOrDownloadImage(icon.imgDay, CacheType.IMAGES)!!
+
+    val bgWidth = cardContentRect.width - quality.cardPadding * 2
+    val bgHeight = bgWidth / bgImage.width * bgImage.height
+
+    val lockWidth = bgWidth / 7
+    val lockHeight = lockWidth / lockIcon.width * lockIcon.height
+
     return Surface.makeRasterN32Premul(
-        (w + 2 * quality.cardPadding).toInt(), (h + 2 * quality.cardPadding).toInt()
+        cardContentRect.width.toInt(), (bgHeight + quality.cardPadding * 2).toInt()
     ).apply {
         canvas.apply {
-            drawImageClip(
-                img,
-                RRect.Companion.makeXYWH(
-                    quality.cardPadding.toFloat(), 0f,
-                    w, h, quality.cardArc
-            ))
-            if(blockType!= 1){
-                val paragraphStyle = ParagraphStyle().apply {
-                    maxLinesCount = 2
-                    ellipsis = "..."
-                    alignment = Alignment.CENTER
-                    textStyle = titleTextStyle.apply {
-                        color = Color.WHITE
-                    }
-                }
-                val hintMessage = ParagraphBuilder(paragraphStyle, FontUtils.fonts)
-                    .addText(hintMessage).build().layout(w)
-                hintMessage.paint(this, 0f, (h - hintMessage.height)/2 + quality.cardPadding)
-            }
+            var x = quality.cardPadding.toFloat()
+            var y = 0f
+            drawImageClip(bgImage, RRect.makeXYWH(x, y, bgWidth, bgHeight, quality.cardArc))
+            x += (bgWidth - lockWidth) / 2
+            y += bgHeight / 4
+            drawImageClip(lockIcon, RRect.makeXYWH(x, y, lockWidth, lockHeight, quality.cardArc))
+
+            x = quality.cardPadding.toFloat()
+            y += lockHeight + quality.drawSpace
+            hintMessage.layout(bgWidth).paint(this, x, y)
         }
     }.makeImageSnapshot()
 }
