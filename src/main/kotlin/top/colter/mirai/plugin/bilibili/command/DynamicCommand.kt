@@ -255,7 +255,11 @@ object DynamicCommand : CompositeCommand(
     @SubCommand("search", "s", "搜索")
     suspend fun CommandSenderOnMessage<*>.search(did: String) {
         val subject = Contact()
-        val detail = biliClient.getDynamicDetail(did)
+        val detail = try {
+            biliClient.getDynamicDetail(did)
+        } catch (e: Exception) {
+            null
+        }
         if (detail != null) subject.sendMessage("少女祈祷中...") else subject.sendMessage("未找到动态")
         detail?.let { d -> BiliBiliDynamic.dynamicChannel.send(DynamicDetail(d, subject.delegate)) }
     }

@@ -411,28 +411,24 @@ suspend fun Canvas.drawTextArea(text: String, rect: Rect, textX: Float, textY: F
 
             is RichText.Emoji -> {
                 if (emojiTypeface != null) {
-                    val tl = TextLine.make(node.value, emojiFont)
-                    if (x + tl.width > rect.right) {
-                        x = rect.left
-                        y += tl.height + quality.lineSpace
-                    }
-                    drawTextLine(tl, x, y, paint)
-                    x += tl.width
+                        val tl = TextLine.make(node.value, emojiFont)
+                        if (x + tl.width > rect.right) {
+                            x = rect.left
+                            y += tl.height + quality.lineSpace
+                        }
+                        drawTextLine(tl, x, y, paint)
+                        x += tl.width
                 }else {
                     val emoji = node.value.codePoints().mapToObj { it.toString(16) }.collect(Collectors.joining("-"))
                     val emojiSize = TextLine.make("🙂", font).height
 
                     var emojiImg: Image? = null
                     try {
-                        emojiImg = getOrDownloadImage(twemoji(emoji), CacheType.EMOJI)
-                    } catch (_: Exception) { }
-                    try {
-                        val e = emoji.split("-")
-                        val et = if (e.last() == "fe0f") {
-                            e.dropLast(1)
-                        } else {
-                            e.plus("fe0f")
-                        }.joinToString("-")
+                        var e = emoji.split("-")
+                        if (e.last() == "fe0f" && !e.contains("200d")) {
+                            e = e.dropLast(1)
+                        }
+                        val et = e.joinToString("-")
                         emojiImg = getOrDownloadImage(twemoji(et), CacheType.EMOJI)
                     } catch (_: Exception) { }
 

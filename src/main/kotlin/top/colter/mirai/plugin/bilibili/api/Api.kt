@@ -49,5 +49,5 @@ const val UNFOLLOW_PGC = "https://api.bilibili.com/pgc/web/follow/del"
 const val SHORT_LINK = "https://api.bilibili.com/x/share/click"
 
 // Twemoji CDN
-const val TWEMOJI = "https://twemoji.maxcdn.com/v/14.0.2/72x72"
+const val TWEMOJI = "https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72"
 
