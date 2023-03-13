@@ -12,7 +12,6 @@ import top.colter.mirai.plugin.bilibili.draw.drawGeneral
 import top.colter.mirai.plugin.bilibili.draw.makeDrawDynamic
 import top.colter.mirai.plugin.bilibili.draw.makeRGB
 import top.colter.mirai.plugin.bilibili.utils.*
-import top.colter.mirai.plugin.bilibili.utils.logger
 
 object DynamicMessageTasker : BiliTasker() {
 
@@ -58,7 +57,7 @@ object DynamicMessageTasker : BiliTasker() {
             return "此动态为专属动态\n请自行查看详情内容"
         }
         return when (type) {
-            DYNAMIC_TYPE_FORWARD -> "${modules.moduleDynamic.desc?.text}\n\n 转发动态:\n${orig?.textContent()}"
+            DYNAMIC_TYPE_FORWARD -> "${modules.moduleDynamic.desc?.text}\n\n 转发 ${orig?.modules?.moduleAuthor?.name} 的动态:\n${orig?.textContent()}"
             DYNAMIC_TYPE_WORD,
             DYNAMIC_TYPE_DRAW -> modules.moduleDynamic.desc?.text
                 ?: modules.moduleDynamic.major?.blocked?.hintMessage?:
