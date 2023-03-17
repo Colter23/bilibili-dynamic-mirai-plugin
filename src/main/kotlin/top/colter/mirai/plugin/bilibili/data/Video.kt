@@ -196,7 +196,7 @@ data class VideoDetail(
         @SerialName("cover")
         val cover: String? = null,
         @SerialName("mid")
-        val mid: Int? = null,
+        val mid: Long? = null,
         @SerialName("intro")
         val intro: String? = null,
         @SerialName("sign_state")

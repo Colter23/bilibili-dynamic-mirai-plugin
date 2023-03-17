@@ -63,7 +63,7 @@ data class BiliSearch(
         @SerialName("type")
         val type: String? = null,
         @SerialName("mid")
-        val mid: Int? = null,
+        val mid: Long? = null,
         @SerialName("uname")
         val uname: String? = null,
         @SerialName("usign")

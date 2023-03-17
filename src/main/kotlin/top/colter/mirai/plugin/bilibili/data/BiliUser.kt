@@ -85,7 +85,7 @@ data class BiliUser(
     @Serializable
     data class UserHonourInfo(
         @SerialName("mid")
-        val mid: Int,
+        val mid: Long,
         @SerialName("colour")
         val colour: String?,
         @SerialName("tags")

@@ -576,7 +576,7 @@ data class PgcSeason(
         @SerialName("is_follow")
         val isFollow: Int? = null,
         @SerialName("mid")
-        val mid: Int? = null,
+        val mid: Long? = null,
         @SerialName("nickname_color")
         val nicknameColor: String? = null,
         @SerialName("pendant")
