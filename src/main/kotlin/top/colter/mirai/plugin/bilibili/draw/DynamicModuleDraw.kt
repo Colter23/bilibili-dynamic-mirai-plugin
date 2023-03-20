@@ -4,6 +4,7 @@ import org.jetbrains.skia.*
 import org.jetbrains.skia.paragraph.Alignment
 import org.jetbrains.skia.paragraph.ParagraphBuilder
 import org.jetbrains.skia.paragraph.ParagraphStyle
+import org.jetbrains.skia.paragraph.TextStyle
 import top.colter.mirai.plugin.bilibili.BiliConfig
 import top.colter.mirai.plugin.bilibili.api.twemoji
 import top.colter.mirai.plugin.bilibili.data.ModuleAuthor
@@ -114,8 +115,10 @@ suspend fun drawAdditionalCard(
         maxLinesCount = 1
         ellipsis = "..."
         alignment = Alignment.LEFT
-        textStyle = titleTextStyle.apply {
+        textStyle = TextStyle().apply {
             fontSize = quality.titleFontSize * 0.8f
+            color = theme.titleColor
+            fontFamilies = arrayOf(mainTypeface.familyName)
         }
     }
 

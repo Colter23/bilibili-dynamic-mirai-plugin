@@ -48,6 +48,7 @@ object BiliConfig: AutoSavePluginConfig("BiliConfig") {
           liveInterval: 直播检测间隔(与动态检测独立) 单位秒
           lowSpeed: 低频检测时间段与倍率(例: 3-8x2 三点到八点检测间隔为正常间隔的2倍) 24小时制
           checkReportInterval: 检测报告间隔 单位分
+          timeout: 超时时间 单位秒
     """
     )
     val checkConfig: CheckConfig by value()
@@ -96,6 +97,7 @@ object BiliConfig: AutoSavePluginConfig("BiliConfig") {
     @ValueDescription(
         """
         缓存配置:
+          downloadOriginal: 是否下载动态原图
           expires: 图片过期时长 单位天
           为 0 时表示不清理此类图片
           当图片在指定时间内未被再次使用,就会被删除
@@ -207,7 +209,8 @@ data class CheckConfig(
     var interval: Int = 15,
     var liveInterval: Int = 15,
     var lowSpeed: String = "0-0x2",
-    val checkReportInterval: Int = 10
+    val checkReportInterval: Int = 10,
+    val timeout: Int = 10
 )
 
 
@@ -262,6 +265,7 @@ data class ForwardDisplay(
 
 @Serializable
 data class CacheConfig(
+    val downloadOriginal: Boolean = true,
     val expires: Map<CacheType, Int> = mapOf(
         CacheType.DRAW to 7,
         CacheType.IMAGES to 7,

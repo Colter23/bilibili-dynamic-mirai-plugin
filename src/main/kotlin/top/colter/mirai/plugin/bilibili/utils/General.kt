@@ -227,10 +227,12 @@ suspend fun getOrDownloadImage(url: String, cacheType: CacheType = CacheType.UNK
     null
 }
 
-suspend fun getOrDownloadImageDefault(url: String, fallbackUrl: String, cacheType: CacheType = CacheType.UNKNOWN) =
-    getOrDownloadImage(url, cacheType)?:
+suspend fun getOrDownloadImageDefault(url: String, fallbackUrl: String, cacheType: CacheType = CacheType.UNKNOWN): Image {
+    return (if (BiliConfig.cacheConfig.downloadOriginal) getOrDownloadImage(url, cacheType) else null) ?:
     getOrDownloadImage(fallbackUrl, cacheType)?:
     Image.makeFromEncoded(loadResourceBytes("image/IMAGE_MISS.png"))
+}
+
 
 
 suspend fun Contact.sendImage(url: String, cacheType: CacheType = CacheType.UNKNOWN) = try {

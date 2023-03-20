@@ -13,6 +13,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.supervisorScope
 import kotlinx.serialization.json.Json
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
+import top.colter.mirai.plugin.bilibili.BiliConfig.checkConfig
 import top.colter.mirai.plugin.bilibili.BiliConfig.enableConfig
 import top.colter.mirai.plugin.bilibili.BiliConfig.proxyConfig
 import top.colter.mirai.plugin.bilibili.utils.decode
@@ -43,9 +44,9 @@ open class BiliClient : Closeable {
             header(HttpHeaders.Referrer, "https://t.bilibili.com")
         }
         install(HttpTimeout) {
-            socketTimeoutMillis = 10_000L
-            connectTimeoutMillis = 10_000L
-            requestTimeoutMillis = 10_000L
+            socketTimeoutMillis = checkConfig.timeout * 1000L
+            connectTimeoutMillis = checkConfig.timeout * 1000L
+            requestTimeoutMillis = checkConfig.timeout * 1000L
         }
         expectSuccess = true
         Json {

@@ -4,6 +4,7 @@ import org.jetbrains.skia.*
 import org.jetbrains.skia.paragraph.Alignment
 import org.jetbrains.skia.paragraph.ParagraphBuilder
 import org.jetbrains.skia.paragraph.ParagraphStyle
+import org.jetbrains.skia.paragraph.TextStyle
 import top.colter.mirai.plugin.bilibili.BiliConfig
 import top.colter.mirai.plugin.bilibili.data.ModuleDynamic
 import top.colter.mirai.plugin.bilibili.utils.*
@@ -526,11 +527,13 @@ suspend fun ModuleDynamic.Major.Blocked.drawGeneral(): Image {
         maxLinesCount = 2
         ellipsis = "..."
         alignment = Alignment.CENTER
-        textStyle = titleTextStyle.apply {
+        textStyle = TextStyle().apply {
+            fontSize = quality.titleFontSize
             color = Color.WHITE
+            fontFamilies = arrayOf(mainTypeface.familyName)
         }
     }
-    val hintMessage = ParagraphBuilder(paragraphStyle, FontUtils.fonts).addText(hintMessage).build()
+    val hintMessage = ParagraphBuilder(paragraphStyle, FontUtils.fonts).addText("包月充电专属动态").build()
     val bgImage = getOrDownloadImage(bgImg.imgDay, CacheType.IMAGES)!!
     val lockIcon = getOrDownloadImage(icon.imgDay, CacheType.IMAGES)!!
 
@@ -548,7 +551,7 @@ suspend fun ModuleDynamic.Major.Blocked.drawGeneral(): Image {
             var y = 0f
             drawImageClip(bgImage, RRect.makeXYWH(x, y, bgWidth, bgHeight, quality.cardArc))
             x += (bgWidth - lockWidth) / 2
-            y += bgHeight / 4
+            y += bgHeight / 3
             drawImageClip(lockIcon, RRect.makeXYWH(x, y, lockWidth, lockHeight, quality.cardArc))
 
             x = quality.cardPadding.toFloat()

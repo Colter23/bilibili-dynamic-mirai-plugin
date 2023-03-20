@@ -48,7 +48,7 @@ fun Canvas.drawRectShadowAntiAlias(r: Rect, shadow: Theme.Shadow): Canvas =
 fun Canvas.drawImageRRect(image: Image, srcRect: Rect, rRect: RRect, paint: Paint? = null) {
     save()
     clipRRect(rRect, true)
-    drawImageRect(image, srcRect, rRect, FilterMipmap(FilterMode.LINEAR, MipmapMode.NEAREST), paint, true)
+    drawImageRect(image, srcRect, rRect, FilterMipmap(FilterMode.LINEAR, MipmapMode.NEAREST), paint, false)
     restore()
 }
 
@@ -72,7 +72,7 @@ fun Surface.saveImage(path: String) = File(path).writeBytes(makeImageSnapshot().
 fun Canvas.drawScaleWidthImage(image: Image, width: Float, x: Float, y: Float, paint: Paint = Paint()) {
     val src = Rect.makeXYWH(0f, 0f, image.width.toFloat(), image.height.toFloat())
     val dst = Rect.makeXYWH(x, y, width, width * image.height / image.width)
-    drawImageRect(image, src, dst, FilterMipmap(FilterMode.LINEAR, MipmapMode.NEAREST), paint, true)
+    drawImageRect(image, src, dst, FilterMipmap(FilterMode.LINEAR, MipmapMode.NEAREST), paint, false)
 }
 
 fun Canvas.drawScaleWidthImageOutline(
