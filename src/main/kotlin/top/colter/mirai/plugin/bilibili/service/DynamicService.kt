@@ -119,17 +119,18 @@ object DynamicService {
                 }else false
             }
             if (c == 0) appendLine("无")
+            //appendLine()
+            //appendLine("番剧: ")
+            //val cc = bangumi.count { (ssid, sub) ->
+            //    if (subject in sub.contacts) {
+            //        appendLine("${sub.title}@ss$ssid")
+            //        true
+            //    }else false
+            //}
+            //if (cc == 0) appendLine("无")
             appendLine()
-            appendLine("番剧: ")
-            val cc = bangumi.count { (ssid, sub) ->
-                if (subject in sub.contacts) {
-                    appendLine("${sub.title}@ss$ssid")
-                    true
-                }else false
-            }
-            if (cc == 0) appendLine("无")
-            appendLine()
-            append("共 ${c + cc} 个订阅")
+            //append("共 ${c + cc} 个订阅")
+            append("共 ${c} 个订阅")
         }
     }
 

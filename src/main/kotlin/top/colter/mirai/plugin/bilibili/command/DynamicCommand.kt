@@ -24,6 +24,7 @@ import top.colter.mirai.plugin.bilibili.data.DynamicDetail
 import top.colter.mirai.plugin.bilibili.data.LiveDetail
 import top.colter.mirai.plugin.bilibili.service.*
 import top.colter.mirai.plugin.bilibili.utils.*
+import xyz.cssxsh.mirai.skia.MiraiSkiaPlugin.reload
 
 object DynamicCommand : CompositeCommand(
     owner = BiliBiliDynamic,
@@ -39,6 +40,12 @@ object DynamicCommand : CompositeCommand(
     @SubCommand("h", "help", "帮助", "menu")
     suspend fun CommandSender.help() {
         loadResourceBytes("image/HELP.png").toExternalResource().toAutoCloseable().sendAsImageTo(Contact())
+    }
+
+    @SubCommand("reload", "重载")
+    suspend fun CommandSender.reload() {
+        BiliConfig.reload()
+        sendMessage("配置重载成功")
     }
 
     @SubCommand("color", "颜色")
@@ -177,8 +184,9 @@ object DynamicCommand : CompositeCommand(
 
     @SubCommand("templateList", "tl", "模板列表")
     suspend fun CommandSenderOnMessage<*>.templateList(type: String = "d") {
-        subject?.sendMessage("少女祈祷中...")
+        val ms = subject?.sendMessage("加载中...")
         TemplateService.listTemplate(type, Contact())
+        ms?.recall()
     }
 
     @SubCommand("template", "t", "模板")
@@ -260,7 +268,7 @@ object DynamicCommand : CompositeCommand(
         } catch (e: Exception) {
             null
         }
-        if (detail != null) subject.sendMessage("少女祈祷中...") else subject.sendMessage("未找到动态")
+        if (detail != null) subject.sendMessage("加载中...") else subject.sendMessage("未找到动态")
         detail?.let { d -> BiliBiliDynamic.dynamicChannel.send(DynamicDetail(d, subject.delegate)) }
     }
 
@@ -268,7 +276,7 @@ object DynamicCommand : CompositeCommand(
     suspend fun CommandSenderOnMessage<*>.live() {
         val subject = Contact()
         val detail = biliClient.getLive(1, 1)
-        if (detail != null) subject.sendMessage("少女祈祷中...") else subject.sendMessage("当前没有人在直播")
+        if (detail != null) subject.sendMessage("加载中...") else subject.sendMessage("当前没有人在直播")
         detail?.let { d -> BiliBiliDynamic.liveChannel.send(LiveDetail(d.rooms.first(), subject.delegate)) }
     }
 
@@ -279,7 +287,7 @@ object DynamicCommand : CompositeCommand(
             list?.forEach { di ->
                 BiliBiliDynamic.dynamicChannel.send(DynamicDetail(di, Contact().delegate))
             }
-            if (!list.isNullOrEmpty()) "少女祈祷中..." else "未找到动态"
+            if (!list.isNullOrEmpty()) "加载中..." else "未找到动态"
         }?.let { sendMessage(it) }
     }
 

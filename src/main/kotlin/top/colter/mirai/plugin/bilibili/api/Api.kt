@@ -1,8 +1,8 @@
 package top.colter.mirai.plugin.bilibili.api
 
 // Login
-const val LOGIN_URL = "http://passport.bilibili.com/qrcode/getLoginUrl"
-const val LOGIN_INFO = "http://passport.bilibili.com/qrcode/getLoginInfo"
+const val LOGIN_QRCODE = "https://passport.bilibili.com/x/passport-login/web/qrcode/generate"
+const val LOGIN_INFO = "https://passport.bilibili.com/x/passport-login/web/qrcode/poll"
 
 // Dynamic
 const val NEW_DYNAMIC = "https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/all"
@@ -26,6 +26,7 @@ const val SEARCH = "https://api.bilibili.com/x/web-interface/search/type"
 
 // Space
 const val USER_INFO = "https://api.bilibili.com/x/space/acc/info"
+const val USER_INFO_WBI = "https://api.bilibili.com/x/space/wbi/acc/info"
 const val USER_ID = "https://api.bilibili.com/x/web-interface/nav"
 const val SPACE_SEARCH = "https://api.bilibili.com/x/space/arc/search"
 

@@ -42,6 +42,7 @@ object ListenerTasker : BiliTasker() {
                 TriggerMode.Never -> f = false
             }
             if (f) {
+                val ms = subject.sendMessage("加载中...")
                 val msg = message.filter { it !is At && it !is Image }.toMessageChain().content.trim()
                 val type = matchingRegular(msg)
                 val img = type?.drawGeneral() ?: return@subscribeAlways
@@ -50,6 +51,7 @@ object ListenerTasker : BiliTasker() {
                     + imgMsg
                     if (returnLink) + PlainText(type.getLink())
                 })
+                ms.recall()
             }
         }
     }

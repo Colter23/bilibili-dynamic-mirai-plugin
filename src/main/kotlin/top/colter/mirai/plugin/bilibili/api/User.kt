@@ -7,20 +7,15 @@ import top.colter.mirai.plugin.bilibili.data.*
 import top.colter.mirai.plugin.bilibili.utils.bodyParameter
 import top.colter.mirai.plugin.bilibili.utils.decode
 
-suspend fun BiliClient.getLoginUrl(): LoginResult = get(LOGIN_URL)
-suspend fun BiliClient.loginInfo(oauthKey: String): LoginResult {
-    //return useHttpClient {
-    //    it.post(LOGIN_INFO) {
-    //        bodyParameter("oauthKey", oauthKey)
-    //    }.body<String>().decode()
-    //}
-    return post(LOGIN_INFO) {
-        bodyParameter("oauthKey", oauthKey)
+suspend fun BiliClient.getLoginQrcode(): LoginQrcode? = getData(LOGIN_QRCODE)
+suspend fun BiliClient.loginInfo(qrcodeKey: String): LoginData? {
+    return getData(LOGIN_INFO) {
+        parameter("qrcode_key", qrcodeKey)
     }
 }
 
 suspend fun BiliClient.userInfo(uid: Long): BiliUser? {
-    return getData(USER_INFO) {
+    return getDataWithWbi(USER_INFO_WBI) {
         parameter("mid", uid)
     }
 }

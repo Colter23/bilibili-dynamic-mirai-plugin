@@ -24,6 +24,7 @@ import top.colter.mirai.plugin.bilibili.data.DynamicItem
 import top.colter.mirai.plugin.bilibili.data.DynamicType.*
 import java.nio.file.Path
 import java.nio.file.attribute.FileTime
+import java.security.MessageDigest
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalDateTime
@@ -38,7 +39,7 @@ internal val logger by lazy {
     try {
         BiliBiliDynamic.logger
     } catch (_: Throwable) {
-        MiraiLogger.Factory.create(BiliClient::class)
+        MiraiLogger.Factory.create(BiliBiliDynamic::class)
     }
 }
 
@@ -458,4 +459,9 @@ inline fun matchUser(user: String, matchSuccess: (uid: Long) -> String?): String
             }
         }
     }
+}
+
+fun String.md5(): String {
+    val md = MessageDigest.getInstance("MD5")
+    return md.digest(toByteArray()).joinToString("") { "%02x".format(it) }
 }

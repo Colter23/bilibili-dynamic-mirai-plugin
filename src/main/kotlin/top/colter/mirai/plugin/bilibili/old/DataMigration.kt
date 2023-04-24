@@ -100,7 +100,7 @@ fun migrationConfig() {
         if (!BiliPluginConfig.migrated) {
             BiliBiliDynamic.logger.info("开始转移旧版配置...")
 
-            BiliConfig.admin = BiliPluginConfig.admin.toLong()
+            //BiliConfig.admin = BiliPluginConfig.admin.toLong()
             BiliConfig.accountConfig.cookie = BiliPluginConfig.cookie
             BiliConfig.accountConfig.autoFollow = BiliPluginConfig.autoFollow
             BiliConfig.accountConfig.followGroup = BiliPluginConfig.followGroup

@@ -9,17 +9,15 @@ import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic.save
 import top.colter.mirai.plugin.bilibili.BiliConfig
-import top.colter.mirai.plugin.bilibili.api.getLoginUrl
+import top.colter.mirai.plugin.bilibili.api.getLoginQrcode
 import top.colter.mirai.plugin.bilibili.api.loginInfo
-import top.colter.mirai.plugin.bilibili.data.LoginData
 import top.colter.mirai.plugin.bilibili.draw.loginQrCode
 import top.colter.mirai.plugin.bilibili.initTagid
-import top.colter.mirai.plugin.bilibili.utils.decode
 import java.net.URI
 
 object LoginService {
     suspend fun login(contact: Contact) {
-        val loginData = client.getLoginUrl().data!!.decode<LoginData>()
+        val loginData = client.getLoginQrcode()!!
 
         val image = loginQrCode(loginData.url)
         val qrMsg = image.encodeToData()!!.bytes.toExternalResource().toAutoCloseable().sendAsImageTo(contact)
@@ -28,10 +26,9 @@ object LoginService {
             withTimeout(180000) {
                 while (isActive) {
                     delay(3000)
-                    val loginInfo = client.loginInfo(loginData.oauthKey!!)
-                    if (loginInfo.status == true) {
-                        val url = loginInfo.data!!.decode<LoginData>().url
-                        val querys = URI(url).query.split("&")
+                    val loginInfo = client.loginInfo(loginData.qrcodeKey!!)!!
+                    if (loginInfo.code == 0) {
+                        val querys = URI(loginInfo.url!!).query.split("&")
                         val cookie = buildString {
                             querys.forEach {
                                 if (it.contains("SESSDATA") || it.contains("bili_jct"))

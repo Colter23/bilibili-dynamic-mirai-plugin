@@ -1,7 +1,7 @@
 package top.colter.mirai.plugin.bilibili
 
 import kotlinx.serialization.Serializable
-import net.mamoe.mirai.console.data.AutoSavePluginConfig
+import net.mamoe.mirai.console.data.ReadOnlyPluginConfig
 import net.mamoe.mirai.console.data.ValueDescription
 import net.mamoe.mirai.console.data.value
 import org.jetbrains.skia.paragraph.Alignment
@@ -9,13 +9,13 @@ import top.colter.mirai.plugin.bilibili.service.TriggerMode
 import top.colter.mirai.plugin.bilibili.utils.CacheType
 
 
-object BiliConfig: AutoSavePluginConfig("BiliConfig") {
+object BiliConfig: ReadOnlyPluginConfig("BiliConfig") {
 
-    @ValueDescription("具体的配置文件描述请前往下方链接查看")
-    val help: String by value("https://github.com/Colter23/bilibili-dynamic-mirai-plugin#BiliConfig.yml")
+    //@ValueDescription("具体的配置文件描述请前往下方链接查看")
+    //val help: String by value("https://github.com/Colter23/bilibili-dynamic-mirai-plugin#BiliConfig.yml")
 
     @ValueDescription("管理员")
-    var admin: Long by value(0L)
+    val admin: Long by value(0L)
 
     @ValueDescription(
         """

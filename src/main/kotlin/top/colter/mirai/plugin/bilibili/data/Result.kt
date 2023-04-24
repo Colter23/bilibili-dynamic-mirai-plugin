@@ -17,28 +17,6 @@ data class BiliResult(
 )
 
 @Serializable
-data class LoginResult(
-    @SerialName("code")
-    val code: Int? = null,
-    @SerialName("message")
-    val message: String? = null,
-    @SerialName("ts")
-    val ts: Int? = null,
-    @SerialName("status")
-    val status: Boolean? = null,
-    @SerialName("data")
-    val data: JsonElement? = null
-)
-
-@Serializable
-data class LoginData(
-    @SerialName("url")
-    val url: String,
-    @SerialName("oauthKey")
-    val oauthKey: String? = null
-)
-
-@Serializable
 data class PgcResult(
     @SerialName("code")
     val code: Int,

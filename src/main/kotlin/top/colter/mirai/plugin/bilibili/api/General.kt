@@ -9,6 +9,7 @@ import top.colter.mirai.plugin.bilibili.data.ShortLinkData
 import top.colter.mirai.plugin.bilibili.utils.actionNotify
 import top.colter.mirai.plugin.bilibili.utils.bodyParameter
 import top.colter.mirai.plugin.bilibili.utils.decode
+import top.colter.mirai.plugin.bilibili.utils.md5
 
 fun twemoji(code: String) = "$TWEMOJI/$code.png"
 
@@ -29,6 +30,21 @@ internal suspend inline fun <reified T> BiliClient.getData(
     } else {
         isLogin = true
         res.data.decode()
+    }
+}
+internal suspend inline fun <reified T> BiliClient.getDataWithWbi(
+    url: String,
+    crossinline block: HttpRequestBuilder.() -> Unit = {}
+): T? {
+    val builder = HttpRequestBuilder()
+    builder.block()
+    val params = builder.url.parameters.build().formUrlEncode()
+    val wts = System.currentTimeMillis() / 1000
+    val wrid = "$params&wts=$wts${getVerifyString()}".md5()
+    return getData(url) {
+        block()
+        parameter("w_rid", wrid)
+        parameter("wts", wts)
     }
 }
 
@@ -71,4 +87,26 @@ suspend fun BiliClient.toShortLink(oid: String, shareId: String, shareOrigin: St
             }.body<String>().decode<BiliResult>().data?.decode<ShortLinkData>()?.link
         }
     }catch (e: Exception) { null }
+}
+
+fun getVerifyString(): String {
+    // https://api.bilibili.com/x/web-interface/nav
+    //val imgUrl = "https://i0.hdslb.com/bfs/wbi/829e9923f2d9407c8932e9e492a345ff.png"
+    //val subUrl = "https://i0.hdslb.com/bfs/wbi/349e075a9ac443dfb7679db4f73c379f.png"
+    //val r = splitUrl(imgUrl) + splitUrl(subUrl)
+    //val r = "829e9923f2d9407c8932e9e492a345ff349e075a9ac443dfb7679db4f73c379f"
+    //val array = intArrayOf(46,47,18,2,53,8,23,32,15,50,10,31,58,3,45,35,27,43,5,49,33,9,42,19,29,28,14,39,12,38,41,13,37,48,7,16,24,55,40,61,26,17,0,1,60,51,30,4,22,25,54,21,56,59,6,63,57,62,11,36,20,34,44,52)
+    //return buildString {
+    //    array.forEach { t ->
+    //        if (t < r.length) {
+    //            append(r[t])
+    //        }
+    //    }
+    //}.slice(IntRange(0, 31))
+
+    return "df39df43c6df3e3e349742c2547a45a0"
+}
+
+fun splitUrl(url: String): String {
+    return url.removeSuffix("/").split("/").last().split(".").first()
 }
