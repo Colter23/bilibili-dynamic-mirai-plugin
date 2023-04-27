@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "top.colter"
-version = "3.2.9"
+version = "3.2.8"
 
 repositories {
     mavenLocal()
