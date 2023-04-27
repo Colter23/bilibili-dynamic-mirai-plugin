@@ -42,16 +42,28 @@ object ListenerTasker : BiliTasker() {
                 TriggerMode.Never -> f = false
             }
             if (f) {
-                val ms = subject.sendMessage("加载中...")
                 val msg = message.filter { it !is At && it !is Image }.toMessageChain().content.trim()
                 val type = matchingRegular(msg)
-                val img = type?.drawGeneral() ?: return@subscribeAlways
-                val imgMsg = subject.uploadImage(img, CacheType.DRAW_SEARCH) ?: return@subscribeAlways
-                subject.sendMessage(buildMessageChain {
-                    + imgMsg
-                    if (returnLink) + PlainText(type.getLink())
-                })
-                ms.recall()
+                if (type != null) {
+                    val ms = subject.sendMessage("加载中...")
+                    val img = type.drawGeneral()
+                    if (img == null) {
+                        ms.recall()
+                        subject.sendMessage("解析失败")
+                        return@subscribeAlways
+                    }
+                    val imgMsg = subject.uploadImage(img, CacheType.DRAW_SEARCH)
+                    if (imgMsg == null) {
+                        ms.recall()
+                        subject.sendMessage("图片上传失败")
+                        return@subscribeAlways
+                    }
+                    subject.sendMessage(buildMessageChain {
+                        + imgMsg
+                        if (returnLink) + PlainText(type.getLink())
+                    })
+                    ms.recall()
+                }
             }
         }
     }

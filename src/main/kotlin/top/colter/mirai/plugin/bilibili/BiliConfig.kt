@@ -285,7 +285,7 @@ data class LinkResolveConfig(
         """((www|m).bilibili.com/bangumi/(play|media)/)?((ss|ep|md)\d+)""",
         """[tm].bilibili.com/(dynamic/)?(\d+)""",
         """live.bilibili.com/(h5/)?(\d+)""",
-        """b23.tv/([0-9A-z]+)""",
+        """b23.tv\\?/([0-9A-z]+)""",
     )
 ){
     val reg: List<Regex> get() = regex.map { it.toRegex() }
