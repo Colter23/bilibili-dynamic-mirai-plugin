@@ -6,10 +6,9 @@ import io.ktor.http.*
 import top.colter.mirai.plugin.bilibili.client.BiliClient
 import top.colter.mirai.plugin.bilibili.data.BiliResult
 import top.colter.mirai.plugin.bilibili.data.ShortLinkData
-import top.colter.mirai.plugin.bilibili.utils.actionNotify
-import top.colter.mirai.plugin.bilibili.utils.bodyParameter
-import top.colter.mirai.plugin.bilibili.utils.decode
-import top.colter.mirai.plugin.bilibili.utils.md5
+import top.colter.mirai.plugin.bilibili.data.WbiImg
+import top.colter.mirai.plugin.bilibili.utils.*
+import java.time.LocalDate
 
 fun twemoji(code: String) = "$TWEMOJI/$code.png"
 
@@ -89,22 +88,28 @@ suspend fun BiliClient.toShortLink(oid: String, shareId: String, shareOrigin: St
     }catch (e: Exception) { null }
 }
 
-fun getVerifyString(): String {
-    // https://api.bilibili.com/x/web-interface/nav
-    //val imgUrl = "https://i0.hdslb.com/bfs/wbi/829e9923f2d9407c8932e9e492a345ff.png"
-    //val subUrl = "https://i0.hdslb.com/bfs/wbi/349e075a9ac443dfb7679db4f73c379f.png"
-    //val r = splitUrl(imgUrl) + splitUrl(subUrl)
-    //val r = "829e9923f2d9407c8932e9e492a345ff349e075a9ac443dfb7679db4f73c379f"
-    //val array = intArrayOf(46,47,18,2,53,8,23,32,15,50,10,31,58,3,45,35,27,43,5,49,33,9,42,19,29,28,14,39,12,38,41,13,37,48,7,16,24,55,40,61,26,17,0,1,60,51,30,4,22,25,54,21,56,59,6,63,57,62,11,36,20,34,44,52)
-    //return buildString {
-    //    array.forEach { t ->
-    //        if (t < r.length) {
-    //            append(r[t])
-    //        }
-    //    }
-    //}.slice(IntRange(0, 31))
+var lastWbiTime: LocalDate = LocalDate.now()
+var wbiImg: WbiImg? = null
+suspend fun getWbiImg(): WbiImg {
+    val now = LocalDate.now()
+    if (now.isAfter(lastWbiTime) || wbiImg == null) {
+        lastWbiTime = now
+        wbiImg = biliClient.userInfo()?.wbiImg
+    }
+    return wbiImg!!
+}
 
-    return "df39df43c6df3e3e349742c2547a45a0"
+suspend fun getVerifyString(): String {
+    val wi = getWbiImg()
+    val r = splitUrl(wi.imgUrl) + splitUrl(wi.subUrl)
+    val array = intArrayOf(46,47,18,2,53,8,23,32,15,50,10,31,58,3,45,35,27,43,5,49,33,9,42,19,29,28,14,39,12,38,41,13,37,48,7,16,24,55,40,61,26,17,0,1,60,51,30,4,22,25,54,21,56,59,6,63,57,62,11,36,20,34,44,52)
+    return buildString {
+        array.forEach { t ->
+            if (t < r.length) {
+                append(r[t])
+            }
+        }
+    }.slice(IntRange(0, 31))
 }
 
 fun splitUrl(url: String): String {

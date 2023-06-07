@@ -52,13 +52,16 @@ open class BiliClient : Closeable {
         Json {
             json
         }
-        BrowserUserAgent()
+        //BrowserUserAgent()
+        install(UserAgent) {
+            agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36"
+        }
     }
 
     suspend inline fun <reified T> get(url: String, crossinline block: HttpRequestBuilder.() -> Unit = {}): T =
         useHttpClient<String> {
             it.get(url) {
-                header(HttpHeaders.Cookie, BiliBiliDynamic.cookie.toString())
+                header(HttpHeaders.Cookie, BiliBiliDynamic.cookie.toString() + "DedeUserID=" + BiliBiliDynamic.uid)
                 block()
             }.body()
         }.decode()
@@ -66,7 +69,7 @@ open class BiliClient : Closeable {
     suspend inline fun <reified T> post(url: String, crossinline block: HttpRequestBuilder.() -> Unit = {}): T =
         useHttpClient<String> {
             it.post(url) {
-                header(HttpHeaders.Cookie, BiliBiliDynamic.cookie.toString())
+                header(HttpHeaders.Cookie, BiliBiliDynamic.cookie.toString() + "DedeUserID=" + BiliBiliDynamic.uid)
                 block()
             }.body()
         }.decode()

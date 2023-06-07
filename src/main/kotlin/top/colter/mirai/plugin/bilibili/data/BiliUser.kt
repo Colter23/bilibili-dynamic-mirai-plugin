@@ -17,6 +17,9 @@ data class BiliUser(
     val vip: ModuleAuthor.Vip? = null,
     @SerialName("pendant")
     val pendant: ModuleAuthor.Pendant? = null,
+    @SerialName("wbi_img")
+    val wbiImg: WbiImg? = null,
+
     //@SerialName("sex")
     //val sex: String,
     //@SerialName("face_nft")
@@ -119,6 +122,14 @@ data class BiliUser(
     )
 
 }
+
+@Serializable
+data class WbiImg(
+    @SerialName("img_url")
+    val imgUrl: String,
+    @SerialName("sub_url")
+    val subUrl: String,
+)
 
 @Serializable
 data class FansMedal(

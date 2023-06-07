@@ -58,7 +58,7 @@ object DynamicService {
         "设置完成"
     }
 
-    suspend fun addSubscribe(uid: Long, subject: String) = mutex.withLock {
+    suspend fun addSubscribe(uid: Long, subject: String, isSelf: Boolean = true) = mutex.withLock {
         if (isFollow(uid, subject)) return@withLock "之前订阅过这个人哦"
         if (dynamic[0]?.contacts?.contains(subject) == true) dynamic[0]?.contacts?.remove(subject)
 
@@ -80,10 +80,13 @@ object DynamicService {
         //    add(subject)
         //}
         dynamic[uid]?.contacts?.add(subject)
-        "订阅 ${dynamic[uid]?.name} 成功!"
+        val contact = findContact(subject)
+        if (isSelf) "订阅 ${dynamic[uid]?.name} 成功!"
+        else "为${if (contact is Group) "群" else "好友"} ${contact?.id} 订阅 ${dynamic[uid]?.name} 成功!"
+
     }
 
-    suspend fun removeSubscribe(uid: Long, subject: String) = mutex.withLock {
+    suspend fun removeSubscribe(uid: Long, subject: String, isSelf: Boolean = true) = mutex.withLock {
         if (!isFollow(uid, subject)) return@withLock "还未订阅此人哦"
         val user = dynamic[uid]!!
         if (user.contacts.remove(subject)) {
@@ -96,7 +99,9 @@ object DynamicService {
                     remove(uid)
                     isEmpty()
                 } == true) atAll.remove(subject)
-            "对 ${user.name} 取消订阅成功"
+            val contact = findContact(subject)
+            if (isSelf) "取消订阅 ${user.name} 成功"
+            else "为${if (contact is Group) "群" else "好友"} ${contact?.id} 取消订阅 ${user.name} 成功"
         }else "取消订阅失败"
     }
 

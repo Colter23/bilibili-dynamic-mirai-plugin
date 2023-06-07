@@ -28,7 +28,7 @@ const val SEARCH = "https://api.bilibili.com/x/web-interface/search/type"
 const val USER_INFO = "https://api.bilibili.com/x/space/acc/info"
 const val USER_INFO_WBI = "https://api.bilibili.com/x/space/wbi/acc/info"
 const val USER_ID = "https://api.bilibili.com/x/web-interface/nav"
-const val SPACE_SEARCH = "https://api.bilibili.com/x/space/arc/search"
+const val SPACE_SEARCH = "https://api.bilibili.com/x/space/wbi/arc/search"
 
 // Follow
 const val IS_FOLLOW = "https://api.bilibili.com/x/relation"

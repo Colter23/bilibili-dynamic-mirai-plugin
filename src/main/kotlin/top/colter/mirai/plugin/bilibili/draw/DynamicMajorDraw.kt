@@ -162,7 +162,7 @@ suspend fun ModuleDynamic.Major.Archive.drawGeneral(showStat: Boolean = false): 
     }
 
     val descParagraph =
-        ParagraphBuilder(paragraphStyle, FontUtils.fonts).addText(desc.replace("\r\n", " ").replace("\n", " ")).build()
+        ParagraphBuilder(paragraphStyle, FontUtils.fonts).addText((desc?:"").replace("\r\n", " ").replace("\n", " ")).build()
             .layout(paragraphWidth)
 
     val fallbackUrl = imgApi(cover, cardContentRect.width.toInt(), (cardContentRect.width * 0.625).toInt())
@@ -332,7 +332,7 @@ suspend fun ModuleDynamic.Major.Pgc.drawSmall(): Image {
 
 suspend fun drawSmallCard(
     title: String,
-    desc: String,
+    desc: String?,
     cover: String,
     lbadge: String,
     rbadge: String,
@@ -355,7 +355,7 @@ suspend fun drawSmallCard(
         textStyle = descTextStyle
     }
 
-    val descParagraph = ParagraphBuilder(paragraphStyle, FontUtils.fonts).addText(desc).build().layout(paragraphWidth)
+    val descParagraph = ParagraphBuilder(paragraphStyle, FontUtils.fonts).addText(desc?:"").build().layout(paragraphWidth)
 
     val videoCardRect = RRect.makeComplexXYWH(
         quality.cardPadding.toFloat(),

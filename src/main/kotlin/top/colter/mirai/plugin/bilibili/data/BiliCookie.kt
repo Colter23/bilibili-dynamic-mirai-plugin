@@ -22,7 +22,7 @@ data class BiliCookie(
     fun isEmpty(): Boolean = sessData == "" && biliJct == ""
 
     override fun toString(): String {
-        return "SESSDATA=$sessData; bili_jct=$biliJct"
+        return "SESSDATA=$sessData; bili_jct=$biliJct; "
     }
 }
 

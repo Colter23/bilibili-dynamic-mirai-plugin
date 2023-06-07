@@ -16,6 +16,7 @@ import net.mamoe.mirai.utils.ExternalResource.Companion.sendAsImageTo
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
 import top.colter.mirai.plugin.bilibili.*
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic.crossContact
+import top.colter.mirai.plugin.bilibili.BiliBiliDynamic.logger
 import top.colter.mirai.plugin.bilibili.api.getDynamicDetail
 import top.colter.mirai.plugin.bilibili.api.getLive
 import top.colter.mirai.plugin.bilibili.api.getUserNewDynamic
@@ -58,13 +59,13 @@ object DynamicCommand : CompositeCommand(
         }
     }
 
-    @SubCommand("add", "添加", "订阅")
+    @SubCommand("add", "follow", "添加", "订阅")
     suspend fun CommandSender.add(id: String, target: GroupOrContact = GroupOrContact(Contact())) {
         if (checkPerm(target)) {
             if (pgcRegex.matches(id)) {
                 sendMessage(PgcService.followPgc(id, target.subject))
             } else try {
-                DynamicService.addSubscribe(id.toLong(), target.subject).let {
+                DynamicService.addSubscribe(id.toLong(), target.subject, this.subject?.delegate == target.subject).let {
                     sendMessage(it)
                     actionNotify(this.subject?.id, name, target.name, "订阅", it)
                 }
@@ -74,13 +75,13 @@ object DynamicCommand : CompositeCommand(
         }
     }
 
-    @SubCommand("del", "删除")
+    @SubCommand("del", "unfollow", "删除")
     suspend fun CommandSender.del(id: String, target: GroupOrContact = GroupOrContact(Contact())) {
         if (checkPerm(target)) {
             if (pgcRegex.matches(id)) {
                 sendMessage(PgcService.delPgc(id, target.subject))
             } else matchUser(id) {
-                DynamicService.removeSubscribe(it, target.subject)
+                DynamicService.removeSubscribe(it, target.subject, this.subject?.delegate == target.subject)
             }?.let {
                 sendMessage(it)
                 actionNotify(this.subject?.id, name, target.name, "取消订阅", it)
@@ -262,14 +263,19 @@ object DynamicCommand : CompositeCommand(
 
     @SubCommand("search", "s", "搜索")
     suspend fun CommandSenderOnMessage<*>.search(did: String) {
-        val subject = Contact()
-        val detail = try {
-            biliClient.getDynamicDetail(did)
+        val msg = sendMessage("加载中...")
+        try {
+            val detail = biliClient.getDynamicDetail(did)
+            if (detail != null) {
+                detail.let { d -> BiliBiliDynamic.dynamicChannel.send(DynamicDetail(d, subject?.delegate)) }
+            } else {
+                sendMessage("未找到动态")
+            }
         } catch (e: Exception) {
-            null
+            sendMessage("获取动态失败 ${e.message}")
+            logger.error("获取动态失败", e)
         }
-        if (detail != null) subject.sendMessage("加载中...") else subject.sendMessage("未找到动态")
-        detail?.let { d -> BiliBiliDynamic.dynamicChannel.send(DynamicDetail(d, subject.delegate)) }
+        msg?.recall()
     }
 
     @SubCommand("live", "直播")
@@ -282,34 +288,48 @@ object DynamicCommand : CompositeCommand(
 
     @SubCommand("new", "最新动态")
     suspend fun CommandSenderOnMessage<*>.new(user: String, count: Int = 1) {
+        val msg = sendMessage("加载中...")
         matchUser(user) {
-            val list = biliClient.getUserNewDynamic(it)?.items?.subList(0, count)
-            list?.forEach { di ->
-                BiliBiliDynamic.dynamicChannel.send(DynamicDetail(di, Contact().delegate))
+            try {
+                val list = biliClient.getUserNewDynamic(it)?.items?.subList(0, count)
+                list?.forEach { di ->
+                    BiliBiliDynamic.dynamicChannel.send(DynamicDetail(di, Contact().delegate))
+                }
+                if (list.isNullOrEmpty()) "未找到动态" else null
+            }catch (e: Exception) {
+                logger.error("获取动态失败", e)
+                "获取动态失败 ${e.message}"
             }
-            if (!list.isNullOrEmpty()) "加载中..." else "未找到动态"
         }?.let { sendMessage(it) }
+        msg?.recall()
     }
 
     @SubCommand("video", "最新视频")
     suspend fun CommandSenderOnMessage<*>.newVideo(user: String) {
+        val msg = sendMessage("加载中...")
         matchUser(user) {
-            biliClient.searchUserVideo(it)?.list?.vlist?.run {
-                if (isNotEmpty()) {
-                    val video = first()
-                    val type = matchingRegular(video.bvid)
-                    val img = type?.drawGeneral() ?: return
-                    val imgMsg = Contact().uploadImage(img, CacheType.DRAW_SEARCH) ?: return
-                    sendMessage(buildMessageChain {
-                        +imgMsg
-                        if (BiliConfig.linkResolveConfig.returnLink) +PlainText(type.getLink())
-                    })
-                    null
-                } else {
-                    "未找到视频"
+            try {
+                biliClient.searchUserVideo(it)?.list?.vlist?.run {
+                    if (isNotEmpty()) {
+                        val video = first()
+                        val type = matchingRegular(video.bvid)
+                        val img = type?.drawGeneral() ?: return
+                        val imgMsg = Contact().uploadImage(img, CacheType.DRAW_SEARCH) ?: return
+                        sendMessage(buildMessageChain {
+                            +imgMsg
+                            if (BiliConfig.linkResolveConfig.returnLink) +PlainText(type.getLink())
+                        })
+                        null
+                    } else {
+                        "未找到视频"
+                    }
                 }
+            }catch (e: Exception) {
+                logger.error("获取动态失败", e)
+                "获取动态失败 ${e.message}"
             }
         }?.let { sendMessage(it) }
+        msg?.recall()
     }
 
     @SubCommand("create", "创建分组")

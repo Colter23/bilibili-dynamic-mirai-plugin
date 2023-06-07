@@ -85,8 +85,8 @@ data class DynamicItem(
     val idStr: String?,
     @SerialName("visible")
     val visible: Boolean = true,
-    @SerialName("basic")
-    val basic: DynamicBasic? = null,
+    //@SerialName("basic")
+    //val basic: DynamicBasic? = null,
     @SerialName("modules")
     val modules: Modules,
     @SerialName("orig")
@@ -118,7 +118,7 @@ data class DynamicItem(
         @Serializable
         data class LikeIcon(
             @SerialName("id")
-            val id: Int = 0,
+            val id: Long = 0,
             @SerialName("action_url")
             val actionUrl: String = "",
             @SerialName("start_url")
@@ -243,7 +243,7 @@ data class ModuleAuthor(
     @Serializable
     data class Pendant(
         @SerialName("pid")
-        val pid: Int,
+        val pid: Long,
         @SerialName("name")
         val name: String,
         @SerialName("expire")
@@ -903,7 +903,7 @@ data class ModuleDynamic(
             @SerialName("cover")
             val cover: String,
             @SerialName("desc")
-            val desc: String,
+            val desc: String? = null,
             //@SerialName("disable_preview")
             //val disablePreview: Boolean,
             @SerialName("duration_text")
