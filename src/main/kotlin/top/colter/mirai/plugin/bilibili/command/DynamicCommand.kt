@@ -71,6 +71,8 @@ object DynamicCommand : CompositeCommand(
                 }
             } catch (e: NumberFormatException) {
                 sendMessage("ID错误 [$id]")
+            } catch (e: Exception) {
+                sendMessage("订阅失败 ${e.message}")
             }
         }
     }

@@ -65,8 +65,10 @@ object DynamicService {
         if (!dynamic.containsKey(uid)) {
             val m = followUser(uid)
             if (m != null) return@withLock m
-            val u = client.userInfo(uid)
-            dynamic[uid] = SubData(u?.name!!)
+            val un = if (uid == 11783021L) {
+                "哔哩哔哩番剧出差"
+            } else client.userInfo(uid)?.name!!
+            dynamic[uid] = SubData(un)
         }
 
         //dynamic[uid]?.contacts?.apply {

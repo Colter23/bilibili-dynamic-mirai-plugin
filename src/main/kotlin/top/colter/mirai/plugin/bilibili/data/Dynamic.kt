@@ -442,13 +442,13 @@ data class ModuleDynamic(
             @SerialName("state")
             val state: Int,
             @SerialName("is_upower_active")
-            val active: Boolean,
+            val active: Boolean? = null,
             @SerialName("desc")
             val desc: Desc,
             @SerialName("button")
-            val button: Button,
+            val button: Button? = null,
             @SerialName("jump_url")
-            val jumpUrl: String,
+            val jumpUrl: String? = null,
         )
 
         /**
