@@ -63,11 +63,14 @@ object DynamicService {
         if (dynamic[0]?.contacts?.contains(subject) == true) dynamic[0]?.contacts?.remove(subject)
 
         if (!dynamic.containsKey(uid)) {
-            val m = followUser(uid)
-            if (m != null) return@withLock m
-            val un = if (uid == 11783021L) {
-                "哔哩哔哩番剧出差"
-            } else client.userInfo(uid)?.name!!
+            val un = if (BiliBiliDynamic.uid == uid) client.userInfo(uid)?.name!!
+            else {
+                val m = followUser(uid)
+                if (m != null) return@withLock m
+                if (uid == 11783021L) {
+                    "哔哩哔哩番剧出差"
+                } else client.userInfo(uid)?.name!!
+            }
             dynamic[uid] = SubData(un)
         }
 

@@ -123,6 +123,8 @@ internal class PluginTest {
                             })
                             y += 30f
                         }
+
+                        else -> {}
                     }
 
                 }
@@ -140,7 +142,7 @@ internal class PluginTest {
             "DYNAMIC_TYPE_FORWARD",
             "652271005324017683",
             true,
-            null,
+            //null,
             DynamicItem.Modules(
                 ModuleAuthor(
                     "AUTHOR_TYPE_NORMAL",
@@ -296,7 +298,7 @@ internal class PluginTest {
                 "DYNAMIC_TYPE_WORD",
                 "652271005324017683",
                 true,
-                null,
+                //null,
                 DynamicItem.Modules(
                     ModuleAuthor(
                         "AUTHOR_TYPE_NORMAL",

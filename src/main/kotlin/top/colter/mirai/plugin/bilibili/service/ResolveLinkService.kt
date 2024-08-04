@@ -67,18 +67,20 @@ enum class LinkType(val regex: List<Regex>, var id: String? = null): ResolveLink
 
     },
     Article(listOf(
-        """(?:www\.bilibili\.com/read/)?(cv\d{1,10})""".toRegex()
+        """(?:www\.bilibili\.com/read/)?cv(\d{1,10})""".toRegex(),
+        """(?:www\.bilibili\.com/read/mobile/)(\d{1,10})""".toRegex()
     )) {
         override suspend fun drawGeneral(): String? {
-            return biliClient.getArticleDetail(id!!)?.run {
+            return biliClient.getArticleDetail("cv$id")?.run {
                 drawGeneral(id!!, "专栏", time.formatTime, author, toDrawData().drawGeneral())
             }
         }
 
-        override suspend fun getLink(): String = ARTICLE_LINK(id!!.removePrefix("cv"))
+        override suspend fun getLink(): String = ARTICLE_LINK(id!!)
     },
     Dynamic(listOf(
-        """[tm]\.bilibili\.com/(?:dynamic/)?(\d+)""".toRegex()
+        """[tm]\.bilibili\.com/(?:dynamic/)?(\d+)""".toRegex(),
+        """www\.bilibili\.com/opus/(\d+)""".toRegex()
     )) {
         override suspend fun drawGeneral(): String? {
             val color = Color.makeRGB(BiliConfig.imageConfig.defaultColor)

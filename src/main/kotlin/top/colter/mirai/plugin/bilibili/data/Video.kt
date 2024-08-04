@@ -42,7 +42,7 @@ data class VideoDetail(
     @SerialName("dynamic")
     val dynamic: String? = null,
     @SerialName("cid")
-    val cid: Int? = null,
+    val cid: Long? = null,
     @SerialName("dimension")
     val dimension: Dimension? = null,
     @SerialName("season_id")
@@ -117,7 +117,7 @@ data class VideoDetail(
     @Serializable
     data class Stat(
         @SerialName("aid")
-        val aid: Int? = null,
+        val aid: Long? = null,
         @SerialName("view")
         val view: Int,
         @SerialName("danmaku")
@@ -168,7 +168,7 @@ data class VideoDetail(
     @Serializable
     data class Pages(
         @SerialName("cid")
-        val cid: Int? = null,
+        val cid: Long? = null,
         @SerialName("page")
         val page: Int? = null,
         @SerialName("from")
@@ -190,7 +190,7 @@ data class VideoDetail(
     @Serializable
     data class UgcSeason(
         @SerialName("id")
-        val id: Int? = null,
+        val id: Long? = null,
         @SerialName("title")
         val title: String? = null,
         @SerialName("cover")
