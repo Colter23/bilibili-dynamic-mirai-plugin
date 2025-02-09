@@ -1,0 +1,288 @@
+{
+  "basic": {
+    "comment_id_str": "40626213",
+    "comment_type": 12,
+    "jump_url": "//www.bilibili.com/opus/1031201757795975177",
+    "like_icon": {
+      "action_url": "https://i0.hdslb.com/bfs/garb/48ec31b7e015b17220d4230e9809615d71e2c1bf.bin",
+      "end_url": "",
+      "id": 1737463530001,
+      "start_url": ""
+    },
+    "rid_str": "40626213"
+  },
+  "id_str": "1031201757795975177",
+  "modules": {
+    "module_author": {
+      "avatar": {
+        "container_size": {
+          "height": 1.375,
+          "width": 1.375
+        },
+        "fallback_layers": {
+          "is_critical_group": true,
+          "layers": [
+            {
+              "general_spec": {
+                "pos_spec": {
+                  "axis_x": 0.6875,
+                  "axis_y": 0.6875,
+                  "coordinate_pos": 2
+                },
+                "render_spec": {
+                  "opacity": 1
+                },
+                "size_spec": {
+                  "height": 0.787,
+                  "width": 0.787
+                }
+              },
+              "layer_config": {
+                "is_critical": true,
+                "tags": {
+                  "AVATAR_LAYER": {},
+                  "GENERAL_CFG": {
+                    "config_type": 1,
+                    "general_config": {
+                      "web_css_style": {
+                        "borderRadius": "50%"
+                      }
+                    }
+                  }
+                }
+              },
+              "resource": {
+                "res_image": {
+                  "image_src": {
+                    "placeholder": 6,
+                    "remote": {
+                      "bfs_style": "widget-layer-avatar",
+                      "url": "https://i1.hdslb.com/bfs/face/7950c18f62d49cf8c09add8c5a0bd97c349b7397.jpg"
+                    },
+                    "src_type": 1
+                  }
+                },
+                "res_type": 3
+              },
+              "visible": true
+            },
+            {
+              "general_spec": {
+                "pos_spec": {
+                  "axis_x": 0.6875,
+                  "axis_y": 0.6875,
+                  "coordinate_pos": 2
+                },
+                "render_spec": {
+                  "opacity": 1
+                },
+                "size_spec": {
+                  "height": 1.375,
+                  "width": 1.375
+                }
+              },
+              "layer_config": {
+                "tags": {
+                  "PENDENT_LAYER": {}
+                }
+              },
+              "resource": {
+                "res_image": {
+                  "image_src": {
+                    "remote": {
+                      "bfs_style": "widget-layer-avatar",
+                      "url": "https://i1.hdslb.com/bfs/garb/item/b145dea561e2cb837d72725d28b483f7841fe78b.png"
+                    },
+                    "src_type": 1
+                  }
+                },
+                "res_type": 3
+              },
+              "visible": true
+            },
+            {
+              "general_spec": {
+                "pos_spec": {
+                  "axis_x": 0.7560000000000001,
+                  "axis_y": 0.7726666666666667,
+                  "coordinate_pos": 1
+                },
+                "render_spec": {
+                  "opacity": 1
+                },
+                "size_spec": {
+                  "height": 0.41666666666666663,
+                  "width": 0.41666666666666663
+                }
+              },
+              "layer_config": {
+                "tags": {
+                  "GENERAL_CFG": {
+                    "config_type": 1,
+                    "general_config": {
+                      "web_css_style": {
+                        "background-color": "rgb(255,255,255)",
+                        "border": "2px solid rgba(255,255,255,1)",
+                        "borderRadius": "50%",
+                        "boxSizing": "border-box"
+                      }
+                    }
+                  },
+                  "ICON_LAYER": {}
+                }
+              },
+              "resource": {
+                "res_image": {
+                  "image_src": {
+                    "local": 1,
+                    "src_type": 2
+                  }
+                },
+                "res_type": 3
+              },
+              "visible": true
+            }
+          ]
+        },
+        "mid": "35434465"
+      },
+      "decoration_card": {
+        "big_card_url": "https://i0.hdslb.com/bfs/garb/ee3ef4c018e7aa0fe33583d31ce31945358e11d6.png",
+        "card_type": 2,
+        "card_type_name": "免费",
+        "card_url": "https://i0.hdslb.com/bfs/garb/ee3ef4c018e7aa0fe33583d31ce31945358e11d6.png",
+        "fan": {
+          "color": "#3DC5EC",
+          "color_format": {
+            "colors": [
+              "#3DC5ECFF",
+              "#3DC5ECFF"
+            ],
+            "end_point": "0,100",
+            "gradients": [
+              0,
+              100
+            ],
+            "start_point": "0,0"
+          },
+          "is_fan": 1,
+          "name": "蔚蓝档案",
+          "num_desc": "009777",
+          "number": 9777
+        },
+        "id": 1705928214002,
+        "image_enhance": "https://i0.hdslb.com/bfs/garb/ee3ef4c018e7aa0fe33583d31ce31945358e11d6.png",
+        "item_id": 1705928214002,
+        "jump_url": "https://www.bilibili.com/h5/mall/equity-link/collect-home?item_id=1705928214002&isdiy=0&part=card&from=post&f_source=garb&vmid=35434465&native.theme=1&navhide=1",
+        "name": "蔚蓝档案粉丝"
+      },
+      "face": "https://i1.hdslb.com/bfs/face/7950c18f62d49cf8c09add8c5a0bd97c349b7397.jpg",
+      "face_nft": false,
+      "following": null,
+      "jump_url": "//space.bilibili.com/35434465/dynamic",
+      "label": "",
+      "mid": 35434465,
+      "name": "白夜清露",
+      "official_verify": {
+        "desc": "",
+        "type": -1
+      },
+      "pendant": {
+        "expire": 0,
+        "image": "https://i1.hdslb.com/bfs/garb/item/b145dea561e2cb837d72725d28b483f7841fe78b.png",
+        "image_enhance": "https://i1.hdslb.com/bfs/garb/item/b145dea561e2cb837d72725d28b483f7841fe78b.png",
+        "image_enhance_frame": "",
+        "n_pid": 3642,
+        "name": "星座系列：摩羯座",
+        "pid": 3642
+      },
+      "pub_action": "投稿了文章",
+      "pub_location_text": "",
+      "pub_time": "2025年02月07日 21:09",
+      "pub_ts": 1738933769,
+      "type": "AUTHOR_TYPE_NORMAL",
+      "vip": {
+        "avatar_subscript": 1,
+        "avatar_subscript_url": "",
+        "due_date": 1759161600000,
+        "label": {
+          "bg_color": "#FB7299",
+          "bg_style": 1,
+          "border_color": "",
+          "img_label_uri_hans": "",
+          "img_label_uri_hans_static": "https://i0.hdslb.com/bfs/vip/8d4f8bfc713826a5412a0a27eaaac4d6b9ede1d9.png",
+          "img_label_uri_hant": "",
+          "img_label_uri_hant_static": "https://i0.hdslb.com/bfs/activity-plat/static/20220614/e369244d0b14644f5e1a06431e22a4d5/VEW8fCC0hg.png",
+          "label_theme": "annual_vip",
+          "path": "",
+          "text": "年度大会员",
+          "text_color": "#FFFFFF",
+          "use_img_label": true
+        },
+        "nickname_color": "#FB7299",
+        "status": 1,
+        "theme_type": 0,
+        "type": 2
+      }
+    },
+    "module_dynamic": {
+      "additional": null,
+      "desc": null,
+      "major": {
+        "opus": {
+          "fold_action": [
+            "全文"
+          ],
+          "jump_url": "//www.bilibili.com/read/cv40626213/",
+          "pics": [
+            {
+              "height": 661,
+              "live_url": null,
+              "size": 368.8583984375,
+              "url": "https://i0.hdslb.com/bfs/article/76408cb846f73fecec23ba1cb5147f8735434465.jpg",
+              "width": 2253
+            }
+          ],
+          "summary": {
+            "rich_text_nodes": [
+              {
+                "orig_text": "看起来是很久以前的《特殊作战》“日鞠调查活动” 的翻版，好在只是一个小活动。 活动持续期间叠加了露营复刻和三倍掉落，算是一点额外收益 就是目前不知道0068复刻时的巧克力要怎么办？ [图片] 给没经历过此类活动的老师们介绍一次，该活动的玩法就是去平日的主线、特别委托、活动消耗体力。 根据消耗的体力完成活动期间中追加特别的每日任务，以此获得「情人节印章」。 而每日任务所获得的「情人节印章」，可以去活动商店中兑换情人节信函、情人节家具抽选箱以及信用点。 「情人节信函」可以邀请一个学生，观看完相关剧情后，便可以获得对应学生的默认版本角色碎片和纪念用的情人节巧克力。请务必来体验下！ 不过如果是拥有不同衣装的学生，则会被视为同一人，不能重复进行邀约。 [图片] 以下为「情人节的约定」第一期的活动一图流，以及情人节巧克力总预览ver3 [图片] [图片]",
+                "text": "看起来是很久以前的《特殊作战》“日鞠调查活动” 的翻版，好在只是一个小活动。 活动持续期间叠加了露营复刻和三倍掉落，算是一点额外收益 就是目前不知道0068复刻时的巧克力要怎么办？ [图片] 给没经历过此类活动的老师们介绍一次，该活动的玩法就是去平日的主线、特别委托、活动消耗体力。 根据消耗的体力完成活动期间中追加特别的每日任务，以此获得「情人节印章」。 而每日任务所获得的「情人节印章」，可以去活动商店中兑换情人节信函、情人节家具抽选箱以及信用点。 「情人节信函」可以邀请一个学生，观看完相关剧情后，便可以获得对应学生的默认版本角色碎片和纪念用的情人节巧克力。请务必来体验下！ 不过如果是拥有不同衣装的学生，则会被视为同一人，不能重复进行邀约。 [图片] 以下为「情人节的约定」第一期的活动一图流，以及情人节巧克力总预览ver3 [图片] [图片]",
+                "type": "RICH_TEXT_NODE_TYPE_TEXT"
+              }
+            ],
+            "text": "看起来是很久以前的《特殊作战》“日鞠调查活动” 的翻版，好在只是一个小活动。 活动持续期间叠加了露营复刻和三倍掉落，算是一点额外收益 就是目前不知道0068复刻时的巧克力要怎么办？ [图片] 给没经历过此类活动的老师们介绍一次，该活动的玩法就是去平日的主线、特别委托、活动消耗体力。 根据消耗的体力完成活动期间中追加特别的每日任务，以此获得「情人节印章」。 而每日任务所获得的「情人节印章」，可以去活动商店中兑换情人节信函、情人节家具抽选箱以及信用点。 「情人节信函」可以邀请一个学生，观看完相关剧情后，便可以获得对应学生的默认版本角色碎片和纪念用的情人节巧克力。请务必来体验下！ 不过如果是拥有不同衣装的学生，则会被视为同一人，不能重复进行邀约。 [图片] 以下为「情人节的约定」第一期的活动一图流，以及情人节巧克力总预览ver3 [图片] [图片]"
+          },
+          "title": "蔚蓝档案日服 情人节的约定活动整理/情人节巧克力总预览【2.12-2.26】"
+        },
+        "type": "MAJOR_TYPE_OPUS"
+      },
+      "topic": null
+    },
+    "module_more": {
+      "three_point_items": [
+        {
+          "label": "举报",
+          "type": "THREE_POINT_REPORT"
+        }
+      ]
+    },
+    "module_stat": {
+      "comment": {
+        "count": 12,
+        "forbidden": false
+      },
+      "forward": {
+        "count": 0,
+        "forbidden": false
+      },
+      "like": {
+        "count": 251,
+        "forbidden": false,
+        "status": false
+      }
+    }
+  },
+  "type": "DYNAMIC_TYPE_ARTICLE",
+  "visible": true
+}

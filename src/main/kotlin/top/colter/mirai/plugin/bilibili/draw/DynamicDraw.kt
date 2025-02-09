@@ -119,6 +119,15 @@ val titleTextStyle by lazy {
     }
 }
 
+val bigTitleTextStyle by lazy {
+    TextStyle().apply {
+        fontSize = quality.titleFontSize + 3
+        color = theme.titleColor
+        fontStyle = FontStyle.BOLD
+        fontFamilies = arrayOf(mainTypeface.familyName)
+    }
+}
+
 val descTextStyle by lazy {
     TextStyle().apply {
         fontSize = quality.descFontSize

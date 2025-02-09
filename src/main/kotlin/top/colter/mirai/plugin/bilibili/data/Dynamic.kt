@@ -844,6 +844,7 @@ data class ModuleDynamic(
          * MAJOR_TYPE_PGC        番剧
          * MAJOR_TYPE_COMMON     活动
          * MAJOR_TYPE_UGC_SEASON 广播剧
+         * MAJOR_TYPE_OPUS       新版动态
          * MAJOR_TYPE_NONE       空
          */
         @SerialName("type")
@@ -869,9 +870,48 @@ data class ModuleDynamic(
         val common: Common? = null,
         @SerialName("ugc_season")
         val ugcSeason: Archive? = null,
+        @SerialName("opus")
+        val opus: Opus? = null,
         @SerialName("none")
         val none: None? = null,
     ) {
+
+        /**
+         * 新样式
+         *
+         * @param title 标题
+         * @param summary 总结
+         * @param pics 封面
+         *
+         */
+        @Serializable
+        data class Opus(
+            @SerialName("title")
+            val title: String? = null,
+            @SerialName("summary")
+            val summary: ContentDesc,
+            @SerialName("pics")
+            val pics: List<DrawItem>
+        ) {
+            /**
+             * 图片项
+             * @param width 宽度
+             * @param height 高度
+             * @param size 文件大小
+             * @param src 链接
+             */
+            @Serializable
+            data class DrawItem(
+                @SerialName("width")
+                val width: Int,
+                @SerialName("height")
+                val height: Int,
+                @SerialName("size")
+                val size: Float,
+                @SerialName("url")
+                val src: String,
+            )
+        }
 
         /**
          * 视频

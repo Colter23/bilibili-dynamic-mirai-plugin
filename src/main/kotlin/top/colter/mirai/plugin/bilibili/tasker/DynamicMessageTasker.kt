@@ -62,7 +62,8 @@ object DynamicMessageTasker : BiliTasker() {
             DYNAMIC_TYPE_DRAW -> modules.moduleDynamic.desc?.text
                 ?: modules.moduleDynamic.major?.blocked?.hintMessage?:
                 ""
-            DYNAMIC_TYPE_ARTICLE -> modules.moduleDynamic.major?.article?.title!!
+            DYNAMIC_TYPE_ARTICLE -> modules.moduleDynamic.major?.article?.title
+                ?: modules.moduleDynamic.major?.opus?.title!!
             DYNAMIC_TYPE_AV -> modules.moduleDynamic.major?.archive?.title!!
             DYNAMIC_TYPE_MUSIC -> modules.moduleDynamic.major?.music?.title!!
             DYNAMIC_TYPE_PGC -> modules.moduleDynamic.major?.pgc?.title!!
@@ -130,7 +131,7 @@ object DynamicMessageTasker : BiliTasker() {
                 listOf(
                     DynamicMessage.Link(
                         DYNAMIC_TYPE_ARTICLE.text,
-                        ARTICLE_LINK(this.modules.moduleDynamic.major?.article?.id!!.toString())
+                        ARTICLE_LINK(this.modules.moduleDynamic.major?.article?.id?.toString() ?: this.did)
                     ),
                     DynamicMessage.Link("动态", DYNAMIC_LINK(did))
                 )

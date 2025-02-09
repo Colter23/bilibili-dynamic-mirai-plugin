@@ -80,7 +80,7 @@ enum class LinkType(val regex: List<Regex>, var id: String? = null): ResolveLink
     },
     Dynamic(listOf(
         """[tm]\.bilibili\.com/(?:dynamic/)?(\d+)""".toRegex(),
-        """www\.bilibili\.com/opus/(\d+)""".toRegex()
+        """(?:www|m)\.bilibili\.com/opus/(\d+)""".toRegex()
     )) {
         override suspend fun drawGeneral(): String? {
             val color = Color.makeRGB(BiliConfig.imageConfig.defaultColor)

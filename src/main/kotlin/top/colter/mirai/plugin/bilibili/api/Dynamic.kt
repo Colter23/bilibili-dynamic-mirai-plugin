@@ -14,6 +14,7 @@ suspend fun BiliClient.getNewDynamic(page: Int = 1, type: String = "all"): Dynam
         parameter("timezone_offset", "-480")
         parameter("type", type)
         parameter("page", page)
+        parameter("features", "itemOpusStyle")
     }
 }
 
@@ -28,6 +29,7 @@ suspend fun BiliClient.getUserNewDynamic(uid: Long, hasTop: Boolean = false, off
         parameter("timezone_offset", "-480")
         parameter("host_mid", uid)
         parameter("offset", offset)
+        parameter("features", "itemOpusStyle")
     }
 }
 
@@ -39,6 +41,7 @@ suspend fun BiliClient.getDynamicDetail(did: String): DynamicItem? {
     return getData<DynamicDetail>(DYNAMIC_DETAIL) {
         parameter("timezone_offset", "-480")
         parameter("id", did)
+        parameter("features", "itemOpusStyle")
     }?.item
 }
 

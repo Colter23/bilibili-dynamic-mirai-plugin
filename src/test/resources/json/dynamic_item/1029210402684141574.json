@@ -1,0 +1,242 @@
+{
+  "basic": {
+    "comment_id_str": "341586801",
+    "comment_type": 11,
+    "jump_url": "//www.bilibili.com/opus/1029210402684141574",
+    "like_icon": {
+      "action_url": "https://i0.hdslb.com/bfs/garb/48ec31b7e015b17220d4230e9809615d71e2c1bf.bin",
+      "end_url": "",
+      "id": 1737463530001,
+      "start_url": ""
+    },
+    "rid_str": "341586801"
+  },
+  "id_str": "1029210402684141574",
+  "modules": {
+    "module_author": {
+      "avatar": {
+        "container_size": {
+          "height": 1.35,
+          "width": 1.35
+        },
+        "fallback_layers": {
+          "is_critical_group": true,
+          "layers": [
+            {
+              "general_spec": {
+                "pos_spec": {
+                  "axis_x": 0.675,
+                  "axis_y": 0.675,
+                  "coordinate_pos": 2
+                },
+                "render_spec": {
+                  "opacity": 1
+                },
+                "size_spec": {
+                  "height": 1,
+                  "width": 1
+                }
+              },
+              "layer_config": {
+                "is_critical": true,
+                "tags": {
+                  "AVATAR_LAYER": {},
+                  "GENERAL_CFG": {
+                    "config_type": 1,
+                    "general_config": {
+                      "web_css_style": {
+                        "borderRadius": "50%"
+                      }
+                    }
+                  }
+                }
+              },
+              "resource": {
+                "res_image": {
+                  "image_src": {
+                    "placeholder": 6,
+                    "remote": {
+                      "bfs_style": "widget-layer-avatar",
+                      "url": "https://i2.hdslb.com/bfs/face/6f8809083cdb8080863c0454b8d50e4c18a30214.jpg"
+                    },
+                    "src_type": 1
+                  }
+                },
+                "res_type": 3
+              },
+              "visible": true
+            }
+          ]
+        },
+        "mid": "3546838751775383"
+      },
+      "face": "https://i2.hdslb.com/bfs/face/6f8809083cdb8080863c0454b8d50e4c18a30214.jpg",
+      "face_nft": false,
+      "following": true,
+      "jump_url": "//space.bilibili.com/3546838751775383/dynamic",
+      "label": "",
+      "mid": 3546838751775383,
+      "name": "优妮-Uni_Kokoro",
+      "official_verify": {
+        "desc": "",
+        "type": -1
+      },
+      "pendant": {
+        "expire": 0,
+        "image": "",
+        "image_enhance": "",
+        "image_enhance_frame": "",
+        "n_pid": 0,
+        "name": "",
+        "pid": 0
+      },
+      "pub_action": "",
+      "pub_location_text": "",
+      "pub_time": "2025年02月02日 12:22",
+      "pub_ts": 1738470120,
+      "type": "AUTHOR_TYPE_NORMAL",
+      "vip": {
+        "avatar_subscript": 0,
+        "avatar_subscript_url": "",
+        "due_date": 0,
+        "label": {
+          "bg_color": "",
+          "bg_style": 0,
+          "border_color": "",
+          "img_label_uri_hans": "",
+          "img_label_uri_hans_static": "https://i0.hdslb.com/bfs/vip/d7b702ef65a976b20ed854cbd04cb9e27341bb79.png",
+          "img_label_uri_hant": "",
+          "img_label_uri_hant_static": "https://i0.hdslb.com/bfs/activity-plat/static/20220614/e369244d0b14644f5e1a06431e22a4d5/KJunwh19T5.png",
+          "label_theme": "",
+          "path": "",
+          "text": "",
+          "text_color": "",
+          "use_img_label": true
+        },
+        "nickname_color": "",
+        "status": 0,
+        "theme_type": 0,
+        "type": 0
+      }
+    },
+    "module_dynamic": {
+      "additional": null,
+      "desc": null,
+      "major": {
+        "opus": {
+          "fold_action": [
+            "展开",
+            "收起"
+          ],
+          "jump_url": "//www.bilibili.com/opus/1029210402684141574",
+          "pics": [
+            {
+              "height": 2048,
+              "live_url": null,
+              "size": 1707.3564453125,
+              "url": "http://i0.hdslb.com/bfs/new_dyn/2efd90228bb3f1b85282ad3767e0be423546838751775383.png",
+              "width": 1366
+            }
+          ],
+          "summary": {
+            "rich_text_nodes": [
+              {
+                "orig_text": "看看！我很可爱吧~!",
+                "text": "看看！我很可爱吧~!",
+                "type": "RICH_TEXT_NODE_TYPE_TEXT"
+              },
+              {
+                "emoji": {
+                  "icon_url": "https://i0.hdslb.com/bfs/emote/ed04066ea7124106d17ffcaf75600700e5442f5c.png",
+                  "size": 1,
+                  "text": "[爱心]",
+                  "type": 1
+                },
+                "orig_text": "[爱心]",
+                "text": "[爱心]",
+                "type": "RICH_TEXT_NODE_TYPE_EMOJI"
+              },
+              {
+                "orig_text": "\n你可以把我介绍给你的爸爸妈妈朋友",
+                "text": "\n你可以把我介绍给你的爸爸妈妈朋友",
+                "type": "RICH_TEXT_NODE_TYPE_TEXT"
+              },
+              {
+                "emoji": {
+                  "icon_url": "https://i0.hdslb.com/bfs/emote/b49fa9f4b1e7c3477918153b82c60b114d87347c.png",
+                  "size": 1,
+                  "text": "[胜利]",
+                  "type": 1
+                },
+                "orig_text": "[胜利]",
+                "text": "[胜利]",
+                "type": "RICH_TEXT_NODE_TYPE_EMOJI"
+              },
+              {
+                "orig_text": "\n你最喜欢哪个表情？",
+                "text": "\n你最喜欢哪个表情？",
+                "type": "RICH_TEXT_NODE_TYPE_TEXT"
+              },
+              {
+                "emoji": {
+                  "icon_url": "https://i0.hdslb.com/bfs/emote/4384050fbab0586259acdd170b510fe262f08a17.png",
+                  "size": 1,
+                  "text": "[歪嘴]",
+                  "type": 1
+                },
+                "orig_text": "[歪嘴]",
+                "text": "[歪嘴]",
+                "type": "RICH_TEXT_NODE_TYPE_EMOJI"
+              },
+              {
+                "orig_text": "\n\n我想尽快和大家聊聊~",
+                "text": "\n\n我想尽快和大家聊聊~",
+                "type": "RICH_TEXT_NODE_TYPE_TEXT"
+              },
+              {
+                "emoji": {
+                  "icon_url": "https://i0.hdslb.com/bfs/emote/63c9d1a31c0da745b61cdb35e0ecb28635675db2.png",
+                  "size": 1,
+                  "text": "[星星眼]",
+                  "type": 1
+                },
+                "orig_text": "[星星眼]",
+                "text": "[星星眼]",
+                "type": "RICH_TEXT_NODE_TYPE_EMOJI"
+              }
+            ],
+            "text": "看看！我很可爱吧~![爱心]\n你可以把我介绍给你的爸爸妈妈朋友[胜利]\n你最喜欢哪个表情？[歪嘴]\n\n我想尽快和大家聊聊~[星星眼]"
+          },
+          "title": "♡立绘公开♡"
+        },
+        "type": "MAJOR_TYPE_OPUS"
+      },
+      "topic": null
+    },
+    "module_more": {
+      "three_point_items": [
+        {
+          "label": "举报",
+          "type": "THREE_POINT_REPORT"
+        }
+      ]
+    },
+    "module_stat": {
+      "comment": {
+        "count": 128,
+        "forbidden": false
+      },
+      "forward": {
+        "count": 10,
+        "forbidden": false
+      },
+      "like": {
+        "count": 391,
+        "forbidden": false,
+        "status": true
+      }
+    }
+  },
+  "type": "DYNAMIC_TYPE_DRAW",
+  "visible": true
+}

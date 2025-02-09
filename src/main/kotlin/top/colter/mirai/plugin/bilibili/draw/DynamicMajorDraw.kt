@@ -23,6 +23,7 @@ suspend fun ModuleDynamic.Major.makeGeneral(isForward: Boolean = false): Image {
         "MAJOR_TYPE_PGC" -> pgc!!.drawSmall()
         "MAJOR_TYPE_UGC_SEASON" -> ugcSeason!!.drawSmall()
         "MAJOR_TYPE_COMMON" -> common!!.drawGeneral()
+        "MAJOR_TYPE_OPUS" -> opus!!.drawGeneral()
         "MAJOR_TYPE_NONE" -> drawInfoText(none?.tips!!)
         else -> drawInfoText("无法绘制类型为 [$type] 的动态类型, 请把动态链接反馈给开发者")
     }
@@ -52,6 +53,48 @@ fun drawInfoText(text: String): Image {
     }.makeImageSnapshot()
 }
 
+suspend fun ModuleDynamic.Major.Opus.drawGeneral(): Image {
+
+    val desc = summary.drawGeneral()
+    val draw = if (pics.isNotEmpty()) {
+        val imgs = pics.map {
+            ModuleDynamic.Major.Draw.DrawItem(it.width, it.height, it.size, it.src)
+        }
+        ModuleDynamic.Major.Draw(0L, imgs).drawGeneral()
+    } else null
+
+    val paragraphStyle = ParagraphStyle().apply {
+        alignment = Alignment.LEFT
+        textStyle = bigTitleTextStyle
+    }
+    val contentParagraph = title?.let {
+        ParagraphBuilder(paragraphStyle, FontUtils.fonts).addText(title).build().layout(cardContentRect.width)
+    }
+
+    val h =
+        if (contentParagraph != null) contentParagraph.lineNumber * quality.contentFontSize.toInt() + quality.cardPadding else 0
+
+    return Surface.makeRasterN32Premul(
+        cardRect.width.toInt(),
+        desc.height + (draw?.height ?: 0) + h
+    ).apply {
+        canvas.apply {
+            contentParagraph?.let {
+                contentParagraph.paint(
+                    this,
+                    quality.cardPadding.toFloat(),
+                    0f
+                )
+            }
+
+            drawImage(desc, 0f, h.toFloat())
+            draw?.let {
+                drawImage(draw, 0f, h.toFloat() + desc.height)
+            }
+
+        }
+    }.makeImageSnapshot()
+}
 
 suspend fun ModuleDynamic.Major.Common.drawGeneral(): Image {
 

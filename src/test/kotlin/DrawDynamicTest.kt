@@ -68,6 +68,19 @@ class DrawDynamicTest {
         }
     }
 
+    @Test
+    fun buildDynamicMsg1() = runBlocking {
+        decodeToDynamicItem("1031201757795975177").buildMessage().apply {
+            println("============== ${this.did}==============")
+            println("content: $content")
+            images?.forEach {
+                println(it)
+            }
+        }
+        println()
+
+    }
+
     @OptIn(ConsoleExperimentalApi::class)
     @After
     fun cleanup() = runBlocking {
