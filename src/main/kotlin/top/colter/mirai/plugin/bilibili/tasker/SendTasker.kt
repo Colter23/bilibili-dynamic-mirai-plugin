@@ -221,7 +221,8 @@ object SendTasker : BiliTasker() {
             DynamicType.DYNAMIC_TYPE_FORWARD -> DynamicFilterType.FORWARD
             DynamicType.DYNAMIC_TYPE_AV,
             DynamicType.DYNAMIC_TYPE_UGC_SEASON,
-            DynamicType.DYNAMIC_TYPE_PGC -> DynamicFilterType.VIDEO
+            DynamicType.DYNAMIC_TYPE_PGC,
+            DynamicType.DYNAMIC_TYPE_PGC_UNION -> DynamicFilterType.VIDEO
 
             DynamicType.DYNAMIC_TYPE_MUSIC -> DynamicFilterType.MUSIC
             DynamicType.DYNAMIC_TYPE_ARTICLE -> DynamicFilterType.ARTICLE
@@ -232,7 +233,7 @@ object SendTasker : BiliTasker() {
 
     private fun getDynamicContactList(mid: Long, content: String, type: DynamicType): MutableSet<String>? {
             return try {
-                if (type == DynamicType.DYNAMIC_TYPE_PGC) {
+                if (type == DynamicType.DYNAMIC_TYPE_PGC || type == DynamicType.DYNAMIC_TYPE_PGC_UNION) {
                     return bangumi[mid]?.contacts
                 }
 

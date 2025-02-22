@@ -46,6 +46,7 @@ enum class DynamicType(val text: String) {
     DYNAMIC_TYPE_LIVE("直播"),
     DYNAMIC_TYPE_LIVE_RCMD("直播"),
     DYNAMIC_TYPE_PGC("番剧"),
+    DYNAMIC_TYPE_PGC_UNION("番剧"),
     DYNAMIC_TYPE_COMMON_SQUARE("动态"),
     DYNAMIC_TYPE_COMMON_VERTICAL("动态"),
     DYNAMIC_TYPE_UGC_SEASON("合集"),
