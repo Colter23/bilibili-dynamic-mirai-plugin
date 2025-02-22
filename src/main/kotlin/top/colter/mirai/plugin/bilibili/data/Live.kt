@@ -108,7 +108,7 @@ data class LiveRoomDetail(
     @SerialName("new_pendants")
     val newPendants: NewPendants? = null,
     @SerialName("up_session")
-    val upSession: Long? = null,
+    val upSession: String? = null,
     @SerialName("pk_status")
     val pkStatus: Int? = null,
     @SerialName("pk_id")
