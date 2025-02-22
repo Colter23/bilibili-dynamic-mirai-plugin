@@ -442,8 +442,8 @@ data class ModuleDynamic(
             val mid: Long,
             @SerialName("state")
             val state: Int,
-            @SerialName("is_upower_active")
-            val active: Boolean? = null,
+            //@SerialName("is_upower_active")
+            //val active: Boolean? = null,
             @SerialName("desc")
             val desc: Desc,
             @SerialName("button")
