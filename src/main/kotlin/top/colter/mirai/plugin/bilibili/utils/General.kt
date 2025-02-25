@@ -127,6 +127,7 @@ val DynamicItem.link: String
         DYNAMIC_TYPE_LIVE -> "https://live.bilibili.com/${modules.moduleDynamic.major?.live?.id}"
         DYNAMIC_TYPE_LIVE_RCMD -> "https://live.bilibili.com/${modules.moduleDynamic.major?.live?.id}"
         DYNAMIC_TYPE_PGC -> "https://www.bilibili.com/bangumi/play/ep${modules.moduleDynamic.major?.pgc?.epid}"
+        DYNAMIC_TYPE_PGC_UNION -> "https://www.bilibili.com/bangumi/play/ep${modules.moduleDynamic.major?.pgc?.epid}"
         DYNAMIC_TYPE_UGC_SEASON -> "https://www.bilibili.com/video/av${modules.moduleDynamic.major?.ugcSeason?.aid}"
         DYNAMIC_TYPE_NONE -> ""
     }

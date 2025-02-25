@@ -25,7 +25,8 @@ object DynamicCheckTasker : BiliCheckTasker("Dynamic") {
     private val banType = listOf(
         DynamicType.DYNAMIC_TYPE_LIVE,
         DynamicType.DYNAMIC_TYPE_LIVE_RCMD,
-        //DynamicType.DYNAMIC_TYPE_PGC
+        //DynamicType.DYNAMIC_TYPE_PGC,
+        //DynamicType.DYNAMIC_TYPE_PGC_UNION
     )
 
     private const val capacity = 200
@@ -47,7 +48,7 @@ object DynamicCheckTasker : BiliCheckTasker("Dynamic") {
                     !historyDynamic.contains(it.did)
                 }.filter {
                     if (listenAllDynamicMode) true
-                    else if (it.type == DynamicType.DYNAMIC_TYPE_PGC)
+                    else if (it.type == DynamicType.DYNAMIC_TYPE_PGC || it.type == DynamicType.DYNAMIC_TYPE_PGC_UNION)
                         bangumi.contains(it.modules.moduleAuthor.mid)
                     else followingUsers.contains(it.modules.moduleAuthor.mid)
                 }.sortedBy {

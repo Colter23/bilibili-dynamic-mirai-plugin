@@ -67,6 +67,7 @@ object DynamicMessageTasker : BiliTasker() {
             DYNAMIC_TYPE_AV -> modules.moduleDynamic.major?.archive?.title!!
             DYNAMIC_TYPE_MUSIC -> modules.moduleDynamic.major?.music?.title!!
             DYNAMIC_TYPE_PGC -> modules.moduleDynamic.major?.pgc?.title!!
+            DYNAMIC_TYPE_PGC_UNION -> modules.moduleDynamic.major?.pgc?.title!!
             DYNAMIC_TYPE_UGC_SEASON -> modules.moduleDynamic.major?.ugcSeason?.title!!
             DYNAMIC_TYPE_COMMON_VERTICAL,
             DYNAMIC_TYPE_COMMON_SQUARE -> modules.moduleDynamic.major?.common?.title!!
@@ -157,9 +158,10 @@ object DynamicMessageTasker : BiliTasker() {
                 )
             }
 
-            DYNAMIC_TYPE_PGC -> {
+            DYNAMIC_TYPE_PGC,
+            DYNAMIC_TYPE_PGC_UNION -> {
                 listOf(
-                    DynamicMessage.Link(DYNAMIC_TYPE_PGC.text, EPISODE_LINK(this.modules.moduleDynamic.major?.pgc?.epid!!.toString())),
+                    DynamicMessage.Link(type.text, EPISODE_LINK(this.modules.moduleDynamic.major?.pgc?.epid!!.toString())),
                     DynamicMessage.Link("动态", DYNAMIC_LINK(did))
                 )
             }

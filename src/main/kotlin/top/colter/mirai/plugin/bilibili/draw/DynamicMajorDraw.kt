@@ -381,6 +381,22 @@ suspend fun drawSmallCard(
     rbadge: String,
     duration: String?
 ): Image {
+    // 1) 先把需要的图片下载好，拿到它的实际宽高
+    //    这里让封面宽度固定为 cardContentRect.width * 0.4f
+    val desiredCoverWidth = cardContentRect.width * 0.4f
+    val fallbackUrl = imgApi(cover, desiredCoverWidth.toInt(), 100 /* 高度先随便写一个，不太影响 */)
+    val coverImg = getOrDownloadImageDefault(cover, fallbackUrl, CacheType.IMAGES)
+
+    // 2) 根据图片原始宽高和想要的 cover 显示宽度，计算出它等比缩放后的显示高度
+    val originWidth = coverImg.width.toFloat()
+    val originHeight = coverImg.height.toFloat()
+
+    // 目标是“指定封面宽度 = desiredCoverWidth，然后让高度跟着图片宽高比变动”
+    val scale = desiredCoverWidth / originWidth
+    val scaledCoverHeight = originHeight * scale
+
+    // 3) 接下来根据 title/desc 段落高度、徽章高度等，计算出最终卡片整体高度
+    //    依然要做段落排版，但要先知道可用文本区域有多少宽度
     val paragraphStyle = ParagraphStyle().apply {
         maxLinesCount = 2
         ellipsis = "..."
@@ -388,95 +404,116 @@ suspend fun drawSmallCard(
         textStyle = titleTextStyle
     }
 
-    val coverWidth = quality.smallCardHeight * 1.6f  // 封面比例 16:10
-    val paragraphWidth = cardContentRect.width - quality.cardPadding - coverWidth
-
-    val titleParagraph = ParagraphBuilder(paragraphStyle, FontUtils.fonts).addText(title).build().layout(paragraphWidth)
-
+    // 假设卡片的总宽度仍是 cardRect.width，不变
+    val textAreaWidth = cardContentRect.width - quality.cardPadding - desiredCoverWidth
+    val titleParagraph = ParagraphBuilder(paragraphStyle, FontUtils.fonts)
+        .addText(title)
+        .build()
+        .layout(textAreaWidth)
+    
     paragraphStyle.apply {
         maxLinesCount = if (titleParagraph.lineNumber == 1) 3 else 2
         textStyle = descTextStyle
     }
+    val descParagraph = ParagraphBuilder(paragraphStyle, FontUtils.fonts)
+        .addText(desc ?: "")
+        .build()
+        .layout(textAreaWidth)
+    
+    // 计算出卡片最终高度：上面徽章区域(quality.badgeHeight) + coverHeight + 下方留白等
+    val cardHeight = 
+        quality.badgeHeight + 
+        scaledCoverHeight + 
+        quality.cardPadding // 视需求再加额外空隙
 
-    val descParagraph = ParagraphBuilder(paragraphStyle, FontUtils.fonts).addText(desc?:"").build().layout(paragraphWidth)
-
-    val videoCardRect = RRect.makeComplexXYWH(
-        quality.cardPadding.toFloat(),
-        quality.badgeHeight + 1f,
-        cardContentRect.width,
-        quality.smallCardHeight.toFloat(),
-        cardBadgeArc
-    )
-
+    // 4) 创建最终画布 (Surface)
     return Surface.makeRasterN32Premul(
         cardRect.width.toInt(),
-        quality.smallCardHeight + quality.badgeHeight + quality.cardPadding
+        cardHeight.toInt()
     ).apply {
-        canvas.apply {
+        val canvas = this.canvas
 
-            // 绘制卡片背景
-            drawCard(videoCardRect)
-            // 卡片阴影
-            drawRectShadowAntiAlias(videoCardRect.inflate(1f), theme.smallCardShadow)
+        // 4.1) 先根据新的 cardHeight 绘制背景、阴影等
+        val videoCardRect = RRect.makeComplexXYWH(
+            quality.cardPadding.toFloat(),
+            quality.badgeHeight + 1f,
+            cardContentRect.width,
+            cardHeight - (quality.badgeHeight + quality.cardPadding),
+            cardBadgeArc
+        )
+        canvas.drawCard(videoCardRect)
+        canvas.drawRectShadowAntiAlias(
+            videoCardRect.inflate(1f),
+            theme.smallCardShadow
+        )
 
-            // 徽章
-            if (BiliConfig.imageConfig.badgeEnable.left) {
-                drawBadge(
-                    lbadge,
-                    font,
-                    theme.subLeftBadge.fontColor,
-                    theme.subLeftBadge.bgColor,
-                    videoCardRect,
-                    Position.TOP_LEFT
-                )
-            }
-            if (BiliConfig.imageConfig.badgeEnable.right) {
-                drawBadge(
-                    rbadge,
-                    font,
-                    theme.subRightBadge.fontColor,
-                    theme.subRightBadge.bgColor,
-                    videoCardRect,
-                    Position.TOP_RIGHT
-                )
-            }
-
-            // 封面
-            val fallbackUrl = imgApi(cover, coverWidth.toInt(), quality.smallCardHeight)
-            val coverImg = getOrDownloadImageDefault(cover, fallbackUrl, CacheType.IMAGES)
-            val coverRRect = RRect.makeComplexXYWH(
-                videoCardRect.left, videoCardRect.top, coverWidth,
-                quality.smallCardHeight.toFloat(), cardBadgeArc
-            ).inflate(-1f) as RRect
-            drawImageRRect(coverImg, coverRRect)
-
-            val space = (videoCardRect.height - titleParagraph.height - descParagraph.height) / 3
-            val y = videoCardRect.top + space
-            titleParagraph.paint(
-                this,
-                quality.cardPadding * 1.5f + coverWidth,
-                y
+        // 4.2) 绘制徽章等
+        if (BiliConfig.imageConfig.badgeEnable.left) {
+            canvas.drawBadge(
+                lbadge,
+                font,
+                theme.subLeftBadge.fontColor,
+                theme.subLeftBadge.bgColor,
+                videoCardRect,
+                Position.TOP_LEFT
             )
-
-            descParagraph.paint(
-                this,
-                quality.cardPadding * 1.5f + coverWidth,
-                y + titleParagraph.height + space
+        }
+        if (BiliConfig.imageConfig.badgeEnable.right) {
+            canvas.drawBadge(
+                rbadge,
+                font,
+                theme.subRightBadge.fontColor,
+                theme.subRightBadge.bgColor,
+                videoCardRect,
+                Position.TOP_RIGHT
             )
+        }
 
-            if (duration != null) {
-                val durationTextLine = TextLine.make(duration, font.makeWithSize(quality.subTitleFontSize))
-                drawLabelCard(
-                    durationTextLine,
-                    coverRRect.left + quality.badgePadding * 2,
-                    coverRRect.bottom - durationTextLine.height - quality.badgePadding * 2,
-                    Paint().apply { color = Color.WHITE },
-                    Paint().apply {
-                        color = Color.BLACK
-                        alpha = 130
-                    }
-                )
-            }
+        // 4.3) 绘制封面图片：宽度 = desiredCoverWidth，高度 = scaledCoverHeight
+        val coverRRect = RRect.makeComplexXYWH(
+            videoCardRect.left,
+            videoCardRect.top,
+            desiredCoverWidth,
+            scaledCoverHeight,
+            cardBadgeArc
+        ).inflate(-1f) as RRect
+        canvas.drawImageRRect(coverImg, coverRRect)
+
+        // 4.4) 在右侧绘制标题/描述
+        val textX = coverRRect.right + quality.cardPadding
+
+        // 假设 titleParagraph + descParagraph 的总高度为 totalTextHeight
+        val totalTextHeight = titleParagraph.height + descParagraph.height
+        val space = (scaledCoverHeight - totalTextHeight) / 3
+        val textRegionTop = videoCardRect.top // 或者再往下偏移一些
+        val startY = textRegionTop + space
+
+        // 绘制标题
+        titleParagraph.paint(
+            canvas,
+            textX,
+            startY
+        )
+        // 绘制描述
+        descParagraph.paint(
+            canvas,
+            textX,
+            startY + titleParagraph.height + space
+        )
+
+        // 4.5) 如果有 duration，就在封面右下角再叠加一个小标签
+        if (duration != null) {
+            val durationTextLine = TextLine.make(duration, font.makeWithSize(quality.subTitleFontSize))
+            canvas.drawLabelCard(
+                durationTextLine,
+                coverRRect.left + quality.badgePadding * 2,
+                coverRRect.bottom - durationTextLine.height - quality.badgePadding * 2,
+                Paint().apply { color = Color.WHITE },
+                Paint().apply {
+                    color = Color.BLACK
+                    alpha = 130
+                }
+            )
         }
     }.makeImageSnapshot()
 }

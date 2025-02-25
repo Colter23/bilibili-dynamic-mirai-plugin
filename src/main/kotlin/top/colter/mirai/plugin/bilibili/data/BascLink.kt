@@ -46,7 +46,7 @@ fun MUSIC_LINK(id: String) = "$BASE_MUSIC/au$id"
 fun MEDIA_LINK(id: String) = "$BASE_PGC_MEDIA/md$id"
 fun SEASON_LINK(id: String) = if (toShortLink) "$BASE_SHORT/ss$id" else "$BASE_PGC/ss$id"
 fun EPISODE_LINK(id: String) = if (toShortLink) "$BASE_SHORT/ep$id" else "$BASE_PGC/ep$id"
-fun PGC_LINK(id: String) = if (toShortLink) "$BASE_SHORT/$id" else "$BASE_PGC/$id"
+fun PGC_LINK(id: String) = if (toShortLink) "$BASE_SHORT/$id" else if (id.startsWith("md")) "$BASE_PGC_MEDIA/$id" else "$BASE_PGC/$id"
 suspend fun LIVE_LINK(id: String) = if (toShortLink) {
     biliClient.liveShortLink(id).run {
         this?.removePrefix("https://") ?: "$BASE_LIVE/$id"
