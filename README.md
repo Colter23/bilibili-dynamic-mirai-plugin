@@ -18,7 +18,10 @@
 
 ## V4版本
 
-Coming soon...
+暂时不会发V4了，V4之前写了70%-80%了，但因为一些原因就弃坑了。    
+打算重新写一个动态bot (大饼)，不依赖任何框架，对接onebot，支持多个社交平台。
+
+<img src="docs/img/dynamic-bot.png" width="600" alt="样式1">  
 
 ## 反馈
 
