@@ -7,6 +7,7 @@ import top.colter.mirai.plugin.bilibili.api.liveShortLink
 import top.colter.mirai.plugin.bilibili.api.spaceShortLink
 import top.colter.mirai.plugin.bilibili.utils.biliClient
 
+const val BASE_LINK = "https://www.bilibili.com"
 const val BASE_DYNAMIC = "https://t.bilibili.com"
 const val BASE_ARTICLE = "https://www.bilibili.com/read"
 const val BASE_VIDEO = "https://www.bilibili.com/video"
@@ -23,6 +24,11 @@ suspend fun DYNAMIC_LINK(id: String) =
     if (toShortLink) biliClient.dynamicShortLink(id).run {
         this?.removePrefix("https://") ?: "$BASE_DYNAMIC/$id"
     } else "$BASE_DYNAMIC/$id"
+
+suspend fun OPUS_LINK(id: String) =
+    if (toShortLink) biliClient.dynamicShortLink(id).run {
+        this?.removePrefix("https://") ?: "$BASE_LINK/opus/$id"
+    } else "$BASE_LINK/opus/$id"
 
 suspend fun ARTICLE_LINK(id: String) =
     if (toShortLink) {

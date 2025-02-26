@@ -907,8 +907,8 @@ data class ModuleDynamic(
                 val width: Int,
                 @SerialName("height")
                 val height: Int,
-                @SerialName("size")
-                val size: Float,
+                //@SerialName("size")
+                //val size: Float,
                 @SerialName("url")
                 val src: String,
             )
@@ -1030,8 +1030,8 @@ data class ModuleDynamic(
                 val width: Int,
                 @SerialName("height")
                 val height: Int,
-                @SerialName("size")
-                val size: Float,
+                //@SerialName("size")
+                //val size: Float,
                 @SerialName("src")
                 val src: String,
                 @SerialName("tags")

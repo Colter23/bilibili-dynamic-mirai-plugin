@@ -409,7 +409,7 @@ object SendTasker : BiliTasker() {
             .replace("{link}", dm.links?.get(0)?.value!!)
     }
 
-    private suspend fun buildMsg(ms: String, dm: DynamicMessage, contacts: List<Contact>): String {
+    public suspend fun buildMsg(ms: String, dm: DynamicMessage, contacts: List<Contact>): String {
         var p = 0
         var content = ms
 

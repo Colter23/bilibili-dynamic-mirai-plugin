@@ -60,8 +60,8 @@ object DynamicMessageTasker : BiliTasker() {
             DYNAMIC_TYPE_FORWARD -> "${modules.moduleDynamic.desc?.text}\n\n 转发 ${orig?.modules?.moduleAuthor?.name} 的动态:\n${orig?.textContent()}"
             DYNAMIC_TYPE_WORD,
             DYNAMIC_TYPE_DRAW -> modules.moduleDynamic.desc?.text
-                ?: modules.moduleDynamic.major?.blocked?.hintMessage?:
-                ""
+                ?: modules.moduleDynamic.major?.blocked?.hintMessage
+                ?: (modules.moduleDynamic.major?.opus?.title + "\n" + modules.moduleDynamic.major?.opus?.summary?.text)
             DYNAMIC_TYPE_ARTICLE -> modules.moduleDynamic.major?.article?.title
                 ?: modules.moduleDynamic.major?.opus?.title!!
             DYNAMIC_TYPE_AV -> modules.moduleDynamic.major?.archive?.title!!
@@ -132,6 +132,7 @@ object DynamicMessageTasker : BiliTasker() {
                 listOf(
                     DynamicMessage.Link(
                         DYNAMIC_TYPE_ARTICLE.text,
+                        if (this.modules.moduleDynamic.major?.type == "MAJOR_TYPE_OPUS") OPUS_LINK(did) else
                         ARTICLE_LINK(this.modules.moduleDynamic.major?.article?.id?.toString() ?: this.did)
                     ),
                     DynamicMessage.Link("动态", DYNAMIC_LINK(did))

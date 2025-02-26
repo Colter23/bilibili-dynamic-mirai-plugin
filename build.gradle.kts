@@ -1,5 +1,5 @@
 plugins {
-    val kotlinVersion = "1.7.20"
+    val kotlinVersion = "2.0.0"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.serialization") version kotlinVersion
 
@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "top.colter"
-version = "3.2.13"
+version = "3.2.14-BETA3"
 
 repositories {
     mavenLocal()
@@ -26,17 +26,17 @@ mavenCentralPublish {
 }
 
 dependencies {
-    implementation("io.ktor:ktor-client-okhttp:2.1.3") {
+    implementation("io.ktor:ktor-client-okhttp:3.0.3") {
         exclude(group = "org.jetbrains.kotlin")
         exclude(group = "org.jetbrains.kotlinx")
         exclude(group = "org.slf4j")
     }
-    implementation("io.ktor:ktor-client-encoding:2.1.3") {
+    implementation("io.ktor:ktor-client-encoding:3.0.3") {
         exclude(group = "org.jetbrains.kotlin")
         exclude(group = "org.jetbrains.kotlinx")
         exclude(group = "org.slf4j")
     }
-    implementation("io.ktor:ktor-serialization-kotlinx-json:2.1.3") {
+    implementation("io.ktor:ktor-serialization-kotlinx-json:3.0.3") {
         exclude(group = "org.jetbrains.kotlin")
         exclude(group = "org.jetbrains.kotlinx")
         exclude(group = "org.slf4j")

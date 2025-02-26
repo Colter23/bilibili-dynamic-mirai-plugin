@@ -58,7 +58,7 @@ suspend fun ModuleDynamic.Major.Opus.drawGeneral(): Image {
     val desc = summary.drawGeneral()
     val draw = if (pics.isNotEmpty()) {
         val imgs = pics.map {
-            ModuleDynamic.Major.Draw.DrawItem(it.width, it.height, it.size, it.src)
+            ModuleDynamic.Major.Draw.DrawItem(it.width, it.height, it.src)
         }
         ModuleDynamic.Major.Draw(0L, imgs).drawGeneral()
     } else null

@@ -16,6 +16,7 @@ import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
 import top.colter.mirai.plugin.bilibili.data.DynamicItem
 import top.colter.mirai.plugin.bilibili.draw.drawDynamic
 import top.colter.mirai.plugin.bilibili.tasker.DynamicMessageTasker.buildMessage
+import top.colter.mirai.plugin.bilibili.tasker.SendTasker.buildMsg
 import java.io.File
 
 class DrawDynamicTest {
@@ -78,6 +79,14 @@ class DrawDynamicTest {
             }
         }
         println()
+
+    }
+
+    @Test
+    fun buildDynamicMsg2() = runBlocking {
+        val s = decodeToDynamicItem("1029210402684141574").buildMessage()
+
+        println(buildMsg("{name}@{type}\\n{link}\\n{content}", s, listOf()))
 
     }
 
