@@ -19,7 +19,8 @@
 ## V4版本
 
 暂时不会发V4了，V4之前写了70%-80%了，但因为一些原因就弃坑了。    
-打算重新写一个动态bot (大饼)，不依赖任何框架，对接onebot，支持多个社交平台。
+打算重新写一个动态bot (大饼)，不依赖任何框架，对接onebot，支持多个社交平台。   
+V4虽然弃坑了，但部分代码还是可以借鉴的，具体可以看看 [V4分支](https://github.com/Colter23/bilibili-dynamic-mirai-plugin/tree/v4)。
 
 <img src="docs/img/dynamic-bot.png" width="600" alt="样式1">  
 
