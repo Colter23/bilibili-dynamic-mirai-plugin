@@ -1,542 +1,139 @@
 package top.colter.mirai.plugin.bilibili.draw
 
-import org.jetbrains.skia.*
-import org.jetbrains.skia.paragraph.Alignment
-import org.jetbrains.skia.paragraph.ParagraphBuilder
-import org.jetbrains.skia.paragraph.ParagraphStyle
+import kotlinx.coroutines.*
+import org.jetbrains.skia.Color
+import org.jetbrains.skia.Image
 import org.jetbrains.skia.paragraph.TextStyle
-import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
-import top.colter.mirai.plugin.bilibili.BiliConfig
-import top.colter.mirai.plugin.bilibili.BiliConfig.imageConfig
-import top.colter.mirai.plugin.bilibili.data.*
-import top.colter.mirai.plugin.bilibili.data.DynamicType.DYNAMIC_TYPE_FORWARD
-import top.colter.mirai.plugin.bilibili.data.DynamicType.DYNAMIC_TYPE_NONE
-import top.colter.mirai.plugin.bilibili.draw.Position.*
-import top.colter.mirai.plugin.bilibili.tasker.DynamicMessageTasker.isUnlocked
-import top.colter.mirai.plugin.bilibili.utils.*
-import top.colter.mirai.plugin.bilibili.utils.FontUtils.loadTypeface
-import top.colter.mirai.plugin.bilibili.utils.FontUtils.matchFamily
+import top.colter.bilibili.data.LazyImage
+import top.colter.bilibili.data.dynamic.BiliDynamic
+import top.colter.bilibili.data.dynamic.author
+import top.colter.bilibili.data.dynamic.content
+import top.colter.bilibili.data.dynamic.major
+import top.colter.bilibili.data.dynamic.type.RichTextType
+import top.colter.bilibili.tools.forEachLazyImageFields
+import top.colter.mirai.plugin.bilibili.draw.component.Author
+import top.colter.mirai.plugin.bilibili.draw.component.SmallAuthor
+import top.colter.mirai.plugin.bilibili.tools.CacheType
+import top.colter.mirai.plugin.bilibili.tools.cacheImage
+import top.colter.mirai.plugin.bilibili.tools.getOrDownload
+import top.colter.skiko.*
+import top.colter.skiko.data.RichParagraphBuilder
+import top.colter.skiko.layout.Column
+import top.colter.skiko.layout.Layout
+import top.colter.skiko.layout.RichText
+import kotlin.coroutines.coroutineContext
 
 
-val logger by BiliBiliDynamic::logger
-
-val quality: Quality by lazy {
-    var quality: Quality?
-    if (BiliImageQuality.customOverload) {
-        quality = BiliImageQuality.customQuality
-        logger.warning("图片分辨率配置已重载")
-    } else {
-        quality = BiliImageQuality.quality[imageConfig.quality]
-        if (quality == null) {
-            logger.error("未找到 ${imageConfig.quality} 的图片分辨率配置")
-            quality = BiliImageQuality.quality.firstNotNullOf { it.value }
-        }
-    }
-    quality.apply {
-        badgeHeight = if (imageConfig.badgeEnable.enable) badgeHeight else 0
-    }
-}
-
-val theme: Theme by lazy {
-    var theme: Theme?
-    if (BiliImageTheme.customOverload) {
-        theme = BiliImageTheme.customTheme
-        logger.warning("图片主题配置已重载")
-    } else {
-        theme = BiliImageTheme.theme[imageConfig.theme]
-        if (theme == null) {
-            logger.error("未找到 ${imageConfig.theme} 的图片主题配置")
-            theme = BiliImageTheme.theme.firstNotNullOf { it.value }
-        }
-    }
-    theme
-}
-
-val cardRect: Rect by lazy {
-    Rect.makeLTRB(quality.cardMargin.toFloat(), 0f, quality.imageWidth - quality.cardMargin.toFloat(), 0f)
-}
-
-val cardContentRect: Rect by lazy {
-    cardRect.inflate(-1f * quality.cardPadding)
-}
-
-val mainTypeface: Typeface by lazy {
-    val mainFont = imageConfig.font.split(";").first().split(".").first()
-    try {
-        if (mainFont.isBlank()) {
-            logger.warning("配置文件未配置字体, 尝试加载 font 目录下的字体")
-            val f = FontUtils.defaultFont
-            if (f == null) {
-                throw Exception()
-            } else {
-                logger.info("成功加载 ${f.familyName} 字体")
-                return@lazy f
+suspend fun DynamicDraw(dynamic: BiliDynamic): Image? {
+    CoroutineScope(coroutineContext).launch {
+        val list = mutableListOf<Deferred<Pair<LazyImage, ByteArray?>>>()
+        forEachLazyImageFields(dynamic) {
+            if (url.isNotBlank()) {
+                list.add(async {
+                    Pair(this@forEachLazyImageFields, getOrDownload(url, CacheType.IMAGES) )
+                })
             }
-        } else {
-            matchFamily(mainFont).matchStyle(FontStyle.NORMAL)!!
         }
-    } catch (e: Exception) {
-        logger.warning("加载主字体 $mainFont 失败, 尝试加载默认字体")
-        loadSysDefaultFont()
-    }
-}
-
-fun loadSysDefaultFont(): Typeface {
-    val defaultList = listOf("HarmonyOS Sans SC", "LXGW WenKai", "Source Han Sans", "SimHei", "sans-serif")
-    defaultList.forEach {
-        try {
-
-            val f = matchFamily(it).matchStyle(FontStyle.NORMAL)!!
-            logger.info("加载默认字体 $it 成功")
-            return f
-        } catch (_: Exception) {
+        list.awaitAll().forEach {
+            it.first.image = it.second
         }
+    }.join()
+
+    val draw = BiliDraw {
+        DynamicView(dynamic)
     }
-    throw Exception("无法加载默认字体, 请自行配置字体或准备字体文件")
+    cacheImage(draw, "${dynamic.mid}/${dynamic.id}.png", CacheType.DRAW_DYNAMIC)
+    return draw
 }
 
-val font: Font by lazy {
-    Font(mainTypeface, quality.contentFontSize)
-}
-
-val emojiTypeface: Typeface? by lazy {
-    xyz.cssxsh.skia.FontUtils.matchFamily("Noto Color Emoji")?.matchStyle(FontStyle.NORMAL)
-}
-
-val emojiFont: Font by lazy {
-    Font(emojiTypeface, quality.contentFontSize)
-}
-
-val fansCardFont: Font by lazy {
-    Font(loadTypeface(Data.makeFromBytes(loadResourceBytes("font/FansCard.ttf"))), quality.subTitleFontSize)
-}
-
-val titleTextStyle by lazy {
-    TextStyle().apply {
-        fontSize = quality.titleFontSize
-        color = theme.titleColor
-        fontFamilies = arrayOf(mainTypeface.familyName)
-    }
-}
-
-val bigTitleTextStyle by lazy {
-    TextStyle().apply {
-        fontSize = quality.titleFontSize + 3
-        color = theme.titleColor
-        fontStyle = FontStyle.BOLD
-        fontFamilies = arrayOf(mainTypeface.familyName)
-    }
-}
-
-val descTextStyle by lazy {
-    TextStyle().apply {
-        fontSize = quality.descFontSize
-        color = theme.descColor
-        fontFamilies = arrayOf(mainTypeface.familyName)
-    }
-}
-
-val contentTextStyle by lazy {
-    TextStyle().apply {
-        fontSize = quality.contentFontSize
-        color = theme.contentColor
-        fontFamilies = arrayOf(mainTypeface.familyName)
-    }
-}
-
-val footerTextStyle by lazy {
-    TextStyle().apply {
-        fontSize = quality.footerFontSize
-        color = theme.footerColor
-        fontFamilies = arrayOf(mainTypeface.familyName)
-    }
-}
-
-val footerParagraphStyle by lazy {
-    ParagraphStyle().apply {
-        maxLinesCount = 2
-        ellipsis = "..."
-        alignment = BiliConfig.templateConfig.footer.footerAlign
-        textStyle = footerTextStyle
-    }
-}
-
-val cardBadgeArc: FloatArray by lazy {
-    val left = if (imageConfig.badgeEnable.left) 0f else quality.cardArc
-    val right = if (imageConfig.badgeEnable.right) 0f else quality.cardArc
-    floatArrayOf(left, right, quality.cardArc, quality.cardArc)
-}
-
-val linkPaint = Paint().apply {
-    color = theme.linkColor
-    isAntiAlias = true
-}
-val generalPaint = Paint().apply {
-    color = theme.contentColor
-    isAntiAlias = true
-}
+//val BiliDynamic.imageMap: Map<String, String> by lazy {
+//    return mapOf("" to "")
+//}
+//    get() {
+//        return mapOf("" to "")
+//    }
 
 
-suspend fun DynamicItem.makeDrawDynamic(colors: List<Int>): String {
-    val dynamic = drawDynamic(colors.first(), false)
-    val img = makeCardBg(dynamic.height, colors) {
-        it.drawImage(dynamic, 0f, 0f)
-    }
-    return cacheImage(img, "$mid/$idStr.png", CacheType.DRAW_DYNAMIC)
-}
+fun Layout.DynamicView(dynamic: BiliDynamic) {
 
-suspend fun DynamicItem.drawDynamic(themeColor: Int, isForward: Boolean = false): Image {
-    val orig = orig?.drawDynamic(themeColor, type == DYNAMIC_TYPE_FORWARD)
+    val face = dynamic.author.face.image?.makeImage()!!
+    val verify = dynamic.author.official?.type!!
+    val pendant = dynamic.author.pendant?.image?.image?.makeImage()
+    val ornament = dynamic.author.decorate?.image?.image?.makeImage()!!
 
-    var imgList = modules.makeGeneral(formatTime, link, type, themeColor, isForward, isUnlocked())
+    val name = dynamic.name
+    val time = dynamic.formatTime
 
-    // 调整附加卡片顺序
-    if (orig != null) {
-        imgList = if (this.modules.moduleDynamic.additional != null) {
-            val result = ArrayList<Image>(imgList.size + 1)
-            result.addAll(imgList.subList(0, imgList.size - 1))
-            result.add(orig)
-            result.add(imgList.last())
-            result
-        } else {
-            imgList.plus(orig)
-        }
-    }
+    val numStr = dynamic.author.decorate?.fan?.numStr
+    val color = dynamic.author.decorate?.fan?.color?.let { Color.makeRGB(it) }
 
-    var plusHeight = 0
-    if (type == DynamicType.DYNAMIC_TYPE_WORD || type == DYNAMIC_TYPE_NONE) {
-        plusHeight += quality.contentSpace * 2
-    }
 
-    val footer = if (!isForward) {
-        buildFooter(modules.moduleAuthor.name, modules.moduleAuthor.mid, did, formatTime, type.text)
-    } else null
+    Column(modifier = Modifier()
+        .fillMaxWidth()
+        .padding(20.dp)
+        .background(Color.WHITE.withAlpha(0.6f))
+        .border(3.dp, 15.dp)
+    ) {
 
-    return imgList.assembleCard(did, footer, plusHeight, isForward)
-
-}
-
-fun buildFooter(name: String, uid: Long, id: String, time: String, type: String): String? {
-    val footerTemplate = BiliConfig.templateConfig.footer.dynamicFooter
-    return if (footerTemplate.isNotBlank()) {
-        footerTemplate
-            .replace("{name}", name)
-            .replace("{uid}", uid.toString())
-            .replace("{id}", id)
-            .replace("{time}", time)
-            .replace("{type}", type)
-    } else null
-}
-
-fun List<Image>.assembleCard(id: String, footer: String? = null, plusHeight: Int = 0, isForward: Boolean = false, tag: String? = null): Image {
-    val height = sumOf {
-        if (it.width > cardRect.width) {
-            (cardRect.width * it.height / it.width + quality.contentSpace).toInt()
-        } else {
-            it.height + quality.contentSpace
-        }
-    } + plusHeight
-
-    val footerParagraph = if (footer != null) {
-        ParagraphBuilder(footerParagraphStyle, FontUtils.fonts).addText(footer).build().layout(cardRect.width)
-    } else null
-
-    val margin = if (isForward) quality.cardPadding * 2 else quality.cardMargin * 2
-
-    return Surface.makeRasterN32Premul(
-        (cardRect.width + margin).toInt(),
-        height + quality.badgeHeight + margin + (footerParagraph?.height?.toInt() ?: 0)
-    ).apply {
-        canvas.apply {
-
-            val rrect = RRect.makeComplexXYWH(
-                margin / 2f,
-                quality.badgeHeight + margin / 2f,
-                cardRect.width,
-                height.toFloat(),
-                cardBadgeArc
+        if (containsEnv("forward")) {
+            SmallAuthor(
+                face = face,
+                verify = verify,
+                name = name,
+                time = time,
+                modifier = Modifier().fillMaxWidth().height(50.dp).margin(horizontal = 5.dp, vertical = 10.dp) // .background(Color.RED)
             )
+        } else {
+            Author(
+                face = face,
+                pendant = pendant,
+                verify = verify,
+                name = name,
+                time = time,
+                ornament = ornament,
+                numStr = numStr,
+                color = color,
+                modifier = Modifier().fillMaxWidth().height(100.dp).margin(horizontal = (-15).dp, vertical = 10.dp) // .background(Color.RED)
+//                modifier = Modifier().fillMaxWidth().height(100.dp).margin(top = 10.dp, right = (-15).dp, bottom = 30.dp, left = (-15).dp) // .background(Color.RED)
+            )
+        }
 
-            if (isForward) {
-                drawRectShadowAntiAlias(rrect.inflate(1f), theme.smallCardShadow)
-            } else {
-                drawRectShadowAntiAlias(rrect.inflate(1f), theme.cardShadow)
-            }
+        if (dynamic.content != null) {
+            val style = TextStyle().setColor(Color.BLACK).setFontSize(30.px).setFontFamily(FontUtils.defaultFont!!.familyName)
+            val linkStyle = TextStyle().setColor(Color.makeRGB(23, 139, 207)).setFontSize(30.px).setFontFamily(FontUtils.defaultFont!!.familyName)
+            val paragraph = RichParagraphBuilder(style)
 
-            if (imageConfig.badgeEnable.left) {
-                val svg = loadSVG("icon/${if (isForward) "FORWARD" else "BILIBILI_LOGO"}.svg")
-                drawBadge(
-                    tag ?: if (isForward) "转发动态" else "动态",
-                    font,
-                    theme.mainLeftBadge.fontColor,
-                    theme.mainLeftBadge.bgColor,
-                    rrect,
-                    TOP_LEFT,
-                    svg.makeImage(quality.contentFontSize, quality.contentFontSize)
-                )
-            }
-            if (imageConfig.badgeEnable.right) {
-                drawBadge(id, font, theme.mainRightBadge.fontColor, theme.mainRightBadge.bgColor, rrect, TOP_RIGHT)
-            }
-
-            drawCard(rrect)
-
-            var top = quality.cardMargin + quality.badgeHeight.toFloat()
-            for (img in this@assembleCard) {
-
-                //drawScaleWidthImageOutline(img, cardRect.width, quality.cardMargin.toFloat(), top, isForward)
-                drawScaleWidthImage(img, cardRect.width, quality.cardMargin.toFloat(), top)
-
-                top += if (img.width > cardRect.width) {
-                    (cardRect.width * img.height / img.width + quality.contentSpace).toInt()
-                } else {
-                    img.height + quality.contentSpace
+            dynamic.content?.richTextNodes?.forEach {
+                when (it.type) {
+                    RichTextType.AT,
+                    RichTextType.WEB,
+                    RichTextType.VOTE,
+                    RichTextType.BV,
+                    RichTextType.GOODS,
+                    RichTextType.TOPIC -> paragraph.addText(it.text, linkStyle)
+                    RichTextType.TEXT,
+                    RichTextType.UNKNOWN -> paragraph.addText(it.text)
+                    RichTextType.EMOJI -> paragraph.addEmoji(it.text, it.emoji?.iconUrl?.image?.makeImage()!!)
                 }
             }
 
-            footerParagraph?.paint(this, cardRect.left, rrect.bottom + quality.cardMargin / 2)
-
-        }
-    }.makeImageSnapshot()
-}
-
-suspend fun DynamicItem.Modules.makeGeneral(
-    time: String,
-    link: String,
-    type: DynamicType,
-    themeColor: Int,
-    isForward: Boolean = false,
-    isUnlocked: Boolean = false
-): List<Image> {
-    return mutableListOf<Image>().apply {
-        if (type != DYNAMIC_TYPE_NONE)
-            add(if (isForward) moduleAuthor.drawForward(time) else moduleAuthor.drawGeneral(time, link, themeColor))
-        if(isUnlocked){
-            add(drawBlockedDefault())
-        }else{
-            moduleDispute?.drawGeneral()?.let { add(it) }
-            addAll(moduleDynamic.makeGeneral(isForward))
-        }
-    }
-}
-
-fun drawBlockedDefault(): Image {
-    val bgImg = Image.makeFromEncoded(loadResourceBytes("image/Blocked_BG_Day.png"))
-    val bgWidth = cardContentRect.width - 2 * quality.cardPadding
-    val bgHeight = bgImg.height / bgImg.width * bgWidth
-
-    val textStyle = ParagraphStyle().apply {
-        maxLinesCount = 2
-        ellipsis = "..."
-        alignment = Alignment.CENTER
-        textStyle = titleTextStyle.apply {
-            color = Color.WHITE
-        }
-    }
-    val text = ParagraphBuilder(textStyle, FontUtils.fonts)
-        .addText("此动态为专属动态\n请自行查看详情内容")
-        .build().layout(bgWidth)
-
-    return Surface.makeRasterN32Premul(
-        cardContentRect.width.toInt(), (bgHeight + 3 * quality.cardPadding).toInt()
-    ).apply {
-        canvas.apply {
-            val x = quality.cardPadding.toFloat()
-            var y = quality.cardPadding.toFloat()
-            drawImageClip(bgImg, RRect.Companion.makeXYWH(x, y, bgWidth, bgHeight, quality.cardArc))
-
-            y += (bgHeight - text.height) / 2
-            text.paint(this, x, y)
-        }
-    }.makeImageSnapshot()
-}
-
-fun Rect.textVertical(text: TextLine) =
-    bottom - (height - text.capHeight) / 2
-
-fun Canvas.drawCard(rrect: RRect, bgColor: Int = theme.cardBgColor) {
-    drawRRect(rrect, Paint().apply {
-        color = bgColor
-        mode = PaintMode.FILL
-        isAntiAlias = true
-    })
-    drawRRect(rrect, Paint().apply {
-        color = theme.cardOutlineColors.first()
-        mode = PaintMode.STROKE
-        strokeWidth = quality.cardOutlineWidth
-        isAntiAlias = true
-        shader = Shader.makeSweepGradient(
-            rrect.left + rrect.width / 2,
-            rrect.top + rrect.height / 2,
-            theme.cardOutlineColors
-        )
-    })
-}
-
-fun makeCardBg(height: Int, colors: List<Int>, block: (Canvas) -> Unit): Image {
-    val imageRect = Rect.makeXYWH(0f, 0f, quality.imageWidth.toFloat(), height.toFloat())
-    return Surface.makeRasterN32Premul(imageRect.width.toInt(), height).apply {
-        canvas.apply {
-            drawRect(imageRect, Paint().apply {
-                shader = Shader.makeLinearGradient(
-                    Point(imageRect.left, imageRect.top),
-                    Point(imageRect.right, imageRect.bottom),
-                    // H：色相   S：30   B：100
-                    //generateLinearGradient(listOf(0xFFffb2cc.toInt(), 0xFFffb2b2.toInt()))
-                    //generateLinearGradient(listOf(0xFFd3edfa.toInt()))
-                    generateLinearGradient(colors)
-                )
-            })
-            block(this)
-        }
-    }.makeImageSnapshot()
-}
-
-suspend fun Canvas.drawAvatar(
-    face: String,
-    pendant: String?,
-    verifyType: Int?,
-    faceSize: Float,
-    verifyIconSize: Float,
-    isForward: Boolean = false
-) {
-
-    val faceImg = getOrDownloadImage(face, CacheType.USER)
-
-    val hasPendant = pendant != null && pendant != ""
-
-    var tarFaceRect = RRect.makeXYWH(
-        quality.cardPadding * if (isForward) 1.5f else 1.8f,
-        quality.cardPadding * if (isForward) 1f else 1.2f,
-        faceSize,
-        faceSize,
-        faceSize / 2
-    )
-    if (!hasPendant) {
-        tarFaceRect = tarFaceRect.inflate(quality.noPendantFaceInflate) as RRect
-        drawCircle(
-            tarFaceRect.left + tarFaceRect.width / 2,
-            tarFaceRect.top + tarFaceRect.width / 2,
-            tarFaceRect.width / 2 + quality.noPendantFaceInflate / 2,
-            Paint().apply { color = theme.faceOutlineColor })
-    }
-
-    faceImg?.let { drawImageRRect(it, tarFaceRect) }
-
-    if (hasPendant) {
-        getOrDownloadImage(pendant!!, CacheType.USER)?.let { pendantImg ->
-            val srcPendantRect = Rect(0f, 0f, pendantImg.width.toFloat(), pendantImg.height.toFloat())
-            val tarPendantRect = Rect.makeXYWH(
-                tarFaceRect.left + tarFaceRect.width / 2 - quality.pendantSize / 2,
-                tarFaceRect.top + tarFaceRect.height / 2 - quality.pendantSize / 2,
-                quality.pendantSize, quality.pendantSize
-            )
-            drawImageRect(
-                pendantImg,
-                srcPendantRect,
-                tarPendantRect,
-                FilterMipmap(FilterMode.LINEAR, MipmapMode.NEAREST),
-                null,
-                true
+            RichText(
+                paragraph = paragraph.build(),
+                modifier = Modifier().margin(vertical = 20.dp)
             )
         }
+
+        dynamic.major?.let {
+            majorDraw(it)
+        }
+
+        dynamic.origin?.let {
+            putEnv("forward", true)
+            DynamicView(it)
+            removeEnv("forward")
+        }
+
     }
-
-    val verifyIcon = when (verifyType) {
-        0 -> "PERSONAL_OFFICIAL_VERIFY"
-        1 -> "ORGANIZATION_OFFICIAL_VERIFY"
-        else -> ""
-    }
-
-    if (verifyIcon != "") {
-        val svg = loadSVG("icon/$verifyIcon.svg")
-        val size = if (hasPendant) verifyIconSize - quality.noPendantFaceInflate / 2 else verifyIconSize
-        drawImage(
-            svg.makeImage(size, size),
-            tarFaceRect.right - size,
-            tarFaceRect.bottom - size
-        )
-    }
-}
-
-fun Canvas.drawBadge(
-    text: String,
-    font: Font,
-    fontColor: Int,
-    bgColor: Int,
-    cardRect: Rect,
-    position: Position,
-    icon: Image? = null
-) {
-
-    val textLine = TextLine.make(text, font)
-
-    val badgeWidth = textLine.width + quality.badgePadding * 8 + (icon?.width ?: 0)
-
-    val rrect = when (position) {
-        TOP_LEFT -> RRect.makeXYWH(
-            cardRect.left, cardRect.top - quality.badgeHeight, badgeWidth,
-            quality.badgeHeight.toFloat(), quality.badgeArc, quality.badgeArc, 0f, 0f
-        )
-
-        TOP_RIGHT -> RRect.makeXYWH(
-            cardRect.right - badgeWidth, cardRect.top - quality.badgeHeight, badgeWidth,
-            quality.badgeHeight.toFloat(), quality.badgeArc, quality.badgeArc, 0f, 0f
-        )
-
-        BOTTOM_LEFT -> RRect.makeXYWH(
-            cardRect.left, cardRect.bottom + quality.badgeHeight, badgeWidth,
-            quality.badgeHeight.toFloat(), 0f, 0f, quality.badgeArc, quality.badgeArc
-        )
-
-        BOTTOM_RIGHT -> RRect.makeXYWH(
-            cardRect.right - badgeWidth, cardRect.bottom + quality.badgeHeight, badgeWidth,
-            quality.badgeHeight.toFloat(), 0f, 0f, quality.badgeArc, quality.badgeArc
-        )
-    }
-
-    drawRectShadowAntiAlias(rrect.inflate(1f), theme.smallCardShadow)
-
-    drawCard(rrect, bgColor)
-
-    var x = rrect.left + quality.badgePadding * 4
-    if (icon != null) {
-        x -= quality.badgePadding
-        drawImage(icon, x, rrect.top + (quality.badgeHeight - icon.height) / 2)
-        x += icon.width + quality.badgePadding * 2
-    }
-
-    drawTextLine(
-        textLine,
-        x,
-        rrect.bottom - (quality.badgeHeight - textLine.capHeight) / 2,
-        Paint().apply { color = fontColor })
+//    }
 
 }
-
-fun Canvas.drawLabelCard(
-    textLine: TextLine,
-    x: Float,
-    y: Float,
-    fontPaint: Paint,
-    bgPaint: Paint
-) {
-
-    val rrect = RRect.makeXYWH(
-        x,
-        y,
-        textLine.width + quality.badgePadding * 4,
-        textLine.height,
-        quality.badgeArc
-    )
-    drawRRect(rrect, bgPaint)
-
-    drawTextLine(
-        textLine,
-        rrect.left + quality.badgePadding * 2,
-        rrect.bottom - quality.badgePadding,
-        //rrect.textVertical(textLine),
-        fontPaint
-    )
-}
-

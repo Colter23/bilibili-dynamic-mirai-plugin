@@ -1,7 +1,12 @@
 package top.colter.mirai.plugin.bilibili.data
 
+import io.ktor.http.*
+import io.ktor.util.date.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+
+// ([\w-]+)=([\w-%]+);?
+// (DedeUserID|DedeUserID__ckMd5|SESSDATA|bili_jct)=([\w-%]+);?
 
 @Serializable
 data class BiliCookie(
@@ -10,19 +15,29 @@ data class BiliCookie(
     @SerialName("bili_jct")
     var biliJct: String = ""
 ) {
-    fun parse(cookie: String): BiliCookie {
-        cookie.split("; ", ";").forEach {
-            val cookieKV = it.split("=")
-            if (cookieKV[0] == "SESSDATA") sessData = cookieKV[1].replace(",", "%2C").replace("*", "%2A")
-            if (cookieKV[0] == "bili_jct") biliJct = cookieKV[1]
+    companion object {
+        fun parse(cookie: String): BiliCookie {
+            return BiliCookie().apply {
+                cookie.split("; ", ";").forEach {
+                    val cookieKV = it.split("=")
+                    if (cookieKV[0] == "SESSDATA") sessData = cookieKV[1].replace(",", "%2C").replace("*", "%2A")
+                    if (cookieKV[0] == "bili_jct") biliJct = cookieKV[1]
+                }
+            }
         }
+    }
+
+    fun parse(cookie: String): BiliCookie {
+        val c = BiliCookie.parse(cookie)
+        sessData = c.sessData
+        biliJct = c.biliJct
         return this
     }
 
     fun isEmpty(): Boolean = sessData == "" && biliJct == ""
 
     override fun toString(): String {
-        return "SESSDATA=$sessData; bili_jct=$biliJct; "
+        return "SESSDATA=$sessData; bili_jct=$biliJct"
     }
 }
 
@@ -53,6 +68,28 @@ data class EditThisCookie(
     @SerialName("value")
     val value: String
 )
+fun EditThisCookie.toCookie() = Cookie(
+    name = name,
+    value = value,
+    encoding = CookieEncoding.RAW,
+    expires = expirationDate?.run { GMTDate(times(1000).toLong()) },
+    domain = domain,
+    path = path,
+    secure = secure,
+    httpOnly = httpOnly
+)
+
+fun Cookie.toEditThisCookie(id: Int = 0) = EditThisCookie(
+    name = name,
+    value = value,
+    expirationDate = expires?.timestamp?.toDouble()?.div(1000),
+    domain = domain.orEmpty(),
+    path = path.orEmpty(),
+    secure = secure,
+    httpOnly = httpOnly,
+    id = id
+)
+
 
 fun List<EditThisCookie>.toCookie(): BiliCookie {
     val bc = BiliCookie()

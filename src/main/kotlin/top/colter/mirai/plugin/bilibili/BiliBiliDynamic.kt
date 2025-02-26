@@ -1,102 +1,135 @@
 package top.colter.mirai.plugin.bilibili
 
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.launch
-import net.mamoe.mirai.console.MiraiConsole
-import net.mamoe.mirai.console.command.CommandManager.INSTANCE.register
-import net.mamoe.mirai.console.command.CommandManager.INSTANCE.unregister
+import net.mamoe.mirai.console.ConsoleFrontEndImplementation
 import net.mamoe.mirai.console.extension.PluginComponentStorage
-import net.mamoe.mirai.console.permission.PermissionId
-import net.mamoe.mirai.console.permission.PermissionService
+import net.mamoe.mirai.console.plugin.id
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescription
 import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
-import net.mamoe.mirai.console.plugin.name
-import net.mamoe.mirai.console.plugin.version
-import net.mamoe.mirai.console.util.SemVersion
+import net.mamoe.mirai.console.util.ConsoleExperimentalApi
 import net.mamoe.mirai.utils.info
-import top.colter.mirai.plugin.bilibili.command.DynamicCommand
-import top.colter.mirai.plugin.bilibili.data.*
-import top.colter.mirai.plugin.bilibili.old.migration
-import top.colter.mirai.plugin.bilibili.old.updateData
-import top.colter.mirai.plugin.bilibili.tasker.*
+import top.colter.bilibili.client.BiliClient
+import top.colter.mirai.plugin.bilibili.account.AccountManager
+import top.colter.mirai.plugin.bilibili.account.BiliAccount
+import top.colter.mirai.plugin.bilibili.account.BiliApplication
+import top.colter.mirai.plugin.bilibili.database.PushTemplate
+
 
 object BiliBiliDynamic : KotlinPlugin(
     JvmPluginDescription(
         id = "top.colter.bilibili-dynamic-mirai-plugin",
         name = "BiliBili Dynamic",
-        version = "3.2.13",
+        version = "4.0.0-alpha.1",
     ) {
         author("Colter")
-        dependsOn("xyz.cssxsh.mirai.plugin.mirai-skia-plugin", ">= 1.1.0")
+//        dependsOn("xyz.cssxsh.mirai.plugin.mirai-skia-plugin", ">= 1.1.0")
     }
 ) {
 
-    var uid: Long = 0L
-    var tagid: Int = 0
-
-    var cookie = BiliCookie()
-
-    val dynamicChannel = Channel<DynamicDetail>(20)
-    val liveChannel = Channel<LiveDetail>(20)
-    val messageChannel = Channel<BiliMessage>(20)
-    val missChannel = Channel<BiliMessage>(10)
-
-    val liveUsers = mutableMapOf<Long, Long>()
-
-    val liveGwp = PermissionId(BiliBiliDynamic.description.id, "live.atall")
-    val videoGwp = PermissionId(BiliBiliDynamic.description.id, "video.atall")
-    val crossContact = PermissionId(BiliBiliDynamic.description.id, "crossContact")
-
-    override fun PluginComponentStorage.onLoad() {
-        /**
-         * run after auto login
-         * @author cssxsh
-         */
-        runAfterStartup {
-            updateData()
-
-            DynamicCheckTasker.start()
-            LiveCheckTasker.start()
-            DynamicMessageTasker.start()
-            LiveMessageTasker.start()
-            SendTasker.start()
-            ListenerTasker.start()
-            if (BiliConfig.enableConfig.liveCloseNotifyEnable) LiveCloseCheckTasker.start()
-            if (BiliConfig.enableConfig.cacheClearEnable) CacheClearTasker.start()
-        }
+    object DynamicBiliApplication: BiliApplication {
+        override val id: String = BiliBiliDynamic.id
+        override val name: String = "动态检测"
+        override val description: String = "检测B站动态"
+        override val accounts: List<BiliAccount> by AccountManager()
     }
 
+
+//    private val additional by lazy {
+//        try {
+//            Class.forName("xyz.cssxsh.mirai.plugin.mirai-skia-plugin", false, jvmPluginClasspath.pluginClassLoader)
+//            false
+//        } catch (_: ClassNotFoundException) {
+//            true
+//        }
+//    }
+
+
+//    val dynamicChannel = Channel<DynamicDetail>(20)
+
+    val client = BiliClient()
+
+    override fun PluginComponentStorage.onLoad() {
+//        client.storage.container.addAll(DynamicBiliApplication.account.first().cookie)
+
+        // 插件授权
+//        runAfterStartup {
+//            val colter = Bot.instances[0].getFriend(3375582524L)
+//            if (colter != null) {
+//                colter.permitteeId.permit(parentPermission.id)
+//                colter.permitteeId.getPermittedPermissions().forEach {
+//                    println(it.toString())
+//                }
+//            }else {
+//                println("未找到")
+//            }
+//        }
+
+
+    }
+
+    @OptIn(ConsoleFrontEndImplementation::class, ConsoleExperimentalApi::class)
     override fun onEnable() {
-        // XXX: mirai console version check
-        check(SemVersion.parseRangeRequirement(">= 2.12.0-RC").test(MiraiConsole.version)) {
-            "$name $version 需要 Mirai-Console 版本 >= 2.12.0，目前版本是 ${MiraiConsole.version}"
-        }
-        logger.info { "BiliBili Dynamic Plugin loaded" }
+        logger.info { "Plugin loaded" }
 
-        PermissionService.INSTANCE.register(liveGwp, "直播At全体")
-        PermissionService.INSTANCE.register(videoGwp, "视频At全体")
-        PermissionService.INSTANCE.register(crossContact, "跨聊天语境控制")
+//        if (additional) {
+//            with(jvmPluginClasspath) {
+//                downloadAndAddToPath(pluginIndependentLibrariesClassLoader, listOf("io.github.kasukusakura:silk-codec:0.0.5"))
+//            }
+//            try {
+//                NativeLoader.initialize(dataFolder)
+//            } catch (error: UnsatisfiedLinkError) {
+//                logger.error("Silk Codec 初始化失败, folder: $dataFolder", error)
+//            }
+//        }
 
-        DynamicCommand.register()
+        PushTemplate.reload()
+//        BiliSubscribe.reload()
+//        BiliUser.reload()
+//        ContactGroup.reload()
+//        BlackWhiteList.reload()
+//
+//        FriendMessageListener.registerTo(globalEventChannel())
+//        GroupMessageListener.registerTo(globalEventChannel())
+//        MessageListener.registerTo(globalEventChannel())
 
-        BiliData.reload()
-        BiliConfig.reload()
-        BiliImageTheme.reload()
-        BiliImageQuality.reload()
 
-        migration()
 
-        launch { initData() }
+
+
+
+        // region Context
+
+        // endregion
+
+        // 文件变动事件
+//        val ws = dataFolder.toPath().fileSystem.newWatchService()
+//        StandardWatchEventKinds.OVERFLOW
+//        dataFolder.toPath().register(ws, StandardWatchEventKinds.ENTRY_MODIFY)
+//
+//        ws.take().pollEvents().forEach {
+//            it.context()
+//        }
+
+//        launch {
+//            // 进度条
+//            val p = MiraiConsole.newProcessProgress()
+//            repeat(100){
+//                p.update(it.toLong()/100)
+//                p.updateText("**$it**")
+//                p.rerender()
+//
+//                delay(100)
+//            }
+//            p.updateText("更新完成!")
+//            p.close()
+//        }
+
+
+
     }
 
     override fun onDisable() {
-        DynamicCommand.unregister()
-        dynamicChannel.close()
-        messageChannel.close()
+        PushTemplate.save()
+//        dynamicChannel.close()
 
-        BiliTasker.cancelAll()
-
-        BiliData.save()
-        BiliConfig.save()
     }
 }

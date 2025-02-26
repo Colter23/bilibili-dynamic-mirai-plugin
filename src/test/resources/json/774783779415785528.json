@@ -1,0 +1,245 @@
+{
+  "basic": {
+    "comment_id_str": "230175599",
+    "comment_type": 11,
+    "jump_url": "//www.bilibili.com/opus/774783779415785528",
+    "like_icon": {
+      "action_url": "https://i0.hdslb.com/bfs/garb/item/8f50d9728dd3281e40d525471774674ab7049837.bin",
+      "end_url": "",
+      "id": 2428,
+      "start_url": ""
+    },
+    "rid_str": "230175599"
+  },
+  "id_str": "774783779415785528",
+  "modules": {
+    "module_author": {
+      "avatar": {
+        "container_size": {
+          "height": 1.35,
+          "width": 1.35
+        },
+        "fallback_layers": {
+          "is_critical_group": true,
+          "layers": [
+            {
+              "general_spec": {
+                "pos_spec": {
+                  "axis_x": 0.675,
+                  "axis_y": 0.675,
+                  "coordinate_pos": 2
+                },
+                "render_spec": {
+                  "opacity": 1
+                },
+                "size_spec": {
+                  "height": 1,
+                  "width": 1
+                }
+              },
+              "layer_config": {
+                "is_critical": true,
+                "tags": {
+                  "AVATAR_LAYER": {},
+                  "GENERAL_CFG": {
+                    "config_type": 1,
+                    "general_config": {
+                      "web_css_style": {
+                        "borderRadius": "50%"
+                      }
+                    }
+                  }
+                }
+              },
+              "resource": {
+                "res_image": {
+                  "image_src": {
+                    "placeholder": 6,
+                    "remote": {
+                      "bfs_style": "widget-layer-avatar",
+                      "url": "https://i1.hdslb.com/bfs/face/652385c47e4742b6e26e19995a2407c83756b1f7.jpg"
+                    },
+                    "src_type": 1
+                  }
+                },
+                "res_type": 3
+              },
+              "visible": true
+            },
+            {
+              "general_spec": {
+                "pos_spec": {
+                  "axis_x": 0.8000000000000002,
+                  "axis_y": 0.8000000000000002,
+                  "coordinate_pos": 1
+                },
+                "render_spec": {
+                  "opacity": 1
+                },
+                "size_spec": {
+                  "height": 0.41666666666666663,
+                  "width": 0.41666666666666663
+                }
+              },
+              "layer_config": {
+                "tags": {
+                  "GENERAL_CFG": {
+                    "config_type": 1,
+                    "general_config": {
+                      "web_css_style": {
+                        "background-color": "rgb(255,255,255)",
+                        "border": "2px solid rgba(255,255,255,1)",
+                        "borderRadius": "50%",
+                        "boxSizing": "border-box"
+                      }
+                    }
+                  },
+                  "ICON_LAYER": {}
+                }
+              },
+              "resource": {
+                "res_image": {
+                  "image_src": {
+                    "local": 3,
+                    "src_type": 2
+                  }
+                },
+                "res_type": 3
+              },
+              "visible": true
+            }
+          ]
+        },
+        "mid": "487550002"
+      },
+      "face": "https://i1.hdslb.com/bfs/face/652385c47e4742b6e26e19995a2407c83756b1f7.jpg",
+      "face_nft": false,
+      "following": true,
+      "jump_url": "//space.bilibili.com/487550002/dynamic",
+      "label": "",
+      "mid": 487550002,
+      "name": "猫芒ベル_Official",
+      "official_verify": {
+        "desc": "",
+        "type": 0
+      },
+      "pendant": {
+        "expire": 0,
+        "image": "",
+        "image_enhance": "",
+        "image_enhance_frame": "",
+        "name": "",
+        "pid": 0
+      },
+      "pub_action": "",
+      "pub_location_text": "",
+      "pub_time": "2023-03-19 21:16",
+      "pub_ts": 1679231806,
+      "type": "AUTHOR_TYPE_NORMAL",
+      "vip": {
+        "avatar_subscript": 1,
+        "avatar_subscript_url": "",
+        "due_date": 1696780800000,
+        "label": {
+          "bg_color": "#FB7299",
+          "bg_style": 1,
+          "border_color": "",
+          "img_label_uri_hans": "",
+          "img_label_uri_hans_static": "https://i0.hdslb.com/bfs/vip/8d4f8bfc713826a5412a0a27eaaac4d6b9ede1d9.png",
+          "img_label_uri_hant": "",
+          "img_label_uri_hant_static": "https://i0.hdslb.com/bfs/activity-plat/static/20220614/e369244d0b14644f5e1a06431e22a4d5/VEW8fCC0hg.png",
+          "label_theme": "annual_vip",
+          "path": "",
+          "text": "年度大会员",
+          "text_color": "#FFFFFF",
+          "use_img_label": true
+        },
+        "nickname_color": "#FB7299",
+        "status": 1,
+        "theme_type": 0,
+        "type": 2
+      }
+    },
+    "module_dynamic": {
+      "additional": null,
+      "desc": {
+        "rich_text_nodes": [
+          {
+            "orig_text": "谢谢你观看我的直播!\r\n这是任何人都可以使用的表情！",
+            "text": "谢谢你观看我的直播!\r\n这是任何人都可以使用的表情！",
+            "type": "RICH_TEXT_NODE_TYPE_TEXT"
+          },
+          {
+            "emoji": {
+              "icon_url": "https://i0.hdslb.com/bfs/emote/1597302b98827463f5b75c7cac1f29ea6ce572c4.png",
+              "size": 1,
+              "text": "[给心心]",
+              "type": 1
+            },
+            "orig_text": "[给心心]",
+            "text": "[给心心]",
+            "type": "RICH_TEXT_NODE_TYPE_EMOJI"
+          },
+          {
+            "orig_text": "\n如果你来参加直播，尽可以使用它",
+            "text": "\n如果你来参加直播，尽可以使用它",
+            "type": "RICH_TEXT_NODE_TYPE_TEXT"
+          },
+          {
+            "emoji": {
+              "icon_url": "https://i0.hdslb.com/bfs/emote/5f2370e561c32d841245f7b1aab2eef43aeb9544.png",
+              "size": 1,
+              "text": "[保卫萝卜_哇]",
+              "type": 1
+            },
+            "orig_text": "[保卫萝卜_哇]",
+            "text": "[保卫萝卜_哇]",
+            "type": "RICH_TEXT_NODE_TYPE_EMOJI"
+          }
+        ],
+        "text": "谢谢你观看我的直播!\r\n这是任何人都可以使用的表情！[给心心]\n如果你来参加直播，尽可以使用它[保卫萝卜_哇]"
+      },
+      "major": {
+        "draw": {
+          "id": 230175599,
+          "items": [
+            {
+              "height": 1658,
+              "size": 1868.8848,
+              "src": "https://i0.hdslb.com/bfs/new_dyn/821b222240fba0004cd603e187bfa13d487550002.png",
+              "tags": [],
+              "width": 2000
+            }
+          ]
+        },
+        "type": "MAJOR_TYPE_DRAW"
+      },
+      "topic": null
+    },
+    "module_more": {
+      "three_point_items": [
+        {
+          "label": "举报",
+          "type": "THREE_POINT_REPORT"
+        }
+      ]
+    },
+    "module_stat": {
+      "comment": {
+        "count": 59,
+        "forbidden": false
+      },
+      "forward": {
+        "count": 0,
+        "forbidden": false
+      },
+      "like": {
+        "count": 895,
+        "forbidden": false,
+        "status": true
+      }
+    }
+  },
+  "type": "DYNAMIC_TYPE_DRAW",
+  "visible": true
+}

@@ -1,0 +1,241 @@
+{
+  "basic": {
+    "comment_id_str": "230460231",
+    "comment_type": 11,
+    "like_icon": {
+      "action_url": "https://i0.hdslb.com/bfs/garb/item/8f50d9728dd3281e40d525471774674ab7049837.bin",
+      "end_url": "",
+      "id": 2428,
+      "start_url": ""
+    },
+    "rid_str": "230460231"
+  },
+  "id_str": "775420190491934723",
+  "modules": {
+    "module_author": {
+      "avatar": {
+        "container_size": {
+          "height": 1.5,
+          "width": 1.5
+        },
+        "fallback_layers": {
+          "is_critical_group": true,
+          "layers": [
+            {
+              "general_spec": {
+                "pos_spec": {
+                  "axis_x": 0.75,
+                  "axis_y": 0.75,
+                  "coordinate_pos": 2
+                },
+                "render_spec": {
+                  "opacity": 1
+                },
+                "size_spec": {
+                  "height": 1.3,
+                  "width": 1.3
+                }
+              },
+              "layer_config": {
+                "is_critical": true,
+                "tags": {
+                  "AVATAR_LAYER": {
+                  },
+                  "GENERAL_CFG": {
+                    "config_type": 1,
+                    "general_config": {
+                      "web_css_style": {
+                        "borderRadius": "50%"
+                      }
+                    }
+                  }
+                }
+              },
+              "resource": {
+                "res_image": {
+                  "image_src": {
+                    "placeholder": 6,
+                    "remote": {
+                      "bfs_style": "widget-layer-avatar",
+                      "url": "https://i2.hdslb.com/bfs/face/4051b34930a775303b71e609a1a582eaa7b6864c.jpg"
+                    },
+                    "src_type": 1
+                  }
+                },
+                "res_type": 3
+              },
+              "visible": true
+            },
+            {
+              "general_spec": {
+                "pos_spec": {
+                  "axis_x": 1.025,
+                  "axis_y": 1.025,
+                  "coordinate_pos": 1
+                },
+                "render_spec": {
+                  "opacity": 1
+                },
+                "size_spec": {
+                  "height": 0.41666666666666663,
+                  "width": 0.41666666666666663
+                }
+              },
+              "layer_config": {
+                "tags": {
+                  "GENERAL_CFG": {
+                    "config_type": 1,
+                    "general_config": {
+                      "web_css_style": {
+                        "background-color": "rgb(255,255,255)",
+                        "border": "2px solid rgba(255,255,255,1)",
+                        "borderRadius": "50%",
+                        "boxSizing": "border-box"
+                      }
+                    }
+                  },
+                  "ICON_LAYER": {
+                  }
+                }
+              },
+              "resource": {
+                "res_animation": {
+                  "webp_src": {
+                    "placeholder": 5,
+                    "remote": {
+                      "bfs_style": "widget-layer-avatar",
+                      "url": "https://i0.hdslb.com/bfs/activity-plat/static/20220506/334553dd7c506a92b88eaf4d59ac8b4d/j8AeXAkEul.gif"
+                    },
+                    "src_type": 1
+                  }
+                },
+                "res_type": 4
+              },
+              "visible": true
+            }
+          ]
+        },
+        "mid": "436037759"
+      },
+      "face": "https://i2.hdslb.com/bfs/face/4051b34930a775303b71e609a1a582eaa7b6864c.jpg",
+      "face_nft": false,
+      "following": true,
+      "jump_url": "//space.bilibili.com/436037759/dynamic",
+      "label": "",
+      "mid": 436037759,
+      "name": "碧蓝档案情报站",
+      "official_verify": {
+        "desc": "",
+        "type": -1
+      },
+      "pendant": {
+        "expire": 0,
+        "image": "",
+        "image_enhance": "",
+        "image_enhance_frame": "",
+        "name": "",
+        "pid": 0
+      },
+      "pub_action": "",
+      "pub_location_text": "",
+      "pub_time": "2023-03-21 14:26",
+      "pub_ts": 1679379982,
+      "type": "AUTHOR_TYPE_NORMAL",
+      "vip": {
+        "avatar_subscript": 0,
+        "avatar_subscript_url": "",
+        "due_date": 0,
+        "label": {
+          "bg_color": "",
+          "bg_style": 0,
+          "border_color": "",
+          "img_label_uri_hans": "",
+          "img_label_uri_hans_static": "https://i0.hdslb.com/bfs/vip/d7b702ef65a976b20ed854cbd04cb9e27341bb79.png",
+          "img_label_uri_hant": "",
+          "img_label_uri_hant_static": "https://i0.hdslb.com/bfs/activity-plat/static/20220614/e369244d0b14644f5e1a06431e22a4d5/KJunwh19T5.png",
+          "label_theme": "",
+          "path": "",
+          "text": "",
+          "text_color": "",
+          "use_img_label": true
+        },
+        "nickname_color": "",
+        "status": 0,
+        "theme_type": 0,
+        "type": 0
+      }
+    },
+    "module_dynamic": {
+      "additional": null,
+      "desc": {
+        "rich_text_nodes": [
+          {
+            "orig_text": "【活动介绍】【日服】\n3/22(星期三)维护之后，将开启复刻活动「新春狂想曲 第68番」!\n配合活动复刻会新追加附有家具动作的限定家具「植物架」，以及2种新欧帕兹等各种各样的活动报酬，来获得它们吧！\nhttps://bluearchive.jp/news/newsJump/304\n",
+            "text": "【活动介绍】【日服】\n3/22(星期三)维护之后，将开启复刻活动「新春狂想曲 第68番」!\n配合活动复刻会新追加附有家具动作的限定家具「植物架」，以及2种新欧帕兹等各种各样的活动报酬，来获得它们吧！\nhttps://bluearchive.jp/news/newsJump/304\n",
+            "type": "RICH_TEXT_NODE_TYPE_TEXT"
+          },
+          {
+            "jump_url": "//search.bilibili.com/all?keyword=%E7%A2%A7%E8%93%9D%E6%A1%A3%E6%A1%88",
+            "orig_text": "#碧蓝档案#",
+            "text": "#碧蓝档案#",
+            "type": "RICH_TEXT_NODE_TYPE_TOPIC"
+          },
+          {
+            "jump_url": "//search.bilibili.com/all?keyword=%E8%94%9A%E8%93%9D%E6%A1%A3%E6%A1%88",
+            "orig_text": "#蔚蓝档案#",
+            "text": "#蔚蓝档案#",
+            "type": "RICH_TEXT_NODE_TYPE_TOPIC"
+          }
+        ],
+        "text": "【活动介绍】【日服】\n3/22(星期三)维护之后，将开启复刻活动「新春狂想曲 第68番」!\n配合活动复刻会新追加附有家具动作的限定家具「植物架」，以及2种新欧帕兹等各种各样的活动报酬，来获得它们吧！\nhttps://bluearchive.jp/news/newsJump/304\n#碧蓝档案##蔚蓝档案#"
+      },
+      "major": {
+        "draw": {
+          "id": 230460231,
+          "items": [
+            {
+              "height": 720,
+              "size": 225.34,
+              "src": "https://i0.hdslb.com/bfs/new_dyn/fb958ead5bafa5f2b166364a73edc064436037759.jpg",
+              "tags": [
+              ],
+              "width": 1280
+            }
+          ]
+        },
+        "type": "MAJOR_TYPE_DRAW"
+      },
+      "topic": {
+        "id": 1019615,
+        "jump_url": "https://m.bilibili.com/topic-detail?topic_id=1019615&topic_name=%E7%A2%A7%E8%93%9D%E6%A1%A3%E6%A1%88%E6%97%A5%E5%B8%B8",
+        "name": "碧蓝档案日常"
+      }
+    },
+    "module_more": {
+      "three_point_items": [
+        {
+          "label": "举报",
+          "type": "THREE_POINT_REPORT"
+        }
+      ]
+    },
+    "module_stat": {
+      "comment": {
+        "count": 20,
+        "forbidden": false
+      },
+      "forward": {
+        "count": 1,
+        "forbidden": false
+      },
+      "like": {
+        "count": 439,
+        "forbidden": false,
+        "status": false
+      }
+    }
+  },
+  "type": "DYNAMIC_TYPE_DRAW",
+  "visible": true
+
+}
