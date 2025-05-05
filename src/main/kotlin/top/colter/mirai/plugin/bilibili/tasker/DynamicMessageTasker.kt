@@ -84,7 +84,7 @@ object DynamicMessageTasker : BiliTasker() {
             return listOf("cache/$path")
         }
         return when (type) {
-            DYNAMIC_TYPE_FORWARD -> orig?.dynamicImages()!!
+            DYNAMIC_TYPE_FORWARD -> orig?.dynamicImages()
             DYNAMIC_TYPE_DRAW -> when(modules.moduleDynamic.major?.type){
                 "MAJOR_TYPE_DRAW" -> modules.moduleDynamic.major?.draw?.items?.map { it.src }
                 "MAJOR_TYPE_BLOCKED" -> {
