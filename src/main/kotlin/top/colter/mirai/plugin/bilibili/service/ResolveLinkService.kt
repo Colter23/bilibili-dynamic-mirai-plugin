@@ -11,14 +11,19 @@ import java.time.Instant
 
 private val regex = BiliConfig.linkResolveConfig.reg
 
-fun matchingRegular(content: String): LinkType? {
+fun matchingRegular(content: String): ResolvedLinkInfo? {
     return if (regex.any { it.find(content) != null }) {
         logger.info("开始解析链接 -> $content")
         matchingInternalRegular(content)
     } else null
 }
 
-fun matchingInternalRegular(content: String): LinkType? {
+data class ResolvedLinkInfo(val type: LinkType, val id: String) : ResolveLink {
+    override suspend fun drawGeneral(): String? = type.drawGeneral(id)
+    override suspend fun getLink(): String = type.getLink(id)
+}
+
+fun matchingInternalRegular(content: String): ResolvedLinkInfo? {
     var matchResult: MatchResult? = null
     var type: LinkType? = null
 
@@ -33,8 +38,7 @@ fun matchingInternalRegular(content: String): LinkType? {
         if (matchResult != null) break
     }
     return if (matchResult != null && type != null) {
-        type.id = matchResult.destructured.component1()
-        type
+        ResolvedLinkInfo(type, matchResult.destructured.component1())
     }else {
         logger.warning("未匹配到链接! -> $content")
         null
@@ -53,93 +57,88 @@ interface ResolveLink {
     suspend fun getLink(): String
 }
 
-enum class LinkType(val regex: List<Regex>, var id: String? = null): ResolveLink {
+enum class LinkType(val regex: List<Regex>) {
     VideoLink(listOf(
         """(?:www\.bilibili\.com/video/)?((?:BV[0-9A-z]{10})|(?:av\d{1,20}))""".toRegex()
-    )) {
-        override suspend fun drawGeneral(): String? {
-            return biliClient.getVideoDetail(id!!)?.run {
-                drawGeneral(id!!, "视频", pubdate.formatTime, toDrawAuthorData(), toDrawData().drawGeneral(true))
-            }
-        }
-
-        override suspend fun getLink(): String = VIDEO_LINK(id!!)
-
-    },
+    )),
     Article(listOf(
         """(?:www\.bilibili\.com/read/)?cv(\d{1,10})""".toRegex(),
         """(?:www\.bilibili\.com/read/mobile/)(\d{1,10})""".toRegex()
-    )) {
-        override suspend fun drawGeneral(): String? {
-            return biliClient.getArticleDetail("cv$id")?.run {
-                drawGeneral(id!!, "专栏", time.formatTime, author, toDrawData().drawGeneral())
-            }
-        }
-
-        override suspend fun getLink(): String = ARTICLE_LINK(id!!)
-    },
+    )),
     Dynamic(listOf(
         """[tm]\.bilibili\.com/(?:dynamic/)?(\d+)""".toRegex(),
         """(?:www|m)\.bilibili\.com/opus/(\d+)""".toRegex()
-    )) {
-        override suspend fun drawGeneral(): String? {
-            val color = Color.makeRGB(BiliConfig.imageConfig.defaultColor)
-            return biliClient.getDynamicDetail(id!!)?.run {
-                val dynamic = drawDynamic(color)
-                val img = makeCardBg(dynamic.height, listOf(color)) {
-                    it.drawImage(dynamic, 0f, 0f)
-                }
-                cacheImage(img, "$idStr.png", CacheType.DRAW_SEARCH)
-            }
-        }
-
-        override suspend fun getLink(): String = DYNAMIC_LINK(id!!)
-    },
+    )),
     Live(listOf(
         """live\.bilibili\.com/(?:h5/)?(\d+)""".toRegex()
-    )) {
-        override suspend fun drawGeneral(): String? {
-            val room = biliClient.getLiveDetail(id!!) ?: return null
-            val author = biliClient.userInfo(room.uid)?.toDrawAuthorData() ?: return null
-            val data = room.toDrawData().drawGeneral()
-            return drawGeneral(id!!, "直播", Instant.now().epochSecond.formatTime, author, data)
-        }
-
-        override suspend fun getLink(): String = LIVE_LINK(id!!)
-    },
+    )),
     User(listOf(
         """space\.bilibili\.com/(\d+)""".toRegex()
-    )) {
-        override suspend fun drawGeneral(): String? {
-            val author = biliClient.userInfo(id!!.toLong())?.toDrawAuthorData() ?: return null
-            return drawGeneral(id!!, "用户", Instant.now().epochSecond.formatTime, author, null)
-        }
-
-        override suspend fun getLink(): String = SPACE_LINK(id!!)
-    },
+    )),
     Pgc(listOf(
         """(?:(?:www|m)\.bilibili\.com/bangumi/(?:play|media)/)?((?:ss|ep|md)\d+)""".toRegex()
-    )) {
-        override suspend fun drawGeneral(): String? {
-            val info = biliClient.getPcgInfo(id!!) ?: return null
-            val author = info.toPgcAuthor() ?: return null
-            val data = info.toPgc()?.drawSmall()
-            return drawGeneral(id!!, "番剧", Instant.now().epochSecond.formatTime, author, data)
-        }
-
-        override suspend fun getLink(): String = PGC_LINK(id!!)
-    },
+    )),
     ShortLink(listOf(
         """(?:b23\.tv|bili2233\.cn)\\?/([0-9A-z]+)""".toRegex()
-    )) {
-        override suspend fun drawGeneral(): String? {
-            val link = biliClient.redirect("https://b23.tv/$id")
-            return if (link != null) {
-                matchingInternalRegular(link)?.drawGeneral()
-            }else null
-        }
+    ));
 
-        override suspend fun getLink(): String = "$BASE_SHORT/$id"
+    suspend fun drawGeneral(id: String): String? {
+        return when (this) {
+            VideoLink -> {
+                biliClient.getVideoDetail(id)?.run {
+                    drawGeneral(id, "视频", pubdate.formatTime, toDrawAuthorData(), toDrawData().drawGeneral(true))
+                }
+            }
+            Article -> {
+                biliClient.getArticleDetail("cv$id")?.run {
+                    drawGeneral(id, "专栏", time.formatTime, author, toDrawData().drawGeneral())
+                }
+            }
+            Dynamic -> {
+                val color = Color.makeRGB(BiliConfig.imageConfig.defaultColor)
+                biliClient.getDynamicDetail(id)?.run {
+                    val dynamic = drawDynamic(color)
+                    val img = makeCardBg(dynamic.height, listOf(color)) {
+                        it.drawImage(dynamic, 0f, 0f)
+                    }
+                    cacheImage(img, "$idStr.png", CacheType.DRAW_SEARCH)
+                }
+            }
+            Live -> {
+                val room = biliClient.getLiveDetail(id) ?: return null
+                val author = biliClient.userInfo(room.uid)?.toDrawAuthorData() ?: return null
+                val data = room.toDrawData().drawGeneral()
+                drawGeneral(id, "直播", Instant.now().epochSecond.formatTime, author, data)
+            }
+            User -> {
+                val author = biliClient.userInfo(id.toLong())?.toDrawAuthorData() ?: return null
+                drawGeneral(id, "用户", Instant.now().epochSecond.formatTime, author, null)
+            }
+            Pgc -> {
+                val info = biliClient.getPcgInfo(id) ?: return null
+                val author = info.toPgcAuthor() ?: return null
+                val data = info.toPgc()?.drawSmall()
+                drawGeneral(id, "番剧", Instant.now().epochSecond.formatTime, author, data)
+            }
+            ShortLink -> {
+                val link = biliClient.redirect("https://b23.tv/$id")
+                if (link != null) {
+                    matchingInternalRegular(link)?.drawGeneral()
+                } else null
+            }
+        }
+    }
+
+    suspend fun getLink(id: String): String {
+        return when (this) {
+            VideoLink -> VIDEO_LINK(id)
+            Article -> ARTICLE_LINK(id)
+            Dynamic -> DYNAMIC_LINK(id)
+            Live -> LIVE_LINK(id)
+            User -> SPACE_LINK(id)
+            Pgc -> PGC_LINK(id)
+            ShortLink -> "$BASE_SHORT/$id"
+        }
     }
 }
 
