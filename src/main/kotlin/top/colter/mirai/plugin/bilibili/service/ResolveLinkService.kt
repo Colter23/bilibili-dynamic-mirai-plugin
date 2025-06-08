@@ -55,7 +55,7 @@ interface ResolveLink {
 
 enum class LinkType(val regex: List<Regex>, var id: String? = null): ResolveLink {
     VideoLink(listOf(
-        """(?:www\.bilibili\.com/video/)?((?:BV[0-9A-z]{10})|(?:av\d{1,10}))""".toRegex()
+        """(?:www\.bilibili\.com/video/)?((?:BV[0-9A-z]{10})|(?:av\d{1,20}))""".toRegex()
     )) {
         override suspend fun drawGeneral(): String? {
             return biliClient.getVideoDetail(id!!)?.run {

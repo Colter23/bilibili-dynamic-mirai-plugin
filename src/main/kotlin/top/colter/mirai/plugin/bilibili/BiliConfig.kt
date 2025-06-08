@@ -280,7 +280,7 @@ data class LinkResolveConfig(
     val triggerMode: TriggerMode = TriggerMode.At,
     val returnLink: Boolean = false,
     val regex: List<String> = listOf(
-        """(www\.bilibili\.com/video/((BV[0-9A-z]{10})|(av\d{1,10})))|^(BV[0-9A-z]{10})|^(av\d{1,10})""",
+        """(www\.bilibili\.com/video/((BV[0-9A-z]{10})|(av\d{1,20})))|^(BV[0-9A-z]{10})|^(av\d{1,20})""",
         """(www\.bilibili\.com/read/cv\d{1,10})|^(cv\d{1,10})|(www\.bilibili\.com/read/mobile/\d{1,10})""",
         """((www|m)\.bilibili\.com/bangumi/(play|media)/(ss|ep|md)\d+)|^((ss|ep|md)\d+)""",
         """([tm]\.bilibili\.com/(dynamic/)?\d+)|(www\.bilibili\.com/opus/\d+)""",
