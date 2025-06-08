@@ -37,6 +37,7 @@ object DynamicCommand : CompositeCommand(
 ) {
 
     private val admin by BiliConfig::admin
+    private val showLoadingMessage get() = BiliConfig.enableConfig.showLoadingMessage
 
     @SubCommand("h", "help", "帮助", "menu")
     suspend fun CommandSender.help() {
@@ -187,7 +188,7 @@ object DynamicCommand : CompositeCommand(
 
     @SubCommand("templateList", "tl", "模板列表")
     suspend fun CommandSenderOnMessage<*>.templateList(type: String = "d") {
-        val ms = subject?.sendMessage("加载中...")
+        val ms = if (showLoadingMessage) subject?.sendMessage("加载中...") else null
         TemplateService.listTemplate(type, Contact())
         ms?.recall()
     }
@@ -265,7 +266,7 @@ object DynamicCommand : CompositeCommand(
 
     @SubCommand("search", "s", "搜索")
     suspend fun CommandSenderOnMessage<*>.search(did: String) {
-        val msg = sendMessage("加载中...")
+        val msg = if (showLoadingMessage) sendMessage("加载中...") else null
         try {
             val detail = biliClient.getDynamicDetail(did)
             if (detail != null) {
@@ -290,7 +291,7 @@ object DynamicCommand : CompositeCommand(
 
     @SubCommand("new", "最新动态")
     suspend fun CommandSenderOnMessage<*>.new(user: String, count: Int = 1) {
-        val msg = sendMessage("加载中...")
+        val msg = if (showLoadingMessage) sendMessage("加载中...") else null
         matchUser(user) {
             try {
                 val list = biliClient.getUserNewDynamic(it)?.items?.subList(0, count)
@@ -308,7 +309,7 @@ object DynamicCommand : CompositeCommand(
 
     @SubCommand("video", "最新视频")
     suspend fun CommandSenderOnMessage<*>.newVideo(user: String) {
-        val msg = sendMessage("加载中...")
+        val msg = if (showLoadingMessage) sendMessage("加载中...") else null
         matchUser(user) {
             try {
                 biliClient.searchUserVideo(it)?.list?.vlist?.run {

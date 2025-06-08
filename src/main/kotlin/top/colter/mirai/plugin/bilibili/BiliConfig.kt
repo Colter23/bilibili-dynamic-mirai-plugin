@@ -149,6 +149,7 @@ data class EnableConfig(
     var translateEnable: Boolean = false,
     val proxyEnable: Boolean = false,
     val cacheClearEnable: Boolean = true,
+    val showLoadingMessage: Boolean = true,
 )
 
 @Serializable
