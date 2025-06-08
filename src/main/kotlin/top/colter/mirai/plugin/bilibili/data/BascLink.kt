@@ -16,7 +16,7 @@ const val BASE_PGC = "https://www.bilibili.com/bangumi/play"
 const val BASE_PGC_MEDIA = "https://www.bilibili.com/bangumi/media"
 const val BASE_LIVE = "https://live.bilibili.com"
 const val BASE_SPACE = "https://space.bilibili.com"
-const val BASE_SHORT = "b23.tv"
+const val BASE_SHORT = "https://b23.tv"
 
 val toShortLink: Boolean by lazy { BiliConfig.pushConfig.toShortLink }
 
