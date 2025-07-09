@@ -17,6 +17,7 @@ object ListenerTasker : BiliTasker() {
 
     private val triggerMode = BiliConfig.linkResolveConfig.triggerMode
     private val returnLink = BiliConfig.linkResolveConfig.returnLink
+    private val showLoadingMessage = BiliConfig.enableConfig.showLoadingMessage
 
     override suspend fun main() {
         globalEventChannel().subscribeAlways<BotLeaveEvent> {
@@ -45,16 +46,16 @@ object ListenerTasker : BiliTasker() {
                 val msg = message.filter { it !is At && it !is Image }.toMessageChain().content.trim()
                 val type = matchingRegular(msg)
                 if (type != null) {
-                    val ms = subject.sendMessage("加载中...")
+                    val ms = if (showLoadingMessage) subject.sendMessage("加载中...") else null
                     val img = type.drawGeneral()
                     if (img == null) {
-                        ms.recall()
+                        ms?.recall()
                         subject.sendMessage("解析失败")
                         return@subscribeAlways
                     }
                     val imgMsg = subject.uploadImage(img, CacheType.DRAW_SEARCH)
                     if (imgMsg == null) {
-                        ms.recall()
+                        ms?.recall()
                         subject.sendMessage("图片上传失败")
                         return@subscribeAlways
                     }
@@ -62,7 +63,7 @@ object ListenerTasker : BiliTasker() {
                         + imgMsg
                         if (returnLink) + PlainText(type.getLink())
                     })
-                    ms.recall()
+                    ms?.recall()
                 }
             }
         }

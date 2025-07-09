@@ -461,6 +461,7 @@ Vtuber 字幕组及粉丝群如需要使用可通过群联系我, 使用我搭�
 #   translateEnable: 翻译开关
 #   proxyEnable: 代理开关
 #   cacheClearEnable: 缓存清理开关
+#   showLoadingMessage: 是否显示"加载中"提示消息
 enableConfig:
   drawEnable: true
   notifyEnable: true
@@ -468,6 +469,7 @@ enableConfig:
   translateEnable: false
   proxyEnable: false
   cacheClearEnable: true
+  showLoadingMessage: true
 
 # 账号配置:
 #   cookie: BiliBili的cookie, 可使用 /bili login 自动获取
