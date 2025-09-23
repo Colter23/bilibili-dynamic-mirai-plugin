@@ -204,7 +204,7 @@ fun VideoDetail.toDrawData(): ModuleDynamic.Major.Archive =
 
 fun ArticleDetail.toDrawData(): ModuleDynamic.Major.Article =
     ModuleDynamic.Major.Article(
-        aid,
+        aid.toString(),
         title,
         summary,
         "$words 字",

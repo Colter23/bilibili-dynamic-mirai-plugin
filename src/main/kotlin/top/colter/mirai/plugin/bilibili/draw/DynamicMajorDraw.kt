@@ -661,8 +661,8 @@ suspend fun ModuleDynamic.Major.Article.drawGeneral(): Image {
     }
 
     val descParagraph = ParagraphBuilder(paragraphStyle, FontUtils.fonts).addText(desc).build().layout(paragraphWidth)
-
-    val articleCoverHeight = cardContentRect.width * if (covers.size == 1) 0.29375f else 0.23166f
+    //0.29375f
+    val articleCoverHeight = cardContentRect.width * if (covers.size == 1) 0.35f else 0.23166f
     val articleCardHeight = articleCoverHeight + titleParagraph.height + descParagraph.height + quality.cardPadding
 
     val articleCardRect = RRect.makeComplexXYWH(

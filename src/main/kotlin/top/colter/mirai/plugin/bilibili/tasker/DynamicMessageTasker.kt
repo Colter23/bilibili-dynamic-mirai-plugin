@@ -37,6 +37,24 @@ object DynamicMessageTasker : BiliTasker() {
             && modules.moduleAuthor.iconBadge?.text == "专属动态"
 
     suspend fun DynamicItem.buildMessage(contact: String? = null): DynamicMessage {
+
+        try {
+            if (type == DYNAMIC_TYPE_ARTICLE) {
+                modules.moduleDynamic.major!!.article = ModuleDynamic.Major.Article(
+                    basic.ridStr,
+                    modules.moduleDynamic.major.opus?.title!!,
+                    modules.moduleDynamic.major.opus?.summary?.text!!,
+                    "",
+                    "",
+                    modules.moduleDynamic.major.opus?.pics?.map { it.src }!!
+                )
+                modules.moduleDynamic.major.type = "MAJOR_TYPE_ARTICLE"
+                modules.moduleDynamic.major.opus = null
+            }
+        } catch (e: Exception) {
+            top.colter.mirai.plugin.bilibili.draw.logger.warning("专栏消息转换失败", e)
+        }
+
         return DynamicMessage(
             did,
             modules.moduleAuthor.mid,
@@ -133,7 +151,7 @@ object DynamicMessageTasker : BiliTasker() {
                     DynamicMessage.Link(
                         DYNAMIC_TYPE_ARTICLE.text,
                         if (this.modules.moduleDynamic.major?.type == "MAJOR_TYPE_OPUS") OPUS_LINK(did) else
-                        ARTICLE_LINK(this.modules.moduleDynamic.major?.article?.id?.toString() ?: this.did)
+                            ARTICLE_LINK(this.modules.moduleDynamic.major?.article?.id ?: this.did)
                     ),
                     DynamicMessage.Link("动态", DYNAMIC_LINK(did))
                 )

@@ -81,7 +81,8 @@ data class DynamicItem(
      */
     @SerialName("type")
     val typeStr: String,
-
+    @SerialName("basic")
+    val basic: DynamicBasic,
     @SerialName("id_str")
     val idStr: String?,
     @SerialName("visible")
@@ -113,21 +114,7 @@ data class DynamicItem(
         val commentType: Int,
         @SerialName("rid_str")
         val ridStr: String,
-        @SerialName("like_icon")
-        val likeIcon: LikeIcon,
-    ) {
-        @Serializable
-        data class LikeIcon(
-            @SerialName("id")
-            val id: Long = 0,
-            @SerialName("action_url")
-            val actionUrl: String = "",
-            @SerialName("start_url")
-            val startUrl: String = "",
-            @SerialName("end_url")
-            val endUrl: String = "",
-        )
-    }
+    )
 
     /**
      * 动态模块
@@ -849,7 +836,7 @@ data class ModuleDynamic(
          * MAJOR_TYPE_NONE       空
          */
         @SerialName("type")
-        val type: String,
+        var type: String,
 
         @SerialName("archive")
         val archive: Archive? = null,
@@ -858,7 +845,7 @@ data class ModuleDynamic(
         @SerialName("draw")
         val draw: Draw? = null,
         @SerialName("article")
-        val article: Article? = null,
+        var article: Article? = null,
         @SerialName("music")
         val music: Music? = null,
         @SerialName("live")
@@ -872,7 +859,7 @@ data class ModuleDynamic(
         @SerialName("ugc_season")
         val ugcSeason: Archive? = null,
         @SerialName("opus")
-        val opus: Opus? = null,
+        var opus: Opus? = null,
         @SerialName("none")
         val none: None? = null,
     ) {
@@ -1096,7 +1083,7 @@ data class ModuleDynamic(
         @Serializable
         data class Article(
             @SerialName("id")
-            val id: Long,
+            val id: String,
             @SerialName("title")
             val title: String,
             @SerialName("desc")
