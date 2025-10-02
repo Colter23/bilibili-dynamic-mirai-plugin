@@ -27,7 +27,11 @@ fun matchingInternalRegular(content: String): ResolvedLinkInfo? {
     var matchResult: MatchResult? = null
     var type: LinkType? = null
 
-    for (linkType in LinkType.values()) {
+    // 定义优先级顺序：短链接优先，其他保持原顺序
+    val prioritizedTypes = listOf(LinkType.ShortLink) + 
+        LinkType.values().filter { it != LinkType.ShortLink }
+
+    for (linkType in prioritizedTypes) {
         for (regex in linkType.regex) {
             matchResult = regex.find(content)
             if (matchResult != null) {
