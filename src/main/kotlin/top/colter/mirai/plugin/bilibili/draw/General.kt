@@ -103,21 +103,37 @@ fun RRect.offsetR(dx: Float, dy: Float): RRect {
     return RRect.makeComplexLTRB(left + dx, top + dy, right + dx, bottom + dy, radii)
 }
 
+enum class ClipMode {
+    CENTER,  // 居中截取
+    TOP      // 顶部截取
+}
+
 fun Canvas.drawImageClip(
     image: Image,
     dstRect: RRect,
-    paint: Paint? = null
+    paint: Paint? = null,
+    clipMode: ClipMode = ClipMode.CENTER
 ) {
     val ratio = image.width.toFloat() / image.height.toFloat()
 
     val srcRect = if (dstRect.width / ratio < dstRect.height) {
+        // 宽度不够，需要裁剪左右
         val imgW = dstRect.width * image.height / dstRect.height
-        val offsetX = (image.width - imgW) / 2f
+        val offsetX = if (clipMode == ClipMode.CENTER) {
+            (image.width - imgW) / 2f
+        } else {
+            0f
+        }
         Rect.makeXYWH(offsetX, 0f, imgW, image.height.toFloat())
     } else {
+        // 高度不够，需要裁剪上下
         val imgH = dstRect.height * image.width / dstRect.width
-        // 从顶部截取，而不是中部
-        Rect.makeXYWH(0f, 0f, image.width.toFloat(), imgH)
+        val offsetY = if (clipMode == ClipMode.CENTER) {
+            (image.height - imgH) / 2f
+        } else {
+            0f
+        }
+        Rect.makeXYWH(0f, offsetY, image.width.toFloat(), imgH)
     }
 
     drawImageRRect(image, srcRect, dstRect, paint)

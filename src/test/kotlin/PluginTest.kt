@@ -140,7 +140,6 @@ internal class PluginTest {
         val dynamic = DynamicItem(
 //            "DYNAMIC_TYPE_WORD",
             "DYNAMIC_TYPE_FORWARD",
-            DynamicItem.DynamicBasic("652271005324017683", 11, "652271005324017683"),
             "652271005324017683",
             true,
             //null,
@@ -297,7 +296,6 @@ internal class PluginTest {
             orig = DynamicItem(
 //            "DYNAMIC_TYPE_WORD",
                 "DYNAMIC_TYPE_WORD",
-                DynamicItem.DynamicBasic("652271005324017683", 11, "652271005324017683"),
                 "652271005324017683",
                 true,
                 //null,
