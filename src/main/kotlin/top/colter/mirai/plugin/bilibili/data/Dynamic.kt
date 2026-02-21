@@ -886,7 +886,7 @@ data class ModuleDynamic(
              * @param width 宽度
              * @param height 高度
              * @param size 文件大小
-             * @param src 链接
+             * @param url 链接
              */
             @Serializable
             data class DrawItem(
@@ -897,7 +897,7 @@ data class ModuleDynamic(
                 //@SerialName("size")
                 //val size: Float,
                 @SerialName("url")
-                val src: String,
+                val url: String,
             )
         }
 

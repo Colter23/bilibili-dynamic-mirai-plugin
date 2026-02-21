@@ -116,8 +116,8 @@ fun Canvas.drawImageClip(
         Rect.makeXYWH(offsetX, 0f, imgW, image.height.toFloat())
     } else {
         val imgH = dstRect.height * image.width / dstRect.width
-        val offsetY = (image.height - imgH) / 2
-        Rect.makeXYWH(0f, offsetY, image.width.toFloat(), imgH)
+        // 从顶部截取，而不是中部
+        Rect.makeXYWH(0f, 0f, image.width.toFloat(), imgH)
     }
 
     drawImageRRect(image, srcRect, dstRect, paint)
