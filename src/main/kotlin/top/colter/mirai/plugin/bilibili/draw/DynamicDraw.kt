@@ -526,7 +526,7 @@ fun Canvas.drawLabelCard(
         x,
         y,
         textLine.width + quality.badgePadding * 4,
-        textLine.height,
+        textLine.height + quality.badgePadding / 2,
         quality.badgeArc
     )
     drawRRect(rrect, bgPaint)

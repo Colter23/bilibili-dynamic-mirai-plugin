@@ -524,11 +524,9 @@ suspend fun ModuleDynamic.Major.Draw.drawGeneral(): Image {
     var drawItemHeight = 0f
     var drawItemSpace = quality.drawSpace * 2
     var drawItemNum = 1
-    var useTopClip = false  // 是否使用顶部截取
 
     when (items.size) {
         1 -> {
-            // 单张大图使用居中截取
             drawItemWidth = if (items[0].width > cardContentRect.width / 2) {
                 cardContentRect.width
             } else {
@@ -540,31 +538,22 @@ suspend fun ModuleDynamic.Major.Draw.drawGeneral(): Image {
             } else {
                 drawHeight
             }
-            useTopClip = false
         }
 
         2, 4 -> {
-            // 多图正方形布局使用顶部截取
             drawItemWidth = (cardContentRect.width - quality.drawSpace) / 2
             drawItemHeight = drawItemWidth
             if (items.size >= 3) {
                 drawItemSpace += quality.drawSpace
             }
             drawItemNum = 2
-            useTopClip = true
         }
 
-        3, in 5..9 -> {
-            // 九宫格布局使用顶部截取
+        3, in 5..30 -> {
             drawItemWidth = (cardContentRect.width - quality.drawSpace * 2) / 3
             drawItemHeight = drawItemWidth
-            drawItemSpace += if (items.size <= 6) {
-                quality.drawSpace
-            } else {
-                quality.drawSpace * 2
-            }
+            drawItemSpace += quality.drawSpace * ceil(items.size / 3f).toInt() - 1
             drawItemNum = 3
-            useTopClip = true
         }
     }
 
@@ -589,8 +578,29 @@ suspend fun ModuleDynamic.Major.Draw.drawGeneral(): Image {
                     isAntiAlias = true
                 })
 
-                // 根据图片数量选择截取方式：单张大图用居中，多图/九宫格用顶部
-                drawImageClip(img, dstRect, clipMode = if (useTopClip) ClipMode.TOP else ClipMode.CENTER)
+                // 长图为顶部裁剪，默认为居中裁剪
+                val topClipMode = drawItem.height > (drawItem.width * 2)
+                drawImageClip(img, dstRect, topClipMode = topClipMode)
+
+                // 动图/长图标签
+                var label: TextLine? = null
+                if (drawItem.src.endsWith(".gif")) {
+                    label = TextLine.make("动图", font.makeWithSize(quality.subTitleFontSize))
+                } else if (topClipMode) {
+                    label = TextLine.make("长图", font.makeWithSize(quality.subTitleFontSize))
+                }
+                if (label != null) {
+                    drawLabelCard(
+                        label,
+                        dstRect.right - label.width - (quality.badgePadding * 4) - (quality.cardPadding / 2),
+                        dstRect.bottom - label.height - quality.badgePadding - (quality.cardPadding / 2),
+                        Paint().apply { color = Color.WHITE },
+                        Paint().apply {
+                            color = Color.BLACK
+                            alpha = 130
+                        }
+                    )
+                }
 
                 drawRRect(dstRect, Paint().apply {
                     color = theme.drawOutlineColor
@@ -637,12 +647,10 @@ suspend fun ModuleDynamic.Major.Blocked.drawGeneral(): Image {
         canvas.apply {
             var x = quality.cardPadding.toFloat()
             var y = 0f
-            // 背景图使用居中截取
-            drawImageClip(bgImage, RRect.makeXYWH(x, y, bgWidth, bgHeight, quality.cardArc), clipMode = ClipMode.CENTER)
+            drawImageClip(bgImage, RRect.makeXYWH(x, y, bgWidth, bgHeight, quality.cardArc))
             x += (bgWidth - lockWidth) / 2
             y += bgHeight / 3
-            // 锁图标使用居中截取
-            drawImageClip(lockIcon, RRect.makeXYWH(x, y, lockWidth, lockHeight, quality.cardArc), clipMode = ClipMode.CENTER)
+            drawImageClip(lockIcon, RRect.makeXYWH(x, y, lockWidth, lockHeight, quality.cardArc))
 
             x = quality.cardPadding.toFloat()
             y += lockHeight + quality.drawSpace
@@ -715,8 +723,7 @@ suspend fun ModuleDynamic.Major.Article.drawGeneral(): Image {
                     val fallbackUrl = imgApi(it, imgW.toInt(), articleCoverHeight.toInt())
                     val img = getOrDownloadImageDefault(it, fallbackUrl, CacheType.IMAGES)
                     val tar = RRect.makeXYWH(imgX, articleCardRect.top, imgW, articleCoverHeight, 0f)
-                    // 专栏封面使用顶部截取
-                    drawImageClip(img, tar, Paint(), clipMode = ClipMode.TOP)
+                    drawImageClip(img, tar, Paint(), topClipMode = true)
                     imgX += articleCardRect.width / 3 + 2
                 }
                 restore()
