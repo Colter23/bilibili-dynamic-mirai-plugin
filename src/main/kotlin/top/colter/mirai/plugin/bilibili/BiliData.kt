@@ -48,7 +48,7 @@ object BiliData : AutoSavePluginData("BiliData") {
 
 @Serializable
 data class SubData(
-    val name: String,
+    var name: String,
     var color: String? = null,
     var last: Long = Instant.now().epochSecond,
     var lastLive: Long = Instant.now().epochSecond,

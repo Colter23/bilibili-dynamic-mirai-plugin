@@ -12,9 +12,9 @@ import java.time.LocalDate
 
 fun twemoji(code: String) = "$TWEMOJI/$code.png"
 
-private var isLogin = true
+var isLogin = true
 
-internal suspend inline fun <reified T> BiliClient.getData(
+suspend inline fun <reified T> BiliClient.getData(
     url: String,
     crossinline block: HttpRequestBuilder.() -> Unit = {}
 ): T? {
@@ -31,7 +31,8 @@ internal suspend inline fun <reified T> BiliClient.getData(
         res.data.decode()
     }
 }
-internal suspend inline fun <reified T> BiliClient.getDataWithWbi(
+
+suspend inline fun <reified T> BiliClient.getDataWithWbi(
     url: String,
     crossinline block: HttpRequestBuilder.() -> Unit = {}
 ): T? {

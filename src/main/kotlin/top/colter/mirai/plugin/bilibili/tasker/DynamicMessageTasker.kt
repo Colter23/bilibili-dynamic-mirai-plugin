@@ -28,6 +28,9 @@ object DynamicMessageTasker : BiliTasker() {
         withTimeout(180002) {
             val dynamicItem = dynamicDetail.item
             logger.debug("动态: ${dynamicItem.modules.moduleAuthor.name}@${dynamicItem.idStr}@${dynamicItem.typeStr}")
+            if (!dynamic[dynamicDetail.item.mid]?.name.equals(dynamicDetail.item.name)) {
+                dynamic[dynamicDetail.item.mid]?.name = dynamicDetail.item.name
+            }
             messageChannel.send(dynamicItem.buildMessage(dynamicDetail.contact))
         }
     }

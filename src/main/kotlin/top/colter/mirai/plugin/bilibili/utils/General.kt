@@ -74,6 +74,9 @@ fun HttpRequestBuilder.bodyParameter(key: String, value: Any) {
 val DynamicItem.mid: Long
     get() = modules.moduleAuthor.mid
 
+val DynamicItem.name: String
+    get() = modules.moduleAuthor.name
+
 val DynamicItem.time: Long
     get() = (did.toLong() shr 32) + 1498838400L
 
