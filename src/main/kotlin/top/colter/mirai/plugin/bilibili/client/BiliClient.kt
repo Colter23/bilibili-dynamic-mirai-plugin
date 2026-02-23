@@ -39,7 +39,7 @@ open class BiliClient : Closeable {
     val clients = MutableList(3) { client() }
 
     protected fun client() = HttpClient(OkHttp) {
-        defaultRequest {
+        install(DefaultRequest) {
             header(HttpHeaders.Origin, "https://t.bilibili.com")
             header(HttpHeaders.Referrer, "https://t.bilibili.com")
         }

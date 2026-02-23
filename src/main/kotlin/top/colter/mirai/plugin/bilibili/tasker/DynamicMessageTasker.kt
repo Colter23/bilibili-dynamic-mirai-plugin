@@ -105,6 +105,7 @@ object DynamicMessageTasker : BiliTasker() {
             DYNAMIC_TYPE_FORWARD -> orig?.dynamicImages()
             DYNAMIC_TYPE_DRAW -> when(modules.moduleDynamic.major?.type){
                 "MAJOR_TYPE_DRAW" -> modules.moduleDynamic.major?.draw?.items?.map { it.src }
+                "MAJOR_TYPE_OPUS" -> modules.moduleDynamic.major?.opus?.pics?.map { it.src }
                 "MAJOR_TYPE_BLOCKED" -> {
                     val path = modules.moduleDynamic.major.blocked?.let {
                         cacheImage(it.drawGeneral(),"blocked_$idStr.png",CacheType.IMAGES)

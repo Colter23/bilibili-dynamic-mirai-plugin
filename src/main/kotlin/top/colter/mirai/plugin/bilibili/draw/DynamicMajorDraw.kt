@@ -524,9 +524,11 @@ suspend fun ModuleDynamic.Major.Draw.drawGeneral(): Image {
     var drawItemHeight = 0f
     var drawItemSpace = quality.drawSpace * 2
     var drawItemNum = 1
+    var useTopClip = false  // 是否使用顶部截取
 
     when (items.size) {
         1 -> {
+            // 单张大图使用居中截取
             drawItemWidth = if (items[0].width > cardContentRect.width / 2) {
                 cardContentRect.width
             } else {
@@ -538,18 +540,22 @@ suspend fun ModuleDynamic.Major.Draw.drawGeneral(): Image {
             } else {
                 drawHeight
             }
+            useTopClip = false
         }
 
         2, 4 -> {
+            // 多图正方形布局使用顶部截取
             drawItemWidth = (cardContentRect.width - quality.drawSpace) / 2
             drawItemHeight = drawItemWidth
             if (items.size >= 3) {
                 drawItemSpace += quality.drawSpace
             }
             drawItemNum = 2
+            useTopClip = true
         }
 
         3, in 5..9 -> {
+            // 九宫格布局使用顶部截取
             drawItemWidth = (cardContentRect.width - quality.drawSpace * 2) / 3
             drawItemHeight = drawItemWidth
             drawItemSpace += if (items.size <= 6) {
@@ -558,6 +564,7 @@ suspend fun ModuleDynamic.Major.Draw.drawGeneral(): Image {
                 quality.drawSpace * 2
             }
             drawItemNum = 3
+            useTopClip = true
         }
     }
 
@@ -582,7 +589,8 @@ suspend fun ModuleDynamic.Major.Draw.drawGeneral(): Image {
                     isAntiAlias = true
                 })
 
-                drawImageClip(img, dstRect)
+                // 根据图片数量选择截取方式：单张大图用居中，多图/九宫格用顶部
+                drawImageClip(img, dstRect, clipMode = if (useTopClip) ClipMode.TOP else ClipMode.CENTER)
 
                 drawRRect(dstRect, Paint().apply {
                     color = theme.drawOutlineColor
@@ -629,10 +637,12 @@ suspend fun ModuleDynamic.Major.Blocked.drawGeneral(): Image {
         canvas.apply {
             var x = quality.cardPadding.toFloat()
             var y = 0f
-            drawImageClip(bgImage, RRect.makeXYWH(x, y, bgWidth, bgHeight, quality.cardArc))
+            // 背景图使用居中截取
+            drawImageClip(bgImage, RRect.makeXYWH(x, y, bgWidth, bgHeight, quality.cardArc), clipMode = ClipMode.CENTER)
             x += (bgWidth - lockWidth) / 2
             y += bgHeight / 3
-            drawImageClip(lockIcon, RRect.makeXYWH(x, y, lockWidth, lockHeight, quality.cardArc))
+            // 锁图标使用居中截取
+            drawImageClip(lockIcon, RRect.makeXYWH(x, y, lockWidth, lockHeight, quality.cardArc), clipMode = ClipMode.CENTER)
 
             x = quality.cardPadding.toFloat()
             y += lockHeight + quality.drawSpace
@@ -705,7 +715,8 @@ suspend fun ModuleDynamic.Major.Article.drawGeneral(): Image {
                     val fallbackUrl = imgApi(it, imgW.toInt(), articleCoverHeight.toInt())
                     val img = getOrDownloadImageDefault(it, fallbackUrl, CacheType.IMAGES)
                     val tar = RRect.makeXYWH(imgX, articleCardRect.top, imgW, articleCoverHeight, 0f)
-                    drawImageClip(img, tar, Paint())
+                    // 专栏封面使用顶部截取
+                    drawImageClip(img, tar, Paint(), clipMode = ClipMode.TOP)
                     imgX += articleCardRect.width / 3 + 2
                 }
                 restore()
