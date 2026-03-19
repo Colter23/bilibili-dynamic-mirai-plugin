@@ -266,16 +266,14 @@ suspend fun ModuleDynamic.ContentDesc.drawGeneral(): Image {
         textStyle = titleTextStyle
     }
 
-    val traCutLineNode = ModuleDynamic.ContentDesc.RichTextNode(
-        "RICH_TEXT_NODE_TYPE_TEXT",
-        BiliConfig.translateConfig.cutLine,
-        BiliConfig.translateConfig.cutLine
+    val nodes = buildContentDescRenderNodes(
+        richTextNodes = richTextNodes,
+        translation = trans(text),
+        cutLine = BiliConfig.translateConfig.cutLine,
     )
 
-    val tra = trans(text)
-
     val textParagraph =
-        ParagraphBuilder(paragraphStyle, FontUtils.fonts).addText("$text${traCutLineNode.text}$tra").build()
+        ParagraphBuilder(paragraphStyle, FontUtils.fonts).addText(buildContentDescMeasureText(nodes)).build()
             .layout(cardContentRect.width)
 
     val textCardHeight = (quality.contentFontSize + quality.lineSpace * 2) * (textParagraph.lineNumber + 2)
@@ -292,15 +290,6 @@ suspend fun ModuleDynamic.ContentDesc.drawGeneral(): Image {
 
     return Surface.makeRasterN32Premul(cardRect.width.toInt(), textCardHeight.toInt()).apply {
         canvas.apply {
-            val nodes = if (tra != null) {
-                richTextNodes.plus(traCutLineNode).plus(
-                    ModuleDynamic.ContentDesc.RichTextNode(
-                        "RICH_TEXT_NODE_TYPE_TEXT", tra, tra
-                    )
-                )
-            } else {
-                richTextNodes
-            }
             nodes.forEach {
                 when (it.type) {
                     "RICH_TEXT_NODE_TYPE_TEXT" -> {
@@ -359,6 +348,34 @@ suspend fun ModuleDynamic.ContentDesc.drawGeneral(): Image {
             }
         }
     }.makeImageSnapshot(IRect.makeXYWH(0, 0, cardRect.width.toInt(), ceil(y + quality.lineSpace * 2).toInt()))!!
+}
+
+internal fun buildContentDescRenderNodes(
+    richTextNodes: List<ModuleDynamic.ContentDesc.RichTextNode>,
+    translation: String?,
+    cutLine: String,
+): List<ModuleDynamic.ContentDesc.RichTextNode> {
+    if (translation.isNullOrBlank()) {
+        return richTextNodes
+    }
+
+    return richTextNodes +
+        ModuleDynamic.ContentDesc.RichTextNode(
+            type = "RICH_TEXT_NODE_TYPE_TEXT",
+            origText = cutLine,
+            text = cutLine,
+        ) +
+        ModuleDynamic.ContentDesc.RichTextNode(
+            type = "RICH_TEXT_NODE_TYPE_TEXT",
+            origText = translation,
+            text = translation,
+        )
+}
+
+internal fun buildContentDescMeasureText(
+    nodes: List<ModuleDynamic.ContentDesc.RichTextNode>
+): String {
+    return nodes.joinToString(separator = "") { it.text }
 }
 
 sealed class RichText(
