@@ -38,9 +38,18 @@ suspend inline fun <reified T> BiliClient.getDataWithWbi(
 ): T? {
     val builder = HttpRequestBuilder()
     builder.block()
-    val params = builder.url.parameters.build().formUrlEncode()
     val wts = System.currentTimeMillis() / 1000
-    val wrid = "$params&wts=$wts${getVerifyString()}".md5()
+    val mixinKey = getVerifyString()
+    // Collect all params including wts, sort by key, filter illegal chars
+    val allParams = mutableMapOf<String, String>()
+    builder.url.parameters.build().forEach { key, values ->
+        allParams[key] = values.firstOrNull() ?: ""
+    }
+    allParams["wts"] = wts.toString()
+    val sortedQuery = allParams.entries
+        .sortedBy { it.key }
+        .joinToString("&") { "${it.key}=${it.value}" }
+    val wrid = "$sortedQuery$mixinKey".md5()
     return getData(url) {
         block()
         parameter("w_rid", wrid)
