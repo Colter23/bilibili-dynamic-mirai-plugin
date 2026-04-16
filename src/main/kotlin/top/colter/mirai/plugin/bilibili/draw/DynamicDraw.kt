@@ -355,7 +355,7 @@ fun Rect.textVertical(text: TextLine) =
     bottom - (height - text.capHeight) / 2
 
 internal fun labelCardTextBaseline(rrect: RRect, textLine: TextLine): Float =
-    Rect.makeXYWH(rrect.left, rrect.top, rrect.width, rrect.height).textVertical(textLine)
+    rrect.bottom - (rrect.height - textLine.capHeight) / 2
 
 fun Canvas.drawCard(rrect: RRect, bgColor: Int = theme.cardBgColor) {
     drawRRect(rrect, Paint().apply {
