@@ -354,6 +354,9 @@ fun drawBlockedDefault(): Image {
 fun Rect.textVertical(text: TextLine) =
     bottom - (height - text.capHeight) / 2
 
+internal fun labelCardTextBaseline(rrect: RRect, textLine: TextLine): Float =
+    rrect.bottom - (rrect.height - textLine.capHeight) / 2
+
 fun Canvas.drawCard(rrect: RRect, bgColor: Int = theme.cardBgColor) {
     drawRRect(rrect, Paint().apply {
         color = bgColor
@@ -534,8 +537,7 @@ fun Canvas.drawLabelCard(
     drawTextLine(
         textLine,
         rrect.left + quality.badgePadding * 2,
-        rrect.bottom - quality.badgePadding,
-        //rrect.textVertical(textLine),
+        labelCardTextBaseline(rrect, textLine),
         fontPaint
     )
 }
