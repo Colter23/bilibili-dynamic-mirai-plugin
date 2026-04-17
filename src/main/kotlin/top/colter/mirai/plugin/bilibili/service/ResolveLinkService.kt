@@ -2,6 +2,7 @@ package top.colter.mirai.plugin.bilibili.service
 
 import org.jetbrains.skia.Color
 import top.colter.mirai.plugin.bilibili.BiliConfig
+import top.colter.mirai.plugin.bilibili.BiliData
 import top.colter.mirai.plugin.bilibili.api.*
 import top.colter.mirai.plugin.bilibili.data.*
 import top.colter.mirai.plugin.bilibili.draw.*
@@ -99,10 +100,11 @@ enum class LinkType(val regex: List<Regex>) {
                 }
             }
             Dynamic -> {
-                val color = Color.makeRGB(BiliConfig.imageConfig.defaultColor)
                 biliClient.getDynamicDetail(id)?.run {
-                    val dynamic = drawDynamic(color)
-                    val img = makeCardBg(dynamic.height, listOf(color)) {
+                    val color = BiliData.dynamic[mid]?.color ?: BiliConfig.imageConfig.defaultColor
+                    val colors = color.split(";", "；").map { Color.makeRGB(it.trim()) }
+                    val dynamic = drawDynamic(colors.first(), false)
+                    val img = makeCardBg(dynamic.height, colors) {
                         it.drawImage(dynamic, 0f, 0f)
                     }
                     cacheImage(img, "$idStr.png", CacheType.DRAW_SEARCH)
