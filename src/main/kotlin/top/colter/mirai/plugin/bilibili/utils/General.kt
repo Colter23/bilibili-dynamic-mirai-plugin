@@ -15,9 +15,11 @@ import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
 import net.mamoe.mirai.utils.MiraiLogger
 import org.jetbrains.skia.Image
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
+import top.colter.mirai.plugin.bilibili.BiliBiliDynamic.currentBot
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic.dataFolderPath
 import top.colter.mirai.plugin.bilibili.BiliConfig
 import top.colter.mirai.plugin.bilibili.BiliData
+import top.colter.mirai.plugin.bilibili.NapcatConfig
 import top.colter.mirai.plugin.bilibili.api.searchUser
 import top.colter.mirai.plugin.bilibili.client.BiliClient
 import top.colter.mirai.plugin.bilibili.data.DynamicItem
@@ -287,21 +289,34 @@ fun findContact(del: String): Contact? {
     }
     val delegate = try { del.toLong() } catch (e: NumberFormatException) { return null }
     try {
-        for (bot in Bot.instances) {
-            if (delegate < 0) {
-                for (group in bot.groups) {
-                    if (group.id == delegate * -1) return group
+        val botList = if (NapcatConfig.enable) {
+            val bl = mutableListOf<Bot>()
+            if (currentBot != null) {
+                Bot.getInstanceOrNull(currentBot!!)?.let { bl.add(it) }
+                Bot.instances.forEach {
+                    if (it.id != currentBot!!) bl.add(it)
                 }
-            } else {
-                for (friend in bot.friends) {
-                    if (friend.id == delegate) return friend
-                }
-                for (stranger in bot.strangers) {
-                    if (stranger.id == delegate) return stranger
-                }
-                for (group in bot.groups) {
-                    for (member in group.members) {
-                        if (member.id == delegate) return member
+            }
+            bl
+        } else Bot.instances
+
+        for (bot in botList) {
+            if (bot.isOnline) {
+                if (delegate < 0) {
+                    for (group in bot.groups) {
+                        if (group.id == delegate * -1) return group
+                    }
+                } else {
+                    for (friend in bot.friends) {
+                        if (friend.id == delegate) return friend
+                    }
+                    for (stranger in bot.strangers) {
+                        if (stranger.id == delegate) return stranger
+                    }
+                    for (group in bot.groups) {
+                        for (member in group.members) {
+                            if (member.id == delegate) return member
+                        }
                     }
                 }
             }

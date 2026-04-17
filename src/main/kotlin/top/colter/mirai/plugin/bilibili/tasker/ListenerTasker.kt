@@ -5,8 +5,10 @@ import net.mamoe.mirai.event.events.BotLeaveEvent
 import net.mamoe.mirai.event.events.GroupMessageEvent
 import net.mamoe.mirai.event.globalEventChannel
 import net.mamoe.mirai.message.data.*
+import top.colter.mirai.plugin.bilibili.BiliBiliDynamic.currentBot
 import top.colter.mirai.plugin.bilibili.BiliConfig
 import top.colter.mirai.plugin.bilibili.BiliData
+import top.colter.mirai.plugin.bilibili.NapcatConfig
 import top.colter.mirai.plugin.bilibili.service.DynamicService.removeAllSubscribe
 import top.colter.mirai.plugin.bilibili.service.TriggerMode
 import top.colter.mirai.plugin.bilibili.service.matchingRegular
@@ -31,6 +33,8 @@ object ListenerTasker : BiliTasker() {
         }
 
         globalEventChannel().subscribeAlways<GroupMessageEvent> {
+            if ((Bot.instances.size > 1) && NapcatConfig.enable && (this.bot.id != currentBot)) return@subscribeAlways
+
             var f = false
             when (triggerMode) {
                 TriggerMode.At -> {

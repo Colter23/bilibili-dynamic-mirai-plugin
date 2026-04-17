@@ -24,7 +24,7 @@ object BiliBiliDynamic : KotlinPlugin(
     JvmPluginDescription(
         id = "top.colter.bilibili-dynamic-mirai-plugin",
         name = "BiliBili Dynamic",
-        version = "3.2.16",
+        version = "3.2.17",
     ) {
         author("Colter")
         dependsOn("xyz.cssxsh.mirai.plugin.mirai-skia-plugin", ">= 1.1.0")
@@ -33,6 +33,7 @@ object BiliBiliDynamic : KotlinPlugin(
 
     var uid: Long = 0L
     var tagid: Int = 0
+    var currentBot: Long? = null
 
     var cookie = BiliCookie()
 
@@ -63,6 +64,7 @@ object BiliBiliDynamic : KotlinPlugin(
             ListenerTasker.start()
             if (BiliConfig.enableConfig.liveCloseNotifyEnable) LiveCloseCheckTasker.start()
             if (BiliConfig.enableConfig.cacheClearEnable) CacheClearTasker.start()
+            if (NapcatConfig.enable) NapcatCheckTasker.start()
         }
     }
 
@@ -83,6 +85,7 @@ object BiliBiliDynamic : KotlinPlugin(
         BiliConfig.reload()
         BiliImageTheme.reload()
         BiliImageQuality.reload()
+        NapcatConfig.reload()
 
         migration()
 
