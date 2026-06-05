@@ -2,6 +2,7 @@ package top.colter.mirai.plugin.bilibili.data
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
 import top.colter.mirai.plugin.bilibili.utils.decode
 
 
@@ -155,7 +156,7 @@ data class DynamicItem(
  * @param face 头像
  * @param faceNFT 是否为NFT头像
  * @param pendant 头像挂件
- * @param following 是否关注(未关注为null)
+ * @param following 关注状态原始值，接口可能返回 boolean、number 或 null
  * @param iconBadge 徽标图案, 现已知 充电专属
  * @param label 标签
  * @param jumpUrl 跳转URL
@@ -190,7 +191,7 @@ data class ModuleAuthor(
     @SerialName("face_nft")
     val faceNFT: Boolean? = null,
     @SerialName("following")
-    val following: Boolean? = null,
+    val following: JsonElement? = null,
     @SerialName("icon_badge")
     val iconBadge: IconBadge? = null,
     @SerialName("label")
