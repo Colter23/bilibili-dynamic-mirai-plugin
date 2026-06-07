@@ -187,10 +187,10 @@ data class ModuleAuthor(
     val pubTime: String = "",
     @SerialName("pub_action")
     val pubAction: String = "",
-    @SerialName("face_nft")
-    val faceNFT: Boolean? = null,
-    @SerialName("following")
-    val following: Boolean? = null,
+    //@SerialName("face_nft")
+    //val faceNFT: Boolean? = null,
+    //@SerialName("following")
+    //val following: Boolean? = null,
     @SerialName("icon_badge")
     val iconBadge: IconBadge? = null,
     @SerialName("label")
@@ -352,8 +352,8 @@ data class ModuleAuthor(
         data class Fan(
             @SerialName("color")
             val color: String,
-            @SerialName("is_fan")
-            val isFan: Boolean,
+            //@SerialName("is_fan")
+            //val isFan: Boolean,
             @SerialName("num_str")
             val numStr: String,
             @SerialName("number")
@@ -1217,8 +1217,8 @@ data class ModuleDynamic(
                     val online: Int,
                     @SerialName("room_paid_type")
                     val roomPaidType: Int,
-                    @SerialName("watched_show")
-                    val watchedShow: WatchedShow,
+                    //@SerialName("watched_show")
+                    //val watchedShow: WatchedShow,
                     //@SerialName("pendants")
                     //val pendants: Pendants,
 
