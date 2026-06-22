@@ -7,9 +7,13 @@
 ![Downloads](https://img.shields.io/github/downloads/Colter23/bilibili-dynamic-mirai-plugin/total)
 [![Release](https://img.shields.io/github/v/release/Colter23/bilibili-dynamic-mirai-plugin)](https://github.com/Colter23/bilibili-dynamic-mirai-plugin/releases)
 
+## 新项目 [dynamic-bot](https://github.com/Colter23/dynamic-bot)
+
+**绘图更好看，管理更方便，独立运行,支持迁移，对接onebot，多平台支持**
+
 ## 特性
 
-**无论多少订阅均可在最低 10s 内检测所有动态**
+无论多少订阅均可在最低 10s 内检测所有动态
 使用 [skiko](https://github.com/JetBrains/skiko) 绘图    
 番剧订阅    
 动态过滤    
