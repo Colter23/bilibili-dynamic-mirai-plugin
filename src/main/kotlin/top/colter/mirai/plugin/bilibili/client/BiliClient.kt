@@ -6,6 +6,7 @@ import io.ktor.client.engine.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.plugins.*
 import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.utils.io.core.*
 import kotlinx.coroutines.CancellationException
@@ -58,12 +59,23 @@ open class BiliClient : Closeable {
         }
     }
 
-    suspend inline fun <reified T> get(url: String, crossinline block: HttpRequestBuilder.() -> Unit = {}): T =
+    suspend inline fun <reified T> get(
+        url: String,
+        crossinline block: HttpRequestBuilder.() -> Unit = {}
+    ): T = getWithResponse(url, {}, block)
+
+    suspend inline fun <reified T> getWithResponse(
+        url: String,
+        crossinline onResponse: (HttpResponse) -> Unit,
+        crossinline block: HttpRequestBuilder.() -> Unit = {}
+    ): T =
         useHttpClient<String> {
-            it.get(url) {
+            val response = it.get(url) {
                 header(HttpHeaders.Cookie, BiliBiliDynamic.cookie.toString() + "DedeUserID=" + BiliBiliDynamic.uid)
                 block()
-            }.body()
+            }
+            onResponse(response)
+            response.body()
         }.decode()
 
     suspend inline fun <reified T> post(url: String, crossinline block: HttpRequestBuilder.() -> Unit = {}): T =

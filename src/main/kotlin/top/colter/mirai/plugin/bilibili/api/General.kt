@@ -2,6 +2,7 @@ package top.colter.mirai.plugin.bilibili.api
 
 import io.ktor.client.call.*
 import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import io.ktor.http.*
 import top.colter.mirai.plugin.bilibili.client.BiliClient
 import top.colter.mirai.plugin.bilibili.data.BiliResult
@@ -17,8 +18,14 @@ var isLogin = true
 suspend inline fun <reified T> BiliClient.getData(
     url: String,
     crossinline block: HttpRequestBuilder.() -> Unit = {}
+): T? = getDataWithResponse(url, {}, block)
+
+suspend inline fun <reified T> BiliClient.getDataWithResponse(
+    url: String,
+    crossinline onResponse: (HttpResponse) -> Unit,
+    crossinline block: HttpRequestBuilder.() -> Unit = {}
 ): T? {
-    val res = get<BiliResult>(url, block)
+    val res = getWithResponse<BiliResult>(url, onResponse, block)
 
     return if (res.code == -101) {
         if (isLogin) actionNotify("账号登录失效，请使用 /bili login 重新登录")
