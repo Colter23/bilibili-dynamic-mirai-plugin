@@ -2,6 +2,7 @@ package top.colter.mirai.plugin.bilibili.data
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 @Serializable
 data class LoginData(
@@ -15,6 +16,8 @@ data class LoginData(
     val timestamp: Long? = null,
     @SerialName("url")
     val url: String? = null,
+    @Transient
+    val cookie: String = "",
 )
 
 @Serializable

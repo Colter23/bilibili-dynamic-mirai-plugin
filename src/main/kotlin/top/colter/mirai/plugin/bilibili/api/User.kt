@@ -1,6 +1,8 @@
 package top.colter.mirai.plugin.bilibili.api
 
 import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
 import top.colter.mirai.plugin.bilibili.BiliBiliDynamic
 import top.colter.mirai.plugin.bilibili.client.BiliClient
 import top.colter.mirai.plugin.bilibili.data.*
@@ -9,10 +11,19 @@ import top.colter.mirai.plugin.bilibili.utils.decode
 
 suspend fun BiliClient.getLoginQrcode(): LoginQrcode? = getData(LOGIN_QRCODE)
 suspend fun BiliClient.loginInfo(qrcodeKey: String): LoginData? {
-    return getData(LOGIN_INFO) {
+    var cookie = ""
+    val loginData = getDataWithResponse<LoginData>(LOGIN_INFO, onResponse = { response ->
+        cookie = response.setCookie().toLoginCookieHeader()
+    }) {
         parameter("qrcode_key", qrcodeKey)
     }
+    return loginData?.copy(cookie = cookie)
 }
+
+internal fun List<Cookie>.toLoginCookieHeader(): String =
+    filter { it.name == "SESSDATA" || it.name == "bili_jct" }
+        .joinToString(separator = "; ") { "${it.name}=${it.value}" }
+        .let { if (it.isEmpty()) it else "$it; " }
 
 suspend fun BiliClient.userInfo(uid: Long): BiliUser? {
     return getDataWithWbi(USER_INFO_WBI) {
